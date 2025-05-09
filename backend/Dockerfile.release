@@ -1,0 +1,40 @@
+FROM rust:1.85 as builder
+
+ARG target=x86_64-unknown-linux-gnu
+
+WORKDIR /build
+RUN touch /opt/config.yml
+COPY backend/ ./backend/
+COPY tools/http_health_checker/ ./tools/http_health_checker/
+COPY Cargo.toml ./Cargo.toml
+
+# TODO: Find a way to cache dependencies download and compilation
+RUN RUSTFLAGS='-C target-feature=+crt-static' \
+    cargo build \
+    --release \
+    --target $target \
+    --bin service \
+    --bin http_health_checker && \
+    mv target/$target/release/service /opt/service && \
+    chmod 555 /opt/service && \
+    mv target/$target/release/http_health_checker /opt/http_health_checker && \
+    chmod 555 /opt/http_health_checker
+
+FROM scratch
+
+COPY --from=builder /opt/service /service
+COPY --from=builder /opt/http_health_checker /http_health_checker
+COPY --from=builder /opt/config.yml /etc/backend/config.yml
+USER 10001
+WORKDIR /
+
+# API Server ; Prometheus /metrics ; Private Server
+EXPOSE 9876 9100 7070
+
+HEALTHCHECK \
+    --start-period=5s \
+    --interval=10s \
+    --timeout=10s \
+    --retries=3 \
+    CMD [ "/http_health_checker", "http://127.0.0.1:9876/" ]
+ENTRYPOINT [ "/service", "--port", "9876", "--config", "/etc/backend/config.yml" ]

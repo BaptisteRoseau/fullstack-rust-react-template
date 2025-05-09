@@ -1,0 +1,55 @@
+default:
+  image: debian:bookworm-slim
+
+stages:
+  - static_analysis
+  - test
+  - build
+  - dynamic_analysis
+  - deploy
+
+# TODO: Convert tests results as junit tests
+# TODO: Run the scripts for testing purposes
+# TODO: Make a script to run the markdown and cspell scripts locally,
+# then use the scripts in the CI
+
+include:
+  # GitLab built-in templates
+  - template: Code-Quality.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+  - template: Security/Container-Scanning.gitlab-ci.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml # GitLab Ultimate
+  - template: Security/License-Scanning.gitlab-ci.yml # GitLab Ultimate
+
+markdown_lint:
+  image: node:latest
+  needs: []
+  rules:
+    - changes:
+        - "*.md"
+        - "**/*.md"
+  script:
+    - npm install -g markdownlint-cli
+    - markdownlint -c .markdownlint.json $(find . -type f -name "*.md")
+
+markdown_link:
+  needs: []
+  image: node:latest
+  rules:
+    - changes:
+        - "*.md"
+        - "**/*.md"
+  script:
+    - npm install -g markdown-link-check
+    - echo '{}' > /tmp/config.json
+    - markdown-link-check -c /tmp/config.json $(find . -type f -name "*.md" -not -path ".git*")
+
+spelling:
+  image: node:latest
+  needs: []
+  allow_failure: true
+  script:
+    # Already Checked
+    - npm install -g cspell@latest
+    - cspell --color --locale "en,fr" --config .cspell.json --gitignore --no-progress ./**

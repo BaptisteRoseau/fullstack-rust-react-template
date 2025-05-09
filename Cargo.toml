@@ -1,0 +1,13 @@
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[workspace]
+resolver = "1"
+members = [
+    "backend/logging",
+    "backend/models",
+    "backend/service",
+    "tools/http_health_checker",
+]
+
+[profile.release]
+lto = true
+strip = true

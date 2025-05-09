@@ -1,0 +1,13 @@
+*.lock
+.$*.bkp
+.git/
+.vscode/
+.zed/
+.typos.toml
+.cspell.json
+.gitignore
+.dockerignore
+
+# Rust Binaries
+target/
+dist/

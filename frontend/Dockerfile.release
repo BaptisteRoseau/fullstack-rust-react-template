@@ -1,0 +1,45 @@
+# Rust builder used for miniserve and the HTTP health checker
+FROM rust:1.85 as RUST_BUILDER
+
+ARG target=x86_64-unknown-linux-gnu
+WORKDIR /build
+
+RUN RUSTFLAGS='-C target-feature=+crt-static' \
+    cargo install miniserve --root /opt/ --target $target
+
+COPY tools/http_health_checker/ ./http_health_checker/
+
+RUN cd ./http_health_checker/ && \
+    RUSTFLAGS='-C target-feature=+crt-static' \
+    cargo build \
+    --release \
+    --target $target && \
+    mv target/$target/release/http_health_checker /opt/http_health_checker && \
+    chmod 555 /opt/http_health_checker
+
+# Site builder used to compile the web application into an SPA
+FROM oven/bun:1 AS SITE_BUILDER
+WORKDIR /usr/src/app
+COPY frontend .
+RUN bun vite build --outDir /dist
+
+# Final minimal image containing only static HTML/CSS/JS/Assets files
+# and miniserve to serve them.
+FROM scratch
+
+COPY --from=RUST_BUILDER /opt/http_health_checker /bin/http_health_checker
+COPY --from=RUST_BUILDER /opt/bin/miniserve /bin/miniserve
+COPY --from=SITE_BUILDER /dist /usr/app
+
+USER 10001
+WORKDIR /usr/app
+EXPOSE 8080
+HEALTHCHECK \
+    --start-period=5s \
+    --interval=10s \
+    --timeout=10s \
+    --retries=3 \
+    CMD [ "/bin/http_health_checker", "http://127.0.0.1:8080/" ]
+ENTRYPOINT ["/bin/miniserve", "--index", "index.html", "--spa", \
+    "--disable-indexing", "--hide-theme-selector", "--hide-version-footer", \
+    "-i", "0.0.0.0", "-p", "8080"]

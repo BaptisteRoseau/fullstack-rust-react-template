@@ -1,0 +1,22 @@
+{
+    "recommendations": [
+        "bradlc.vscode-tailwindcss",
+        "davidanson.vscode-markdownlint",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "fill-labs.dependi",
+        "foxundermoon.shell-format",
+        "ms-azuretools.vscode-docker",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-mysql",
+        "mtxr.sqltools-driver-pg",
+        "oven.bun-vscode",
+        "rust-lang.rust-analyzer",
+        "streetsidesoftware.code-spell-checker",
+        "streetsidesoftware.code-spell-checker-french",
+        "tamasfe.even-better-toml",
+        "tekumara.typos-vscode",
+        "timonwong.shellcheck",
+        "vadimcn.vscode-lldb",
+    ]
+}

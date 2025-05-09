@@ -1,0 +1,50 @@
+[package]
+name = "service"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1"
+axum = { version = "0.8", features = ["http1", "http2"] }
+axum-macros = "0.5"
+axum-prometheus = { version = "*", features = ["metrics-exporter-prometheus"] }
+chrono = { version = "0.4" }
+clap = { version = "4", features = ["derive", "env"] }
+deadpool-postgres = { version = "*" }
+jsonwebtoken = { version = "9", features = ["use_pem"] }
+logging = { path = "../logging" }
+metrics = { version = "0.24" }
+metrics-exporter-prometheus = { version = "0.16", features = ["tokio"] }
+models = { path = "../models" }
+regex = { version = "*" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+thiserror = "2"
+tokio = { version = "1.36", features = ["rt-multi-thread", "macros", "full"] }
+tokio-postgres = { version = "0.7", features = [
+    "with-uuid-1",
+    "with-serde_json-1",
+    "with-chrono-0_4",
+    "with-time-0_3",
+    "with-bit-vec-0_6",
+] }
+tower = { version = "0.5" }
+tower-http = { version = "0.6", features = [
+    "compression-gzip",
+    "decompression-gzip",
+    "trace",
+    "timeout",
+    "auth",
+    "uuid",
+    "cors",
+    "tokio",
+    "sensitive-headers",
+    "set-header",
+    "normalize-path",
+] }
+tracing = "0.1"
+utoipa = { version = "5", features = ["axum_extras", "uuid"] }
+utoipa-axum = { version = "0.2" }
+utoipa-swagger-ui = { version = "9", features = ["axum"] }
+uuid = { version = "1.7", features = ["fast-rng", "serde", "v4"] }

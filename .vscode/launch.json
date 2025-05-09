@@ -1,0 +1,75 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Launch Backend Service",
+            "internalConsoleOptions": "openOnSessionStart",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin",
+                    "service"
+                ]
+            },
+            "args": []
+        },
+        {
+            "name": "Launch Frontend UI",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "bun",
+            "args": [
+                "vite"
+            ],
+            "cwd": "${workspaceFolder}/frontend",
+            "internalConsoleOptions": "openOnSessionStart",
+            "serverReadyAction": {
+                "action": "debugWithChrome",
+                "pattern": "  ➜  Local:   http://localhost:([0-9]+)/",
+                "uriFormat": "http://localhost:%s"
+            }
+        },
+        // TODO: Find a way to run all the tests, not just the 'service' ones
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Launch Backend Service Tests",
+            "internalConsoleOptions": "neverOpen",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin",
+                    "service"
+                ]
+            },
+            "args": []
+        },
+        {
+            "type": "bun",
+            "internalConsoleOptions": "neverOpen",
+            "request": "launch",
+            "name": "Debug File",
+            "program": "${file}",
+            "cwd": "${workspaceFolder}/frontend",
+            "stopOnEntry": false,
+            "watchMode": false
+        },
+        {
+            "type": "bun",
+            "internalConsoleOptions": "neverOpen",
+            "request": "launch",
+            "name": "Run File",
+            "program": "${file}",
+            "cwd": "${workspaceFolder}/frontend",
+            "noDebug": true,
+            "watchMode": false
+        },
+        // TODO: Launch frontend tests
+    ]
+}

@@ -1,0 +1,15 @@
+FROM oven/bun:1 AS SITE_BUILDER
+
+EXPOSE 8080
+WORKDIR /src
+VOLUME [ "/src" ]
+
+ENTRYPOINT [ "bun" ]
+CMD [ \
+    "vite", \
+    "--debug", \
+    "--host", "0.0.0.0", \
+    "--port", "8080", \
+    "--strictPort", \
+    "--logLevel", "info" \
+    ]

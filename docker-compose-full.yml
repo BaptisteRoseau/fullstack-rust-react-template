@@ -1,0 +1,68 @@
+---
+# This docker compose file is solely intended for development
+# purposes and not for production use.
+# Contains the base docker-compose.yml docker-compose-hot-reloading.yml,
+# as well as monitoring, optional and debug services like Prometheus,
+# Grafana, Pgdata.
+include:
+    - docker-compose-hot-reloading.yml
+
+services:
+    pgadmin:
+        image: dpage/pgadmin4:9.1
+        container_name: pgadmin
+        networks:
+            - net
+        environment:
+            PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+            PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+        ports:
+            - '${PGADMIN_PORT}:80'
+        restart: on-failure
+        volumes:
+            - 'pgadmin:/var/lib/pgadmin'
+
+    grafana:
+        image: grafana/grafana:11.3.0-security-01-ubuntu
+        container_name: grafana
+        networks:
+            - net
+        environment:
+            GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
+            GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+        ports:
+            - '${GRAFANA_PORT}:3000'
+        restart: on-failure
+        volumes:
+            - 'grafana:/var/lib/grafana'
+
+    prometheus:
+        image: prom/prometheus:v3.2.1
+        container_name: prometheus
+        networks:
+            - net
+        ports:
+            - '${PROMETHEUS_PORT}:9090'
+        restart: on-failure
+        volumes:
+            - 'prometheus:/prometheus'
+            - ./manifests/prometheus:/etc/prometheus
+
+    postgres-exporter:
+        image: quay.io/prometheuscommunity/postgres-exporter
+        container_name: postgres-exporter
+        networks:
+            - net
+        restart: on-failure
+        environment:
+            DATA_SOURCE_URI: 'postgres:5432/postgres?sslmode=disable'
+            DATA_SOURCE_USER: ${POSTGRES_USER}
+            DATA_SOURCE_PASS: ${POSTGRES_PASSWORD}
+
+networks:
+    net:
+
+volumes:
+    prometheus:
+    grafana:
+    pgadmin:

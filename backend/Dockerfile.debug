@@ -1,0 +1,21 @@
+# This container is used during development to be able to work on
+# the backend code and have a hot-reload equivalent, to make it
+# easier to work between frontend and backend.
+
+FROM rust:1.85
+
+ARG target=x86_64-unknown-linux-gnu
+
+RUN cargo install cargo-watch
+ENV CARGO_TARGET_DIR=/build
+
+WORKDIR /src
+VOLUME [ "/src" ]
+
+EXPOSE 9876
+
+ENTRYPOINT [ "cargo", "watch", "--why", "--delay", "1.5", \
+    "-x", "'build -p backend'", \
+    "--watch", "./Cargo.toml", \
+    "--watch", "backend", \
+    "--", "cargo", "run", "--bin", "service" ]
