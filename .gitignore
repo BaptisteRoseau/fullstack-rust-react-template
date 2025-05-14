@@ -34,4 +34,4 @@ dist/
 # Packages
 backend*.tar.gz
 frontend*.tar.gz
-packages/*
+packages/
