@@ -15,6 +15,7 @@
         "bunx",
         "chrono",
         "clippy",
+        "daisyui",
         "dbname",
         "deadpool",
         "distroless",

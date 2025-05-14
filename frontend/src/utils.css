@@ -1,5 +1,5 @@
-@tailwind base;
-@tailwind components;
+@import 'tailwindcss/preflight';
+@plugin "daisyui";
 @tailwind utilities;
 
 .container {
