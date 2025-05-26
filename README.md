@@ -56,6 +56,7 @@ Make scripts, then call them from CI.
 - [ ] Routing
 - [ ] Automate robots.txt
 - [ ] Automate sitemap.xml
+- [ ] Cookie Banner
 
 ### Backend
 
@@ -81,3 +82,7 @@ Make scripts, then call them from CI.
 - [ ] How to develop
 - [ ] How to deploy
 - [ ] Build HTML documentation from markdown files
+
+## Acknowledgements
+
+- <https://github.com/alan2207/bulletproof-react>
