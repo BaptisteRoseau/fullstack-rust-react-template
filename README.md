@@ -1,8 +1,29 @@
 # Rust React Template
 
-## TODO
+## TODOs
 
-- [ ] Authentication with Authelia
+### Authentication
+
+Authentication will be done by the most performant open source software available:
+
+- Authelia (API Gateway)
+- OpenLDAP (LDAP DB for Authelia)
+- NGINX (Reverse Proxy)
+
+- [ ] Docker Compose
+    - [ ] Authelia
+    - [ ] NGINX
+    - [ ] OpenLDAP
+- [ ] Configurations
+    - [ ] Authelia
+    - [ ] NGINX
+    - [ ] OpenLDAP
+- [ ] App integration
+    - [ ] Register/Login form
+    - [ ] JWT storage
+
+### Other
+
 - [ ] Frontend routing
 - [ ] CI/CD integration
     - [ ] Build Packages
