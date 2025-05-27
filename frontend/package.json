@@ -4,11 +4,11 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "bunx --bun tsc -b && bunx --bun vite build",
+        "build": "tsc -b && vite build",
         "check-types": "tsc --project tsconfig.json --pretty --noEmit",
-        "dev": "bunx --bun vite",
+        "dev": "vite",
         "lint": "eslint .",
-        "preview": "bunx --bun vite preview --open",
+        "preview": "vite preview",
         "test": "vitest"
     },
     "dependencies": {
