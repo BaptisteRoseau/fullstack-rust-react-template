@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 .container {
-    @apply w-full mx-auto border;
+    @apply w-full mx-auto;
 }
 
 /* xs */
