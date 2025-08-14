@@ -1,0 +1,7 @@
+[package]
+name = "mailer"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+lettre = "0.11.18"

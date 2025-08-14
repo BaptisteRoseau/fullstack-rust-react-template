@@ -3,6 +3,7 @@
 resolver = "1"
 members = [
     "backend/logging",
+    "backend/mailer",
     "backend/models",
     "backend/service",
     "tools/http_health_checker",
