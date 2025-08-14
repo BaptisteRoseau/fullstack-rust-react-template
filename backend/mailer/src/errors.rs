@@ -1,3 +1,3 @@
-enum Error{
-    
+pub enum Error{
+
 }
