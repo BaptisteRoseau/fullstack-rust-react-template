@@ -29,6 +29,7 @@ Authentication will be done by the most performant open source software availabl
 - [ ] App integration
     - [ ] Register/Login form
     - [ ] JWT storage
+- [ ] Use LLDAP and authelia for services authentication (Grafana/Postgres/PGAdmin/OpenVPN...)
 
 ### Payment
 
