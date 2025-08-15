@@ -11,7 +11,7 @@ identity_validation:
 authentication_backend:
   ldap:
     implementation: custom
-    address: ldap://openldap
+    address: ldap://lldap
     base_dn: dc=example,dc=com
     additional_users_dn: ou=users
     additional_groups_dn: ou=groups
