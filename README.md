@@ -15,17 +15,17 @@ When finished, its goal is for a developer or company to be able to clone the pr
 Authentication will be done by the most performant open source software available:
 
 - Authelia (API Gateway)
-- OpenLDAP (LDAP DB for Authelia)
+- LLDAP
 - NGINX (Reverse Proxy)
 
 - [ ] Docker Compose
     - [ ] Authelia
     - [ ] NGINX
-    - [ ] OpenLDAP
+    - [ ] LLDAP
 - [ ] Configurations
     - [ ] Authelia
     - [ ] NGINX
-    - [ ] OpenLDAP
+    - [ ] LLDAP
 - [ ] App integration
     - [ ] Register/Login form
     - [ ] JWT storage
@@ -48,6 +48,7 @@ Make scripts, then call them from CI.
 - [ ] GitHub
 - [ ] Deployment tutorial/script
 - [ ] Nix Shell config for executing locally without Docker
+- [ ] Secrets & certificates storage
 
 ### Frontend
 
@@ -57,11 +58,13 @@ Make scripts, then call them from CI.
 - [ ] Automate robots.txt
 - [ ] Automate sitemap.xml
 - [ ] Cookie Banner
+- [ ] User Authentication
 
 ### Backend
 
 - [ ] Graceful Shutdown (currently gracefully cannot stop from container)
 - [ ] Authentication integration
+- [ ] Mailer template
 
 ### Other
 
