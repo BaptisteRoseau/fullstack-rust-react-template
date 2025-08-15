@@ -50,6 +50,18 @@ Make scripts, then call them from CI.
 - [ ] Nix Shell config for executing locally without Docker
 - [ ] Secrets & certificates storage
 
+#### Observability
+
+- [ ] Grafana
+- [ ] Loki
+    - [ ] Send logs of every pod from docker compose/kubernetes to Loki
+- [ ] Prometheus/Mimir (TBD)
+- [ ] Create "grafana" user in LLDAP
+    - [ ] Postgres (application) -> Allow only read only access
+    - [ ] Postgres (authentication) -> Revoke all access, create views, only allow to use those views
+    - [ ] LLDAP ?
+- [ ] Homebrew dashboard
+
 ### Frontend
 
 - [ ] Home Page
