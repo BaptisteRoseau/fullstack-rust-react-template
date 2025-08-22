@@ -2,40 +2,56 @@ server:
   address: tcp://0.0.0.0:9091
 
 log:
-  level: info
+  level: "debug"
+
+totp:
+  issuer: "authelia.com"
 
 identity_validation:
   reset_password:
-    jwt_secret: a_very_secret_jwt_key
+    jwt_secret: "a_very_important_secret"
 
 authentication_backend:
   ldap:
-    implementation: custom
-    address: ldap://lldap
-    base_dn: dc=example,dc=com
-    additional_users_dn: ou=users
-    additional_groups_dn: ou=groups
-    user: cn=admin,dc=example,dc=com
-    password: admin
-    attributes:
-      username: uid
-    users_filter: "(&({username_attribute}={input})(objectClass=person))"
-    groups_filter: "(member={dn})"
+    implementation: "lldap"
+    address: "ldap://lldap:3890"
+    base_dn: "DC=example,DC=com"
+    user: "UID=admin,OU=people,DC=example,DC=com"
+    password: "password"
+
+# authentication_backend:
+#   ldap:
+#     implementation: custom
+#     address: ldap://lldap
+#     base_dn: dc=example,dc=com
+#     additional_users_dn: ou=users
+#     additional_groups_dn: ou=groups
+#     user: cn=admin,dc=example,dc=com
+#     password: admin
+#     attributes:
+#       username: uid
+#     users_filter: "(&({username_attribute}={input})(objectClass=person))"
+#     groups_filter: "(member={dn})"
 
 access_control:
   default_policy: deny
   rules:
-    - domain: "protected.example.com"
+    - domain: "*.example.com"
       policy: one_factor
 
 session:
-  name: authelia_session
-  secret: a_session_secret
-  expiration: 3600
-  inactivity: 300
+  secret: "insecure_session_secret"
   cookies:
-    - domain: example.com
-      authelia_url: https://auth.example.com
+    - name: "authelia_session"
+      domain: "example.com" # Should match whatever your root protected domain is
+      authelia_url: "https://authelia.example.com"
+      expiration: "1 hour"
+      inactivity: "5 minutes"
+
+regulation:
+  max_retries: 3
+  find_time: "2 minutes"
+  ban_time: "5 minutes"
 
 storage:
   local:

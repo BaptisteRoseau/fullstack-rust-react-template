@@ -58,8 +58,11 @@ services:
       - './database:/docker-entrypoint-initdb.d/'
 
   authelia:
-    image: authelia/authelia:latest
+    image: docker.io/authelia/authelia:latest
     container_name: authelia
+    environment:
+      PUID: 1001
+      PGID: 1001
     volumes:
       - ./manifests/authentication/authelia/configuration.yml:/config/configuration.yml
     ports:
