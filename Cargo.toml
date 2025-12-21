@@ -1,8 +1,8 @@
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [workspace]
 resolver = "1"
-members = [
-    "crates/logging",
+members = [ "crates/api", "crates/authentication", "crates/binaries/backend", "crates/config", "crates/core", "crates/database",
+    "crates/logging", "crates/mailer",
     "crates/models",
     "crates/service",
     "tools/http_health_checker",
