@@ -16,10 +16,10 @@ $$ language 'plpgsql';
 -- ITEMS
 -- -----------------------------------------------------------------------------
 CREATE TABLE items (
-    id UUID UNIQUE NOT NULL DEFAULT uuid_generate_v4(),
+    id UUID UNIQUE NOT NULL DEFAULT uuid_generate_v7(),
     name VARCHAR(500) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
     PRIMARY KEY(id),
     CONSTRAINT fk_user_id FOREIGN KEY(id) REFERENCES items(id) ON DELETE
     SET DEFAULT
@@ -29,3 +29,4 @@ CREATE INDEX index_items__owner_id ON items(owner_id);
 CREATE INDEX index_items__created_at ON items(created_at);
 CREATE OR REPLACE TRIGGER update_items__updated_at BEFORE
 UPDATE ON items FOR EACH ROW EXECUTE FUNCTION update_modified_column();
+

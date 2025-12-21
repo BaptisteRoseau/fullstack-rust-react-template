@@ -1,8 +1,9 @@
-TODO:
+# TODO
 
 - [ ] infrastructure
     - [ ] docker
         - [ ] migrations
+        - [ ] mailhog
     - [ ] compose
 - [ ] docker compose
 - [X] crates:
@@ -10,7 +11,7 @@ TODO:
     - [X] binaries
     - [X] core
     - [X] database:
-        - [ ] migrations (sqlx)
+        - [X] migrations (sqlx)
 - [ ] scripts
 - [ ] doc
 - [ ] README.md
@@ -25,3 +26,24 @@ TODO:
     - [ ] Create databases:
         - [ ] authentication
         - [ ] backend
+
+- [ ] Make a clear difference between "client_query" and "ssr_query" in the frontend.
+
+## RBAC
+
+Entities that can have permissions:
+
+- Users
+- Groups
+- Roles
+
+Permissions
+
+Entities can define their permissions ?
+
+## SQL
+
+- [X] Add a trigger on "create table" like this one:
+- [ ] Test the trigger
+- [X] Add an audit function to make sure
+- [ ] Test the trigger
