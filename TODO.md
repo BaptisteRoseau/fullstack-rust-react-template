@@ -12,20 +12,18 @@
     - [X] core
     - [X] database:
         - [X] migrations (sqlx)
+- [ ] Migrate existing crates
 - [ ] scripts
 - [ ] doc
 - [ ] README.md
-- [ ] .env.dev
+- [ ] Provision .env.dev
 - [ ] Nix flake ?
+- [ ] Make a shell script with key/values to ensure dependencies restrictions are followed (database cannot use "core" or "api" as its dependency)
+- [ ] Script to generate SQL -> Rust models (use SQL, this might already exist)
+- [ ] Script to generate API Rust/Typescript models (there should be a tool to do so from a schema file)
+- [ ] Support both REST and gRCP in the same endpoint
 
-- [ ] Database scripts:
-    - [ ] Create users:
-        - [ ] read-only
-        - [ ] read-write
-        - [ ] authentication
-    - [ ] Create databases:
-        - [ ] authentication
-        - [ ] backend
+## Frontend
 
 - [ ] Make a clear difference between "client_query" and "ssr_query" in the frontend.
 
