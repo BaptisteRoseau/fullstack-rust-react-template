@@ -1,4 +1,4 @@
-// TODO: Crate 'schemas' to avoid duplication for backend/frontend
+// TODO: Crate 'schemas' to avoid duplication for crates/frontend
 
 use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToSchema};

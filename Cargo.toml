@@ -2,9 +2,9 @@
 [workspace]
 resolver = "1"
 members = [
-    "backend/logging",
-    "backend/models",
-    "backend/service",
+    "crates/logging",
+    "crates/models",
+    "crates/service",
     "tools/http_health_checker",
 ]
 

@@ -10,7 +10,7 @@ cargo build --release --target="$TARGET"
 
 cd "$GIT_ROOT/target/$TARGET/release/"
 mkdir -p backend
-mv service backend/backend
-tar czf "$PACKAGE_NAME" backend/
-rm -r backend/
+mv service crates/backend
+tar czf "$PACKAGE_NAME" crates/
+rm -r crates/
 mv "$PACKAGE_NAME" "$OUTPUT_DIR/"

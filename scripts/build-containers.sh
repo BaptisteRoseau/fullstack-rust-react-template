@@ -11,4 +11,4 @@ export ENGINE
 export IMAGE_NAME
 
 "$GIT_ROOT/frontend/build-containers.sh"
-"$GIT_ROOT/backend/build-containers.sh"
+"$GIT_ROOT/crates/build-containers.sh"

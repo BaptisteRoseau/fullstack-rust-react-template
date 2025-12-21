@@ -6,7 +6,7 @@ cd "$GIT_ROOT"
 
 # Backend
 cargo llvm-cov --color always --no-fail-fast --show-missing-lines \
-    --ignore-filename-regex='backend/(models/|logging)'
+    --ignore-filename-regex='crates/(models/|logging)'
 
 # Frontend
 cd frontend

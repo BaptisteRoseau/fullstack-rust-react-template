@@ -15,5 +15,5 @@ export OUTPUT_DIR
 set -e
 mkdir -p "$OUTPUT_DIR"
 "$GIT_ROOT/frontend/build.sh"
-"$GIT_ROOT/backend/build.sh"
+"$GIT_ROOT/crates/build.sh"
 echo "Packages have been built into $OUTPUT_DIR"

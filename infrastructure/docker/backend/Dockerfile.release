@@ -4,7 +4,7 @@ ARG target=x86_64-unknown-linux-gnu
 
 WORKDIR /build
 RUN touch /opt/config.yml
-COPY backend/ ./backend/
+COPY crates/ ./crates/
 COPY tools/http_health_checker/ ./tools/http_health_checker/
 COPY Cargo.toml ./Cargo.toml
 
@@ -24,7 +24,7 @@ FROM scratch
 
 COPY --from=builder /opt/service /service
 COPY --from=builder /opt/http_health_checker /http_health_checker
-COPY --from=builder /opt/config.yml /etc/backend/config.yml
+COPY --from=builder /opt/config.yml /etc/crates/config.yml
 USER 10001
 WORKDIR /
 
@@ -37,4 +37,4 @@ HEALTHCHECK \
     --timeout=10s \
     --retries=3 \
     CMD [ "/http_health_checker", "http://127.0.0.1:9876/" ]
-ENTRYPOINT [ "/service", "--port", "9876", "--config", "/etc/backend/config.yml" ]
+ENTRYPOINT [ "/service", "--port", "9876", "--config", "/etc/crates/config.yml" ]
