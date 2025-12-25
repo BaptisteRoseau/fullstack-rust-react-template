@@ -1,5 +1,5 @@
 use super::database::Database;
-use super::errors::DatabaseError;
+use super::error::DatabaseError;
 use super::models::StoredLoginInfo;
 use config::Config;
 use deadpool_postgres::{Config as DpConfig, ManagerConfig, Pool, RecyclingMethod, Runtime};

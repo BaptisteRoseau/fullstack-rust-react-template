@@ -1,6 +1,6 @@
-mod errors;
+mod error;
 
-use crate::errors::ConfigParsingError;
+use crate::error::ConfigParsingError;
 use clap::Parser;
 use serde::Deserialize;
 use std::fs;

@@ -1,7 +1,7 @@
 /**
 * Defines the Database trait interface.
 **/
-use super::errors::DatabaseError;
+use super::error::DatabaseError;
 use config::Config;
 use std::future::Future;
 
