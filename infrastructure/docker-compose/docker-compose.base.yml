@@ -22,38 +22,9 @@ services:
             - 'postgres:/var/lib/postgresql/data'
             - './database:/docker-entrypoint-initdb.d/'
 
-    authelia:
-        image: 'docker.io/authelia/authelia:latest'
-        container_name: 'authelia'
-        volumes:
-            - './manifests/authelia:/config'
-        networks:
-            - net
-        labels:
-            traefik.enable: 'true'
-            traefik.http.routers.authelia.rule: 'Host(`authelia.example.com`)'
-            traefik.http.routers.authelia.entrypoints: 'https'
-            traefik.http.routers.authelia.tls: 'true'
-            traefik.http.routers.authelia.tls.options: 'default'
-            traefik.http.middlewares.authelia.forwardauth.address: 'http://authelia:9091/api/authz/forward-auth' # yamllint disable-line rule:line-length
-            traefik.http.middlewares.authelia.forwardauth.trustForwardHeader: 'true'
-            traefik.http.middlewares.authelia.forwardauth.authResponseHeaders: 'Remote-User,Remote-Groups,Remote-Name,Remote-Email' # yamllint disable-line rule:line-length
-        restart: 'unless-stopped'
-        ports:
-            - '127.0.0.1:9091:9091'
-
-    redis:
-        image: 'redis:alpine'
-        container_name: 'redis'
-        volumes:
-            - 'redis:/data'
-        networks:
-            - net
-        restart: 'unless-stopped'
 
 networks:
     net:
 
 volumes:
     postgres:
-    redis:

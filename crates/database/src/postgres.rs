@@ -1,7 +1,7 @@
 use super::database::Database;
 use super::errors::DatabaseError;
 use super::models::StoredLoginInfo;
-use crate::config::Config;
+use config::Config;
 use deadpool_postgres::{Config as DpConfig, ManagerConfig, Pool, RecyclingMethod, Runtime};
 use models::{
     company::{Company, CompanyContent},

@@ -6,7 +6,7 @@ edition = "2024"
 [dependencies]
 logging = { path = "../logging" }
 models = { path = "../models" }
-
+config = { path = "../config" }
 sqlx = { version = "0.8" }
 deadpool-postgres = { version = "*" }
 metrics = { version = "0.24" }
@@ -19,3 +19,5 @@ tokio-postgres = { version = "0.7", features = [
     "with-bit-vec-0_6",
 ] }
 uuid = { version = "1.19", features = ["fast-rng", "serde", "v7"] }
+thiserror = "2.0.17"
+tracing = { version = "0.1.44", features = ["async-await"] }

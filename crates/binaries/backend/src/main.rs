@@ -1,7 +1,6 @@
-mod api;
-mod config;
-mod databases;
-mod errors;
+use api;
+use config;
+use database;
 mod program;
 use std::process::exit;
 

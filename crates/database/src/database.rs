@@ -2,7 +2,7 @@
 * Defines the Database trait interface.
 **/
 use super::errors::DatabaseError;
-use crate::config::Config;
+use config::Config;
 use std::future::Future;
 
 pub(crate) trait Database {

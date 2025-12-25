@@ -1,3 +1,5 @@
+mod errors;
+
 use crate::errors::ConfigParsingError;
 use clap::Parser;
 use serde::Deserialize;
@@ -154,8 +156,8 @@ struct CliConfig {
 impl CliConfig {
     /// Loads the configuration file and updates its value with the provided CLI/ENV arguments.
     ///
-    /// The CLI/ENV arguments take precedence over the configuration file.
-    pub(crate) fn parse_with_file() -> Result<CliConfig, ConfigParsingError> {
+/// The CLI/ENV arguments take precedence over the configuration file.
+    pub fn parse_with_file() -> Result<CliConfig, ConfigParsingError> {
         let mut config: CliConfig = Self::parse();
 
         let mut file_config: Option<CliConfig> = None;
@@ -183,7 +185,7 @@ impl CliConfig {
 
     /// Generates a default configuration file template.
     #[allow(dead_code)]
-    pub(crate) fn template() -> String {
+    pub fn template() -> String {
         todo!(
             "Use clap to generate a default configuration template with documentation and commented defaults"
         );
@@ -195,29 +197,29 @@ CONFIG
 ====================================================================================== */
 
 #[derive(Debug, Clone)]
-pub(crate) struct BindingConfig {
-    pub(crate) ip: IpAddr,
-    pub(crate) port: u16,
+pub struct BindingConfig {
+    pub ip: IpAddr,
+    pub port: u16,
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct PostgresConfig {
-    pub(crate) host: String,
-    pub(crate) port: u16,
-    pub(crate) database: String,
-    pub(crate) user: String,
-    pub(crate) password: String,
+pub struct PostgresConfig {
+    pub host: String,
+    pub port: u16,
+    pub database: String,
+    pub user: String,
+    pub password: String,
 }
 
 type ServerBindingConfig = BindingConfig;
 type PrometheusConfig = BindingConfig;
 
 #[derive(Debug, Clone)]
-pub(crate) struct SwaggerConfig {
-    pub(crate) ip: IpAddr,
-    pub(crate) port: u16,
-    pub(crate) swagger_ui_path: String,
-    pub(crate) openapi_path: String,
+pub struct SwaggerConfig {
+    pub ip: IpAddr,
+    pub port: u16,
+    pub swagger_ui_path: String,
+    pub openapi_path: String,
 }
 
 /// The main configuration.
@@ -228,16 +230,16 @@ pub(crate) struct SwaggerConfig {
 /// Any user input validation should be done within this struct,
 /// in the [`Config::validate`] method.
 #[derive(Debug, Clone)]
-pub(crate) struct Config {
-    pub(crate) debug: bool,
-    pub(crate) server: ServerBindingConfig,
-    pub(crate) postgres: PostgresConfig,
-    pub(crate) prometheus: Option<PrometheusConfig>,
-    pub(crate) swagger: Option<SwaggerConfig>,
+pub struct Config {
+    pub debug: bool,
+    pub server: ServerBindingConfig,
+    pub postgres: PostgresConfig,
+    pub prometheus: Option<PrometheusConfig>,
+    pub swagger: Option<SwaggerConfig>,
 }
 
 impl Config {
-    pub(crate) fn parse() -> Result<Self, ConfigParsingError> {
+    pub fn parse() -> Result<Self, ConfigParsingError> {
         Self::try_from(CliConfig::parse_with_file()?)
     }
 }
