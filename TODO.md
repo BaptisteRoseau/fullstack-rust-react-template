@@ -12,6 +12,7 @@
     - [X] core
     - [X] database:
         - [X] migrations (sqlx)
+- [ ] Hasicorp Vault ?
 - [ ] Migrate existing crates
 - [ ] scripts
 - [ ] doc
