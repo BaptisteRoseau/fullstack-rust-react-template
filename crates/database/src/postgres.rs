@@ -1,11 +1,8 @@
 use super::database::Database;
 use super::error::DatabaseError;
-use super::models::StoredLoginInfo;
 use config::Config;
-use deadpool_postgres::{Config as DpConfig, ManagerConfig, Pool, RecyclingMethod, Runtime};
-use models::{
-    company::{Company, CompanyContent},
-    user::{User, UserContent},
+use deadpool_postgres::{
+    Config as DpConfig, ManagerConfig, Pool, RecyclingMethod, Runtime,
 };
 use tokio_postgres::types::ToSql;
 use tokio_postgres::{NoTls, Row};
