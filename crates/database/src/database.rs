@@ -5,7 +5,7 @@ use super::error::DatabaseError;
 use config::Config;
 use std::future::Future;
 
-pub(crate) trait Database {
+pub trait Database {
     fn close(&mut self) -> impl Future<Output = Result<(), DatabaseError>> + Send;
     fn init(
         &mut self,
