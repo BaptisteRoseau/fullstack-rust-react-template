@@ -1,3 +1,8 @@
 ---
 include:
   - infrastructure/docker-compose/docker-compose.base.yml
+  - infrastructure/docker-compose/docker-compose.monitoring.yml
+  - infrastructure/docker-compose/docker-compose.debug-services.yml
+  # Use this when developing to get hot reloading on the backend and the frontend.
+  # Comment to test the release build or for production purposes.
+  - infrastructure/docker-compose/docker-compose.hot-reloading.yml

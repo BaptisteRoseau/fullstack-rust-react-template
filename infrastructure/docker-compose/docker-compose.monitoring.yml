@@ -1,0 +1,32 @@
+---
+# Contains services used to collect and expose metrics such as Prometheus.
+
+services:
+    prometheus:
+        image: prom/prometheus:v3.2.1
+        container_name: prometheus
+        networks:
+            - net
+        ports:
+            - '${PROMETHEUS_PORT}:9090'
+        restart: on-failure
+        volumes:
+            - 'prometheus:/prometheus'
+            - ./manifests/prometheus:/etc/prometheus
+
+    postgres-exporter:
+        image: quay.io/prometheuscommunity/postgres-exporter
+        container_name: postgres-exporter
+        networks:
+            - net
+        restart: on-failure
+        environment:
+            DATA_SOURCE_URI: 'postgres:5432/postgres?sslmode=disable'
+            DATA_SOURCE_USER: ${POSTGRES_USER}
+            DATA_SOURCE_PASS: ${POSTGRES_PASSWORD}
+
+networks:
+    net:
+
+volumes:
+    prometheus:

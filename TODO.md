@@ -46,3 +46,10 @@ Entities can define their permissions ?
 - [ ] Test the trigger
 - [X] Add an audit function to make sure
 - [ ] Test the trigger
+
+## Milestones
+
+- [ ] Set-up a database with two users: read_write and read_only
+- [ ] Create the first sqlx migration with a table containing the users
+- [ ] Generate backend Rust database models for the User
+- [ ] Generate database CRUD
