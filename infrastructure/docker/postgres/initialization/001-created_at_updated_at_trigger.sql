@@ -7,40 +7,55 @@
 -- CREATE OR REPLACE TRIGGER update_<table_name>__updated_at BEFORE
 -- UPDATE ON items FOR EACH ROW EXECUTE FUNCTION update_modified_column();
 --
+-- Helper trigger function to update `updated_at` on row modification
+CREATE OR REPLACE FUNCTION update_modified_column()
+RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$;
+
 CREATE OR REPLACE FUNCTION add_item_creation_and_update_fields_trigger() RETURNS event_trigger LANGUAGE plpgsql AS $$
 DECLARE cmd RECORD;
 tbl text;
 clean text;
 idx_name text;
 trg_name text;
-BEGIN FOR cmd IN
-SELECT *
-FROM pg_event_trigger_ddl_commands() LOOP IF cmd.object_type = 'table' THEN tbl := cmd.object_identity;
--- Add the columns in the table definition
-EXECUTE format(
-    'ALTER TABLE %s ADD COLUMN IF NOT EXISTS created_at WITH TIME ZONE DEFAULT now() NOT NULL',
-    tbl
-);
-EXECUTE format(
-    'ALTER TABLE %s ADD COLUMN IF NOT EXISTS updated_at WITH TIME ZONE DEFAULT now() NOT NULL',
-    tbl
-);
--- Create the trigger to automatically update "updated_at" field upon modification
-IF NOT EXISTS (
-    SELECT 1
-    FROM pg_trigger t
-        JOIN pg_class c ON t.tgrelid = c.oid
-        JOIN pg_namespace n ON c.relnamespace = n.oid
-    WHERE t.tgname = trg_name
-        AND (n.nspname || '.' || c.relname) = replace(clean, '__', '.')
-) THEN EXECUTE format(
-    'CREATE TRIGGER %I BEFORE UPDATE ON %s FOR EACH ROW EXECUTE FUNCTION update_modified_column()',
-    trg_name,
-    tbl
-);
+BEGIN
+    FOR cmd IN
+        SELECT *
+        FROM pg_event_trigger_ddl_commands() LOOP
+        IF cmd.object_type = 'table' THEN
+            tbl := cmd.object_identity;
+            clean := replace(tbl, '.', '__');
+            trg_name := format('update_%s__updated_at', clean);
+            -- Add the columns in the table definition
+            EXECUTE format(
+                'ALTER TABLE %s ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL',
+                tbl
+            );
+            EXECUTE format(
+                'ALTER TABLE %s ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL',
+                tbl
+            );
+            -- Create the trigger to automatically update "updated_at" field upon modification
+            IF NOT EXISTS (
+                SELECT 1
+                FROM pg_trigger t
+                    JOIN pg_class c ON t.tgrelid = c.oid
+                    JOIN pg_namespace n ON c.relnamespace = n.oid
+                WHERE t.tgname = trg_name
+                    AND (n.nspname || '.' || c.relname) = tbl
+            ) THEN
+                EXECUTE format(
+                    'CREATE TRIGGER %I BEFORE UPDATE ON %s FOR EACH ROW EXECUTE FUNCTION update_modified_column()',
+                    trg_name,
+                    tbl
+                );
+            END IF;
 END IF;
-END IF;
-END LOOP;
+    END LOOP;
 END;
 $$;
 -- Install the event trigger for every CREATE TABLE statements
