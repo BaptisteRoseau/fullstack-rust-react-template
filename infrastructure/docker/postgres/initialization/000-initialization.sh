@@ -5,12 +5,12 @@ set -euo pipefail
 # Creates the database named by DATABASE_NAME (defaults to `backend`),
 # installs required extension(s), and creates two users from environment
 # variables with appropriate privileges:
-#   - BACKEND_USER / BACKEND_PASSWORD -> read/write (owner-like) access
-#   - READ_ONLY_USER / READ_ONLY_PASSWORD -> read-only (SELECT) access
-: "${BACKEND_USER:?Environment variable BACKEND_USER is required}"
-: "${BACKEND_PASSWORD:?Environment variable BACKEND_PASSWORD is required}"
-: "${READ_ONLY_USER:?Environment variable READ_ONLY_USER is required}"
-: "${READ_ONLY_PASSWORD:?Environment variable READ_ONLY_PASSWORD is required}"
+#   - READWRITE_USER / READWRITE_PASSWORD -> read/write (owner-like) access
+#   - READONLY_USER / READONLY_PASSWORD -> read-only (SELECT) access
+: "${READWRITE_USER:?Environment variable READWRITE_USER is required}"
+: "${READWRITE_PASSWORD:?Environment variable READWRITE_PASSWORD is required}"
+: "${READONLY_USER:?Environment variable READONLY_USER is required}"
+: "${READONLY_PASSWORD:?Environment variable READONLY_PASSWORD is required}"
 
 # Database name for the backend service
 : "${DATABASE_NAME:?Environment variable DATABASE_NAME is required}"
@@ -34,8 +34,8 @@ psql --username "$POSTGRES_USER" --dbname "${DATABASE_NAME}" -v ON_ERROR_STOP=1 
 -- Create BACKEND user if not exists
 DO $$
 BEGIN
-   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${BACKEND_USER}') THEN
-      EXECUTE 'CREATE ROLE ' || quote_ident('${BACKEND_USER}') || ' WITH LOGIN PASSWORD ' || quote_literal('${BACKEND_PASSWORD}');
+   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${READWRITE_USER}') THEN
+      EXECUTE 'CREATE ROLE ' || quote_ident('${READWRITE_USER}') || ' WITH LOGIN PASSWORD ' || quote_literal('${READWRITE_PASSWORD}');
    END IF;
 END
 $$;
@@ -43,23 +43,23 @@ $$;
 -- Create READ_ONLY user if not exists
 DO $$
 BEGIN
-   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${READ_ONLY_USER}') THEN
-      EXECUTE 'CREATE ROLE ' || quote_ident('${READ_ONLY_USER}') || ' WITH LOGIN PASSWORD ' || quote_literal('${READ_ONLY_PASSWORD}');
+   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${READONLY_USER}') THEN
+      EXECUTE 'CREATE ROLE ' || quote_ident('${READONLY_USER}') || ' WITH LOGIN PASSWORD ' || quote_literal('${READONLY_PASSWORD}');
    END IF;
 END
 $$;
 
 -- Grant backend user full access on public schema and future tables
-GRANT CONNECT ON DATABASE ${DATABASE_NAME} TO ${BACKEND_USER};
-GRANT USAGE ON SCHEMA public TO ${BACKEND_USER};
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${BACKEND_USER};
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO ${BACKEND_USER};
+GRANT CONNECT ON DATABASE ${DATABASE_NAME} TO ${READWRITE_USER};
+GRANT USAGE ON SCHEMA public TO ${READWRITE_USER};
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${READWRITE_USER};
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO ${READWRITE_USER};
 
 -- Read-only user: allow connect + select on existing and future tables
-GRANT CONNECT ON DATABASE ${DATABASE_NAME} TO ${READ_ONLY_USER};
-GRANT USAGE ON SCHEMA public TO ${READ_ONLY_USER};
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO ${READ_ONLY_USER};
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO ${READ_ONLY_USER};
+GRANT CONNECT ON DATABASE ${DATABASE_NAME} TO ${READONLY_USER};
+GRANT USAGE ON SCHEMA public TO ${READONLY_USER};
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO ${READONLY_USER};
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO ${READONLY_USER};
 SQL
 
 echo "Initialization complete."

@@ -48,6 +48,7 @@
         "plpgsql",
         "prometheuscommunity",
         "psql",
+        "READWRITE",
         "relkind",
         "relname",
         "relnamespace",

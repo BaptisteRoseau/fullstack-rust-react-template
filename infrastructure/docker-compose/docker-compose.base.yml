@@ -2,14 +2,21 @@
 # Contains the minimum required services to run the application.
 
 services:
-    database:
-        image: postgres:17
-        container_name: postgres
+    postgres:
+        image: app_postgresql:latest
+        build:
+            context: .
+            dockerfile: infrastructure/docker/postgres/Dockerfile
+            tags: ["app_postgresql:latest"]
+        container_name: app_postgresql
         environment:
             POSTGRES_DB: ${POSTGRES_DATABASE}
             POSTGRES_USER: ${POSTGRES_USER}
             POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-            PGDATA: /var/lib/postgresql/data/pgdata
+            READONLY_USER: ${POSTGRES_READONLY_USER}
+            READONLY_PASSWORD: ${POSTGRES_READONLY_PASSWORD}
+            READWRITE_USER: ${POSTGRES_READWRITE_USER}
+            READWRITE_PASSWORD: ${POSTGRES_READWRITE_PASSWORD}
             POSTGRES_HOST_AUTH_METHOD: trust
         networks:
             - net
@@ -18,7 +25,7 @@ services:
         restart: on-failure
         volumes:
             - "postgres:/var/lib/postgresql/data"
-            - "./database:/docker-entrypoint-initdb.d/"
+            - "infrastructure/docker/postgres:/docker-entrypoint-initdb.d/"
 
 networks:
     net:
