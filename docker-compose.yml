@@ -4,6 +4,6 @@ include:
   - infrastructure/docker-compose/docker-compose.monitoring.yml
   - infrastructure/docker-compose/docker-compose.debug-services.yml
   # Use this for release purposes or for testing final images.
-  - infrastructure/docker-compose/docker-compose.release.yml
+  # - infrastructure/docker-compose/docker-compose.release.yml
   # Use this when developing to get hot reloading on the backend and the frontend.
   - infrastructure/docker-compose/docker-compose.hot-reloading.yml
