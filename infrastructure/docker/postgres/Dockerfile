@@ -1,6 +1,6 @@
 FROM postgres:18
 
-ENV PGDATA "/var/lib/postgresql/data" 
+ENV PGDATA="/var/lib/postgresql/data" 
 VOLUME [ "/var/lib/postgresql/data" ]
 EXPOSE 5432
 
