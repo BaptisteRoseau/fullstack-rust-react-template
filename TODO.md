@@ -1,59 +1,12 @@
 # TODO
 
-- [ ] infrastructure
-    - [ ] docker
-        - [ ] migrations
-        - [ ] mailhog
-    - [ ] compose
-- [ ] docker compose
-- [X] crates:
-    - [X] api
-    - [X] binaries
-    - [X] core
-    - [X] database:
-        - [X] migrations (sqlx)
-- [ ] Hasicorp Vault ?
-- [ ] Migrate existing crates
-- [ ] scripts
-- [ ] doc
-- [ ] README.md
-- [ ] Provision .env.dev
-- [ ] Nix flake ?
-- [ ] Make a shell script with key/values to ensure dependencies restrictions are followed (database cannot use "core" or "api" as its dependency)
-- [ ] Script to generate SQL -> Rust models (use SQL, this might already exist)
-- [ ] Script to generate API Rust/Typescript models (there should be a tool to do so from a schema file)
-- [ ] Support both REST and gRCP in the same endpoint
-
-## Frontend
-
-- [ ] Make a clear difference between "client_query" and "ssr_query" in the frontend.
-
-## RBAC
-
-Entities that can have permissions:
-
-- Users
-- Groups
-- Roles
-
-Permissions
-
-Entities can define their permissions ?
-
-## SQL
-
-- [X] Add a trigger on "create table" like this one:
-- [ ] Test the trigger
-- [X] Add an audit function to make sure
-- [ ] Test the audit function
-
 ## Milestones
 
 ### Database Layer
 
 - [X] Set-up a database with two users: read_write and read_only
-- [ ] Create the first sqlx migration with a table containing the users
-    - [ ] Move the created_at/updated_at function to the first migration
+- [X] Create the first sqlx migration with a table containing the users
+    - [X] Move the created_at/updated_at function to the first migration
 - [ ] Generate backend Rust database models for the User
 - [ ] CRUD macro (see something like <https://docs.rs/sqlx-crud/latest/sqlx_crud/traits/trait.Schema.html>)
 - [ ] Use a script to generate the database models: <https://github.com/jayy-lmao/sql-gen?tab=readme-ov-file>
@@ -61,12 +14,24 @@ Entities can define their permissions ?
 
 ### API Layer
 
+- [ ] Use a Protobuf schema to generate Rust models and Typescript structures
+- [ ] Add CORS middleware
+- [ ] Add compression middleware
+- [ ] Add tracing middleware (set sensitive headers before)
+- [ ] Add timeout middleware
+- [ ] Add Swagger UI & openapi.json
+- [ ] Add rate limiter middleware
+- [ ] Convert `core` models to API models and vice-versa
+- [ ] Add error handling middleware & global error conversion
+- [ ] Trace errors & normalize error response
+- [ ] Support both REST & gRCP from the same handler (split with `/rest/` and `/grpc/` in the URL)
+
 ### Testing, CI/CD, Docker and scripts
 
 - [ ] Fix all docker images creation
 - [ ] Fix all docker-compose files, services & interaction
 - [ ] Fix scripts for test execution, audit & licenses
-- [ ] Add formating checker script
+- [ ] Add formatting checker script
 - [ ] Add sqlx JSON schema generation from migration scripts and blank container
 - [ ] Add sqlx JSON schema checker (current vs expected from migrations)
 - [ ] Add protobuf models generation (front & back)
@@ -76,6 +41,13 @@ Entities can define their permissions ?
 - [ ] Integrate everything into GitLab CI
 - [ ] Integrate everything into GitHub CI
 - [ ] Automatically build containers
+- [ ] Add Mailhog for local development
+- [ ] Add unit & integration tests using testcontainers when necessary
+
+### Frontend
+
+- [ ] SSR vs Client query helper
+- [ ] Build React mainstream architecture (component/pages/controllers)
 
 ### Core and authentication - API
 
@@ -84,6 +56,9 @@ Entities can define their permissions ?
 - [ ] Use JWT & auto-rotate
 
 ### User Management & Information Update (back & front)
+
+- [ ] User Dashboard
+- [ ] API to update user information
 
 ### Storage layer
 
@@ -99,6 +74,28 @@ Entities can define their permissions ?
 ### Payment Gateway
 
 - [ ] Create crate, write trait
-- [ ] Use Stripe
+- [ ] Use Stripe integration (frontend embedding + backend IPN)
 
 ### Invoices & Payment User information and update
+
+- [ ] Invoice template & builder
+- [ ] IPN notification handler
+- [ ] Invoice upon instant payment
+- [ ] Send invoices by mail automatically
+- [ ] Store PDFs into Storage
+
+### Documentation
+
+- [ ] README.md in every directory explaining best practices of said directory
+- [ ] `doc/` for developer documentation
+- [ ] CLAUDE.md and other LLM templates
+
+### Extras
+
+- [ ] Loki docker plugin to expose docker logs to Grafana
+- [ ] Pre-built Grafana dashboards
+- [ ] Kubernetes manifests
+- [ ] Nix flake (Docker & Prometheus & Kubernetes)
+- [ ] Hasicorp Vault for certificates/keys/passwords ?
+- [ ] Postgres MCP server using read-only user for IDE & Grafana (if possible)
+- [ ] Admin Dashboard ?
