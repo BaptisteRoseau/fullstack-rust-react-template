@@ -1,5 +1,7 @@
 # Rust React Template
 
+**WARNING**: This project is under a heavy refactor right now and is completely broken.
+
 This project is a work in progress web application template using low-level open source software.
 
 It is designed to be secure, cloud native, very low CPU and memory footprint and handle hundreds of users in parallel even from a 30$ VPS.
