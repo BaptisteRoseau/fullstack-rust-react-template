@@ -3,9 +3,6 @@
 # purposes and not for production use.
 # Contains the base docker-compose.yml files, as well as hot-reloading
 # frontend and backend.
-include:
-  - docker-compose.yml
-
 services:
   backend:
     image: localhost/backend:latest-debug
@@ -16,7 +13,7 @@ services:
         - "localhost/backend:latest-debug"
     depends_on:
       migrate:
-          condition: service_completed_successfully
+          condition: service_completed_successfully00
     container_name: backend
     environment:
       IP: 0.0.0.0

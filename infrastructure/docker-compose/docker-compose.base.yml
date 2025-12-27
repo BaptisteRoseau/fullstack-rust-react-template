@@ -21,9 +21,9 @@ services:
             - net
         ports:
             - "${POSTGRES_PORT}:5432"
-        # restart: on-failure
-        # volumes:
-        #     - "postgres:/var/lib/postgresql/data"
+        restart: on-failure
+        volumes:
+            - "postgres:/var/lib/postgresql/data"
 
     migrate:
         image: nxyt/sqlx-cli
@@ -33,7 +33,7 @@ services:
         container_name: app_database_migration
         command: migrate run
         volumes:
-        - ./:/migrations
+        - ./crates/database/migrations/:/migrations
         environment:
         - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DATABASE}?sslmode=enable
 
