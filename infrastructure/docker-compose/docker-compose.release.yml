@@ -10,6 +10,9 @@ services:
             dockerfile: crates/Dockerfile.release
             tags:
                 - "localhost/backend:latest"
+        depends_on:
+            migrate:
+                condition: service_completed_successfully
         container_name: backend
         environment:
             IP: 0.0.0.0
