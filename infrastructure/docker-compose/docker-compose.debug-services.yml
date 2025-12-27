@@ -13,13 +13,13 @@ services:
             PGADMIN_CONFIG_SERVER_MODE: False
             PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: False
         ports:
-            - '${PGADMIN_PORT}:80'
+            - "${PGADMIN_PORT}:80"
         restart: on-failure
         volumes:
-            - 'pgadmin:/var/lib/pgadmin'
+            - "pgadmin:/var/lib/pgadmin"
 
     grafana:
-        image: grafana/grafana:11.3.0-security-01-ubuntu
+        image: grafana/grafana:12.3
         container_name: grafana
         networks:
             - net
@@ -27,12 +27,19 @@ services:
             GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
             GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
         ports:
-            - '${GRAFANA_PORT}:3000'
+            - "${GRAFANA_PORT}:3000"
         restart: on-failure
         volumes:
-            - 'grafana:/var/lib/grafana'
+            - "grafana:/var/lib/grafana"
 
-    #TODO: Homelab
+    homepage:
+        image: ghcr.io/gethomepage/homepage:latest
+        container_name: homepage
+        ports:
+            - "${HOMEPAGE_PORT}:3000"
+        restart: unless-stopped
+        volumes:
+            - ./infrastructure/docker/homepage/config:/app/config
 
 networks:
     net:
