@@ -1,7 +1,7 @@
 ---
 include:
   - infrastructure/docker-compose/docker-compose.base.yml
-  # - infrastructure/docker-compose/docker-compose.monitoring.yml
+  - infrastructure/docker-compose/docker-compose.monitoring.yml
   - infrastructure/docker-compose/docker-compose.debug-services.yml
   # Use this for release purposes or for testing final images.
   # - infrastructure/docker-compose/docker-compose.release.yml

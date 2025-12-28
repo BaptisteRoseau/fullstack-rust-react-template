@@ -13,7 +13,7 @@ services:
         - "localhost/backend:latest-debug"
     depends_on:
       migrate:
-          condition: service_completed_successfully00
+          condition: service_completed_successfully
     container_name: backend
     environment:
       IP: 0.0.0.0

@@ -14,7 +14,7 @@ services:
             - 'prometheus:/prometheus'
             - ./manifests/prometheus:/etc/prometheus
 
-    postgres-exporter:
+    postgres_exporter:
         image: quay.io/prometheuscommunity/postgres-exporter
         container_name: postgres-exporter
         networks:

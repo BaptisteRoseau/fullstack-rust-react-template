@@ -1,15 +1,19 @@
 FROM rust:1.92 AS builder
 
-RUN RUSTFLAGS='-C target-feature=+crt-static' cargo install \
-        --all-features --target-dir /temp sqlx-cli && \
-    cp $(which sqlx-cli) /opt/sqlx-cli && \
-    rm -r /temp && \
-    chmod 555 /opt/sqlx-cli
+RUN apt update && \
+    apt install perl libssl-dev && \
+    rustup target install x86_64-unknown-linux-musl
 
-FROM scratch
+RUN RUSTFLAGS='-C target-feature=+crt-static' cargo install sqlx-cli \
+    --all-features \
+    --target x86_64-unknown-linux-musl && \
+    cp $(which sqlx) /opt/sqlx && \
+    chmod 555 /opt/sqlx
+
+FROM debian:bookworm-slim
 
 USER 1000
-COPY --from=builder --chown=root:root /opt/sqlx-cli /sqlx-cli
+COPY --from=builder --chown=root:root /opt/sqlx /bin/sqlx
 
-ENTRYPOINT [ "/sqlx-cli" ]
+ENTRYPOINT [ "/bin/sqlx" ]
 CMD [ "--help" ]

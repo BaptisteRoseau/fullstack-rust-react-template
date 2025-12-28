@@ -62,7 +62,7 @@
 
 ### Storage layer
 
-- [ ] Select S3-compatible backend service
+- [ ] Select S3-compatible backend service (<https://garagehq.deuxfleurs.fr/> ?)
 - [ ] Write the trait: save/load
 - [ ] Write middleware that handles file metadata & compression
     - [ ] meta: filename, type, owner & access
