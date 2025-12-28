@@ -15,7 +15,7 @@ cargo install sqlx-cli
 Migrations are located under [migrations](./migrations/). To create a new migration, run the following command from the current
 
 ```cmd
-sqlx migrate add -r <name>
+sqlx migrate add -rs <name>
 ```
 
 Always provide a "rollback" migration under the *down.sql* file. Rollbacks are supposed to be performed automatically after an unsuccessful migration, even if the rollback is empty.
@@ -27,7 +27,7 @@ Always provide a "rollback" migration under the *down.sql* file. Rollbacks are s
 Every table's primary key is the `id` field as follows:
 
 ```sql
-id UUID UNIQUE NOT NULL DEFAULT uuid_generate_v7(),
+id UUID UNIQUE NOT NULL DEFAULT uuidv7(),
 -- ...
 PRIMARY KEY(id),
 ```
