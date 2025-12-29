@@ -35,3 +35,5 @@ dist/
 backend*.tar.gz
 frontend*.tar.gz
 packages/
+
+.env

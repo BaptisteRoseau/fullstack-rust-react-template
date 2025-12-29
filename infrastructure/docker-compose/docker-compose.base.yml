@@ -26,11 +26,7 @@ services:
             - "postgres:/var/lib/postgresql/data"
 
     migrate:
-        image: app_sqlx:latest
-        build:
-            context: ../..
-            dockerfile: infrastructure/docker/postgres_migration/Dockerfile
-            tags: ["app_sqlx:latest"]
+        image: nxyt/sqlx-cli:latest
         depends_on:
           postgres:
             condition: service_started
@@ -39,7 +35,7 @@ services:
         volumes:
         - ./crates/database/migrations/:/migrations
         environment:
-            DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DATABASE}?sslmode=disable"
+            DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DATABASE}?sslmode=disable"
 
 
 networks:
