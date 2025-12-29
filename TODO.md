@@ -2,6 +2,14 @@
 
 ## Milestones
 
+### Current
+
+1. [ ] Fix SQLx migrations
+2. [ ] Generate Rust models from SQLx
+3. [ ] Build or use a CRUD macro trait for Rust models
+4. [ ] Create a Database trait
+5. [ ] Implement CRUD handler in Database trait
+
 ### Database Layer
 
 - [X] Set-up a database with two users: read_write and read_only
