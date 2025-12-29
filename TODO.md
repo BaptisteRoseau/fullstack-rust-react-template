@@ -4,11 +4,13 @@
 
 ### Current
 
-1. [ ] Fix SQLx migrations
-2. [ ] Generate Rust models from SQLx
+1. [X] Fix SQLx migrations
+2. [x] Generate Rust models from SQLx
 3. [ ] Build or use a CRUD macro trait for Rust models
-4. [ ] Create a Database trait
-5. [ ] Implement CRUD handler in Database trait
+    - Make sure keys and values are explicitly stated in the request, not *, to avoid breaking the app upon table alteration
+4. [ ] Make a script to generate the models & add CRUD macro
+5. [ ] Create a Database trait
+6. [ ] Implement CRUD handler in Database trait
 
 ### Database Layer
 

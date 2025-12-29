@@ -35,7 +35,7 @@ services:
         container_name: app_sqlx
         command: sqlx migrate run
         volumes:
-            - ./crates/database/migrations/:/migrations
+            - ../../crates/database/migrations/:/migrations
         environment:
             DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DATABASE}?sslmode=disable"
 

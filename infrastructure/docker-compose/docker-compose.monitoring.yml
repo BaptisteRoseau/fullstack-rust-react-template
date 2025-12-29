@@ -12,7 +12,7 @@ services:
         restart: on-failure
         volumes:
             - 'prometheus:/prometheus'
-            - ./manifests/prometheus:/etc/prometheus
+            - ${GIT_ROOT:-../..}/infrastructure/prometheus:/etc/prometheus
 
     postgres_exporter:
         image: quay.io/prometheuscommunity/postgres-exporter

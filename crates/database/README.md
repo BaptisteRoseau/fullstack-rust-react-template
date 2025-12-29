@@ -42,3 +42,20 @@ updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
 ```
 
 Those fields are updated by default by Postgres so don't bother setting them manually.
+
+### Generate Models
+
+The [`models.rs`](./src/models.rs) file is generated using `sql-gen`.
+
+First, install `sql-gen`:
+
+```sh
+cargo install sql-gen
+```
+
+Then, to generate the models, run the following command:
+
+```sh
+. .env
+sql-gen --db-url "$DATABASE_URL" --output crates/database/src/models.rs
+```
