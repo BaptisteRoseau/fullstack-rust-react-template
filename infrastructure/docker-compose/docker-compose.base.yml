@@ -6,7 +6,7 @@ services:
         image: app_postgres:latest
         build:
             context: ../..
-            dockerfile: infrastructure/docker/postgres/Dockerfile
+            dockerfile: infrastructure/docker/app_postgres/Dockerfile
             tags: ["app_postgres:latest"]
         container_name: app_postgres
         environment:
@@ -28,15 +28,16 @@ services:
     migrate:
         image: nxyt/sqlx-cli:latest
         depends_on:
-          postgres:
-            condition: service_started
-        container_name: app_database_migration
+            postgres:
+                condition: service_healthy
+        networks:
+            - net
+        container_name: app_sqlx
         command: sqlx migrate run
         volumes:
-        - ./crates/database/migrations/:/migrations
+            - ./crates/database/migrations/:/work/migrations
         environment:
             DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DATABASE}?sslmode=disable"
-
 
 networks:
     net:
