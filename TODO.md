@@ -55,6 +55,7 @@
 - [ ] Automatically build containers
 - [ ] Add Mailhog for local development
 - [ ] Add unit & integration tests using testcontainers when necessary
+- [ ] Use transaction/rollback in setUp/tearDown for tests
 
 ### Security
 
