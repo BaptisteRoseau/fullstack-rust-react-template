@@ -24,3 +24,11 @@ The tech stack used in the backend is:
 - SQLx for the database layer and migrations
 - Clap for CLI interface
 - utoipa for the openapi.json and swagger UI
+
+## Tesing
+
+Tests are split into unit tests and integration tests. Unit tests are standalone tests on small pieces of code, wheread integration tests excpect to interract with and environment like a database or an API.
+
+We make a difference between those as follows, and use the `testcontainers` library to run integration tests in parallel.
+
+TODO: The tutorial on integration test vs unit test cfg!
