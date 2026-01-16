@@ -10,7 +10,8 @@ members = [
   "crates/database",
   "crates/logging",
   "crates/mailer",
-  "crates/models", "crates/storage",
+  "crates/models",
+  "crates/storage",
   "tools/http_health_checker",
 ]
 
