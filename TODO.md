@@ -4,19 +4,20 @@
 
 ### Current
 
-1. [X] Fix SQLx migrations
+1. [x] Fix SQLx migrations
 2. [x] Generate Rust models from SQLx
 3. [ ] Build or use a CRUD macro trait for Rust models
-    - Make sure keys and values are explicitly stated in the request, not *, to avoid breaking the app upon table alteration
-4. [ ] Make a script to generate the models & add CRUD macro
-5. [ ] Create a Database trait
-6. [ ] Implement CRUD handler in Database trait
+    - Make sure keys and values are explicitly stated in the request, not \*, to avoid breaking the app upon table alteration
+4. [ ] Make a script to generate the models
+5. [ ] Add CRUD macros to the models
+6. [ ] Create a Database trait
+7. [ ] Implement CRUD handler in Database trait
 
 ### Database Layer
 
-- [X] Set-up a database with two users: read_write and read_only
-- [X] Create the first sqlx migration with a table containing the users
-    - [X] Move the created_at/updated_at function to the first migration
+- [x] Set-up a database with two users: read_write and read_only
+- [x] Create the first sqlx migration with a table containing the users
+    - [x] Move the created_at/updated_at function to the first migration
 - [ ] Generate backend Rust database models for the User
 - [ ] CRUD macro (see something like <https://docs.rs/sqlx-crud/latest/sqlx_crud/traits/trait.Schema.html>)
 - [ ] Use a script to generate the database models: <https://github.com/jayy-lmao/sql-gen?tab=readme-ov-file>
@@ -53,6 +54,10 @@
 - [ ] Automatically build containers
 - [ ] Add Mailhog for local development
 - [ ] Add unit & integration tests using testcontainers when necessary
+
+### Security
+
+- [ ] Hasicorp Vault integration to store & rotate secrets
 
 ### Frontend
 

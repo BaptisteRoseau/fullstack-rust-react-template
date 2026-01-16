@@ -12,4 +12,4 @@ It transparently optimizes the size of blobs:
 - Every blod is compressed before being stored, and decompressed when accessed
 - Optionally encrypt/decrypt data before being stored
 
-Utlimately it should support streaming too but it is not required.
+Utlimately it should support streaming too but it is not required yet.

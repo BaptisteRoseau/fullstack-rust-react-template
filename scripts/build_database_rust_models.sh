@@ -24,6 +24,7 @@ POSTGRES_USER=root
 #   - create a random user/password
 #   - run the container
 #   - wait for container to be ready
+# Add a CLI argument to select the output file of this script
 
 echo "Starting a new database instance"
 
