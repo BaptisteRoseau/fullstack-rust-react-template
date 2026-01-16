@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
+// TODO: Actually move each model in its corresponding crate
+
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct LoginInfo {
     pub email: String,

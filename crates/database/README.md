@@ -49,4 +49,4 @@ The [`generated_models.rs`](./src/generated_models.rs) file is generated using `
 
 DO NOT manually modify this file. If you need to create other models use [./src/models.rs](./src/models.rs).
 
-To generate it, run or read the script [generate_database_rust_models.sh](./scripts/generate_database_rust_models.sh).
+To generate it, run or read the script [build_database_rust_models.sh](./scripts/generate_database_rust_models.sh).

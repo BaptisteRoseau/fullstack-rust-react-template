@@ -5,5 +5,5 @@ GIT_ROOT=$(git rev-parse --show-toplevel)
 
 for file in "$GIT_ROOT"/scripts/test_*.sh; do
     echo "Executing $file"
-    $file
+    "$file"
 done
