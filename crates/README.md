@@ -12,6 +12,13 @@ Most importantly:
 
 The module relashionship should be `api` > `core` > `database`. Each outer layer cannot import inner layer to keep a coherent architecture and allow working on modules independently.
 
+Here:
+
+- `core` cannot use `api`
+- `database` can neither use `core` nor `api`
+- `core` can use `database`
+- `api` can use `core` but not `database`
+
 ## Types of crates
 
 Each crate is this folder is library only. For binaries, go into [binaries](./binaries) and import the required libraries.
