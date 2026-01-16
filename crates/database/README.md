@@ -18,7 +18,7 @@ Migrations are located under [migrations](./migrations/). To create a new migrat
 sqlx migrate add -rs <name>
 ```
 
-Always provide a "rollback" migration under the *down.sql* file. Rollbacks are supposed to be performed automatically after an unsuccessful migration, even if the rollback is empty.
+Always provide a "rollback" migration under the _down.sql_ file. Rollbacks are supposed to be performed automatically after an unsuccessful migration, even if the rollback is empty.
 
 ## Conventions
 
@@ -45,17 +45,8 @@ Those fields are updated by default by Postgres so don't bother setting them man
 
 ### Generate Models
 
-The [`models.rs`](./src/models.rs) file is generated using `sql-gen`.
+The [`generated_models.rs`](./src/generated_models.rs) file is generated using `sql-gen`. It contains structures used to convert data from Postgres to Rust and vice-versa.
 
-First, install `sql-gen`:
+DO NOT manually modify this file. If you need to create other models use [./src/models.rs](./src/models.rs).
 
-```sh
-cargo install sql-gen
-```
-
-Then, to generate the models, run the following command:
-
-```sh
-. .env
-sql-gen --db-url "$DATABASE_URL" --output crates/database/src/models.rs
-```
+To generate it, run or read the script [generate_database_rust_models.sh](./scripts/generate_database_rust_models.sh).
