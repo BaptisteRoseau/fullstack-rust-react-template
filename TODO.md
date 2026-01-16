@@ -12,6 +12,7 @@
 5. [ ] Add CRUD macros to the models
 6. [ ] Create a Database trait
 7. [ ] Implement CRUD handler in Database trait
+8. [ ] Make a script to generate SQLx static file for offline sqlx compilation
 
 ### Database Layer
 
