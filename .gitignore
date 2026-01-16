@@ -38,3 +38,4 @@ frontend*.tar.gz
 packages/
 
 .env
+.llm_memory/
