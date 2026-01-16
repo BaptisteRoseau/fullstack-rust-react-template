@@ -18,6 +18,8 @@ Each should contain a README.md file further describing how to work with it.
 
 Prefer writing small and dedicated files than a giant all-included one. This helps to have a small context for LLMs and makes each file more readable.
 
+When working on a new task, first search for pieces of code that are similar to what you need to implement. Read their related README.md and copy the style of the codebase.
+
 ## Documentation
 
 Whenever you work in a directory, read the README.md in this directory and the one in all its parent directories if they exists.
