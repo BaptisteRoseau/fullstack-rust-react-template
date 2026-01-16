@@ -30,6 +30,7 @@ dist-ssr
 # Rust Binaries
 target/
 dist/
+.sqlx/
 
 # Packages
 backend*.tar.gz
