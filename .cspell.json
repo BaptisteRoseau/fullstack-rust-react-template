@@ -27,6 +27,7 @@
         "Fidbak",
         "frontent",
         "gethomepage",
+        "Hasicorp",
         "HEALTHCHECK",
         "iconify",
         "Iconify",
@@ -64,6 +65,7 @@
         "sqlx",
         "sslmode",
         "subsampling",
+        "Supabase",
         "tgname",
         "tgrelid",
         "thiserror",
@@ -78,3 +80,4 @@
         "zopfli"
     ]
 }
+

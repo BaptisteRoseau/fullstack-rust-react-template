@@ -11,7 +11,7 @@ use tokio_postgres::{NoTls, Row};
 use tracing::warn;
 
 #[derive(Clone)]
-pub(crate) struct PostgresDatabase {
+pub struct PostgresDatabase {
     pool: Pool,
 }
 

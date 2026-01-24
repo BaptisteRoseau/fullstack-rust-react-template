@@ -23,6 +23,12 @@
 - [x] Generate backend Rust database models for the User
 - [ ] Make your own dyn-compatible CRUD macro (fork <https://docs.rs/sqlx-crud/latest/sqlx_crud/traits/trait.Schema.html>)
 - [x] Use a script to generate the database models: <https://github.com/jayy-lmao/sql-gen?tab=readme-ov-file>
+- [X] Set up a database with two users: read_write and read_only
+- [X] Create the first sqlx migration with a table containing the users
+    - [X] Move the created_at/updated_at function to the first migration
+- [ ] Generate backend Rust database models for the User
+- [ ] CRUD macro (see something like <https://docs.rs/sqlx-crud/latest/sqlx_crud/traits/trait.Schema.html>)
+- [ ] Use a script to generate the database models: <https://github.com/jayy-lmao/sql-gen?tab=readme-ov-file>
 - The two previous milestones should allow you to make the database crate basic CRUD functionalities across all tables trivial, so that you can focus on the more interesting ones :D
 - [ ] Use a mix of SeaORM and SQLX ?
 

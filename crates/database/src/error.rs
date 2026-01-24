@@ -8,4 +8,6 @@ pub enum DatabaseError {
     ConnectionPool(#[from] deadpool_postgres::PoolError),
     #[error(transparent)]
     PoolCreationError(#[from] deadpool_postgres::CreatePoolError),
+    #[error("The item was not found.")]
+    NotFound(String),
 }

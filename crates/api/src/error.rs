@@ -1,5 +1,6 @@
 use axum::{http::StatusCode, response::IntoResponse};
 use core::error::CoreError;
+use database::error::DatabaseError;
 use jsonwebtoken::errors::ErrorKind as JwtErrorKind;
 use serde::Serialize;
 use tracing::error;

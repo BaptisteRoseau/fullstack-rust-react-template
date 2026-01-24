@@ -16,6 +16,9 @@ use tower_http::{
     },
     timeout::TimeoutLayer,
     trace::TraceLayer,
+    CompressionLevel, cors::CorsLayer,
+    decompression::RequestDecompressionLayer, normalize_path::NormalizePathLayer,
+    timeout::TimeoutLayer, trace::TraceLayer,
 };
 use utoipa::openapi::{InfoBuilder, OpenApi};
 use utoipa_axum::{router::OpenApiRouter, routes};

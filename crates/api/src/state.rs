@@ -1,7 +1,5 @@
 use config::Config;
-use crate::{
-    database::{database::Database, postgres::PostgresDatabase},
-};
+use database::{Database, postgres::PostgresDatabase};
 
 use axum::extract::FromRef;
 use std::sync::Arc;
