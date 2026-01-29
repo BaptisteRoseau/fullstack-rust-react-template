@@ -34,6 +34,7 @@
 
 ### API Layer
 
+- [ ] Use axum-tower-session for session management
 - [ ] Use a Protobuf schema to generate Rust models and Typescript structures
 - [ ] Add CORS middleware
 - [ ] Add compression middleware
