@@ -86,10 +86,11 @@
 - [ ] Write the trait: save/load
 - [ ] Write middleware that handles file metadata & compression
     - [ ] meta: filename, type, owner & access
-    - [ ] gzip compression by default
+    - [x] gzip compression by default
     - [ ] optional encryption
-    - [ ] caesium image optimizer
+    - [x] caesium image optimizer
     - [ ] pdf file compression
+- [ ] Add benchmarks and use testcontainers to set them ups
 
 ### Payment Gateway
 
