@@ -5,7 +5,6 @@ edition = "2024"
 
 [dependencies]
 logging = { path = "../logging" }
-models = { path = "../models" }
 config = { path = "../config" }
 chrono = { version = "*" }
 sqlx = { version = "0.8" }
