@@ -1,4 +1,4 @@
-use crate::{api::misc::*, api::state::AppState};
+use crate::{misc::*, state::AppState};
 use axum::{Router, routing::get};
 
 use axum_prometheus::metrics_exporter_prometheus::PrometheusHandle;
@@ -7,11 +7,13 @@ use std::{future::ready, iter::once};
 use tower::ServiceBuilder;
 use tower_http::{
     CompressionLevel,
-    compression::CompressionLayer,
+    // compression::CompressionLayer,
     cors::CorsLayer,
     decompression::RequestDecompressionLayer,
     normalize_path::NormalizePathLayer,
-    sensitive_headers::{SetSensitiveRequestHeadersLayer, SetSensitiveResponseHeadersLayer},
+    sensitive_headers::{
+        SetSensitiveRequestHeadersLayer, SetSensitiveResponseHeadersLayer,
+    },
     timeout::TimeoutLayer,
     trace::TraceLayer,
 };
@@ -39,7 +41,7 @@ pub(crate) fn public_routes(app_state: &AppState) -> (Router, OpenApi) {
         //TODO: Set this up based on what is actually available
         .layer(CorsLayer::permissive())
         .layer(NormalizePathLayer::trim_trailing_slash())
-        .layer(CompressionLayer::new().quality(CompressionLevel::Best))
+        // .layer(CompressionLayer::new().quality(CompressionLevel::Best))
         .layer(RequestDecompressionLayer::new())
         .layer(TimeoutLayer::new(Duration::from_secs(TIMEOUT_SEC)));
 
@@ -69,6 +71,8 @@ pub(crate) fn private_routes(_app_state: &AppState, openapi: OpenApi) -> Router 
 }
 
 /// Metrics routes that are exposed to Prometheus
-pub(crate) fn try_metrics_routes(metric_handle: PrometheusHandle) -> Result<Router, anyhow::Error> {
+pub(crate) fn try_metrics_routes(
+    metric_handle: PrometheusHandle,
+) -> Result<Router, anyhow::Error> {
     Ok(Router::new().route("/metrics", get(move || ready(metric_handle.render()))))
 }

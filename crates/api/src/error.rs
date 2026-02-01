@@ -1,7 +1,8 @@
-use crate::databases::errors::DatabaseError;
 use axum::{http::StatusCode, response::IntoResponse};
+use core::error::CoreError;
 use jsonwebtoken::errors::ErrorKind as JwtErrorKind;
 use serde::Serialize;
+use std::fmt::{Debug, Display};
 use thiserror::Error;
 use tracing::error;
 use utoipa::ToSchema;
@@ -56,7 +57,9 @@ impl IntoResponse for ApiErrorResponse {
         // Do not return a body in case of a forbidden or not found
         // error code.
         match self.status_code {
-            StatusCode::FORBIDDEN | StatusCode::NOT_FOUND => self.status_code.into_response(),
+            StatusCode::FORBIDDEN | StatusCode::NOT_FOUND => {
+                self.status_code.into_response()
+            }
             _ => (self.status_code, axum::response::Json(self)).into_response(),
         }
     }
@@ -69,14 +72,14 @@ impl IntoResponse for ApiErrorResponse {
 /// HTTP API though Axum's error management.
 ///
 /// The error message will be logged but not sent in the server response.
-#[derive(Error, Debug)]
-pub(crate) enum ApiError {
+#[derive(Error, Debug, Display)]
+pub enum ApiError {
     #[error("Not found: {0}")]
     NotFound(String),
     #[error("Hardware Error: {0}")]
     IoError(#[from] std::io::Error),
     #[error(transparent)]
-    Database(#[from] DatabaseError),
+    Database(#[from] CoreError),
     // #[error("Serialization error")]
     // Serde(#[from] serde::err),
     #[error("Unexpected Error")]
@@ -94,10 +97,10 @@ impl From<ApiError> for ApiErrorResponse {
     }
 }
 
-impl From<DatabaseError> for ApiErrorResponse {
-    fn from(val: DatabaseError) -> Self {
+impl From<CoreError> for ApiErrorResponse {
+    fn from(val: CoreError) -> Self {
         match val {
-            DatabaseError::NotFound(_) => ApiErrorResponse::not_found(),
+            CoreError::NotFound(_) => ApiErrorResponse::not_found(),
             _ => ApiErrorResponse::unexpected(),
         }
     }

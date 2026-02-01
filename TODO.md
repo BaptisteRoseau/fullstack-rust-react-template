@@ -8,7 +8,7 @@
 2. [x] Generate Rust models from SQLx
 3. [ ] Build or use a CRUD macro trait for Rust models
     - Make sure keys and values are explicitly stated in the request, not \*, to avoid breaking the app upon table alteration
-4. [ ] Make a script to generate the models
+4. [X] Make a script to generate the models
 5. [ ] Add CRUD macros to the models
 6. [ ] Create a Database trait
 7. [ ] Implement CRUD handler in Database trait
@@ -19,9 +19,9 @@
 - [x] Set-up a database with two users: read_write and read_only
 - [x] Create the first sqlx migration with a table containing the users
     - [x] Move the created_at/updated_at function to the first migration
-- [ ] Generate backend Rust database models for the User
+- [X] Generate backend Rust database models for the User
 - [ ] CRUD macro (see something like <https://docs.rs/sqlx-crud/latest/sqlx_crud/traits/trait.Schema.html>)
-- [ ] Use a script to generate the database models: <https://github.com/jayy-lmao/sql-gen?tab=readme-ov-file>
+- [X] Use a script to generate the database models: <https://github.com/jayy-lmao/sql-gen?tab=readme-ov-file>
 - The two previous milestones should allow you to make the database crate basic CRUD functionalities across all tables trivial, so that you can focus on the more interesting ones :D
 
 ### API Layer

@@ -1,13 +1,13 @@
+use config::Config;
 use crate::{
-    config::Config,
-    databases::{database::Database, postgres::PostgresDatabase},
+    database::{database::Database, postgres::PostgresDatabase},
 };
 
 use axum::extract::FromRef;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
-use super::errors::ApiError;
+use super::error::ApiError;
 
 // Notes:
 // dyn trait are not supported for async functions.
@@ -47,7 +47,7 @@ use super::errors::ApiError;
 /// ```
 #[derive(Clone)]
 pub(crate) struct AppState {
-    pub database: Arc<RwLock<PostgresDatabase>>,
+    pub core: Arc<RwLock<PostgresDatabase>>,
     pub config: Arc<Config>,
 }
 
@@ -57,13 +57,13 @@ impl AppState {
         database: PostgresDatabase,
     ) -> Result<Self, ApiError> {
         Ok(Self {
-            database: Arc::new(RwLock::new(database)),
+            core: Arc::new(RwLock::new(database)),
             config: Arc::new(config.clone()),
         })
     }
 
     pub async fn close(&mut self) -> Result<(), ApiError> {
-        self.database.write().await.close().await?;
+        self.core.write().await.close().await?;
         Ok(())
     }
 }
@@ -76,6 +76,6 @@ impl FromRef<AppState> for Arc<Config> {
 
 impl FromRef<AppState> for Arc<RwLock<PostgresDatabase>> {
     fn from_ref(app_state: &AppState) -> Arc<RwLock<PostgresDatabase>> {
-        app_state.database.clone()
+        app_state.core.clone()
     }
 }
