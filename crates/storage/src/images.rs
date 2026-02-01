@@ -1,4 +1,7 @@
 use crate::error::StorageError;
+use crate::parameters::{
+    ImageCompression, ImageConvertion, ImageParameters, ImageResize,
+};
 use caesium::compress_in_memory;
 use caesium::parameters::{
     ChromaSubsampling, GifParameters, JpegParameters, PngParameters, TiffDeflateLevel,
@@ -6,48 +9,46 @@ use caesium::parameters::{
 };
 use caesium::{SupportedFileTypes, convert_in_memory, parameters::CSParameters};
 
-pub(crate) enum CompressionType {
-    Lossy,
-    Lossless,
-}
-
 pub(crate) fn compress_image(
     image: &[u8],
-    compression_type: CompressionType,
+    parameters: &ImageParameters,
 ) -> Result<Vec<u8>, StorageError> {
-    let parameters = select_parameters(compression_type);
-    Ok(compress_in_memory(image.into(), &parameters)?)
-}
-
-pub(crate) fn convert_image_to(
-    image: &[u8],
-    format: SupportedFileTypes,
-    compression_type: CompressionType,
-) -> Result<Vec<u8>, StorageError> {
-    let parameters = select_parameters(compression_type);
-    Ok(convert_in_memory(image.into(), &parameters, format)?)
-}
-
-pub(crate) fn compress_and_resize_image(
-    image: &[u8],
-    height: Option<u32>,
-    width: Option<u32>,
-    compression_type: CompressionType,
-) -> Result<Vec<u8>, StorageError> {
-    let mut parameters = select_parameters(compression_type);
-    if let Some(h) = height {
-        parameters.height = h;
+    if parameters.compression == ImageCompression::NoCompression {
+        return Ok(image.into());
     }
-    if let Some(w) = width {
-        parameters.width = w;
-    }
-    Ok(compress_in_memory(image.into(), &parameters)?)
+    let mut compression_parameters = select_compression(&parameters.compression);
+    udpate_dimensions(&parameters.resize, &mut compression_parameters);
+
+    let format = match parameters.convertion {
+        ImageConvertion::Jpeg => SupportedFileTypes::Jpeg,
+        ImageConvertion::Png => SupportedFileTypes::Png,
+        ImageConvertion::Tiff => SupportedFileTypes::Tiff,
+        ImageConvertion::Webp => SupportedFileTypes::WebP,
+        ImageConvertion::NoConvertion => {
+            return Ok(compress_in_memory(image.into(), &compression_parameters)?);
+        }
+    };
+
+    Ok(convert_in_memory(
+        image.into(),
+        &compression_parameters,
+        format,
+    )?)
 }
 
-fn select_parameters(compression_type: CompressionType) -> CSParameters {
+fn select_compression(compression_type: &ImageCompression) -> CSParameters {
     match compression_type {
-        CompressionType::Lossless => parameters_lossless(),
-        CompressionType::Lossy => parameters_lossy(),
+        ImageCompression::Lossy => parameters_lossy(),
+        _ => parameters_lossless(),
+    }
+}
+
+fn udpate_dimensions(resize: &ImageResize, compression_parameters: &mut CSParameters) {
+    if let Some(h) = resize.height {
+        compression_parameters.height = h;
+    }
+    if let Some(w) = resize.width {
+        compression_parameters.width = w;
     }
 }
 
@@ -81,7 +82,7 @@ fn parameters_lossless() -> CSParameters {
         gif,
         webp,
         tiff,
-        keep_metadata: false,
+        keep_metadata: true,
         width: 0,
         height: 0,
     }
@@ -117,7 +118,7 @@ fn parameters_lossy() -> CSParameters {
         gif,
         webp,
         tiff,
-        keep_metadata: false,
+        keep_metadata: true,
         width: 0,
         height: 0,
     }
