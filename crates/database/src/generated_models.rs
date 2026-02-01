@@ -1,4 +1,3 @@
-
 #[derive(Debug, Clone, sqlx::FromRow)]
 pub struct User {
     id: uuid::Uuid,

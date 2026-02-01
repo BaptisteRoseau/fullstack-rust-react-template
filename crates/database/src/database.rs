@@ -1,22 +1,20 @@
+use crate::crud::Crud;
+
 /**
 * Defines the Database trait interface.
 **/
 use super::error::DatabaseError;
-use crate::crud::Crud;
 use async_trait::async_trait;
 use config::Config;
-use uuid::Uuid;
 
 #[async_trait]
 pub trait Database {
     fn close(&mut self) -> Result<(), DatabaseError>;
     fn init(&mut self, config: &Config) -> Result<&mut Self, DatabaseError>;
-    fn create(&mut self, item: &dyn Crud) -> Result<&mut Self, DatabaseError> {
-        return Ok(self);
-    }
-    fn read(&mut self, id: Uuid) -> Result<&mut Self, DatabaseError>;
+    fn create<T>(&mut self, item: &dyn Crud) -> Result<&mut T, DatabaseError>;
+    fn read_by_id<T>(&mut self, item: &dyn Crud) -> Result<&mut T, DatabaseError>;
     fn update(&mut self, item: &dyn Crud) -> Result<&mut Self, DatabaseError>;
-    fn delete(&mut self, id: Uuid) -> Result<&mut Self, DatabaseError>;
+    fn delete_by_id(&mut self, item: &dyn Crud) -> Result<&mut Self, DatabaseError>;
 }
 
 /* =============================================================================

@@ -3,15 +3,12 @@ use super::error::DatabaseError;
 use crate::crud::Crud;
 use config::Config;
 use deadpool_postgres::{
-    Config as DpConfig, ManagerConfig, Pool, RecyclingMethod, Runtime,
+    Config as DpConfig, ManagerConfig, Pool, RecyclingMethod, Runtime, SslMode,
 };
 use tokio_postgres::types::ToSql;
 use tokio_postgres::{NoTls, Row};
 use tracing::warn;
-use uuid::Uuid;
 
-// TODO: Efficiently manage to cache size
-// TODO: Require SSL when enabled in config & when using release config
 #[derive(Clone)]
 pub(crate) struct PostgresDatabase {
     pool: Pool,
@@ -37,6 +34,7 @@ impl PostgresDatabase {
         dp_config.dbname = Some(config.postgres.database.clone());
         dp_config.password = Some(config.postgres.password.clone());
         dp_config.port = Some(config.postgres.port);
+        dp_config.ssl_mode = Some(SslMode::Require);
         Ok(dp_config)
     }
 
@@ -91,6 +89,19 @@ impl Database for PostgresDatabase {
     fn init(&mut self, config: &Config) -> Result<&mut Self, DatabaseError> {
         let _ = config;
         Ok(self)
+    }
+
+    fn create<T>(&mut self, item: &dyn Crud) -> Result<&mut T, DatabaseError> {
+        todo!()
+    }
+    fn read_by_id<T>(&mut self, item: &dyn Crud) -> Result<&mut T, DatabaseError> {
+        todo!()
+    }
+    fn update(&mut self, item: &dyn Crud) -> Result<&mut Self, DatabaseError> {
+        todo!()
+    }
+    fn delete_by_id(&mut self, item: &dyn Crud) -> Result<&mut Self, DatabaseError> {
+        todo!()
     }
 }
 
