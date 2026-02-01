@@ -1,3 +1,4 @@
+#[warn(dead_code)]
 use super::database::Database;
 use super::error::DatabaseError;
 use crate::crud::Crud;
