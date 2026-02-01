@@ -39,3 +39,9 @@ Tests are split into unit tests and integration tests. Unit tests are standalone
 We make a difference between those as follows, and use the `testcontainers` library to run integration tests in parallel.
 
 TODO: The tutorial on integration test vs unit test cfg!
+
+## Errors
+
+Errors should be derived from `thiserror`, name `CamelCaseModuleError` and reside in the `error` file.
+
+For example, the errors for my_crate should be named `MyCrateError` and be located under `my_crate/src/error.rs`
