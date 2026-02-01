@@ -123,3 +123,78 @@ fn parameters_lossy() -> CSParameters {
         height: 0,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::parameters::{
+        ImageCompression, ImageConversion, ImageParameters, ImageResize,
+    };
+
+    #[test]
+    fn test_no_compression_returns_same() {
+        let input: Vec<u8> = b"this is not an image".to_vec();
+        let params = ImageParameters {
+            compression: ImageCompression::NoCompression,
+            conversion: ImageConversion::NoConversion,
+            resize: ImageResize {
+                height: None,
+                width: None,
+            },
+        };
+
+        let out =
+            compress_image(&input, &params).expect("NoCompression should return Ok");
+        assert_eq!(out, input);
+    }
+
+    #[test]
+    fn test_select_compression() {
+        let lossy = select_compression(&ImageCompression::Lossy);
+        let lossless = select_compression(&ImageCompression::Lossless);
+
+        assert!(lossy.jpeg.quality < 100);
+        assert_eq!(lossless.jpeg.quality, 100);
+    }
+
+    #[test]
+    fn test_update_dimensions() {
+        let mut params = parameters_lossless();
+        let resize = ImageResize {
+            height: Some(42),
+            width: Some(24),
+        };
+        update_dimensions(&resize, &mut params);
+        assert_eq!(params.height, 42);
+        assert_eq!(params.width, 24);
+    }
+
+    #[test]
+    #[ignore]
+    fn test_compress_in_memory_with_png_fixture() {
+        todo!("This test requires a fixture that does not exists yet.");
+        let img_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/1x1.png");
+        let image = std::fs::read(&img_path)
+            .expect("Put a small PNG at crates/storage/tests/fixtures/1x1.png");
+
+        let params = ImageParameters {
+            compression: ImageCompression::Lossy,
+            conversion: ImageConversion::NoConversion,
+            resize: ImageResize {
+                height: None,
+                width: None,
+            },
+        };
+
+        let out = compress_image(&image, &params).expect("compression should succeed");
+        assert!(!out.is_empty());
+        assert!(out.len() < image.len());
+    }
+
+    #[test]
+    #[ignore]
+    fn test_convert_image_format() {
+        todo!("This test requires a fixture that does not exists yet.");
+    }
+}
