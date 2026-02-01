@@ -1,4 +1,5 @@
 mod compressor;
+mod file_optimizer;
 mod images;
 mod storage;
 

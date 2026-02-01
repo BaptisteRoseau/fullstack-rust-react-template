@@ -63,6 +63,7 @@
         "serde",
         "sqlx",
         "sslmode",
+        "subsampling",
         "tgname",
         "tgrelid",
         "thiserror",
@@ -73,6 +74,7 @@
         "uuidv",
         "vite",
         "webpki",
-        "xlink"
+        "xlink",
+        "zopfli"
     ]
 }

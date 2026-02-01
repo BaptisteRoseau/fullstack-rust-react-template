@@ -1,6 +1,6 @@
 use crate::error::StorageError;
 use crate::parameters::{
-    ImageCompression, ImageConvertion, ImageParameters, ImageResize,
+    ImageCompression, ImageConversion, ImageParameters, ImageResize,
 };
 use caesium::compress_in_memory;
 use caesium::parameters::{
@@ -17,14 +17,14 @@ pub(crate) fn compress_image(
         return Ok(image.into());
     }
     let mut compression_parameters = select_compression(&parameters.compression);
-    udpate_dimensions(&parameters.resize, &mut compression_parameters);
+    update_dimensions(&parameters.resize, &mut compression_parameters);
 
-    let format = match parameters.convertion {
-        ImageConvertion::Jpeg => SupportedFileTypes::Jpeg,
-        ImageConvertion::Png => SupportedFileTypes::Png,
-        ImageConvertion::Tiff => SupportedFileTypes::Tiff,
-        ImageConvertion::Webp => SupportedFileTypes::WebP,
-        ImageConvertion::NoConvertion => {
+    let format = match parameters.conversion {
+        ImageConversion::Jpeg => SupportedFileTypes::Jpeg,
+        ImageConversion::Png => SupportedFileTypes::Png,
+        ImageConversion::Tiff => SupportedFileTypes::Tiff,
+        ImageConversion::Webp => SupportedFileTypes::WebP,
+        ImageConversion::NoConversion => {
             return Ok(compress_in_memory(image.into(), &compression_parameters)?);
         }
     };
@@ -43,7 +43,7 @@ fn select_compression(compression_type: &ImageCompression) -> CSParameters {
     }
 }
 
-fn udpate_dimensions(resize: &ImageResize, compression_parameters: &mut CSParameters) {
+fn update_dimensions(resize: &ImageResize, compression_parameters: &mut CSParameters) {
     if let Some(h) = resize.height {
         compression_parameters.height = h;
     }

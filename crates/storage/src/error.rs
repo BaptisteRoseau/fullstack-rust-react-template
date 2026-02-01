@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-use crate::parameters::ImageConvertion;
+use crate::parameters::ImageConversion;
 
 #[derive(Error, Debug)]
 pub enum StorageError {

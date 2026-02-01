@@ -19,8 +19,8 @@ pub enum ImageCompression {
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub enum ImageConvertion {
-    NoConvertion,
+pub enum ImageConversion {
+    NoConversion,
     Webp,
     Jpeg,
     Png,
@@ -36,7 +36,7 @@ pub struct ImageResize {
 #[derive(Copy, Clone, PartialEq)]
 pub struct ImageParameters {
     pub compression: ImageCompression,
-    pub convertion: ImageConvertion,
+    pub conversion: ImageConversion,
     pub resize: ImageResize,
 }
 
@@ -69,7 +69,7 @@ fn initialize_parameters() -> StorageParameters {
         compression: Compression::Gzip,
         image: ImageParameters {
             compression: ImageCompression::Auto,
-            convertion: ImageConvertion::NoConvertion,
+            conversion: ImageConversion::NoConversion,
             resize: ImageResize {
                 height: None,
                 width: None,
