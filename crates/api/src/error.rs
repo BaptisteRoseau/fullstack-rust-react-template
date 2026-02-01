@@ -2,8 +2,6 @@ use axum::{http::StatusCode, response::IntoResponse};
 use core::error::CoreError;
 use jsonwebtoken::errors::ErrorKind as JwtErrorKind;
 use serde::Serialize;
-use std::fmt::{Debug, Display};
-use thiserror::Error;
 use tracing::error;
 use utoipa::ToSchema;
 
@@ -72,7 +70,7 @@ impl IntoResponse for ApiErrorResponse {
 /// HTTP API though Axum's error management.
 ///
 /// The error message will be logged but not sent in the server response.
-#[derive(Error, Debug, Display)]
+#[derive(Debug)]
 pub enum ApiError {
     #[error("Not found: {0}")]
     NotFound(String),
@@ -80,8 +78,10 @@ pub enum ApiError {
     IoError(#[from] std::io::Error),
     #[error(transparent)]
     Database(#[from] CoreError),
-    // #[error("Serialization error")]
-    // Serde(#[from] serde::err),
+    #[error("Serialization error")]
+    SerdeSerialize(#[from] serde::ser::Error),
+    #[error("Deserialization error")]
+    SerdeDeserialize(#[from] serde::de::Error),
     #[error("Unexpected Error")]
     Unexpected(#[from] anyhow::Error),
 }

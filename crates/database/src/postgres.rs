@@ -1,5 +1,6 @@
 use super::database::Database;
 use super::error::DatabaseError;
+use crate::crud::Crud;
 use config::Config;
 use deadpool_postgres::{
     Config as DpConfig, ManagerConfig, Pool, RecyclingMethod, Runtime,
@@ -7,6 +8,7 @@ use deadpool_postgres::{
 use tokio_postgres::types::ToSql;
 use tokio_postgres::{NoTls, Row};
 use tracing::warn;
+use uuid::Uuid;
 
 // TODO: Efficiently manage to cache size
 // TODO: Require SSL when enabled in config & when using release config
@@ -81,12 +83,12 @@ impl PostgresDatabase {
 }
 
 impl Database for PostgresDatabase {
-    async fn close(&mut self) -> Result<(), DatabaseError> {
+    fn close(&mut self) -> Result<(), DatabaseError> {
         self.pool.close();
         Ok(())
     }
 
-    async fn init(&mut self, config: &Config) -> Result<&mut Self, DatabaseError> {
+    fn init(&mut self, config: &Config) -> Result<&mut Self, DatabaseError> {
         let _ = config;
         Ok(self)
     }

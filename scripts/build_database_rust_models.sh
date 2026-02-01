@@ -23,7 +23,7 @@ POSTGRES_PORT=5678
 # Prefix the generated file with a comment
 
 echo "Starting a new database instance"
-docker stop sqlx_query_temp || echo ""
+docker stop sqlx_query_temp 2>&1 >/dev/null || echo ""
 docker run \
     -e POSTGRES_DB=${POSTGRES_DATABASE} \
     -e POSTGRES_USER=${POSTGRES_USER} \

@@ -2,15 +2,21 @@
 * Defines the Database trait interface.
 **/
 use super::error::DatabaseError;
+use crate::crud::Crud;
+use async_trait::async_trait;
 use config::Config;
-use std::future::Future;
+use uuid::Uuid;
 
+#[async_trait]
 pub trait Database {
-    fn close(&mut self) -> impl Future<Output = Result<(), DatabaseError>> + Send;
-    fn init(
-        &mut self,
-        config: &Config,
-    ) -> impl Future<Output = Result<&mut Self, DatabaseError>> + Send;
+    fn close(&mut self) -> Result<(), DatabaseError>;
+    fn init(&mut self, config: &Config) -> Result<&mut Self, DatabaseError>;
+    fn create(&mut self, item: &dyn Crud) -> Result<&mut Self, DatabaseError> {
+        return Ok(self);
+    }
+    fn read(&mut self, id: Uuid) -> Result<&mut Self, DatabaseError>;
+    fn update(&mut self, item: &dyn Crud) -> Result<&mut Self, DatabaseError>;
+    fn delete(&mut self, id: Uuid) -> Result<&mut Self, DatabaseError>;
 }
 
 /* =============================================================================
