@@ -6,26 +6,49 @@ use caesium::parameters::{
 };
 use caesium::{SupportedFileTypes, convert_in_memory, parameters::CSParameters};
 
-pub fn compress_image_lossless(image: &[u8]) -> Result<Vec<u8>, StorageError> {
-    Ok(compress_in_memory(image.into(), &parameters_lossless())?)
+pub(crate) enum CompressionType {
+    Lossy,
+    Lossless,
 }
 
-pub fn convert_image_to(
+pub(crate) fn compress_image(
     image: &[u8],
-    format: SupportedFileTypes,
+    compression_type: CompressionType,
 ) -> Result<Vec<u8>, StorageError> {
-    Ok(convert_in_memory(
-        image.into(),
-        &parameters_lossless(),
-        format,
-    )?)
+    let parameters = select_parameters(compression_type);
+    Ok(compress_in_memory(image.into(), &parameters)?)
 }
 
-pub fn resize_image(
+pub(crate) fn convert_image_to(
     image: &[u8],
     format: SupportedFileTypes,
+    compression_type: CompressionType,
 ) -> Result<Vec<u8>, StorageError> {
-    todo!()
+    let parameters = select_parameters(compression_type);
+    Ok(convert_in_memory(image.into(), &parameters, format)?)
+}
+
+pub(crate) fn compress_and_resize_image(
+    image: &[u8],
+    height: Option<u32>,
+    width: Option<u32>,
+    compression_type: CompressionType,
+) -> Result<Vec<u8>, StorageError> {
+    let mut parameters = select_parameters(compression_type);
+    if let Some(h) = height {
+        parameters.height = h;
+    }
+    if let Some(w) = width {
+        parameters.width = w;
+    }
+    Ok(compress_in_memory(image.into(), &parameters)?)
+}
+
+fn select_parameters(compression_type: CompressionType) -> CSParameters {
+    match compression_type {
+        CompressionType::Lossless => parameters_lossless(),
+        CompressionType::Lossy => parameters_lossy(),
+    }
 }
 
 fn parameters_lossless() -> CSParameters {
