@@ -82,12 +82,16 @@
 
 ### Storage layer
 
-- [ ] Select S3-compatible backend service (<https://garagehq.deuxfleurs.fr/> ?)
-- [ ] Write the trait: save/load
+- [x] Select S3-compatible backend service (MinIO, but remember <https://garagehq.deuxfleurs.fr/>)
+- [ ] Write the trait
+    - [ ] full fledge s3 API
+    - [ ] Allow the selection of a bucket
+    - [ ] Create fake IDs that can be serialized/deserialized easily (base64 ?)
+- [ ] Remove encryption since it will be handled by the storage service
+- [ ] Handle ownership and access
 - [ ] Write middleware that handles file metadata & compression
     - [ ] meta: filename, type, owner & access
     - [x] gzip compression by default
-    - [ ] optional encryption
     - [x] caesium image optimizer
     - [ ] pdf file compression
 - [ ] Add benchmarks and use testcontainers to set them ups

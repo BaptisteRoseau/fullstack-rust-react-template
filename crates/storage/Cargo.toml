@@ -6,4 +6,5 @@ edition = "2024"
 [dependencies]
 flate2 = "1.1.8"
 libcaesium = "0.20.1"
+s3 = { version = "0.1.8", features = ["checksums", "metrics", "tracing"] }
 thiserror = "2.0.17"
