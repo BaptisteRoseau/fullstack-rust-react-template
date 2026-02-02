@@ -2,48 +2,46 @@
 # Contains services used to debug the application and access databases
 
 services:
-    pgadmin:
-        image: dpage/pgadmin4:9.1
-        container_name: pgadmin
-        networks:
-            - net
-        environment:
-            PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-            PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-            PGADMIN_CONFIG_SERVER_MODE: False
-            PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: False
-        ports:
-            - "${PGADMIN_PORT}:80"
-        restart: on-failure
-        volumes:
-            - "pgadmin:/var/lib/pgadmin"
+  pgadmin:
+    image: dpage/pgadmin4:9.1
+    container_name: pgadmin
+    networks:
+      - net
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "${PGADMIN_PORT}:80"
+    restart: on-failure
+    volumes:
+      - "pgadmin:/var/lib/pgadmin"
 
-    grafana:
-        image: grafana/grafana:12.3
-        container_name: grafana
-        networks:
-            - net
-        environment:
-            GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
-            GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
-        ports:
-            - "${GRAFANA_PORT}:3000"
-        restart: on-failure
-        volumes:
-            - "grafana:/var/lib/grafana"
+  grafana:
+    image: grafana/grafana:12.3
+    container_name: grafana
+    networks:
+      - net
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    restart: on-failure
+    volumes:
+      - "grafana:/var/lib/grafana"
 
-    homepage:
-        image: ghcr.io/gethomepage/homepage:latest
-        container_name: homepage
-        ports:
-            - "${HOMEPAGE_PORT}:3000"
-        restart: unless-stopped
-        volumes:
-            - ./infrastructure/docker/homepage/config:/app/config
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    ports:
+      - "${HOMEPAGE_PORT}:3000"
+    restart: unless-stopped
+    volumes:
+      - ./infrastructure/docker/homepage/config:/app/config
 
 networks:
-    net:
+  net:
 
 volumes:
-    grafana:
-    pgadmin:
+  grafana:
+  pgadmin:

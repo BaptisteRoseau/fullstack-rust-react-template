@@ -2,45 +2,59 @@
 # Contains the minimum required services to run the application.
 
 services:
-    postgres:
-        image: app_postgres:latest
-        build:
-            context: ../..
-            dockerfile: infrastructure/docker/app_postgres/Dockerfile
-            tags: ["app_postgres:latest"]
-        container_name: app_postgres
-        environment:
-            POSTGRES_DB: ${POSTGRES_DATABASE}
-            POSTGRES_USER: ${POSTGRES_USER}
-            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-            READWRITE_USER: ${POSTGRES_READWRITE_USER}
-            READWRITE_PASSWORD: ${POSTGRES_READWRITE_PASSWORD}
-            READONLY_USER: ${POSTGRES_READONLY_USER}
-            READONLY_PASSWORD: ${POSTGRES_READONLY_PASSWORD}
-        networks:
-            - net
-        ports:
-            - "${POSTGRES_PORT}:5432"
-        restart: on-failure
-        volumes:
-            - "postgres:/var/lib/postgresql/data"
+  postgres:
+    image: app_postgres:latest
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/app_postgres/Dockerfile
+      tags: ["app_postgres:latest"]
+    container_name: app_postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      READWRITE_USER: ${POSTGRES_READWRITE_USER}
+      READWRITE_PASSWORD: ${POSTGRES_READWRITE_PASSWORD}
+      READONLY_USER: ${POSTGRES_READONLY_USER}
+      READONLY_PASSWORD: ${POSTGRES_READONLY_PASSWORD}
+    networks:
+      - net
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    restart: on-failure
+    volumes:
+      - "postgres:/var/lib/postgresql/data"
 
-    migrate:
-        image: nxyt/sqlx-cli:latest
-        depends_on:
-            postgres:
-                condition: service_healthy
-        networks:
-            - net
-        container_name: app_sqlx
-        command: sqlx migrate run
-        volumes:
-            - ../../crates/database/migrations/:/migrations
-        environment:
-            DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DATABASE}?sslmode=disable"
+  migrate:
+    image: nxyt/sqlx-cli:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - net
+    container_name: app_sqlx
+    command: sqlx migrate run
+    volumes:
+      - ../../crates/database/migrations/:/migrations
+    environment:
+      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DATABASE}?sslmode=disable"
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "${MINIO_PORT}:9000"
+      - "${MINIO_CONSOLE_PORT}:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
 
 networks:
-    net:
+  net:
 
 volumes:
-    postgres:
+  postgres:
+  minio_data:
