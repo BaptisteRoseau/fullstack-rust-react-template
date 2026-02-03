@@ -37,7 +37,7 @@ services:
       - "${HOMEPAGE_PORT}:3000"
     restart: unless-stopped
     volumes:
-      - ./infrastructure/docker/homepage/config:/app/config
+      - ../docker/homepage/config:/app/config
 
 networks:
   net:
