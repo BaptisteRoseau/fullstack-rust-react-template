@@ -1,5 +1,5 @@
 # Rust builder used for miniserve and the HTTP health checker
-FROM rust:1.85 as RUST_BUILDER
+FROM rust:1.94 as RUST_BUILDER
 
 ARG target=x86_64-unknown-linux-gnu
 WORKDIR /build
