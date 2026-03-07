@@ -5,19 +5,19 @@ This folder contains the different crates that make the backend.
 Most importantly:
 
 - [api](./api): The API layer, all HTTP endpoints, middlewares and RBAC.
-- [core](./core): The domain layer, where the business logic happens.
+- [app_core](./app_core): The domain layer, where the business logic happens.
 - [database](./database): The database layer, exposes traits and API to insterract with the database.
 - [config](./config): The configuration either from a file or the CLI, with defaults. This config is passed to all the previous layers and is read-only once parsed.
 - [storage](./storage): The API to store blobs and files. Consider your environment read-only, every write operation should either be in the database for data, or the storage API for files.
 
-The module relashionship should be `api` > `core` > `database`. Each outer layer cannot import inner layer to keep a coherent architecture and allow working on modules independently.
+The module relashionship should be `api` > `app_core` > `database`. Each outer layer cannot import inner layer to keep a coherent architecture and allow working on modules independently.
 
 Here:
 
-- `core` cannot use `api`
-- `database` can neither use `core` nor `api`
-- `core` can use `database`
-- `api` can use `core` but not `database`
+- `app_core` cannot use `api`
+- `database` can neither use `app_core` nor `api`
+- `app_core` can use `database`
+- `api` can use `app_core` but not `database`
 
 ## Types of crates
 

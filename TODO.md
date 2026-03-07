@@ -51,7 +51,7 @@
 - [ ] Add Swagger UI & openapi.json
 - [ ] Add rate limiter middleware
 - [ ] Aggregate middlewares cleanly
-- [ ] Convert `core` models to API models and vice-versa
+- [ ] Convert `app_core` models to API models and vice-versa
 - [ ] Add error handling middleware & global error conversion
 - [ ] Trace errors & normalize error response
 - [ ] Support both REST & gRCP from the same handler (split with `/rest/` and `/grpc/` in the URL)

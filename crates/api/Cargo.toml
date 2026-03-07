@@ -6,7 +6,7 @@ edition = "2024"
 [dependencies]
 logging = { path = "../logging" }
 config = { path = "../config" }
-core = { path = "../core" }
+app_core = { path = "../app_core" }
 anyhow = { version = "1.0.100" }
 axum = { version = "0.8.8", features = ["http1", "http2"] }
 axum-macros = "0.5.0"
