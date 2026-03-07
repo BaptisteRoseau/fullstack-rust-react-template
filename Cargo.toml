@@ -2,10 +2,10 @@
 [workspace]
 resolver = "1"
 members = [
-  # "crates/api",
-  # "crates/binaries/backend",
-  # "crates/core",
-  # "crates/mailer",
+  "crates/api",
+  "crates/binaries/backend",
+  "crates/core",
+  "crates/mailer",
   "crates/config",
   "crates/database",
   "crates/logging",

@@ -7,7 +7,9 @@ use crate::{error::StorageError, parameters::StorageParameters};
 
 // This interface is subject to change as I implement
 // backends support.
-pub trait Storage {
+pub struct Storage {}
+
+impl Storage {
     fn save(
         &self,
         file: Path,

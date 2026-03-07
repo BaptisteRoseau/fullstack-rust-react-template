@@ -26,6 +26,7 @@ const DEFAULT_DATABASE_NAME: &str = "backend";
 const DEFAULT_DATABASE_USER: &str = "backend";
 const DEFAULT_DATABASE_PASSWORD: &str = "password";
 
+const DEFAULT_API_TIMEOUT_SEC: u16 = 20;
 //TODO: Add MinIO support
 
 const DEFAULT_CONFIG_FILE_PATH: &str = ".config.yaml";
@@ -90,6 +91,10 @@ struct CliConfig {
     /// into database.
     #[arg(env, default_value_t = String::from(DEFAULT_SALT))]
     pub(crate) password_salt: String,
+
+    /// Timeout of the API in seconds. Use 0 for no timeout.
+    #[arg(env, default_value_t = u16::from(DEFAULT_API_TIMEOUT_SEC))]
+    pub(crate) api_timeout_sec: u16,
 
     /* ===============
     DATABASE
@@ -156,7 +161,7 @@ struct CliConfig {
 impl CliConfig {
     /// Loads the configuration file and updates its value with the provided CLI/ENV arguments.
     ///
-/// The CLI/ENV arguments take precedence over the configuration file.
+    /// The CLI/ENV arguments take precedence over the configuration file.
     pub fn parse_with_file() -> Result<CliConfig, ConfigParsingError> {
         let mut config: CliConfig = Self::parse();
 
@@ -197,6 +202,11 @@ CONFIG
 ====================================================================================== */
 
 #[derive(Debug, Clone)]
+pub struct ApiConfig {
+    pub timeout_sec: u16,
+}
+
+#[derive(Debug, Clone)]
 pub struct BindingConfig {
     pub ip: IpAddr,
     pub port: u16,
@@ -232,6 +242,7 @@ pub struct SwaggerConfig {
 #[derive(Debug, Clone)]
 pub struct Config {
     pub debug: bool,
+    pub api: ApiConfig,
     pub server: ServerBindingConfig,
     pub postgres: PostgresConfig,
     pub prometheus: Option<PrometheusConfig>,
@@ -272,6 +283,9 @@ impl TryFrom<CliConfig> for Config {
 
         Ok(Self {
             debug: value.debug,
+            api: ApiConfig {
+                timeout_sec: value.api_timeout_sec,
+            },
             server: ServerBindingConfig {
                 ip: value.ip,
                 port: value.port,
@@ -350,6 +364,7 @@ mod test {
                 database_password: DEFAULT_DATABASE_PASSWORD.to_string(),
                 prometheus_ip: DEFAULT_PROMETHEUS_IP,
                 prometheus_port: DEFAULT_PROMETHEUS_PORT,
+                api_timeout_sec: DEFAULT_API_TIMEOUT_SEC,
                 no_prometheus: false,
                 swagger_ip: DEFAULT_SWAGGER_IP,
                 swagger_port: DEFAULT_SWAGGER_PORT,

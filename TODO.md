@@ -4,6 +4,14 @@
 
 ### Current
 
+- [ ] Avoir un docker compose up qui fonctionne:
+    - [ ] DB
+    - [ ] Prometheus
+    - [ ] Grafana
+    - [ ] Backend
+    - [ ] Frontend
+    - [ ] Simple echo API with a simple button (somehow like a TOOD app)
+
 1. [x] Fix SQLx migrations
 2. [x] Generate Rust models from SQLx
 3. [ ] Build or use a CRUD macro trait for Rust models

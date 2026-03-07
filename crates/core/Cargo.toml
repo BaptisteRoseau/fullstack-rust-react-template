@@ -5,4 +5,6 @@ edition = "2024"
 
 [dependencies]
 database = { path = "../database"}
+logging = { path = "../logging" }
+config = { path = "../config" }
 thiserror = "2.0.17"

@@ -1,9 +1,8 @@
 use axum::{http::StatusCode, response::IntoResponse};
 use core::error::CoreError;
-use database::error::DatabaseError;
+use std::fmt::{Display, Debug};
 use jsonwebtoken::errors::ErrorKind as JwtErrorKind;
 use serde::Serialize;
-use tracing::error;
 use utoipa::ToSchema;
 
 /// This is the API standard struct supposed to be sent
@@ -40,12 +39,12 @@ impl ApiErrorResponse {
         )
     }
 
-    // Template for forbidden responses
+    /// Template for forbidden responses
     fn forbidden() -> Self {
         Self::new("FORBIDDEN", "", StatusCode::FORBIDDEN)
     }
 
-    // Template for not found responses
+    /// Template for not found responses
     fn not_found() -> Self {
         Self::new("NOT_FOUND", "", StatusCode::NOT_FOUND)
     }
@@ -71,7 +70,7 @@ impl IntoResponse for ApiErrorResponse {
 /// HTTP API though Axum's error management.
 ///
 /// The error message will be logged but not sent in the server response.
-#[derive(Debug)]
+#[derive(Debug, Display, thiserror::Error)]
 pub enum ApiError {
     #[error("Not found: {0}")]
     NotFound(String),
@@ -93,6 +92,8 @@ impl From<ApiError> for ApiErrorResponse {
             ApiError::NotFound(_) => ApiErrorResponse::not_found(),
             ApiError::IoError(_) => ApiErrorResponse::unexpected(),
             ApiError::Database(e) => e.into(),
+            ApiError::SerdeDeserialize(e) => e.into(),
+            ApiError::SerdeSerialize(e) => e.into(),
             ApiError::Unexpected(e) => e.into(),
         }
     }
@@ -132,7 +133,7 @@ impl From<jsonwebtoken::errors::Error> for ApiErrorResponse {
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> axum::response::Response {
-        error!("API ERROR: {:?}", &self);
+        tracing::error!("API ERROR: {:?}", &self);
         let api_error: ApiErrorResponse = self.into();
         api_error.into_response()
     }

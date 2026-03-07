@@ -85,7 +85,7 @@ You can use the following Dockerfile to build you application and the health che
 
 ```dockerfile
 ARG target
-FROM rust:1.85 as BUILDER
+FROM rust:1.94 as BUILDER
 
 COPY src/  /app/src/
 COPY health_checker/ /app/health_checker/
