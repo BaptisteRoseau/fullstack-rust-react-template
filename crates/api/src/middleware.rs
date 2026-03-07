@@ -19,7 +19,7 @@ use tower_http::{
 
 pub(crate) fn middleware_layer<L>(
     config: &Config,
-) -> ServiceBuilder<impl Clone + Send + Sync + 'static> {
+) -> ServiceBuilder<impl tower::Layer<axum::routing::Route> + Clone + Send + Sync + 'static> {
     ServiceBuilder::new()
         // Avoid logging these headers content
         .layer(SetSensitiveRequestHeadersLayer::new(once(AUTHORIZATION)))
