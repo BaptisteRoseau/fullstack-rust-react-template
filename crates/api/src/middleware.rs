@@ -1,9 +1,11 @@
-use axum::http::StatusCode;
 use axum::http::header::AUTHORIZATION;
+use axum::http::{Request, StatusCode};
+use axum::routing::Route;
 use config::Config;
 use std::iter::once;
 use std::time::Duration;
-use tower::ServiceBuilder;
+use tower::layer::util::Stack;
+use tower::{Service, ServiceBuilder};
 use tower_http::{
     CompressionLevel,
     compression::CompressionLayer,
@@ -17,9 +19,7 @@ use tower_http::{
     trace::TraceLayer,
 };
 
-pub(crate) fn middleware_layer<L>(
-    config: &Config,
-) -> ServiceBuilder<impl tower::Layer<axum::routing::Route> + Clone + Send + Sync + 'static> {
+pub(crate) fn middleware_layer(config: &Config) -> impl tower::Layer<Route> + Clone + Sync + Send {
     ServiceBuilder::new()
         // Avoid logging these headers content
         .layer(SetSensitiveRequestHeadersLayer::new(once(AUTHORIZATION)))

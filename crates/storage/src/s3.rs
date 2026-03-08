@@ -1,5 +1,5 @@
 use config::Config;
-use s3::{Auth, Client, ClientBuilder};
+use s3::{Auth, Client};
 use std::{
     io::{Read, Write},
     path::Path,
@@ -13,7 +13,6 @@ pub struct S3 {
 
 impl S3 {
     pub fn try_new(config: &Config) -> Result<Self, StorageError> {
-        // TODO: Auth from config
         let client = Client::builder(&config.s3.host)?.build()?;
         Ok(Self { client })
     }

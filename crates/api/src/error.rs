@@ -77,7 +77,7 @@ pub enum ApiError {
     #[error("Hardware Error: {0}")]
     IoError(#[from] std::io::Error),
     #[error(transparent)]
-    Database(#[from] CoreError),
+    CoreError(#[from] CoreError),
     #[error("Unexpected Error")]
     Unexpected(#[from] anyhow::Error),
 }
@@ -87,7 +87,7 @@ impl From<ApiError> for ApiErrorResponse {
         match val {
             ApiError::NotFound(_) => ApiErrorResponse::not_found(),
             ApiError::IoError(_) => ApiErrorResponse::unexpected(),
-            ApiError::Database(e) => e.into(),
+            ApiError::CoreError(e) => e.into(),
             ApiError::Unexpected(e) => e.into(),
         }
     }

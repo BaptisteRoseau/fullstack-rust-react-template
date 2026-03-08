@@ -40,9 +40,29 @@ use crate::misc::{__path_health_check, health_check};
 use axum::{Router, routing::get};
 
 use crate::middleware::middleware_layer;
+use axum::http::header::AUTHORIZATION;
+use axum::http::{Request, StatusCode};
+use axum::routing::Route;
 use axum_prometheus::metrics_exporter_prometheus::PrometheusHandle;
 use config::Config;
 use std::future::ready;
+use std::iter::once;
+use std::time::Duration;
+use tower::layer::Layer;
+use tower::layer::util::Stack;
+use tower::{Service, ServiceBuilder};
+use tower_http::{
+    CompressionLevel,
+    compression::CompressionLayer,
+    cors::CorsLayer,
+    decompression::RequestDecompressionLayer,
+    normalize_path::NormalizePathLayer,
+    sensitive_headers::{
+        SetSensitiveRequestHeadersLayer, SetSensitiveResponseHeadersLayer,
+    },
+    timeout::TimeoutLayer,
+    trace::TraceLayer,
+};
 use utoipa::openapi::{InfoBuilder, OpenApi};
 use utoipa_axum::{router::OpenApiRouter, routes};
 use utoipa_swagger_ui::SwaggerUi;
@@ -53,16 +73,32 @@ use utoipa_swagger_ui::SwaggerUi;
 
 /// Public routes that qre exposed to the world
 // pub(crate) fn public_routes(config: &Config, storage: Arc<Rwlock<Storage>>, core: Arc<Rwlock<Core>>) -> (Router, OpenApi) {
-pub(crate) fn public_routes(config: &Config) -> (Router, OpenApi) {
-    let middleware_service = middleware_layer(config);
+pub fn public_routes(config: &Config) -> Router {
     let (api_routes, openapi) = OpenApiRouter::new()
         .routes(routes!(health_check))
         .split_for_parts();
-    api_routes.merge(swagger(config, openapi));
 
-    let router = api_routes.layer(middleware_service).with_state(config);
+    let api_routes = api_routes.merge(swagger(config, openapi));
 
-    (router, openapi)
+    let middleware = ServiceBuilder::new()
+        // Avoid logging these headers content
+        .layer(SetSensitiveRequestHeadersLayer::new(once(AUTHORIZATION)))
+        .layer(SetSensitiveResponseHeadersLayer::new(once(AUTHORIZATION)))
+        .layer(TraceLayer::new_for_http())
+        // Authorize OPTIONS requests for CORS and automatically set up headers
+        //TODO: Set this up based on what is actually available
+        .layer(CorsLayer::permissive())
+        .layer(NormalizePathLayer::trim_trailing_slash())
+        .layer(CompressionLayer::new().quality(CompressionLevel::Best))
+        .layer(RequestDecompressionLayer::new())
+        .layer(TimeoutLayer::with_status_code(
+            StatusCode::REQUEST_TIMEOUT,
+            Duration::from_secs(config.api.timeout_sec.into()),
+        ));
+
+    let router = api_routes.layer(middleware).with_state(config.clone());
+
+    router
 }
 
 /// Swagger UI and OpenAPI routes layer.
@@ -80,7 +116,7 @@ fn swagger(config: &Config, openapi: OpenApi) -> SwaggerUi {
 }
 
 /// Metrics routes that are exposed to Prometheus
-pub(crate) fn try_metrics_routes(
+pub fn try_metrics_routes(
     metric_handle: PrometheusHandle,
 ) -> Result<Router, anyhow::Error> {
     Ok(Router::new().route("/metrics", get(move || ready(metric_handle.render()))))

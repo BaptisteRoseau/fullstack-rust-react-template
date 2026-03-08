@@ -1,6 +1,3 @@
-use api;
-use config;
-use database;
 mod program;
 use std::process::exit;
 

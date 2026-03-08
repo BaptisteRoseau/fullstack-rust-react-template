@@ -1,11 +1,8 @@
-use crate::api::routes::{private_routes, public_routes, try_metrics_routes};
-use crate::api::state::AppState;
-use crate::config::Config;
-use crate::databases::database::Database;
-use crate::databases::postgres::PostgresDatabase;
 use anyhow::Error;
+use api::routes::{public_routes, try_metrics_routes};
 use axum::Router;
 use axum_prometheus::PrometheusMetricLayerBuilder;
+use config::Config;
 use tokio::net::{TcpListener, ToSocketAddrs};
 use tokio::task::JoinHandle;
 use tracing::info;
@@ -16,17 +13,12 @@ use tracing::info;
 pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
     logging::init_logger(config.debug);
     info!("Initializing Database...");
-    let mut database = PostgresDatabase::from(config).await?;
-    database.init(config).await?;
-
-    info!("Initializing application state...");
-    let mut app_state = AppState::try_new(config, database)?;
 
     let mut servers = vec![];
 
     // PUBLIC ROUTES
     info!("Initializing public API router...");
-    let (mut public_routes, openapi) = public_routes(&app_state);
+    let mut public_routes = public_routes(config);
 
     // PROMETHEUS
     if let Some(prometheus_config) = &config.prometheus {
@@ -53,23 +45,6 @@ pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
         servers.push(prometheus_metrics_server);
     }
 
-    // SWAGGER
-    if let Some(swagger_config) = &config.swagger {
-        info!("Initializing private API router...");
-        let private_routes = private_routes(&app_state, openapi);
-
-        info!(
-            "Binding private API onto {}:{}...",
-            &swagger_config.ip, &swagger_config.port
-        );
-        let private_server = tokio::spawn(serve_onto(
-            (swagger_config.ip, swagger_config.port),
-            private_routes,
-        ));
-
-        servers.push(private_server);
-    }
-
     // Binding public routes at the end to make sure metric layer is added
     info!(
         "Binding public API onto {}:{}...",
@@ -88,8 +63,6 @@ pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
         let _ = tokio::join!(server);
     }
 
-    app_state.close().await?;
-
     info!("Successfully shut down the server. Bye bye!");
     Ok(())
 }
@@ -103,7 +76,10 @@ where
     Ok(())
 }
 
-async fn serve_prometheus_metrics<A>(address: A, routes: Router) -> Result<(), anyhow::Error>
+async fn serve_prometheus_metrics<A>(
+    address: A,
+    routes: Router,
+) -> Result<(), anyhow::Error>
 where
     A: ToSocketAddrs,
 {
