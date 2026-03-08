@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+logging = { path = "../logging" }
+config = { path = "../config" }
 flate2 = "1.1.8"
 libcaesium = "0.20.1"
 s3 = { version = "0.1.8", features = ["checksums", "metrics", "tracing"] }

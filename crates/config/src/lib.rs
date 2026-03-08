@@ -26,7 +26,13 @@ const DEFAULT_DATABASE_NAME: &str = "backend";
 const DEFAULT_DATABASE_USER: &str = "backend";
 const DEFAULT_DATABASE_PASSWORD: &str = "password";
 
+const DEFAULT_S3_HOST: &str = "127.0.0.1";
+const DEFAULT_S3_PORT: u16 = 9000;
+const DEFAULT_S3_USER: &str = "backend";
+const DEFAULT_S3_PASSWORD: &str = "password";
+
 const DEFAULT_API_TIMEOUT_SEC: u16 = 20;
+
 //TODO: Add MinIO support
 
 const DEFAULT_CONFIG_FILE_PATH: &str = ".config.yaml";
@@ -99,25 +105,44 @@ struct CliConfig {
     /* ===============
     DATABASE
     ================ */
-    /// Database host
+    /// S3 host
     #[arg(long, env, default_value_t = DEFAULT_DATABASE_HOST.to_string())]
     pub(crate) database_host: String,
 
-    /// Database port
+    /// S3 port
     #[arg(long, env, default_value_t = DEFAULT_DATABASE_PORT)]
     pub(crate) database_port: u16,
 
-    /// Database name
+    /// S3 name
     #[arg(long, env, default_value_t = DEFAULT_DATABASE_NAME.to_string())]
     pub(crate) database_name: String,
 
-    /// Database user
+    /// S3 user
     #[arg(long, env, default_value_t = DEFAULT_DATABASE_USER.to_string())]
     pub(crate) database_user: String,
 
-    /// Database password
+    /// S3 password
     #[arg(long, env, default_value_t = DEFAULT_DATABASE_PASSWORD.to_string())]
     pub(crate) database_password: String,
+
+    /* ===============
+    S3
+    ================ */
+    /// Database host
+    #[arg(long, env, default_value_t = DEFAULT_S3_HOST.to_string())]
+    pub(crate) s3_host: String,
+
+    /// Database port
+    #[arg(long, env, default_value_t = DEFAULT_S3_PORT)]
+    pub(crate) s3_port: u16,
+
+    /// Database user
+    #[arg(long, env, default_value_t = DEFAULT_S3_USER.to_string())]
+    pub(crate) s3_user: String,
+
+    /// Database password
+    #[arg(long, env, default_value_t = DEFAULT_S3_PASSWORD.to_string())]
+    pub(crate) s3_password: String,
 
     /* ===============
     PROMETHEUS
@@ -221,6 +246,14 @@ pub struct PostgresConfig {
     pub password: String,
 }
 
+#[derive(Debug, Clone)]
+pub struct S3Config {
+    pub host: String,
+    pub port: u16,
+    pub user: String,
+    pub password: String,
+}
+
 type ServerBindingConfig = BindingConfig;
 type PrometheusConfig = BindingConfig;
 
@@ -244,6 +277,7 @@ pub struct Config {
     pub debug: bool,
     pub api: ApiConfig,
     pub server: ServerBindingConfig,
+    pub s3: S3Config,
     pub postgres: PostgresConfig,
     pub prometheus: Option<PrometheusConfig>,
     pub swagger: Option<SwaggerConfig>,
@@ -289,6 +323,12 @@ impl TryFrom<CliConfig> for Config {
             server: ServerBindingConfig {
                 ip: value.ip,
                 port: value.port,
+            },
+            s3: S3Config {
+                host: value.s3_host,
+                port: value.s3_port,
+                user: value.s3_user,
+                password: value.s3_password,
             },
             postgres: PostgresConfig {
                 host: value.database_host,
@@ -357,6 +397,10 @@ mod test {
                 pem_pub_key: None,
                 jwt_ttl_s: 8035200,
                 password_salt: String::from("For development purposes only"),
+                s3_host: DEFAULT_S3_HOST.to_string(),
+                s3_port: DEFAULT_S3_PORT,
+                s3_user: DEFAULT_S3_USER.to_string(),
+                s3_password: DEFAULT_S3_PASSWORD.to_string(),
                 database_host: DEFAULT_DATABASE_HOST.to_string(),
                 database_port: DEFAULT_DATABASE_PORT,
                 database_name: DEFAULT_DATABASE_NAME.to_string(),

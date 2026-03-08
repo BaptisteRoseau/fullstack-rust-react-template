@@ -6,4 +6,5 @@ mod s3;
 
 pub mod error;
 pub mod parameters;
+pub use s3::S3;
 pub use storage::Storage;

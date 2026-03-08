@@ -4,4 +4,6 @@ use thiserror::Error;
 pub enum StorageError {
     #[error(transparent)]
     ImageHandlingError(#[from] caesium::error::CaesiumError),
+    #[error(transparent)]
+    S3Error(#[from] s3::Error),
 }

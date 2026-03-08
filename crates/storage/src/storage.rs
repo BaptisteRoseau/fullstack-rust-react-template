@@ -10,13 +10,13 @@ use crate::{error::StorageError, parameters::StorageParameters};
 pub trait Storage {
     fn save(
         &self,
-        file: Path,
+        file: &Path,
         content: &[u8],
         parameters: StorageParameters,
     ) -> Result<(), StorageError>;
     fn load<W: Write>(
         &self,
-        file: Path,
+        file: &Path,
         parameters: StorageParameters,
     ) -> Result<Vec<u8>, StorageError>;
     fn save_stream<R: Read>(
