@@ -5,13 +5,16 @@
 ### Current
 
 - [ ] Avoir un docker compose up qui fonctionne:
-    - [ ] DB
-    - [ ] Prometheus
-    - [ ] Grafana
-    - [ ] Backend
-    - [ ] Frontend
+    - [x] DB
+    - [X] Prometheus
+    - [X] Grafana
+    - [X] Backend
+    - [X] Metrics endpoint
+    - [X] Frontend
+    - [ ] Fix bun run dev
     - [ ] Simple echo API with a simple button (somehow like a TOOD app)
-
+    - [ ] CRUD files s3
+ 
 1. [x] Fix SQLx migrations
 2. [x] Generate Rust models from SQLx
 3. [ ] Build or use a CRUD macro trait for Rust models
@@ -42,7 +45,7 @@
 
 ### API Layer
 
-- [ ] Use axum-tower-session for session management
+- [ ] Use axum-tower-session and axum-login for session management
 - [ ] Use a Protobuf schema to generate Rust models and Typescript structures
 - [ ] Add CORS middleware
 - [ ] Add compression middleware

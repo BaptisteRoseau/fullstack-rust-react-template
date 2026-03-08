@@ -38,15 +38,15 @@
 /// ```
 use crate::misc::{__path_health_check, health_check};
 use axum::{Router, routing::get};
+use crate::endpoints::{__path_download, __path_upload, download, upload};
 
-use axum::http::header::AUTHORIZATION;
 use axum::http::StatusCode;
+use axum::http::header::AUTHORIZATION;
 use axum_prometheus::metrics_exporter_prometheus::PrometheusHandle;
 use config::Config;
 use std::future::ready;
 use std::iter::once;
 use std::time::Duration;
-use tower::layer::Layer;
 use tower::ServiceBuilder;
 use tower_http::{
     CompressionLevel,
@@ -64,15 +64,13 @@ use utoipa::openapi::{InfoBuilder, OpenApi};
 use utoipa_axum::{router::OpenApiRouter, routes};
 use utoipa_swagger_ui::SwaggerUi;
 
-//TODO: Put this in the config
-
 // Bookmark this: https://docs.rs/axum/latest/axum/routing/struct.Router.html
 
 /// Public routes that qre exposed to the world
 // pub(crate) fn public_routes(config: &Config, storage: Arc<Rwlock<Storage>>, core: Arc<Rwlock<Core>>) -> (Router, OpenApi) {
 pub fn public_routes(config: &Config) -> Router {
     let (api_routes, openapi) = OpenApiRouter::new()
-        .routes(routes!(health_check))
+        .routes(routes!(health_check, upload, download))
         .split_for_parts();
 
     let api_routes = api_routes.merge(swagger(config, openapi));
