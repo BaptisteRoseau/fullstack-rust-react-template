@@ -1,11 +1,10 @@
 use axum::http::header::AUTHORIZATION;
-use axum::http::{Request, StatusCode};
+use axum::http::StatusCode;
 use axum::routing::Route;
 use config::Config;
 use std::iter::once;
 use std::time::Duration;
-use tower::layer::util::Stack;
-use tower::{Service, ServiceBuilder};
+use tower::ServiceBuilder;
 use tower_http::{
     CompressionLevel,
     compression::CompressionLayer,

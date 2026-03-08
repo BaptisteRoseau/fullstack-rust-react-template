@@ -1,5 +1,5 @@
 use config::Config;
-use s3::{Auth, Client};
+use s3::Client;
 use std::{
     io::{Read, Write},
     path::Path,
@@ -21,30 +21,30 @@ impl S3 {
 impl Storage for S3 {
     fn save(
         &self,
-        file: &Path,
-        content: &[u8],
-        parameters: StorageParameters,
+        _file: &Path,
+        _content: &[u8],
+        _parameters: StorageParameters,
     ) -> Result<(), StorageError> {
         todo!()
     }
     fn load<W: Write>(
         &self,
-        file: &Path,
-        parameters: StorageParameters,
+        _file: &Path,
+        _parameters: StorageParameters,
     ) -> Result<Vec<u8>, StorageError> {
         todo!()
     }
     fn save_stream<R: Read>(
         &self,
-        reader: R,
-        parameters: StorageParameters,
+        _reader: R,
+        _parameters: StorageParameters,
     ) -> Result<(), StorageError> {
         todo!()
     }
     fn load_stream<W: Write>(
         &self,
-        writer: W,
-        parameters: StorageParameters,
+        _writer: W,
+        _parameters: StorageParameters,
     ) -> Result<(), StorageError> {
         todo!()
     }

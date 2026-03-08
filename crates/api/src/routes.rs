@@ -39,18 +39,15 @@
 use crate::misc::{__path_health_check, health_check};
 use axum::{Router, routing::get};
 
-use crate::middleware::middleware_layer;
 use axum::http::header::AUTHORIZATION;
-use axum::http::{Request, StatusCode};
-use axum::routing::Route;
+use axum::http::StatusCode;
 use axum_prometheus::metrics_exporter_prometheus::PrometheusHandle;
 use config::Config;
 use std::future::ready;
 use std::iter::once;
 use std::time::Duration;
 use tower::layer::Layer;
-use tower::layer::util::Stack;
-use tower::{Service, ServiceBuilder};
+use tower::ServiceBuilder;
 use tower_http::{
     CompressionLevel,
     compression::CompressionLayer,
@@ -96,9 +93,7 @@ pub fn public_routes(config: &Config) -> Router {
             Duration::from_secs(config.api.timeout_sec.into()),
         ));
 
-    let router = api_routes.layer(middleware).with_state(config.clone());
-
-    router
+    api_routes.layer(middleware).with_state(config.clone())
 }
 
 /// Swagger UI and OpenAPI routes layer.

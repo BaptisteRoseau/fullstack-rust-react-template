@@ -92,16 +92,16 @@ impl Database for PostgresDatabase {
         Ok(self)
     }
 
-    fn create<T>(&mut self, item: &dyn Crud) -> Result<&mut T, DatabaseError> {
+    fn create<T>(&mut self, _item: &dyn Crud) -> Result<&mut T, DatabaseError> {
         todo!()
     }
-    fn read_by_id<T>(&mut self, item: &dyn Crud) -> Result<&mut T, DatabaseError> {
+    fn read_by_id<T>(&mut self, _item: &dyn Crud) -> Result<&mut T, DatabaseError> {
         todo!()
     }
-    fn update(&mut self, item: &dyn Crud) -> Result<&mut Self, DatabaseError> {
+    fn update(&mut self, _item: &dyn Crud) -> Result<&mut Self, DatabaseError> {
         todo!()
     }
-    fn delete_by_id(&mut self, item: &dyn Crud) -> Result<&mut Self, DatabaseError> {
+    fn delete_by_id(&mut self, _item: &dyn Crud) -> Result<&mut Self, DatabaseError> {
         todo!()
     }
 }
