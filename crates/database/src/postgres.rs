@@ -2,7 +2,6 @@
 use super::database::Database;
 use super::error::DatabaseError;
 use crate::crud::Crud;
-use async_trait::async_trait;
 use config::Config;
 use deadpool_postgres::{
     Config as DpConfig, ManagerConfig, Pool, RecyclingMethod, Runtime, SslMode,
@@ -87,15 +86,15 @@ impl Database for PostgresDatabase {
         todo!()
     }
 
-    fn init(&mut self, config: &Config) -> Result<(), DatabaseError> {
+    fn init(&mut self, _config: &Config) -> Result<(), DatabaseError> {
         todo!()
     }
 
-    fn read_by_id(&mut self, item: &mut dyn Crud) -> Result<(), DatabaseError> {
+    fn read_by_id(&mut self, _item: &mut dyn Crud) -> Result<(), DatabaseError> {
         todo!()
     }
 
-    fn update(&mut self, item: &dyn Crud) -> Result<(), DatabaseError> {
+    fn update(&mut self, _item: &dyn Crud) -> Result<(), DatabaseError> {
         todo!()
     }
 }

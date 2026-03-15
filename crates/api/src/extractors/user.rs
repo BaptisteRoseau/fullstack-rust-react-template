@@ -1,12 +1,3 @@
-use super::errors::ExtractorError;
-use crate::models::User;
-use async_trait::async_trait;
-use axum::extract::FromRequestParts;
-use axum::http::HeaderMap;
-use axum::http::header;
-use axum::http::request::Parts;
-use tracing::debug;
-use uuid::Uuid;
 
 
 // #[async_trait]
