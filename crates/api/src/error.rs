@@ -5,6 +5,8 @@ use serde::Serialize;
 use std::fmt::Debug;
 use utoipa::ToSchema;
 
+use crate::extractors::errors::ExtractorError;
+
 /// This is the API standard struct supposed to be sent
 /// as a response every time an error occurs.
 ///
@@ -78,6 +80,8 @@ pub enum ApiError {
     IoError(#[from] std::io::Error),
     #[error(transparent)]
     CoreError(#[from] CoreError),
+    #[error(transparent)]
+    ExtractorError(#[from] ExtractorError),
     #[error("Unexpected Error")]
     Unexpected(#[from] anyhow::Error),
 }
@@ -88,7 +92,19 @@ impl From<ApiError> for ApiErrorResponse {
             ApiError::NotFound(_) => ApiErrorResponse::not_found(),
             ApiError::IoError(_) => ApiErrorResponse::unexpected(),
             ApiError::CoreError(e) => e.into(),
+            ApiError::ExtractorError(e) => e.into(),
             ApiError::Unexpected(e) => e.into(),
+        }
+    }
+}
+
+impl From<ExtractorError> for ApiErrorResponse {
+    fn from(val: ExtractorError) -> Self {
+        match val {
+            ExtractorError::InvalidJwt | ExtractorError::NotLoggedIn => {
+                ApiErrorResponse::forbidden()
+            }
+            ExtractorError::Unexpected(_) => ApiErrorResponse::unexpected(),
         }
     }
 }
