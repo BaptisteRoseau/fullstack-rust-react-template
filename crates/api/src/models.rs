@@ -21,12 +21,10 @@ impl User {
         }
     }
 
-    /// The String ID of a user if logged in, None instead.
     pub fn id(&self) -> String {
         self.id.clone()
     }
 
-    /// The String user of a user if logged in, None instead.
     pub fn name(&self) -> String {
         self.name.clone()
     }

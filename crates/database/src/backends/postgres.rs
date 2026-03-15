@@ -1,7 +1,7 @@
-#[warn(dead_code)]
-use super::database::Database;
-use super::error::DatabaseError;
 use crate::crud::Crud;
+#[warn(dead_code)]
+use crate::database::Database;
+use crate::error::DatabaseError;
 use config::Config;
 use deadpool_postgres::{
     Config as DpConfig, ManagerConfig, Pool, RecyclingMethod, Runtime, SslMode,
@@ -11,11 +11,11 @@ use tokio_postgres::{NoTls, Row};
 use tracing::warn;
 
 #[derive(Clone)]
-pub struct PostgresDatabase {
+pub struct Postgres {
     pool: Pool,
 }
 
-impl PostgresDatabase {
+impl Postgres {
     pub async fn try_from(config: &Config) -> Result<Self, DatabaseError> {
         let cfg = Self::parameters(config)?;
         let pool = cfg.create_pool(Some(Runtime::Tokio1), NoTls)?;
@@ -81,7 +81,7 @@ impl PostgresDatabase {
     }
 }
 
-impl Database for PostgresDatabase {
+impl Database for Postgres {
     fn close(&mut self) -> Result<(), DatabaseError> {
         todo!()
     }
