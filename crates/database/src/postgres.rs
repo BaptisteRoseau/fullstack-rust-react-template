@@ -2,6 +2,7 @@
 use super::database::Database;
 use super::error::DatabaseError;
 use crate::crud::Crud;
+use async_trait::async_trait;
 use config::Config;
 use deadpool_postgres::{
     Config as DpConfig, ManagerConfig, Pool, RecyclingMethod, Runtime, SslMode,
@@ -16,7 +17,7 @@ pub struct PostgresDatabase {
 }
 
 impl PostgresDatabase {
-    pub(crate) async fn from(config: &Config) -> Result<Self, DatabaseError> {
+    pub async fn try_from(config: &Config) -> Result<Self, DatabaseError> {
         let cfg = Self::parameters(config)?;
         let pool = cfg.create_pool(Some(Runtime::Tokio1), NoTls)?;
         if pool.get().await.is_err() {
@@ -81,7 +82,23 @@ impl PostgresDatabase {
     }
 }
 
+impl Database for PostgresDatabase {
+    fn close(&mut self) -> Result<(), DatabaseError> {
+        todo!()
+    }
 
+    fn init(&mut self, config: &Config) -> Result<(), DatabaseError> {
+        todo!()
+    }
+
+    fn read_by_id(&mut self, item: &mut dyn Crud) -> Result<(), DatabaseError> {
+        todo!()
+    }
+
+    fn update(&mut self, item: &dyn Crud) -> Result<(), DatabaseError> {
+        todo!()
+    }
+}
 // TESTS: See https://testcontainers.com/ & https://docs.rs/testcontainers/latest/testcontainers/
 //TODO: Rename tests modules as unit_tests and integration_tests
 // to be able to launch one or the other rapidly

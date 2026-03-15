@@ -6,3 +6,4 @@ mod app_state;
 
 pub mod error;
 pub mod routes;
+pub use app_state::AppState;

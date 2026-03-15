@@ -36,7 +36,7 @@
 /// ```rs
 /// .routes(routes!(health_check))
 /// ```
-use crate::misc::{__path_health_check, health_check};
+use crate::{app_state::AppState, misc::{__path_health_check, health_check}};
 use axum::{Router, routing::get};
 use crate::endpoints::{__path_download, __path_upload, download, upload};
 
@@ -68,7 +68,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 /// Public routes that qre exposed to the world
 // pub(crate) fn public_routes(config: &Config, storage: Arc<Rwlock<Storage>>, core: Arc<Rwlock<Core>>) -> (Router, OpenApi) {
-pub fn public_routes(config: &Config) -> Router {
+pub fn public_routes(config: &Config, state: AppState) -> Router {
     let (api_routes, openapi) = OpenApiRouter::new()
         .routes(routes!(health_check, upload, download))
         .split_for_parts();
@@ -91,7 +91,7 @@ pub fn public_routes(config: &Config) -> Router {
             Duration::from_secs(config.api.timeout_sec.into()),
         ));
 
-    api_routes.layer(middleware).with_state(config.clone())
+    api_routes.layer(middleware).with_state(config.clone()).with_state(state)
 }
 
 /// Swagger UI and OpenAPI routes layer.

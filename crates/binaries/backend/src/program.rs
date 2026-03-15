@@ -1,8 +1,13 @@
+use std::sync::{Arc, RwLock};
+
 use anyhow::Error;
+use api::AppState;
 use api::routes::{public_routes, try_metrics_routes};
 use axum::Router;
 use axum_prometheus::PrometheusMetricLayerBuilder;
 use config::Config;
+use database::postgres::PostgresDatabase;
+use storage::S3;
 use tokio::net::{TcpListener, ToSocketAddrs};
 use tokio::task::JoinHandle;
 use tracing::info;
@@ -15,10 +20,16 @@ pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
     info!("Initializing Database...");
 
     let mut servers = vec![];
+    let database = PostgresDatabase::try_from(config).await?;
+    let storage = S3::try_from(config)?;
+    let state = AppState::new(
+        Arc::new(RwLock::new(database)),
+        Arc::new(RwLock::new(storage)),
+    );
 
     // PUBLIC ROUTES
     info!("Initializing public API router...");
-    let mut public_routes = public_routes(config);
+    let mut public_routes = public_routes(config, state);
 
     // PROMETHEUS
     if let Some(prometheus_config) = &config.prometheus {
