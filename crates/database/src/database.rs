@@ -8,15 +8,12 @@ use async_trait::async_trait;
 use config::Config;
 
 #[async_trait]
-pub trait Database {
+pub trait Database: Send + Sync {
     fn close(&mut self) -> Result<(), DatabaseError>;
-    fn init(&mut self, config: &Config) -> Result<&mut Self, DatabaseError>;
-    fn create<T>(&mut self, item: &dyn Crud) -> Result<&mut T, DatabaseError>;
-    fn read_by_id<T>(&mut self, item: &dyn Crud) -> Result<&mut T, DatabaseError>;
-    fn update(&mut self, item: &dyn Crud) -> Result<&mut Self, DatabaseError>;
-    fn delete_by_id(&mut self, item: &dyn Crud) -> Result<&mut Self, DatabaseError>;
+    fn init(&mut self, config: &Config) -> Result<(), DatabaseError>;
+    fn read_by_id(&mut self, item: &mut dyn Crud) -> Result<(), DatabaseError>;
+    fn update(&mut self, item: &dyn Crud) -> Result<(), DatabaseError>;
 }
-
 /* =============================================================================
 TEST
 ============================================================================= */

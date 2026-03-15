@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use std::{
     io::{Read, Write},
     path::Path,
@@ -5,28 +6,30 @@ use std::{
 
 use crate::{error::StorageError, parameters::StorageParameters};
 
-// This interface is subject to change as I implement
-// backends support.
-pub trait Storage {
+#[async_trait]
+pub trait Storage: Send + Sync {
     fn save(
         &self,
         file: &Path,
         content: &[u8],
         parameters: StorageParameters,
     ) -> Result<(), StorageError>;
-    fn load<W: Write>(
+
+    fn load(
         &self,
         file: &Path,
         parameters: StorageParameters,
     ) -> Result<Vec<u8>, StorageError>;
-    fn save_stream<R: Read>(
+
+    fn save_stream(
         &self,
-        reader: R,
+        reader: &mut dyn Read,
         parameters: StorageParameters,
     ) -> Result<(), StorageError>;
-    fn load_stream<W: Write>(
+
+    fn load_stream(
         &self,
-        writer: W,
+        writer: &mut dyn Write,
         parameters: StorageParameters,
     ) -> Result<(), StorageError>;
 }

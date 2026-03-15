@@ -81,30 +81,6 @@ impl PostgresDatabase {
     }
 }
 
-impl Database for PostgresDatabase {
-    fn close(&mut self) -> Result<(), DatabaseError> {
-        self.pool.close();
-        Ok(())
-    }
-
-    fn init(&mut self, config: &Config) -> Result<&mut Self, DatabaseError> {
-        let _ = config;
-        Ok(self)
-    }
-
-    fn create<T>(&mut self, _item: &dyn Crud) -> Result<&mut T, DatabaseError> {
-        todo!()
-    }
-    fn read_by_id<T>(&mut self, _item: &dyn Crud) -> Result<&mut T, DatabaseError> {
-        todo!()
-    }
-    fn update(&mut self, _item: &dyn Crud) -> Result<&mut Self, DatabaseError> {
-        todo!()
-    }
-    fn delete_by_id(&mut self, _item: &dyn Crud) -> Result<&mut Self, DatabaseError> {
-        todo!()
-    }
-}
 
 // TESTS: See https://testcontainers.com/ & https://docs.rs/testcontainers/latest/testcontainers/
 //TODO: Rename tests modules as unit_tests and integration_tests

@@ -23,7 +23,7 @@
 5. [ ] Add CRUD macros to the models
 6. [x] Create a Database trait
 7. [ ] Implement CRUD handler in Database trait
-8. [ ] Make a script to generate SQLx static file for offline sqlx compilation
+8. [X] Make a script to generate SQLx static file for offline sqlx compilation
 9. [ ] Change license to non-commercial
 
 ### Database Layer
@@ -41,10 +41,10 @@
 - [ ] CRUD macro (see something like <https://docs.rs/sqlx-crud/latest/sqlx_crud/traits/trait.Schema.html>)
 - [ ] Use a script to generate the database models: <https://github.com/jayy-lmao/sql-gen?tab=readme-ov-file>
 - The two previous milestones should allow you to make the database crate basic CRUD functionalities across all tables trivial, so that you can focus on the more interesting ones :D
-- [ ] Use a mix of SeaORM and SQLX ?
 
 ### API Layer
 
+- [ ] Set a request ID for logging purposes
 - [ ] Use axum-tower-session and axum-login for session management
 - [ ] Use a Protobuf schema to generate Rust models and Typescript structures
 - [ ] Add CORS middleware

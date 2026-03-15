@@ -11,6 +11,7 @@ sqlx = { version = "0.8" }
 deadpool-postgres = { version = "*" }
 metrics = { version = "0.24" }
 serde = { version = "1.0", features = ["derive"] }
+async-trait = "0.1.89"
 tokio-postgres = { version = "0.7", features = [
     "with-uuid-1",
     "with-serde_json-1",
@@ -21,4 +22,3 @@ tokio-postgres = { version = "0.7", features = [
 uuid = { version = "1.19", features = ["fast-rng", "serde", "v7"] }
 thiserror = "2.0.17"
 tracing = { version = "0.1.44", features = ["async-await"] }
-async-trait = "*"
