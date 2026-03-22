@@ -10,22 +10,33 @@ use database::backends::Postgres;
 use storage::backends::S3;
 use tokio::net::{TcpListener, ToSocketAddrs};
 use tokio::task::JoinHandle;
-use tracing::info;
-
-// TODO: For prometheus and swagger, if the IP and port and the same as another server,
-// merge the two together. Add a warning message if it is with the public server.
+use tracing::{info, warn};
 
 pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
     logging::init_logger(config.debug);
-    info!("Initializing Database...");
 
-    let mut servers = vec![];
+    /* ===========================
+    * APP STATE
+    =========================== */
+
+    info!("Initializing Database...");
     let database = Postgres::try_from(config).await?;
+    info!("Initialized Database");
+
+    info!("Initializing Storage...");
     let storage = S3::try_from(config)?;
+    info!("Initialized Storage");
+
     let state = AppState::new(
         Arc::new(RwLock::new(database)),
         Arc::new(RwLock::new(storage)),
     );
+
+    /* ===========================
+    * SERVERS
+    =========================== */
+
+    let mut servers = vec![];
 
     // PUBLIC ROUTES
     info!("Initializing public API router...");
@@ -40,20 +51,32 @@ pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
             .build_pair();
 
         public_routes = public_routes.layer(prometheus_layer);
+        info!("Initialized Metrics handler");
 
         info!("Initializing Prometheus metrics endpoint...");
         let metrics_routes = try_metrics_routes(metric_handle)?;
 
-        info!(
-            "Binding Prometheus metrics endpoint onto {}:{}...",
-            prometheus_config.ip, prometheus_config.port
-        );
-        let prometheus_metrics_server = tokio::spawn(serve_prometheus_metrics(
-            (prometheus_config.ip, prometheus_config.port),
-            metrics_routes,
-        ));
+        if (prometheus_config.ip == config.server.ip
+            && prometheus_config.port == config.server.port)
+        {
+            warn!(
+                "Merging Prometheus metrics endpoint with public API",
+                prometheus_config.ip, prometheus_config.port
+            );
+            public_routes = public_routes.merge(metrics_routes);
+        } else {
+            info!(
+                "Binding separate Prometheus metrics endpoint onto {}:{}...",
+                prometheus_config.ip, prometheus_config.port
+            );
+            let prometheus_metrics_server = tokio::spawn(serve_onto(
+                (prometheus_config.ip, prometheus_config.port),
+                metrics_routes,
+            ));
+            servers.push(prometheus_metrics_server);
+        }
 
-        servers.push(prometheus_metrics_server);
+        info!("Initialized Prometheus metrics endpoint");
     }
 
     // Binding public routes at the end to make sure metric layer is added
@@ -65,11 +88,12 @@ pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
         (config.server.ip, config.server.port),
         public_routes,
     ));
+    info!("Initialized public API router");
 
     servers.push(public_server);
-    info!("Ready to receive requests");
-
     set_shutdown_signal(&mut servers).await;
+
+    info!("Ready to receive requests");
     for server in servers {
         let _ = tokio::join!(server);
     }
@@ -87,18 +111,6 @@ where
     Ok(())
 }
 
-async fn serve_prometheus_metrics<A>(
-    address: A,
-    routes: Router,
-) -> Result<(), anyhow::Error>
-where
-    A: ToSocketAddrs,
-{
-    let listener = tokio::net::TcpListener::bind(address).await.unwrap();
-    axum::serve(listener, routes).await?;
-    Ok(())
-}
-
 // https://github.com/tokio-rs/axum/blob/main/examples/graceful-shutdown/src/main.rs
 async fn set_shutdown_signal(servers: &mut Vec<JoinHandle<Result<(), Error>>>) {
     let ctrl_c = async {
@@ -111,6 +123,14 @@ async fn set_shutdown_signal(servers: &mut Vec<JoinHandle<Result<(), Error>>>) {
     let terminate = async {
         tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
             .expect("failed to install sigterm signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(unix)]
+    let interrupt = async {
+        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::interrupt())
+            .expect("failed to install sigint signal handler")
             .recv()
             .await;
     };
@@ -135,6 +155,12 @@ async fn set_shutdown_signal(servers: &mut Vec<JoinHandle<Result<(), Error>>>) {
         },
         () = terminate => {
             info!("Received SIGTERM, existing...");
+            for server in servers{
+                server.abort();
+            }
+        },
+        () = interrupt => {
+            info!("Received SIGINT, existing...");
             for server in servers{
                 server.abort();
             }
