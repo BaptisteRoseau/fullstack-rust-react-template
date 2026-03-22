@@ -1,0 +1,11 @@
+[package]
+name = "cache"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+logging = { path = "../logging" }
+config = { path = "../config" }
+async-trait = "0"
+thiserror = "2"
+serde = "1"
