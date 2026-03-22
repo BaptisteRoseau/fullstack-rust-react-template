@@ -3,6 +3,9 @@
 # purposes and not for production use.
 # Contains the base docker-compose.yml files, as well as hot-reloading
 # frontend and backend.
+#
+# Run using --profle hot_reloading
+#
 services:
   backend:
     image: localhost/backend:latest-debug
@@ -35,6 +38,7 @@ services:
     ports:
       - "${BACKEND_PORT}:9876"
       - "${SWAGGER_PORT}:7070"
+    profile: hot_reloading
     restart: on-failure
     volumes:
       - ".:/src"
@@ -54,6 +58,7 @@ services:
     ports:
       - "${FRONTEND_PORT}:8080"
     restart: on-failure
+    profile: hot_reloading
     volumes:
       - "./frontend:/src"
 
