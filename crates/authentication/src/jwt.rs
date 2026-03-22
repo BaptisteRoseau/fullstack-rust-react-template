@@ -1,7 +1,11 @@
-
 use jsonwebtoken::jwk::JwkSet;
 use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode, decode_header};
 use serde::{Deserialize, Serialize};
+
+// TODO:
+// 1. Add the authentication to the config
+// 2. Cache the JwkSet in a lazy const
+// 3. Configure the claims
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {
