@@ -1,3 +1,4 @@
+#[warn(unused)]
 use log::LevelFilter;
 
 pub fn init_logger(debug: bool) {

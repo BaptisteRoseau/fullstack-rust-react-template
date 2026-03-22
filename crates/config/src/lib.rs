@@ -1,3 +1,4 @@
+#[warn(unused)]
 mod error;
 
 use crate::error::ConfigParsingError;

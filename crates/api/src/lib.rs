@@ -1,3 +1,4 @@
+#[warn(unused)]
 mod endpoints;
 mod misc;
 mod extractors;

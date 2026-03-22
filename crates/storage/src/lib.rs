@@ -1,3 +1,4 @@
+#[warn(unused)]
 mod compressor;
 mod file_optimizer;
 mod images;

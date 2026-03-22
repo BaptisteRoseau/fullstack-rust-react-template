@@ -1,3 +1,4 @@
+#[warn(unused)]
 mod program;
 use std::process::exit;
 
