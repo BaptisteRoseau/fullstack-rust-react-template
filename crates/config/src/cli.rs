@@ -100,6 +100,10 @@ pub(crate) struct CliConfig {
     #[arg(long, env, default_value_t = DEFAULT_PROMETHEUS_PORT)]
     pub(crate) prometheus_port: u16,
 
+    /// Prometheus metrics endpoint
+    #[arg(long, env, default_value_t = DEFAULT_PROMETHEUS_PATH.to_string())]
+    pub(crate) prometheus_path: String,
+
     /// Deactivate Prometheus metric server
     #[arg(long, env, default_value_t = false)]
     pub(crate) no_prometheus: bool,

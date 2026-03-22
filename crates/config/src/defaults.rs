@@ -11,6 +11,7 @@ pub(crate) const DEFAULT_OPENAPI_PATH: &str = "/v1/docs/openapi.json";
 
 pub(crate) const DEFAULT_PROMETHEUS_IP: IpAddr = LOCALHOST;
 pub(crate) const DEFAULT_PROMETHEUS_PORT: u16 = 9100;
+pub(crate) const DEFAULT_PROMETHEUS_PATH: &str = "/metrics";
 
 pub(crate) const DEFAULT_DATABASE_HOST: &str = "127.0.0.1";
 pub(crate) const DEFAULT_DATABASE_PORT: u16 = 5432;

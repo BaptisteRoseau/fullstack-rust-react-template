@@ -54,7 +54,7 @@ pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
         info!("Initialized Metrics handler");
 
         info!("Initializing Prometheus metrics endpoint...");
-        let metrics_routes = try_metrics_routes(metric_handle)?;
+        let metrics_routes = try_metrics_routes(&prometheus_config.path, metric_handle)?;
 
         if (prometheus_config.ip == config.server.ip
             && prometheus_config.port == config.server.port)
@@ -76,7 +76,7 @@ pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
             servers.push(prometheus_metrics_server);
         }
 
-        info!("Initialized Prometheus metrics endpoint");
+        info!("Initialized Prometheus metrics endpoint on {}", &prometheus_config.path);
     }
 
     // Binding public routes at the end to make sure metric layer is added

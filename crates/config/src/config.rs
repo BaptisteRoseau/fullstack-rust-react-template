@@ -34,7 +34,13 @@ pub struct S3Config {
 }
 
 type ServerBindingConfig = BindingConfig;
-type PrometheusConfig = BindingConfig;
+
+#[derive(Debug, Clone)]
+pub struct PrometheusConfig {
+    pub ip: IpAddr,
+    pub port: u16,
+    pub path: String,
+}
 
 #[derive(Debug, Clone)]
 pub struct SwaggerConfig {
@@ -80,6 +86,7 @@ impl TryFrom<CliConfig> for Config {
             Some(PrometheusConfig {
                 ip: value.prometheus_ip,
                 port: value.prometheus_port,
+                path: value.prometheus_path
             })
         };
 

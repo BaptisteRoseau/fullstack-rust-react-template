@@ -115,7 +115,8 @@ fn swagger(config: &Config, openapi: OpenApi) -> SwaggerUi {
 
 /// Metrics routes that are exposed to Prometheus
 pub fn try_metrics_routes(
+    path: &str,
     metric_handle: PrometheusHandle,
 ) -> Result<Router, anyhow::Error> {
-    Ok(Router::new().route("/metrics", get(move || ready(metric_handle.render()))))
+    Ok(Router::new().route(path, get(move || ready(metric_handle.render()))))
 }
