@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-reqwest = "*"
-jsonwebtoken = "*"
-serde = { version = "*", features = ["derive"] }
+reqwest = { version = "0", features = ["json"] }
+jsonwebtoken = "10"
+serde = { version = "1", features = ["derive"] }

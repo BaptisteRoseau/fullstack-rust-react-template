@@ -1,5 +1,6 @@
 #[warn(unused)]
-use jsonwebtoken::{decode, decode_header, jwk::JWKSet, DecodingKey, Validation, Algorithm};
+use jsonwebtoken::{decode, decode_header, DecodingKey, Validation, Algorithm};
+use jsonwebtoken::jwk::JwkSet;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -14,7 +15,7 @@ async fn validate_authentik_token(token: &str) -> Result<(), Box<dyn std::error:
     let jwks_url = "https://auth.example.com/application/o/my-rust-app/jwks/";
 
     // 2. Fetch the keys (In production, CACHE this result to avoid network calls on every request!)
-    let jwks: JWKSet = reqwest::get(jwks_url).await?.json().await?;
+    let jwks: JwkSet = reqwest::get(jwks_url).await?.json().await?;
 
     // 3. Get the Key ID (kid) from the JWT header
     let header = decode_header(token)?;
