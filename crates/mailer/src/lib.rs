@@ -1,15 +1,9 @@
-#[warn(unused)]
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+mod builder;
+mod errors;
+mod templates;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub use builder::{Email, EmailBuilder, Mailer};
+pub use errors::Error;
+pub use templates::{Archetype, Language, Template};
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub use lettre::message::Mailbox;
