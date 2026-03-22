@@ -5,6 +5,7 @@ urls=(
     "http://127.0.0.1:7070/v1/docs/swagger-ui/"
     "http://127.0.0.1:9090"
     "http://127.0.0.1:3000"
+    "http://127.0.0.1:8090"
 )
 
 for url in "${urls[@]}"; do
