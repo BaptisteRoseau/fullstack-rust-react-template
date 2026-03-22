@@ -54,6 +54,16 @@ They contain information about how the code should be handled as well as helpful
 
 Do not invent APIs, when necessary, use the context7 MCP to access documentation online.
 
+If you need crate documentation, instead of using `crates.io` prefer using:
+
+```
+curl file://<absolute path to current project>/target/doc/<the crate you're looking for>/index.html
+```
+
+If hitting a 404, run `cargo doc` to build the documentaion pages.
+If still hitting a 404 fallback to `crates.io`.
+Pipe bash commands to convert the HTML to text to reduce token usage and only get useful text.
+
 ## Versionning
 
 When working on a task, frequently run git commit with:
