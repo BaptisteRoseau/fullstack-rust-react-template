@@ -2,23 +2,23 @@ use mailer::*;
 
 #[test]
 fn builder() {
-    let _mailer = Mailer::new(
+    let mut _mailer = Mailer::new(
         "smtp.server.com",
         "smtp_username",
         "smtp_password",
         Mailbox {
-            name: "John Doe",
-            email: "john.doe@server.com",
+            name: Some("John Doe".into()),
+            email: "john.doe@server.com".into(),
         },
         None,
     );
     _mailer.set_footer("Visit our website");
     let builder = _mailer.template(Template::new(
         Archetype::PlainHtml {
-            title: "Mail title",
-            body: "Mail body",
+            title: "Mail title".to_owned(),
+            body: "Mail body".to_owned(),
         },
-        Language::English,
+        Some(Language::English),
     ));
     let mail = builder.build();
     mail.unwrap().send();

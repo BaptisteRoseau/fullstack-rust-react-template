@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
+use crate::error::Error;
 use crate::templates::Template;
 
-use lettre::error::Error;
 use lettre::message::header::ContentType;
 use lettre::message::{Mailbox, MessageBuilder};
 use lettre::transport::smtp::authentication::Credentials;
@@ -21,7 +21,8 @@ impl Email {
     }
 
     pub fn send(&self) -> Result<(), Error> {
-        Ok(self.mailer.send(&self.email)?)
+        self.mailer.send(&self.email)?;
+        Ok(())
     }
 }
 
