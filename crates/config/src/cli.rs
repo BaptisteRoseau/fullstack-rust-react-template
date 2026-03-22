@@ -43,29 +43,6 @@ pub(crate) struct CliConfig {
     #[arg(short, long, env, default_value_t = DEFAULT_PORT)]
     pub(crate) port: u16,
 
-    /// The PEM private key file used for HTTPS and JWT.
-    /// If not provided, default to HTTP and static token for JWT.
-    /// Required in production.
-    #[arg(long, env)]
-    pub(crate) pem_priv_key: Option<PathBuf>,
-
-    /// The PEM public key file used for HTTPS and JWT
-    /// If not provided, default to HTTP and static token for JWT.
-    /// Required in production.
-    #[arg(long, env)]
-    pub(crate) pem_pub_key: Option<PathBuf>,
-
-    /// JSON Web Token (JWT) Time To Live (TTL) in seconds.
-    /// Users will be required to log back in after the
-    /// Default is 3 month.
-    #[arg(long, env, default_value_t = 8035200)]
-    pub(crate) jwt_ttl_s: i64,
-
-    /// Salt used on used passwords before hashing and storing
-    /// into database.
-    #[arg(env, default_value_t = String::from(DEFAULT_SALT))]
-    pub(crate) password_salt: String,
-
     /// Timeout of the API in seconds. Use 0 for no timeout.
     #[arg(env, default_value_t = u16::from(DEFAULT_API_TIMEOUT_SEC))]
     pub(crate) api_timeout_sec: u16,

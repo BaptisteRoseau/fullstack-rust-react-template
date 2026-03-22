@@ -128,19 +128,9 @@ impl Config {
     /// For example, makes sure the PEM key **AND** certificate are provided
     /// if the server is in production mode.
     fn validate(cli_config: &CliConfig) -> Result<(), ConfigParsingError> {
-        // Errors
-        if cli_config.pem_priv_key.is_some() && cli_config.pem_pub_key.is_none() {
-            return Err(ConfigParsingError::MissingPemPubCert);
-        }
-        if cli_config.pem_priv_key.is_none() && cli_config.pem_pub_key.is_some() {
-            return Err(ConfigParsingError::MissingPemPrivKey);
-        }
-        #[cfg(not(debug_assertions))]
-        if cli_config.password_salt == String::from(DEFAULT_SALT) {
-            return Err(ConfigParsingError::DefaultPasswordSaltInReleaseMode);
-        }
+        // Errors: Incompatible config, these return ConfigParsingError
 
-        // Warnings
+        // Warnings: Ignored or deprecated configs
         if cli_config.no_swagger
             && (cli_config.swagger_ip != DEFAULT_SWAGGER_IP
                 || cli_config.swagger_port != DEFAULT_SWAGGER_PORT)
@@ -165,7 +155,6 @@ mod test {
     //TODO: CliConfig merging priority: self->other
     use super::*;
     use std::net::{IpAddr, Ipv4Addr};
-    use std::path::PathBuf;
 
     impl Default for CliConfig {
         fn default() -> Self {
@@ -174,10 +163,6 @@ mod test {
                 debug: false,
                 ip: LOCALHOST,
                 port: DEFAULT_PORT,
-                pem_priv_key: None,
-                pem_pub_key: None,
-                jwt_ttl_s: 8035200,
-                password_salt: String::from("For development purposes only"),
                 s3_host: DEFAULT_S3_HOST.to_string(),
                 s3_port: DEFAULT_S3_PORT,
                 s3_user: DEFAULT_S3_USER.to_string(),
@@ -198,36 +183,6 @@ mod test {
                 no_swagger: false,
             }
         }
-    }
-
-    #[test]
-    fn test_validate_missing_pem_pub_cert() {
-        let mut cli_config = CliConfig::default();
-        cli_config.pem_priv_key = Some(PathBuf::from("private_key.pem"));
-        cli_config.pem_pub_key = None;
-
-        let result = Config::validate(&cli_config);
-
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ConfigParsingError::MissingPemPubCert
-        ));
-    }
-
-    #[test]
-    fn test_validate_missing_pem_priv_key() {
-        let mut cli_config = CliConfig::default();
-        cli_config.pem_pub_key = Some(PathBuf::from("public_key.pem"));
-        cli_config.pem_priv_key = None;
-
-        let result = Config::validate(&cli_config);
-
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ConfigParsingError::MissingPemPrivKey
-        ));
     }
 
     #[test]

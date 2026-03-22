@@ -26,5 +26,3 @@ pub(crate) const DEFAULT_S3_PASSWORD: &str = "password";
 pub(crate) const DEFAULT_API_TIMEOUT_SEC: u16 = 20;
 
 pub(crate) const DEFAULT_CONFIG_FILE_PATH: &str = ".config.yaml";
-
-pub(crate) const DEFAULT_SALT: &str = "This default if for development purposes only";
