@@ -9,23 +9,24 @@ config = { path = "../config" }
 app_core = { path = "../app_core" }
 database = { path = "../database" }
 storage = { path = "../storage" }
-anyhow = { version = "1.0.100" }
-async-trait = "0.1.89"
-axum = { version = "0.8.8", features = ["http1", "http2"] }
-axum-macros = "0.5.0"
+authentication = { path = "../authentication" }
+anyhow = { version = "1" }
+async-trait = "0"
+axum = { version = "0", features = ["http1", "http2"] }
+axum-macros = "0"
 axum-prometheus = { version = "*", features = ["metrics-exporter-prometheus"] }
-chrono = { version = "0.4.42" }
-clap = { version = "4.5.53", features = ["derive", "env"] }
-jsonwebtoken = { version = "10.2.0", features = ["use_pem", "rust_crypto"] }
-metrics = { version = "0.24.3" }
-metrics-exporter-prometheus = { version = "0.18.1", features = ["tokio"] }
+chrono = { version = "0" }
+clap = { version = "4", features = ["derive", "env"] }
+jsonwebtoken = { version = "10", features = ["use_pem", "rust_crypto"] }
+metrics = { version = "0" }
+metrics-exporter-prometheus = { version = "0", features = ["tokio"] }
 regex = { version = "*" }
-serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.147"
-thiserror = "2.0.17"
-tokio = { version = "1.48.0", features = ["rt-multi-thread", "macros", "full"] }
-tower = { version = "0.5.2" }
-tower-http = { version = "0.6.8", features = [
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "full"] }
+tower = { version = "0" }
+tower-http = { version = "0", features = [
     "decompression-gzip",
     "compression-gzip",
     "trace",
@@ -38,8 +39,8 @@ tower-http = { version = "0.6.8", features = [
     "set-header",
     "normalize-path",
 ] }
-tracing = "0.1.44"
-utoipa = { version = "5.4.0", features = ["axum_extras", "uuid"] }
-utoipa-axum = { version = "0.2.0" }
-utoipa-swagger-ui = { version = "9.0.2", features = ["axum"] }
-uuid = { version = "1.19.0", features = ["fast-rng", "serde", "v7"] }
+tracing = "0"
+utoipa = { version = "5", features = ["axum_extras", "uuid"] }
+utoipa-axum = { version = "0" }
+utoipa-swagger-ui = { version = "9", features = ["axum"] }
+uuid = { version = "1", features = ["fast-rng", "serde", "v7"] }

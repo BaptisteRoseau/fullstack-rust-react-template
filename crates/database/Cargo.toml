@@ -7,18 +7,18 @@ edition = "2024"
 logging = { path = "../logging" }
 config = { path = "../config" }
 chrono = { version = "*" }
-sqlx = { version = "0.8" }
+sqlx = { version = "0" }
 deadpool-postgres = { version = "*" }
-metrics = { version = "0.24" }
-serde = { version = "1.0", features = ["derive"] }
-async-trait = "0.1.89"
-tokio-postgres = { version = "0.7", features = [
+metrics = { version = "0" }
+serde = { version = "1", features = ["derive"] }
+async-trait = "0.1"
+tokio-postgres = { version = "0", features = [
     "with-uuid-1",
     "with-serde_json-1",
     "with-chrono-0_4",
     "with-time-0_3",
     "with-bit-vec-0_6",
 ] }
-uuid = { version = "1.19", features = ["fast-rng", "serde", "v7"] }
-thiserror = "2.0.17"
-tracing = { version = "0.1.44", features = ["async-await"] }
+uuid = { version = "1", features = ["fast-rng", "serde", "v7"] }
+thiserror = "2"
+tracing = { version = "0", features = ["async-await"] }
