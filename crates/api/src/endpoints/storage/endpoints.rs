@@ -9,7 +9,7 @@ use crate::{error::ApiError, extractors::OptionalUser};
     ),
 )]
 pub(crate) async fn upload(user: OptionalUser) -> Result<&'static str, ApiError> {
-    Ok("")
+    todo!()
 }
 
 /// Download a file.
@@ -21,5 +21,5 @@ pub(crate) async fn upload(user: OptionalUser) -> Result<&'static str, ApiError>
     ),
 )]
 pub(crate) async fn download(user: OptionalUser) -> Result<String, ApiError> {
-    Ok("".into())
+    todo!()
 }
