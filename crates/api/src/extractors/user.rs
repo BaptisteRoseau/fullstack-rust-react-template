@@ -7,7 +7,19 @@ use uuid::Uuid;
 
 use crate::{error::ApiError, extractors::errors::ExtractorError, models::User};
 
-pub struct OptionalUser(pub Option<User>);
+pub struct OptionalUser(Option<User>);
+
+impl OptionalUser {
+    pub fn inner(self) -> Option<User> {
+        self.0
+    }
+}
+
+impl From<OptionalUser> for Option<User> {
+    fn from(value: OptionalUser) -> Self {
+        value.0
+    }
+}
 
 impl<S> FromRequestParts<S> for OptionalUser
 where
@@ -46,12 +58,14 @@ where
 {
     type Rejection = ApiError;
 
+    /// Extract the user if possible. If not, directly return an error without getting to
+    /// the handler.
     async fn from_request_parts(
         parts: &mut Parts,
         state: &S,
     ) -> Result<Self, Self::Rejection> {
         match OptionalUser::from_request_parts(parts, state).await {
-            Ok(opt_user) => match opt_user.0 {
+            Ok(opt_user) => match opt_user.inner() {
                 Some(user) => Ok(user),
                 None => Err(ApiError::from(ExtractorError::NotLoggedIn)),
             },

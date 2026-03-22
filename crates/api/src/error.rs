@@ -42,6 +42,11 @@ impl ApiErrorResponse {
     }
 
     /// Template for forbidden responses
+    fn unauthorized() -> Self {
+        Self::new("UNAUTHORIZED", "", StatusCode::UNAUTHORIZED)
+    }
+
+    /// Template for forbidden responses
     fn forbidden() -> Self {
         Self::new("FORBIDDEN", "", StatusCode::FORBIDDEN)
     }
@@ -102,7 +107,7 @@ impl From<ExtractorError> for ApiErrorResponse {
     fn from(val: ExtractorError) -> Self {
         match val {
             ExtractorError::InvalidJwt | ExtractorError::NotLoggedIn => {
-                ApiErrorResponse::forbidden()
+                ApiErrorResponse::unauthorized()
             }
             ExtractorError::Unexpected(_) => ApiErrorResponse::unexpected(),
         }
