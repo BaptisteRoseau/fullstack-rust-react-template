@@ -135,6 +135,7 @@
 
 ### Extras
 
+- [ ] Add a management CLI binary 
 - [ ] Loki docker plugin to expose docker logs to Grafana
 - [ ] Pre-built Grafana dashboards
 - [ ] Kubernetes manifests
