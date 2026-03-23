@@ -23,7 +23,7 @@ POSTGRES_PORT=5678
 # Prefix the generated file with a comment
 
 echo "Starting a new database instance"
-docker stop sqlx_query_temp 2>&1 >/dev/null || echo ""
+docker stop sqlx_query_temp 2>&1 >/dev/null || printf ""
 docker run \
     -e POSTGRES_DB=${POSTGRES_DATABASE} \
     -e POSTGRES_USER=${POSTGRES_USER} \
@@ -36,7 +36,7 @@ docker run \
     --rm \
     --detach \
     --name sqlx_query_temp \
-    app_postgres:latest > /dev/null
+    app_postgres:latest 2>&1 > /dev/null
 
 sleep 5
 
@@ -47,15 +47,11 @@ sqlx migrate run  --no-dotenv --database-url "$DATABASE_URL" --source "$GIT_ROOT
 DEST_FILE="./crates/database/src/generated_models.rs"
 
 echo "Generating models"
-sql-gen --db-url "$DATABASE_URL" --output $DEST_FILE
-
-echo "Post-processing: adding Crud derive and imports"
-sed -i '1i use database_crud_derive::Crud;' $DEST_FILE
-sed -i 's/#\[derive(Debug, Clone, sqlx::FromRow)\]/#[derive(Debug, Clone, sqlx::FromRow, Crud)]/' $DEST_FILE
-# Make all struct fields public for the Crud derive patch struct
-sed -i 's/^    \([a-z_]*\):/    pub \1:/' $DEST_FILE
-
+sql-gen --db-url "$DATABASE_URL" \
+    --output "$DEST_FILE" \
+    --model-derive "Debug, Clone, sqlx::FromRow, Crud" \
+    --enum-derive "Debug, Clone, sqlx::FromRow, Crud"
 echo "Models generated in $DEST_FILE"
 
 echo "Stopping container"
-docker stop sqlx_query_temp
+docker stop sqlx_query_temp 2>&1 > /dev/null
