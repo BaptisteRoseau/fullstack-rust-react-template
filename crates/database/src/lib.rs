@@ -1,5 +1,4 @@
-#[warn(unused)]
-mod crud;
+pub mod crud;
 mod database;
 mod generated_models;
 

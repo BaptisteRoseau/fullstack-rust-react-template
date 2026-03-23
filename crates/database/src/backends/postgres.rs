@@ -1,4 +1,3 @@
-use crate::crud::Crud;
 #[warn(dead_code)]
 use crate::database::Database;
 use crate::error::DatabaseError;
@@ -87,14 +86,6 @@ impl Database for Postgres {
     }
 
     fn init(&mut self, _config: &Config) -> Result<(), DatabaseError> {
-        todo!()
-    }
-
-    fn read_by_id(&mut self, _item: &mut dyn Crud) -> Result<(), DatabaseError> {
-        todo!()
-    }
-
-    fn update(&mut self, _item: &dyn Crud) -> Result<(), DatabaseError> {
         todo!()
     }
 }

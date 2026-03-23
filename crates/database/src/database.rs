@@ -1,5 +1,3 @@
-use crate::crud::Crud;
-
 /**
 * Defines the Database trait interface.
 **/
@@ -11,8 +9,6 @@ use config::Config;
 pub trait Database: Send + Sync {
     fn close(&mut self) -> Result<(), DatabaseError>;
     fn init(&mut self, config: &Config) -> Result<(), DatabaseError>;
-    fn read_by_id(&mut self, item: &mut dyn Crud) -> Result<(), DatabaseError>;
-    fn update(&mut self, item: &dyn Crud) -> Result<(), DatabaseError>;
 }
 /* =============================================================================
 TEST
