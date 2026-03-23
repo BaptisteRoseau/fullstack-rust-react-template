@@ -1,4 +1,4 @@
-FROM rust:1.94 as builder
+FROM rust:1.94 AS builder
 
 ARG target=x86_64-unknown-linux-gnu
 
@@ -8,28 +8,28 @@ COPY crates/ ./crates/
 COPY tools/http_health_checker/ ./tools/http_health_checker/
 COPY Cargo.toml ./Cargo.toml
 
-# TODO: Find a way to cache dependencies download and compilation
+# TODO: Use chef to cache dependencies download and compilation
 RUN RUSTFLAGS='-C target-feature=+crt-static' \
     cargo build \
     --release \
     --target $target \
-    --bin service \
+    --bin backend \
     --bin http_health_checker && \
-    mv target/$target/release/service /opt/service && \
-    chmod 555 /opt/service && \
+    mv target/$target/release/backend /opt/backend && \
+    chmod 555 /opt/backend && \
     mv target/$target/release/http_health_checker /opt/http_health_checker && \
     chmod 555 /opt/http_health_checker
 
 FROM scratch
 
-COPY --from=builder /opt/service /service
+COPY --from=builder /opt/backend /backend
 COPY --from=builder /opt/http_health_checker /http_health_checker
 COPY --from=builder /opt/config.yml /etc/crates/config.yml
 USER 10001
 WORKDIR /
 
-# API Server ; Prometheus /metrics ; Private Server
-EXPOSE 9876 9100 7070
+# API Server ; Prometheus /metrics
+EXPOSE 9876 9100
 
 HEALTHCHECK \
     --start-period=5s \
@@ -37,4 +37,4 @@ HEALTHCHECK \
     --timeout=10s \
     --retries=3 \
     CMD [ "/http_health_checker", "http://127.0.0.1:9876/" ]
-ENTRYPOINT [ "/service", "--port", "9876", "--config", "/etc/crates/config.yml" ]
+ENTRYPOINT [ "/backend", "--port", "9876", "--config", "/etc/backend/config.yml" ]

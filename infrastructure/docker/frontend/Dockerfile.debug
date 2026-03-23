@@ -1,4 +1,4 @@
-FROM oven/bun:1 AS SITE_BUILDER
+FROM oven/bun:1
 
 EXPOSE 8080
 WORKDIR /src

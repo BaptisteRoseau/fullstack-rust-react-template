@@ -17,5 +17,5 @@ EXPOSE 9876
 ENTRYPOINT [ "cargo", "watch", "--why", "--delay", "1.5", \
     "-x", "'build -p backend'", \
     "--watch", "./Cargo.toml", \
-    "--watch", "backend", \
-    "--", "cargo", "run", "--bin", "service" ]
+    "--watch", "crates", \
+    "--", "cargo", "run", "--bin", "backend" ]
