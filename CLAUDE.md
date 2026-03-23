@@ -37,9 +37,11 @@ When working on a task:
 - Go onto the next chunk and repeat
 - When finished, tell the user your task is done and ask for a review. Do not merge the branch yourself.
 
-Always store relevant information, delete obsolete information and find a clever way to index them to find them quickly whenever possible.
+Store relevant information, delete obsolete information and find a clever way to index them to find them quickly whenever possible.
 
-Do not invent, if you need information or documentation, use the codebase, your `llm_memory/` directory and MCP server, and use the context7 MCP when you need documentation.
+Regularly run `git pull` and `git push` to share your work.
+
+Do not invent, if you need information or documentation, use the codebase, your memory and use the context7 MCP when you need documentation.
 
 ### Testing
 
