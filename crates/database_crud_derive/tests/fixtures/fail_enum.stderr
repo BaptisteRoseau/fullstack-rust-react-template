@@ -1,0 +1,7 @@
+error: proc-macro derive panicked
+ --> tests/fixtures/fail_enum.rs:3:10
+  |
+3 | #[derive(Crud)]
+  |          ^^^^
+  |
+  = help: message: Crud derive only supports structs
