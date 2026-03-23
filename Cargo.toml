@@ -10,6 +10,7 @@ members = [
   "crates/mailer",
   "crates/config",
   "crates/database",
+  "crates/database_crud_derive",
   "crates/logging",
   "crates/storage",
   "tools/http_health_checker",
