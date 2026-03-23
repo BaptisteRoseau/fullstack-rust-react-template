@@ -59,10 +59,7 @@ pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
         if (prometheus_config.ip == config.server.ip
             && prometheus_config.port == config.server.port)
         {
-            warn!(
-                "Merging Prometheus metrics endpoint with public API",
-                prometheus_config.ip, prometheus_config.port
-            );
+            warn!("Merging Prometheus metrics endpoint with public API");
             public_routes = public_routes.merge(metrics_routes);
         } else {
             info!(

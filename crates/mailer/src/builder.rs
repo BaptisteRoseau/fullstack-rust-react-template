@@ -6,9 +6,9 @@ use crate::templates::Template;
 use lettre::message::header::ContentType;
 use lettre::message::{Mailbox, MessageBuilder};
 use lettre::transport::smtp::authentication::Credentials;
-use lettre::{Message, SmtpTransport, Transport};
+use lettre::{Message, SmtpTransport};
 
-//// =======================
+// =======================
 
 pub struct Email {
     mailer: SmtpTransport,
