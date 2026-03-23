@@ -37,13 +37,25 @@ pub enum CrudValue {
 /// the generated CRUD methods from a specific connection pool type.
 #[async_trait]
 pub trait CrudExecutor: Send + Sync {
-    async fn crud_fetch_one<T>(&self, query: &str, args: Vec<CrudValue>) -> Result<T, CrudError>
+    async fn crud_fetch_one<T>(
+        &self,
+        query: &str,
+        args: Vec<CrudValue>,
+    ) -> Result<T, CrudError>
     where
         T: for<'r> FromRow<'r, sqlx::postgres::PgRow> + Send + Unpin;
 
-    async fn crud_fetch_all<T>(&self, query: &str, args: Vec<CrudValue>) -> Result<Vec<T>, CrudError>
+    async fn crud_fetch_all<T>(
+        &self,
+        query: &str,
+        args: Vec<CrudValue>,
+    ) -> Result<Vec<T>, CrudError>
     where
         T: for<'r> FromRow<'r, sqlx::postgres::PgRow> + Send + Unpin;
 
-    async fn crud_execute(&self, query: &str, args: Vec<CrudValue>) -> Result<u64, CrudError>;
+    async fn crud_execute(
+        &self,
+        query: &str,
+        args: Vec<CrudValue>,
+    ) -> Result<u64, CrudError>;
 }

@@ -10,7 +10,10 @@ pub fn generate(model: &ModelInfo) -> (TokenStream, TokenStream) {
     let patch_ident = format_ident!("{}Patch", struct_ident);
     let table = &model.table_name;
 
-    let id_field = model.id_field.as_ref().expect("Crud derive requires an 'id' field");
+    let id_field = model
+        .id_field
+        .as_ref()
+        .expect("Crud derive requires an 'id' field");
     let id_ty = &id_field.ty;
 
     // Generate patch struct fields
@@ -178,7 +181,10 @@ pub fn generate(model: &ModelInfo) -> (TokenStream, TokenStream) {
     (patch_struct_and_impl, patch_methods_on_model)
 }
 
-fn to_crud_value_non_option(field: &crate::parse::FieldInfo, value_expr: &TokenStream) -> TokenStream {
+fn to_crud_value_non_option(
+    field: &crate::parse::FieldInfo,
+    value_expr: &TokenStream,
+) -> TokenStream {
     let type_name = extract_base_type_name(&field.ty);
     match type_name.as_str() {
         "String" => quote! { crate::crud::CrudValue::String(#value_expr) },
@@ -209,7 +215,7 @@ fn extract_base_type_name(ty: &syn::Type) -> String {
 mod tests {
     use super::*;
     use crate::parse::ModelInfo;
-    use syn::{parse_str, DeriveInput};
+    use syn::{DeriveInput, parse_str};
 
     fn parse_model(code: &str) -> ModelInfo {
         let input: DeriveInput = parse_str(code).unwrap();

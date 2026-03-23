@@ -60,11 +60,17 @@ mod test {
         let compressed = super::compress_stream(std::io::Cursor::new(&original))
             .expect("compression stream failed");
 
-        assert!(compressed.len() < original.len(), "compressed should be smaller than original");
+        assert!(
+            compressed.len() < original.len(),
+            "compressed should be smaller than original"
+        );
 
         let decompressed = super::decompress_stream(std::io::Cursor::new(&compressed))
             .expect("decompression stream failed");
 
-        assert_eq!(decompressed, original, "decompressed stream should equal original");
+        assert_eq!(
+            decompressed, original,
+            "decompressed stream should equal original"
+        );
     }
 }

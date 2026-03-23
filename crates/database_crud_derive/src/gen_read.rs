@@ -51,7 +51,7 @@ pub fn generate(model: &ModelInfo) -> TokenStream {
 mod tests {
     use super::*;
     use crate::parse::ModelInfo;
-    use syn::{parse_str, DeriveInput};
+    use syn::{DeriveInput, parse_str};
 
     fn parse_model(code: &str) -> ModelInfo {
         let input: DeriveInput = parse_str(code).unwrap();

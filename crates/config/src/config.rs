@@ -86,7 +86,7 @@ impl TryFrom<CliConfig> for Config {
             Some(PrometheusConfig {
                 ip: value.prometheus_ip,
                 port: value.prometheus_port,
-                path: value.prometheus_path
+                path: value.prometheus_path,
             })
         };
 

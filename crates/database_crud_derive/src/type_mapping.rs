@@ -154,7 +154,9 @@ pub fn read_param_to_crud_value(field: &FieldInfo) -> TokenStream {
             .map(extract_base_type_name)
             .unwrap_or_default();
         match inner_name.as_str() {
-            "String" => quote! { crate::crud::CrudValue::OptionString(#ident.map(|s| s.to_string())) },
+            "String" => {
+                quote! { crate::crud::CrudValue::OptionString(#ident.map(|s| s.to_string())) }
+            }
             "DateTime" => quote! { crate::crud::CrudValue::OptionDateTime(#ident) },
             "bool" => quote! { crate::crud::CrudValue::OptionBool(#ident) },
             "i32" => quote! { crate::crud::CrudValue::OptionI32(#ident) },
@@ -190,7 +192,7 @@ pub(crate) fn extract_base_type_name(ty: &Type) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::parse::{extract_option_inner, FieldInfo};
+    use crate::parse::{FieldInfo, extract_option_inner};
     use proc_macro2::{Ident, Span};
     use quote::quote;
     use syn::parse_str;
@@ -238,8 +240,12 @@ mod tests {
 
     #[test]
     fn test_extract_base_primitive() {
-        for (input, expected) in [("bool", "bool"), ("i32", "i32"), ("i64", "i64"), ("f64", "f64")]
-        {
+        for (input, expected) in [
+            ("bool", "bool"),
+            ("i32", "i32"),
+            ("i64", "i64"),
+            ("f64", "f64"),
+        ] {
             let ty: Type = parse_str(input).unwrap();
             assert_eq!(extract_base_type_name(&ty), expected);
         }

@@ -49,10 +49,7 @@ impl ModelInfo {
             })
             .collect();
 
-        let id_field = all_fields
-            .iter()
-            .find(|f| f.ident == "id")
-            .cloned();
+        let id_field = all_fields.iter().find(|f| f.ident == "id").cloned();
 
         let user_fields: Vec<FieldInfo> = all_fields
             .iter()
@@ -144,18 +141,30 @@ mod tests {
                 updated_at: chrono::DateTime<chrono::Utc>,
             }",
         );
-        let desc = model.all_fields.iter().find(|f| f.ident == "description").unwrap();
+        let desc = model
+            .all_fields
+            .iter()
+            .find(|f| f.ident == "description")
+            .unwrap();
         assert!(desc.is_option);
         assert!(desc.inner_ty.is_some());
 
-        let label = model.all_fields.iter().find(|f| f.ident == "label").unwrap();
+        let label = model
+            .all_fields
+            .iter()
+            .find(|f| f.ident == "label")
+            .unwrap();
         assert!(label.is_option);
 
         let name = model.all_fields.iter().find(|f| f.ident == "name").unwrap();
         assert!(!name.is_option);
         assert!(name.inner_ty.is_none());
 
-        let count = model.all_fields.iter().find(|f| f.ident == "count").unwrap();
+        let count = model
+            .all_fields
+            .iter()
+            .find(|f| f.ident == "count")
+            .unwrap();
         assert!(!count.is_option);
     }
 
@@ -171,8 +180,11 @@ mod tests {
                 updated_at: chrono::DateTime<chrono::Utc>,
             }",
         );
-        let user_field_names: Vec<String> =
-            model.user_fields.iter().map(|f| f.ident.to_string()).collect();
+        let user_field_names: Vec<String> = model
+            .user_fields
+            .iter()
+            .map(|f| f.ident.to_string())
+            .collect();
         assert_eq!(user_field_names, vec!["name", "price", "active"]);
         assert!(!user_field_names.contains(&"id".to_string()));
         assert!(!user_field_names.contains(&"created_at".to_string()));

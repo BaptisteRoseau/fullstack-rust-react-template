@@ -76,7 +76,10 @@ pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
             servers.push(prometheus_metrics_server);
         }
 
-        info!("Initialized Prometheus metrics endpoint on {}", &prometheus_config.path);
+        info!(
+            "Initialized Prometheus metrics endpoint on {}",
+            &prometheus_config.path
+        );
     }
 
     // Binding public routes at the end to make sure metric layer is added

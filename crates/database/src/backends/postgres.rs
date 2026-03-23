@@ -24,10 +24,7 @@ impl Postgres {
             config.postgres.port,
             config.postgres.database,
         );
-        let pool = PgPoolOptions::new()
-            .max_connections(10)
-            .connect(&url)
-            .await;
+        let pool = PgPoolOptions::new().max_connections(10).connect(&url).await;
 
         match pool {
             Ok(pool) => Ok(Self { pool }),
@@ -94,7 +91,11 @@ fn bind_crud_value_query(
 
 #[async_trait]
 impl CrudExecutor for Postgres {
-    async fn crud_fetch_one<T>(&self, query: &str, args: Vec<CrudValue>) -> Result<T, CrudError>
+    async fn crud_fetch_one<T>(
+        &self,
+        query: &str,
+        args: Vec<CrudValue>,
+    ) -> Result<T, CrudError>
     where
         T: for<'r> FromRow<'r, sqlx::postgres::PgRow> + Send + Unpin,
     {
@@ -105,7 +106,11 @@ impl CrudExecutor for Postgres {
         Ok(q.fetch_one(&self.pool).await?)
     }
 
-    async fn crud_fetch_all<T>(&self, query: &str, args: Vec<CrudValue>) -> Result<Vec<T>, CrudError>
+    async fn crud_fetch_all<T>(
+        &self,
+        query: &str,
+        args: Vec<CrudValue>,
+    ) -> Result<Vec<T>, CrudError>
     where
         T: for<'r> FromRow<'r, sqlx::postgres::PgRow> + Send + Unpin,
     {
@@ -116,7 +121,11 @@ impl CrudExecutor for Postgres {
         Ok(q.fetch_all(&self.pool).await?)
     }
 
-    async fn crud_execute(&self, query: &str, args: Vec<CrudValue>) -> Result<u64, CrudError> {
+    async fn crud_execute(
+        &self,
+        query: &str,
+        args: Vec<CrudValue>,
+    ) -> Result<u64, CrudError> {
         let mut q = sqlx::query(query);
         for arg in args {
             q = bind_crud_value_query(q, arg);

@@ -8,7 +8,11 @@ pub fn generate(model: &ModelInfo) -> TokenStream {
     let struct_ident = &model.struct_ident;
     let table = &model.table_name;
 
-    let field_names: Vec<String> = model.user_fields.iter().map(|f| f.ident.to_string()).collect();
+    let field_names: Vec<String> = model
+        .user_fields
+        .iter()
+        .map(|f| f.ident.to_string())
+        .collect();
     let columns = field_names.join(", ");
 
     let placeholders: Vec<String> = (1..=model.user_fields.len())
@@ -51,7 +55,7 @@ pub fn generate(model: &ModelInfo) -> TokenStream {
 mod tests {
     use super::*;
     use crate::parse::ModelInfo;
-    use syn::{parse_str, DeriveInput};
+    use syn::{DeriveInput, parse_str};
 
     fn parse_model(code: &str) -> ModelInfo {
         let input: DeriveInput = parse_str(code).unwrap();
@@ -75,7 +79,9 @@ mod tests {
         );
         let output = generate(&model);
         let s = tokens_str(&output);
-        assert!(s.contains("INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *"));
+        assert!(
+            s.contains("INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *")
+        );
         assert!(s.contains("pub async fn create"));
         assert!(s.contains("CrudExecutor"));
     }
@@ -93,7 +99,9 @@ mod tests {
         );
         let output = generate(&model);
         let s = tokens_str(&output);
-        assert!(s.contains("INSERT INTO users (name, address) VALUES ($1, $2) RETURNING *"));
+        assert!(
+            s.contains("INSERT INTO users (name, address) VALUES ($1, $2) RETURNING *")
+        );
         assert!(s.contains("Option < String >"));
     }
 

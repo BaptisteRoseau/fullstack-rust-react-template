@@ -1,9 +1,9 @@
+mod app_state;
 #[warn(unused)]
 mod endpoints;
-mod misc;
 mod extractors;
+mod misc;
 mod models;
-mod app_state;
 
 pub mod error;
 pub mod routes;

@@ -16,7 +16,6 @@
 // like lossy image compression or resizing based of the size of
 // the file being stored.
 
-
 #[derive(Copy, Clone, PartialEq)]
 pub enum EncryptionType {
     NoEncryption,
