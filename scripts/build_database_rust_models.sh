@@ -47,11 +47,15 @@ sqlx migrate run  --no-dotenv --database-url "$DATABASE_URL" --source "$GIT_ROOT
 DEST_FILE="./crates/database/src/generated_models.rs"
 
 echo "Generating models"
+chmod +w "$DEST_FILE"
 sql-gen --db-url "$DATABASE_URL" \
     --output "$DEST_FILE" \
-    --model-derive "Debug, Clone, sqlx::FromRow, Crud" \
-    --enum-derive "Debug, Clone, sqlx::FromRow, Crud"
+    --model-derive "Debug, Clone, sqlx::FromRow, database_crud_derive::Crud" \
+    --enum-derive "Debug, Clone, sqlx::FromRow, database_crud_derive::Crud"
+rustfmt --quiet "$DEST_FILE"
+chmod -w "$DEST_FILE"
 echo "Models generated in $DEST_FILE"
+
 
 echo "Stopping container"
 docker stop sqlx_query_temp 2>&1 > /dev/null
