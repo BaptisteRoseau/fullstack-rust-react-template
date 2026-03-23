@@ -10,6 +10,7 @@ services:
     ports:
       - "${PROMETHEUS_PORT}:9090"
     restart: on-failure
+    profiles: [monitoring]
     volumes:
       - "prometheus:/prometheus"
       - ${GIT_ROOT:-../..}/infrastructure/prometheus:/etc/prometheus
@@ -20,6 +21,7 @@ services:
     networks:
       - net
     restart: on-failure
+    profiles: [monitoring]
     environment:
       DATA_SOURCE_URI: "postgres:5432/postgres?sslmode=disable"
       DATA_SOURCE_USER: ${POSTGRES_USER}
@@ -30,6 +32,7 @@ services:
     container_name: grafana
     networks:
       - net
+    profiles: [monitoring]
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}

@@ -1,0 +1,66 @@
+---
+# This docker compose file is solely intended for development
+# purposes and not for production use.
+# Contains the base docker-compose.yml files, as well as hot-reloading
+# frontend and backend.
+#
+# Run using --profle hot_reloading
+#
+services:
+  backend:
+    image: localhost/backend:latest-debug
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/backend/Dockerfile.debug
+      tags:
+        - "localhost/backend:latest-debug"
+    depends_on:
+      migrate:
+          condition: service_completed_successfully
+    container_name: backend
+    environment:
+      IP: 0.0.0.0
+      PORT: 9876
+      PROMETHEUS_IP: 0.0.0.0
+      PROMETHEUS_PORT: 9100
+      SWAGGER_IP: 0.0.0.0
+      SWAGGER_PORT: 7070
+      SWAGGER_UI_PATH: "/v1/docs/swagger-ui"
+      SWAGGER_OPENAPI_PATH: "/v1/docs/openapi.json"
+      DEBUG: true
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${POSTGRES_DATABASE}
+      DATABASE_USER: ${POSTGRES_USER}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - net
+    ports:
+      - "${BACKEND_PORT}:9876"
+      - "${SWAGGER_PORT}:7070"
+    profiles: [debug]
+    restart: on-failure
+    volumes:
+      - ".:/src"
+
+  frontend:
+    image: localhost/frontend:latest-debug
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/frontend/Dockerfile.debug
+      tags:
+        - "localhost/frontend:latest-debug"
+    container_name: frontend
+    environment:
+      API_ROOT: ${API_ROOT}
+    networks:
+      - net
+    ports:
+      - "${FRONTEND_PORT}:8080"
+    restart: on-failure
+    profiles: [debug]
+    volumes:
+      - "./frontend:/src"
+
+networks:
+  net:

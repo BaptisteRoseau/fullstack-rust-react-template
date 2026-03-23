@@ -5,4 +5,4 @@ include:
   - infrastructure/docker-compose/docker-compose.debug-services.yml
   - infrastructure/docker-compose/docker-compose.authentication.yml
   - infrastructure/docker-compose/docker-compose.release.yml
-  - infrastructure/docker-compose/docker-compose.hot-reloading.yml
+  - infrastructure/docker-compose/docker-compose.debug.yml
