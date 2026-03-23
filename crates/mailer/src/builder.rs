@@ -21,6 +21,7 @@ impl Email {
     }
 
     pub fn send(&self) -> Result<(), Error> {
+        todo!();
         self.mailer.send(&self.email)?;
         Ok(())
     }
@@ -46,6 +47,7 @@ impl EmailBuilder {
     }
 
     pub fn build(&self) -> Result<Email, Error> {
+        todo!();
         let message_content = self.template.content();
         let email = self
             .builder
@@ -91,6 +93,7 @@ impl Mailer {
     }
 
     pub fn template(&self, template: Template) -> EmailBuilder {
-        EmailBuilder::new(self.builder.clone(), template)
+        todo!();
+        EmailBuilder::new(self, self.builder.clone(), template)
     }
 }
