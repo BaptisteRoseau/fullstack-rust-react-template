@@ -6,8 +6,8 @@ services:
     backend:
         image: localhost/backend:latest
         build:
-            context: .
-            dockerfile: crates/Dockerfile.release
+            context: ../..
+            dockerfile: infrastructure/docker/backend/Dockerfile.release
             tags:
                 - "localhost/backend:latest"
         depends_on:
@@ -31,6 +31,7 @@ services:
             DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
         networks:
             - net
+        profiles: [release]
         ports:
             - "${BACKEND_PORT}:9876"
             - "${SWAGGER_PORT}:7070"
@@ -39,8 +40,8 @@ services:
     frontend:
         image: localhost/frontend:latest
         build:
-            context: .
-            dockerfile: frontend/Dockerfile.release
+            context: ../..
+            dockerfile: infrastructure/docker/frontend/Dockerfile.release
             tags:
                 - "localhost/frontend:latest"
         container_name: frontend
@@ -48,6 +49,7 @@ services:
             API_ROOT: ${API_ROOT}
         networks:
             - net
+        profiles: [release]
         ports:
             - "${FRONTEND_PORT}:8080"
         restart: on-failure

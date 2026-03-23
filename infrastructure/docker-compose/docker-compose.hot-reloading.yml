@@ -10,8 +10,8 @@ services:
   backend:
     image: localhost/backend:latest-debug
     build:
-      context: .
-      dockerfile: crates/Dockerfile.debug
+      context: ../..
+      dockerfile: infrastructure/docker/backend/Dockerfile.debug
       tags:
         - "localhost/backend:latest-debug"
     depends_on:
@@ -38,7 +38,7 @@ services:
     ports:
       - "${BACKEND_PORT}:9876"
       - "${SWAGGER_PORT}:7070"
-    profile: hot_reloading
+    profiles: [hot_reloading]
     restart: on-failure
     volumes:
       - ".:/src"
@@ -46,8 +46,8 @@ services:
   frontend:
     image: localhost/frontend:latest-debug
     build:
-      context: .
-      dockerfile: frontend/Dockerfile.debug
+      context: ../..
+      dockerfile: infrastructure/docker/frontend/Dockerfile.debug
       tags:
         - "localhost/frontend:latest-debug"
     container_name: frontend
@@ -58,7 +58,7 @@ services:
     ports:
       - "${FRONTEND_PORT}:8080"
     restart: on-failure
-    profile: hot_reloading
+    profiles: [hot_reloading]
     volumes:
       - "./frontend:/src"
 
