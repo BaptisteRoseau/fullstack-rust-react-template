@@ -3,6 +3,8 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 pub enum DatabaseError {
     #[error(transparent)]
+    Sqlx(#[from] sqlx::Error),
+    #[error(transparent)]
     Postgres(#[from] tokio_postgres::error::Error),
     #[error(transparent)]
     ConnectionPool(#[from] deadpool_postgres::PoolError),

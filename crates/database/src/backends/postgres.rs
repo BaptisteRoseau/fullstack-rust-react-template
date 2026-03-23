@@ -1,82 +1,127 @@
+use async_trait::async_trait;
+use sqlx::postgres::PgPoolOptions;
+use sqlx::{FromRow, PgPool};
+
+use crate::crud::{CrudError, CrudExecutor, CrudValue};
 #[warn(dead_code)]
 use crate::database::Database;
 use crate::error::DatabaseError;
 use config::Config;
-use deadpool_postgres::{
-    Config as DpConfig, ManagerConfig, Pool, RecyclingMethod, Runtime, SslMode,
-};
-use tokio_postgres::types::ToSql;
-use tokio_postgres::{NoTls, Row};
 use tracing::warn;
 
 #[derive(Clone)]
 pub struct Postgres {
-    pool: Pool,
+    pool: PgPool,
 }
 
 impl Postgres {
     pub async fn try_from(config: &Config) -> Result<Self, DatabaseError> {
-        let cfg = Self::parameters(config)?;
-        let pool = cfg.create_pool(Some(Runtime::Tokio1), NoTls)?;
-        if pool.get().await.is_err() {
-            warn!("Could not connect to database yet");
+        let url = format!(
+            "postgres://{}:{}@{}:{}/{}",
+            config.postgres.user,
+            config.postgres.password,
+            config.postgres.host,
+            config.postgres.port,
+            config.postgres.database,
+        );
+        let pool = PgPoolOptions::new()
+            .max_connections(10)
+            .connect(&url)
+            .await;
+
+        match pool {
+            Ok(pool) => Ok(Self { pool }),
+            Err(e) => {
+                warn!("Could not connect to database yet: {e}");
+                // Create pool without connecting (lazy)
+                let pool = PgPoolOptions::new()
+                    .max_connections(10)
+                    .connect_lazy(&url)?;
+                Ok(Self { pool })
+            }
         }
-        Ok(Self { pool })
     }
 
-    fn parameters(config: &Config) -> Result<DpConfig, DatabaseError> {
-        let mut dp_config = DpConfig::new();
-        dp_config.manager = Some(ManagerConfig {
-            recycling_method: RecyclingMethod::Clean,
-        });
-        dp_config.user = Some(config.postgres.user.clone());
-        dp_config.host = Some(config.postgres.host.clone());
-        dp_config.dbname = Some(config.postgres.database.clone());
-        dp_config.password = Some(config.postgres.password.clone());
-        dp_config.port = Some(config.postgres.port);
-        dp_config.ssl_mode = Some(SslMode::Require);
-        Ok(dp_config)
+    pub fn pool(&self) -> &PgPool {
+        &self.pool
+    }
+}
+
+fn bind_crud_value_query_as<'q, T>(
+    query: sqlx::query::QueryAs<'q, sqlx::Postgres, T, sqlx::postgres::PgArguments>,
+    value: CrudValue,
+) -> sqlx::query::QueryAs<'q, sqlx::Postgres, T, sqlx::postgres::PgArguments>
+where
+    T: for<'r> FromRow<'r, sqlx::postgres::PgRow>,
+{
+    match value {
+        CrudValue::Uuid(v) => query.bind(v),
+        CrudValue::String(v) => query.bind(v),
+        CrudValue::OptionString(v) => query.bind(v),
+        CrudValue::DateTime(v) => query.bind(v),
+        CrudValue::OptionDateTime(v) => query.bind(v),
+        CrudValue::Bool(v) => query.bind(v),
+        CrudValue::OptionBool(v) => query.bind(v),
+        CrudValue::I32(v) => query.bind(v),
+        CrudValue::OptionI32(v) => query.bind(v),
+        CrudValue::I64(v) => query.bind(v),
+        CrudValue::OptionI64(v) => query.bind(v),
+        CrudValue::F64(v) => query.bind(v),
+        CrudValue::OptionF64(v) => query.bind(v),
+    }
+}
+
+fn bind_crud_value_query(
+    query: sqlx::query::Query<'_, sqlx::Postgres, sqlx::postgres::PgArguments>,
+    value: CrudValue,
+) -> sqlx::query::Query<'_, sqlx::Postgres, sqlx::postgres::PgArguments> {
+    match value {
+        CrudValue::Uuid(v) => query.bind(v),
+        CrudValue::String(v) => query.bind(v),
+        CrudValue::OptionString(v) => query.bind(v),
+        CrudValue::DateTime(v) => query.bind(v),
+        CrudValue::OptionDateTime(v) => query.bind(v),
+        CrudValue::Bool(v) => query.bind(v),
+        CrudValue::OptionBool(v) => query.bind(v),
+        CrudValue::I32(v) => query.bind(v),
+        CrudValue::OptionI32(v) => query.bind(v),
+        CrudValue::I64(v) => query.bind(v),
+        CrudValue::OptionI64(v) => query.bind(v),
+        CrudValue::F64(v) => query.bind(v),
+        CrudValue::OptionF64(v) => query.bind(v),
+    }
+}
+
+#[async_trait]
+impl CrudExecutor for Postgres {
+    async fn crud_fetch_one<T>(&self, query: &str, args: Vec<CrudValue>) -> Result<T, CrudError>
+    where
+        T: for<'r> FromRow<'r, sqlx::postgres::PgRow> + Send + Unpin,
+    {
+        let mut q = sqlx::query_as::<_, T>(query);
+        for arg in args {
+            q = bind_crud_value_query_as(q, arg);
+        }
+        Ok(q.fetch_one(&self.pool).await?)
     }
 
-    pub async fn query_one_cached<T: ToString>(
-        &self,
-        query: T,
-        params: &[&(dyn ToSql + Sync)],
-    ) -> Result<Row, DatabaseError> {
-        let client = self.pool.get().await?;
-        let statement = client.prepare_cached(query.to_string().as_str()).await?;
-        let row = client.query_one(&statement, params).await?;
-        Ok(row)
+    async fn crud_fetch_all<T>(&self, query: &str, args: Vec<CrudValue>) -> Result<Vec<T>, CrudError>
+    where
+        T: for<'r> FromRow<'r, sqlx::postgres::PgRow> + Send + Unpin,
+    {
+        let mut q = sqlx::query_as::<_, T>(query);
+        for arg in args {
+            q = bind_crud_value_query_as(q, arg);
+        }
+        Ok(q.fetch_all(&self.pool).await?)
     }
 
-    pub async fn query_one<T: ToString>(
-        &self,
-        query: T,
-        params: &[&(dyn ToSql + Sync)],
-    ) -> Result<Row, DatabaseError> {
-        let client = self.pool.get().await?;
-        let row = client.query_one(query.to_string().as_str(), params).await?;
-        Ok(row)
-    }
-
-    pub async fn execute_cached<T: ToString>(
-        &self,
-        query: T,
-        params: &[&(dyn ToSql + Sync)],
-    ) -> Result<u64, DatabaseError> {
-        let client = self.pool.get().await?;
-        let statement = client.prepare_cached(query.to_string().as_str()).await?;
-        Ok(client.execute(&statement, params).await?)
-    }
-
-    pub async fn execute<T: ToString>(
-        &self,
-        query: T,
-        params: &[&(dyn ToSql + Sync)],
-    ) -> Result<u64, DatabaseError> {
-        let client = self.pool.get().await?;
-        let affected = client.execute(query.to_string().as_str(), params).await?;
-        Ok(affected)
+    async fn crud_execute(&self, query: &str, args: Vec<CrudValue>) -> Result<u64, CrudError> {
+        let mut q = sqlx::query(query);
+        for arg in args {
+            q = bind_crud_value_query(q, arg);
+        }
+        Ok(q.execute(&self.pool).await?.rows_affected())
     }
 }
 
