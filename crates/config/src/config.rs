@@ -181,6 +181,7 @@ mod test {
                 database_password: DEFAULT_DATABASE_PASSWORD.to_string(),
                 prometheus_ip: DEFAULT_PROMETHEUS_IP,
                 prometheus_port: DEFAULT_PROMETHEUS_PORT,
+                prometheus_path: DEFAULT_PROMETHEUS_PATH.to_string(),
                 api_timeout_sec: DEFAULT_API_TIMEOUT_SEC,
                 no_prometheus: false,
                 swagger_ip: DEFAULT_SWAGGER_IP,
