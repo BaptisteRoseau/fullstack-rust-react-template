@@ -24,17 +24,17 @@ impl TryFrom<&Config> for S3 {
 impl Storage for S3 {
     fn save(
         &self,
-        file: &Path,
-        content: &[u8],
-        parameters: StorageParameters,
+        _file: &Path,
+        _content: &[u8],
+        _parameters: StorageParameters,
     ) -> Result<(), StorageError> {
         todo!()
     }
 
     fn load(
         &self,
-        file: &Path,
-        parameters: StorageParameters,
+        _file: &Path,
+        _parameters: StorageParameters,
     ) -> Result<Vec<u8>, StorageError> {
         todo!()
     }
@@ -49,21 +49,21 @@ impl Storage for S3 {
 
     fn load_stream(
         &self,
-        writer: &mut dyn Write,
-        parameters: StorageParameters,
+        _writer: &mut dyn Write,
+        _parameters: StorageParameters,
     ) -> Result<(), StorageError> {
         todo!()
     }
 
-    fn direct_save(&self, file: &Path) -> Result<(), StorageError> {
+    fn direct_save(&self, _file: &Path) -> Result<(), StorageError> {
         todo!()
     }
 
-    fn direct_load(&self, file: &Path) -> Result<Vec<u8>, StorageError> {
+    fn direct_load(&self, _file: &Path) -> Result<Vec<u8>, StorageError> {
         todo!()
     }
 
-    fn delete(&self, file: &Path) -> Result<(), StorageError> {
+    fn delete(&self, _file: &Path) -> Result<(), StorageError> {
         todo!()
     }
 }

@@ -56,8 +56,8 @@ pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
         info!("Initializing Prometheus metrics endpoint...");
         let metrics_routes = try_metrics_routes(&prometheus_config.path, metric_handle)?;
 
-        if (prometheus_config.ip == config.server.ip
-            && prometheus_config.port == config.server.port)
+        if prometheus_config.ip == config.server.ip
+            && prometheus_config.port == config.server.port 
         {
             warn!("Merging Prometheus metrics endpoint with public API");
             public_routes = public_routes.merge(metrics_routes);

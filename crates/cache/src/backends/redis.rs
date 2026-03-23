@@ -1,4 +1,3 @@
-use crate::Cache;
 
 // TODO: deadpool_redis :D
 

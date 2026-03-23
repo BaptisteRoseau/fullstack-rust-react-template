@@ -3,7 +3,6 @@ use std::rc::Rc;
 use crate::error::Error;
 use crate::templates::Template;
 
-use lettre::message::header::ContentType;
 use lettre::message::{Mailbox, MessageBuilder};
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::{Message, SmtpTransport};
@@ -92,7 +91,7 @@ impl Mailer {
         self
     }
 
-    pub fn template(&self, template: Template) -> EmailBuilder {
+    pub fn template(&self, _template: Template) -> EmailBuilder {
         todo!();
         // EmailBuilder::new(self, self.builder.clone(), template)
     }

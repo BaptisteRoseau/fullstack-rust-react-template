@@ -42,8 +42,8 @@ where
             }
         };
 
-        let mut token: String = header.to_str().unwrap().to_string();
-        let token = token
+        let token: String = header.to_str().unwrap().to_string();
+        let _token = token
             .strip_prefix("Bearer ")
             .unwrap_or(token.as_str())
             .to_string();
