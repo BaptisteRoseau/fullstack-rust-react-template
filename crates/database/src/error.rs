@@ -4,12 +4,6 @@ use thiserror::Error;
 pub enum DatabaseError {
     #[error(transparent)]
     Sqlx(#[from] sqlx::Error),
-    #[error(transparent)]
-    Postgres(#[from] tokio_postgres::error::Error),
-    #[error(transparent)]
-    ConnectionPool(#[from] deadpool_postgres::PoolError),
-    #[error(transparent)]
-    PoolCreationError(#[from] deadpool_postgres::CreatePoolError),
     #[error("The item was not found.")]
     NotFound(String),
 }

@@ -71,16 +71,20 @@ impl ModelInfo {
 }
 
 fn extract_option_inner(ty: &Type) -> (bool, Option<Type>) {
-    if let Type::Path(type_path) = ty {
-        if let Some(segment) = type_path.path.segments.last() {
-            if segment.ident == "Option" {
-                if let PathArguments::AngleBracketed(args) = &segment.arguments {
-                    if let Some(GenericArgument::Type(inner)) = args.args.first() {
-                        return (true, Some(inner.clone()));
-                    }
-                }
-            }
-        }
+    let Type::Path(type_path) = ty else {
+        return (false, None);
+    };
+    let Some(segment) = type_path.path.segments.last() else {
+        return (false, None);
+    };
+    if segment.ident != "Option" {
+        return (false, None);
+    }
+    let PathArguments::AngleBracketed(args) = &segment.arguments else {
+        return (false, None);
+    };
+    if let Some(GenericArgument::Type(inner)) = args.args.first() {
+        return (true, Some(inner.clone()));
     }
     (false, None)
 }

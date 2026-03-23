@@ -13,7 +13,7 @@ pub fn to_crud_value(field: &FieldInfo, value_expr: &TokenStream) -> TokenStream
         let inner_name = field
             .inner_ty
             .as_ref()
-            .map(|t| extract_base_type_name(t))
+            .map(extract_base_type_name)
             .unwrap_or_default();
         match inner_name.as_str() {
             "String" => quote! { crate::crud::CrudValue::OptionString(#value_expr) },
@@ -59,7 +59,7 @@ pub fn create_param_type(field: &FieldInfo) -> TokenStream {
         let inner_name = field
             .inner_ty
             .as_ref()
-            .map(|t| extract_base_type_name(t))
+            .map(extract_base_type_name)
             .unwrap_or_default();
         match inner_name.as_str() {
             "String" => quote! { Option<String> },
@@ -89,7 +89,7 @@ pub fn create_param_to_crud_value(field: &FieldInfo) -> TokenStream {
         let inner_name = field
             .inner_ty
             .as_ref()
-            .map(|t| extract_base_type_name(t))
+            .map(extract_base_type_name)
             .unwrap_or_default();
         match inner_name.as_str() {
             "String" => quote! { crate::crud::CrudValue::OptionString(#ident) },
@@ -122,7 +122,7 @@ pub fn read_param_type(field: &FieldInfo) -> TokenStream {
         let inner_name = field
             .inner_ty
             .as_ref()
-            .map(|t| extract_base_type_name(t))
+            .map(extract_base_type_name)
             .unwrap_or_default();
         match inner_name.as_str() {
             "String" => quote! { Option<&str> },
@@ -151,7 +151,7 @@ pub fn read_param_to_crud_value(field: &FieldInfo) -> TokenStream {
         let inner_name = field
             .inner_ty
             .as_ref()
-            .map(|t| extract_base_type_name(t))
+            .map(extract_base_type_name)
             .unwrap_or_default();
         match inner_name.as_str() {
             "String" => quote! { crate::crud::CrudValue::OptionString(#ident.map(|s| s.to_string())) },
@@ -179,10 +179,10 @@ pub fn read_param_to_crud_value(field: &FieldInfo) -> TokenStream {
 
 /// Extract the last segment of a type path (e.g. "uuid::Uuid" -> "Uuid", "String" -> "String")
 fn extract_base_type_name(ty: &Type) -> String {
-    if let Type::Path(type_path) = ty {
-        if let Some(segment) = type_path.path.segments.last() {
-            return segment.ident.to_string();
-        }
+    if let Type::Path(type_path) = ty
+        && let Some(segment) = type_path.path.segments.last()
+    {
+        return segment.ident.to_string();
     }
     String::new()
 }

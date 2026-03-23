@@ -197,10 +197,10 @@ fn to_crud_value_non_option(field: &crate::parse::FieldInfo, value_expr: &TokenS
 }
 
 fn extract_base_type_name(ty: &syn::Type) -> String {
-    if let syn::Type::Path(type_path) = ty {
-        if let Some(segment) = type_path.path.segments.last() {
-            return segment.ident.to_string();
-        }
+    if let syn::Type::Path(type_path) = ty
+        && let Some(segment) = type_path.path.segments.last()
+    {
+        return segment.ident.to_string();
     }
     String::new()
 }

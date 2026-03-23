@@ -33,7 +33,7 @@ pub fn generate(model: &ModelInfo) -> TokenStream {
     let args: Vec<TokenStream> = model
         .user_fields
         .iter()
-        .map(|f| create_param_to_crud_value(f))
+        .map(create_param_to_crud_value)
         .collect();
 
     quote! {
