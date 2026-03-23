@@ -22,7 +22,7 @@ impl Email {
 
     pub fn send(&self) -> Result<(), Error> {
         todo!();
-        self.mailer.send(&self.email)?;
+        // self.mailer.send(&self.email)?;
         Ok(())
     }
 }
@@ -48,13 +48,13 @@ impl EmailBuilder {
 
     pub fn build(&self) -> Result<Email, Error> {
         todo!();
-        let message_content = self.template.content();
-        let email = self
-            .builder
-            .subject(message_content.title)
-            .header(ContentType::TEXT_HTML)
-            .body(message_content.body)?;
-        Ok(Email::new(self.mailer.clone(), email))
+        // let message_content = self.template.content();
+        // let email = self
+        //     .builder
+        //     .subject(message_content.title)
+        //     .header(ContentType::TEXT_HTML)
+        //     .body(message_content.body)?;
+        // Ok(Email::new(self.mailer.clone(), email))
     }
 }
 
@@ -94,6 +94,6 @@ impl Mailer {
 
     pub fn template(&self, template: Template) -> EmailBuilder {
         todo!();
-        EmailBuilder::new(self, self.builder.clone(), template)
+        // EmailBuilder::new(self, self.builder.clone(), template)
     }
 }
