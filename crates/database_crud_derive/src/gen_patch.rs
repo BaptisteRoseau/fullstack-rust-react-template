@@ -4,7 +4,8 @@ use quote::{format_ident, quote};
 use crate::parse::ModelInfo;
 use crate::type_mapping::to_crud_value;
 
-pub fn generate(model: &ModelInfo) -> TokenStream {
+/// Returns (patch_struct_and_impl, patch_methods_on_model)
+pub fn generate(model: &ModelInfo) -> (TokenStream, TokenStream) {
     let struct_ident = &model.struct_ident;
     let patch_ident = format_ident!("{}Patch", struct_ident);
     let table = &model.table_name;
@@ -19,11 +20,9 @@ pub fn generate(model: &ModelInfo) -> TokenStream {
         .map(|f| {
             let ident = &f.ident;
             if f.is_option {
-                // Nullable field: Option<Option<T>>
                 let inner_ty = f.inner_ty.as_ref().unwrap();
                 quote! { pub #ident: Option<Option<#inner_ty>> }
             } else {
-                // Non-nullable field: Option<T>
                 let ty = &f.ty;
                 quote! { pub #ident: Option<#ty> }
             }
@@ -78,8 +77,7 @@ pub fn generate(model: &ModelInfo) -> TokenStream {
         })
         .collect();
 
-    // Generate the dynamic execute body:
-    // For each user field, emit an if-let block that pushes a SET clause and CrudValue
+    // Generate execute body arms
     let execute_arms: Vec<TokenStream> = model
         .user_fields
         .iter()
@@ -88,8 +86,6 @@ pub fn generate(model: &ModelInfo) -> TokenStream {
             let field_name = ident.to_string();
 
             if f.is_option {
-                // For Option<T> model fields, patch field is Option<Option<T>>
-                // When Some(inner), we push the inner value (which may be None for NULL)
                 let value_expr = quote! { inner };
                 let crud_value = to_crud_value(f, &value_expr);
                 quote! {
@@ -100,10 +96,7 @@ pub fn generate(model: &ModelInfo) -> TokenStream {
                     }
                 }
             } else {
-                // For non-Option model fields, patch field is Option<T>
-                // When Some(v), we push v directly
                 let value_expr = quote! { v };
-                // We need a non-option CrudValue here, so create a temp FieldInfo-like mapping
                 let crud_value = to_crud_value_non_option(f, &value_expr);
                 quote! {
                     if let Some(v) = self.#ident {
@@ -116,7 +109,7 @@ pub fn generate(model: &ModelInfo) -> TokenStream {
         })
         .collect();
 
-    // Generate field initializers for build_patch and patch (all None)
+    // Field initializers (all None)
     let none_inits: Vec<TokenStream> = model
         .user_fields
         .iter()
@@ -128,7 +121,8 @@ pub fn generate(model: &ModelInfo) -> TokenStream {
 
     let select_sql = format!("SELECT * FROM {table} WHERE id = $1");
 
-    quote! {
+    // The patch struct and its impl (goes outside the model's impl block)
+    let patch_struct_and_impl = quote! {
         pub struct #patch_ident {
             pub id: #id_ty,
             #(#patch_fields),*
@@ -162,8 +156,10 @@ pub fn generate(model: &ModelInfo) -> TokenStream {
                 db.crud_fetch_one::<#struct_ident>(&query, args).await
             }
         }
+    };
 
-        // Methods on the model struct for creating patches
+    // Methods that go on the model struct's impl block
+    let patch_methods_on_model = quote! {
         pub fn build_patch(id: #id_ty) -> #patch_ident {
             #patch_ident {
                 id,
@@ -177,10 +173,11 @@ pub fn generate(model: &ModelInfo) -> TokenStream {
                 #(#none_inits),*
             }
         }
-    }
+    };
+
+    (patch_struct_and_impl, patch_methods_on_model)
 }
 
-/// For non-option fields unwrapped from Some(v), produce the right CrudValue
 fn to_crud_value_non_option(field: &crate::parse::FieldInfo, value_expr: &TokenStream) -> TokenStream {
     let type_name = extract_base_type_name(&field.ty);
     match type_name.as_str() {

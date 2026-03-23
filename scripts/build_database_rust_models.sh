@@ -48,6 +48,13 @@ DEST_FILE="./crates/database/src/generated_models.rs"
 
 echo "Generating models"
 sql-gen --db-url "$DATABASE_URL" --output $DEST_FILE
+
+echo "Post-processing: adding Crud derive and imports"
+sed -i '1i use database_crud_derive::Crud;' $DEST_FILE
+sed -i 's/#\[derive(Debug, Clone, sqlx::FromRow)\]/#[derive(Debug, Clone, sqlx::FromRow, Crud)]/' $DEST_FILE
+# Make all struct fields public for the Crud derive patch struct
+sed -i 's/^    \([a-z_]*\):/    pub \1:/' $DEST_FILE
+
 echo "Models generated in $DEST_FILE"
 
 echo "Stopping container"

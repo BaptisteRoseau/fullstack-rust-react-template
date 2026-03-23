@@ -22,15 +22,17 @@ pub fn derive_crud(input: TokenStream) -> TokenStream {
     let create_fn = gen_create::generate(&model);
     let read_fns = gen_read::generate(&model);
     let delete_fn = gen_delete::generate(&model);
-    let patch_code = gen_patch::generate(&model);
+    let (patch_struct_and_impl, patch_methods_on_model) = gen_patch::generate(&model);
 
     let output = quote! {
         impl #struct_ident {
             #create_fn
             #read_fns
             #delete_fn
-            #patch_code
+            #patch_methods_on_model
         }
+
+        #patch_struct_and_impl
     };
 
     output.into()
