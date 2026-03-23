@@ -22,18 +22,18 @@ When working on a new task, first search for pieces of code that are similar to 
 
 ### Planning
 
-When working on a task, use the `llm_memory/` directory. This is your place, you will have an SQLite database with an MCP and maybe even a RAG to store and retrieve relevant pieces of information.
-
 When working on a task:
 
 - Create a branch for your task if not already on a new one
+- Make a clear TODO list of the tasks
 - First have a read-only approach: list what pieces of information you need to retrieve as bulletpoints
-- Then, go in the codebase, database and documentation find those information and summarize them
+- Then, use an agent to go in the codebase, database and documentation find those information and summarize them
 - Then, plan the modifications that needs to be done and split them into small chunks that will be done one by one
-- Go back and forth with the plan, implement a chunk, read it, criticize it and refactor it until you are satisfied
-- Test it using the unit tests, compiler and linter
-- Only if necessary, add unit tests
-- Commit your code
+- Go back and forth with the plan, start an agent that will:
+    - implement a chunk, read it, criticize it and refactor it until it is satisfied
+    - Test it using the unit tests, compiler and linter (use the scripts)
+    - Only if necessary, add unit tests
+- Commit your code with: git commit --author=Claude -m "<message>"
 - Go onto the next chunk and repeat
 - When finished, tell the user your task is done and ask for a review. Do not merge the branch yourself.
 
@@ -52,9 +52,7 @@ Be critical on the issues: is the problem from the test or the codebase ? If in 
 Whenever you work in a directory, read the README.md in this directory and the one in all its parent directories if they exists.
 They contain information about how the code should be handled as well as helpful guidelines.
 
-Do not invent APIs, when necessary, use the context7 MCP to access documentation online.
-
-If you need crate documentation, instead of using `crates.io` prefer using:
+If you need Rust crate documentation, instead of using `crates.io` prefer using:
 
 ```
 curl file://<absolute path to current project>/target/doc/<the crate you're looking for>/index.html
@@ -64,10 +62,8 @@ If hitting a 404, run `cargo doc` to build the documentaion pages.
 If still hitting a 404 fallback to `crates.io`.
 Pipe bash commands to convert the HTML to text to reduce token usage and only get useful text.
 
-## Versionning
+Do not invent APIs, when necessary, use the context7 MCP to access documentation online.
 
-When working on a task, frequently run git commit with:
+## Running the services
 
-```bash
-git commit --author=LLM -m "<message>"
-```
+All the services required to run the application can be launched using `docker compose up -d`.
