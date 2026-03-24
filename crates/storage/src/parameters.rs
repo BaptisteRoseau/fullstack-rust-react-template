@@ -89,6 +89,19 @@ impl StorageParameters {
         self.compression = Compression::NoCompression;
         self
     }
+
+    pub fn compression(&self) -> Compression {
+        self.compression
+    }
+
+    pub fn no_image_compression(&mut self) -> &mut Self {
+        self.image.compression = ImageCompression::NoCompression;
+        self
+    }
+
+    pub fn image(&self) -> &ImageParameters {
+        &self.image
+    }
 }
 
 fn initialize_parameters() -> StorageParameters {

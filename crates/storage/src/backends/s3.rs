@@ -1,29 +1,45 @@
 use config::Config;
-use s3::{Auth, Client, Credentials};
+use s3::{AddressingStyle, Auth, BlockingClient, Credentials};
 use std::{
     io::{Read, Write},
     path::Path,
 };
 
-use crate::{Storage, error::StorageError, parameters::StorageParameters};
+use crate::{
+    Storage,
+    compressor::{compress_bytes, decompress_bytes},
+    error::StorageError,
+    images::compress_image,
+    parameters::{Compression, StorageParameters},
+};
 
 #[derive(Clone)]
 pub struct S3 {
-    client: Client,
+    client: BlockingClient,
+    bucket: String,
 }
 
 impl S3 {
     pub fn new(
         endpoint: &str,
+        bucket: &str,
         access_key: &str,
         secret_key: &str,
     ) -> Result<Self, StorageError> {
         let credentials = Credentials::new(access_key, secret_key)?;
-        let client = Client::builder(endpoint)?
+        let client = BlockingClient::builder(endpoint)?
             .region("us-east-1")
             .auth(Auth::Static(credentials))
+            .addressing_style(AddressingStyle::Path)
             .build()?;
-        Ok(Self { client })
+        Ok(Self {
+            client,
+            bucket: bucket.to_string(),
+        })
+    }
+
+    fn key_from_path(file: &Path) -> String {
+        file.to_string_lossy().to_string()
     }
 }
 
@@ -31,12 +47,12 @@ impl TryFrom<&Config> for S3 {
     type Error = StorageError;
 
     fn try_from(value: &Config) -> Result<Self, Self::Error> {
-        let credentials = Credentials::new(&value.s3.user, &value.s3.password)?;
-        let client = Client::builder(&value.s3.host)?
-            .region("us-east-1")
-            .auth(Auth::Static(credentials))
-            .build()?;
-        Ok(Self { client })
+        Self::new(
+            &value.s3.host,
+            "default",
+            &value.s3.user,
+            &value.s3.password,
+        )
     }
 }
 
@@ -47,7 +63,21 @@ impl Storage for S3 {
         content: &[u8],
         parameters: StorageParameters,
     ) -> Result<(), StorageError> {
-        todo!()
+        let processed = compress_image(content, parameters.image())?;
+
+        let body = match parameters.compression() {
+            Compression::Gzip => compress_bytes(&processed)?,
+            Compression::NoCompression => processed,
+        };
+
+        let key = Self::key_from_path(file);
+        self.client
+            .objects()
+            .put(&self.bucket, &key)
+            .body_bytes(body)
+            .send()?;
+
+        Ok(())
     }
 
     fn load(
@@ -55,7 +85,21 @@ impl Storage for S3 {
         file: &Path,
         parameters: StorageParameters,
     ) -> Result<Vec<u8>, StorageError> {
-        todo!()
+        let key = Self::key_from_path(file);
+        let output = self
+            .client
+            .objects()
+            .get(&self.bucket, &key)
+            .send()?;
+
+        let raw = output.bytes()?;
+
+        let data = match parameters.compression() {
+            Compression::Gzip => decompress_bytes(&raw)?,
+            Compression::NoCompression => raw.to_vec(),
+        };
+
+        Ok(data)
     }
 
     fn save_stream(
@@ -63,27 +107,39 @@ impl Storage for S3 {
         _reader: &mut dyn Read,
         _parameters: StorageParameters,
     ) -> Result<(), StorageError> {
-        todo!()
+        todo!("save_stream requires a file path in the trait signature")
     }
 
     fn load_stream(
         &self,
-        writer: &mut dyn Write,
-        parameters: StorageParameters,
+        _writer: &mut dyn Write,
+        _parameters: StorageParameters,
     ) -> Result<(), StorageError> {
-        todo!()
+        todo!("load_stream requires a file path in the trait signature")
     }
 
-    fn direct_save(&self, file: &Path) -> Result<(), StorageError> {
-        todo!()
+    fn direct_save(&self, _file: &Path) -> Result<(), StorageError> {
+        todo!("direct_save needs content to upload or should return a presigned URL")
     }
 
     fn direct_load(&self, file: &Path) -> Result<Vec<u8>, StorageError> {
-        todo!()
+        let key = Self::key_from_path(file);
+        let output = self
+            .client
+            .objects()
+            .get(&self.bucket, &key)
+            .send()?;
+        let raw = output.bytes()?;
+        Ok(raw.to_vec())
     }
 
     fn delete(&self, file: &Path) -> Result<(), StorageError> {
-        todo!()
+        let key = Self::key_from_path(file);
+        self.client
+            .objects()
+            .delete(&self.bucket, &key)
+            .send()?;
+        Ok(())
     }
 }
 
@@ -94,8 +150,13 @@ mod tests {
     use crate::testing::containers::minio::MINIO;
 
     fn make_storage() -> S3 {
-        S3::new(&MINIO.endpoint, &MINIO.access_key, &MINIO.secret_key)
-            .expect("failed to create S3 client")
+        S3::new(
+            &MINIO.endpoint,
+            crate::testing::containers::minio::TEST_BUCKET,
+            &MINIO.access_key,
+            &MINIO.secret_key,
+        )
+        .expect("failed to create S3 client")
     }
 
     #[test]
@@ -103,40 +164,28 @@ mod tests {
         let _storage = make_storage();
     }
 
-    // Uncomment as S3 trait methods get implemented:
-    //
-    // #[test]
-    // fn test_save_and_load() {
-    //     crate::testing::trait_tests::assert_save_and_load(&make_storage());
-    // }
-    //
-    // #[test]
-    // fn test_save_overwrite() {
-    //     crate::testing::trait_tests::assert_save_overwrite(&make_storage());
-    // }
-    //
-    // #[test]
-    // fn test_load_nonexistent() {
-    //     crate::testing::trait_tests::assert_load_nonexistent(&make_storage());
-    // }
-    //
-    // #[test]
-    // fn test_save_stream_and_load_stream() {
-    //     crate::testing::trait_tests::assert_save_stream_and_load_stream(&make_storage());
-    // }
-    //
-    // #[test]
-    // fn test_delete() {
-    //     crate::testing::trait_tests::assert_delete(&make_storage());
-    // }
-    //
-    // #[test]
-    // fn test_direct_save() {
-    //     crate::testing::trait_tests::assert_direct_save(&make_storage());
-    // }
-    //
-    // #[test]
-    // fn test_direct_load() {
-    //     crate::testing::trait_tests::assert_direct_load(&make_storage());
-    // }
+    #[test]
+    fn test_save_and_load() {
+        crate::testing::trait_tests::assert_save_and_load(&make_storage());
+    }
+
+    #[test]
+    fn test_save_overwrite() {
+        crate::testing::trait_tests::assert_save_overwrite(&make_storage());
+    }
+
+    #[test]
+    fn test_load_nonexistent() {
+        crate::testing::trait_tests::assert_load_nonexistent(&make_storage());
+    }
+
+    #[test]
+    fn test_delete() {
+        crate::testing::trait_tests::assert_delete(&make_storage());
+    }
+
+    #[test]
+    fn test_direct_load() {
+        crate::testing::trait_tests::assert_direct_load(&make_storage());
+    }
 }

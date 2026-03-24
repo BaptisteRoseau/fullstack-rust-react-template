@@ -4,11 +4,18 @@ use std::path::Path;
 use crate::parameters::StorageParameters;
 use crate::Storage;
 
+/// Returns parameters suitable for testing with raw bytes (no image/gzip processing).
+fn raw_params() -> StorageParameters {
+    let mut params = StorageParameters::new();
+    params.no_compression();
+    params.no_image_compression();
+    params
+}
+
 pub fn assert_save_and_load(storage: &dyn Storage) {
     let path = Path::new("test-trait/save_and_load.bin");
     let data = b"hello, storage!";
-    let mut params = StorageParameters::new();
-    params.no_compression();
+    let params = raw_params();
 
     storage.save(path, data, params).expect("save failed");
     let loaded = storage.load(path, params).expect("load failed");
@@ -19,8 +26,7 @@ pub fn assert_save_and_load(storage: &dyn Storage) {
 
 pub fn assert_save_overwrite(storage: &dyn Storage) {
     let path = Path::new("test-trait/save_overwrite.bin");
-    let mut params = StorageParameters::new();
-    params.no_compression();
+    let params = raw_params();
 
     storage
         .save(path, b"version-1", params)
@@ -37,8 +43,7 @@ pub fn assert_save_overwrite(storage: &dyn Storage) {
 
 pub fn assert_load_nonexistent(storage: &dyn Storage) {
     let path = Path::new("test-trait/nonexistent.bin");
-    let mut params = StorageParameters::new();
-    params.no_compression();
+    let params = raw_params();
 
     let result = storage.load(path, params);
     assert!(result.is_err(), "loading a nonexistent file should fail");
@@ -47,8 +52,7 @@ pub fn assert_load_nonexistent(storage: &dyn Storage) {
 pub fn assert_save_stream_and_load_stream(storage: &dyn Storage) {
     let data = b"streamed content for testing";
     let mut reader = Cursor::new(data);
-    let mut params = StorageParameters::new();
-    params.no_compression();
+    let params = raw_params();
 
     storage
         .save_stream(&mut reader, params)
@@ -63,8 +67,7 @@ pub fn assert_save_stream_and_load_stream(storage: &dyn Storage) {
 
 pub fn assert_delete(storage: &dyn Storage) {
     let path = Path::new("test-trait/delete.bin");
-    let mut params = StorageParameters::new();
-    params.no_compression();
+    let params = raw_params();
 
     storage
         .save(path, b"to be deleted", params)
@@ -85,8 +88,7 @@ pub fn assert_direct_save(storage: &dyn Storage) {
 
 pub fn assert_direct_load(storage: &dyn Storage) {
     let path = Path::new("test-trait/direct_load.bin");
-    let mut params = StorageParameters::new();
-    params.no_compression();
+    let params = raw_params();
 
     // Save something first so there's content to load directly
     storage
