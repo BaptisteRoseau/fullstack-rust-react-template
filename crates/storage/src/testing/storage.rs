@@ -1,8 +1,8 @@
 use std::io::Cursor;
 use std::path::Path;
 
-use crate::parameters::StorageParameters;
 use crate::Storage;
+use crate::parameters::StorageParameters;
 
 /// Returns parameters suitable for testing with raw bytes (no image/gzip processing).
 fn raw_params() -> StorageParameters {
@@ -76,27 +76,4 @@ pub fn assert_delete(storage: &dyn Storage) {
 
     let result = storage.load(path, params);
     assert!(result.is_err(), "load after delete should fail");
-}
-
-pub fn assert_direct_save(storage: &dyn Storage) {
-    let path = Path::new("test-trait/direct_save.bin");
-    let result = storage.direct_save(path);
-    assert!(result.is_ok(), "direct_save should not error");
-
-    let _ = storage.delete(path);
-}
-
-pub fn assert_direct_load(storage: &dyn Storage) {
-    let path = Path::new("test-trait/direct_load.bin");
-    let params = raw_params();
-
-    // Save something first so there's content to load directly
-    storage
-        .save(path, b"direct load content", params)
-        .expect("save failed");
-
-    let result = storage.direct_load(path);
-    assert!(result.is_ok(), "direct_load should not error");
-
-    let _ = storage.delete(path);
 }

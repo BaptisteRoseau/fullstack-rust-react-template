@@ -59,9 +59,9 @@ impl TryFrom<&Config> for S3 {
 impl Storage for S3 {
     fn save(
         &self,
-        _file: &Path,
-        _content: &[u8],
-        _parameters: StorageParameters,
+        file: &Path,
+        content: &[u8],
+        parameters: StorageParameters,
     ) -> Result<(), StorageError> {
         let processed = compress_image(content, parameters.image())?;
 
@@ -82,15 +82,11 @@ impl Storage for S3 {
 
     fn load(
         &self,
-        _file: &Path,
-        _parameters: StorageParameters,
+        file: &Path,
+        parameters: StorageParameters,
     ) -> Result<Vec<u8>, StorageError> {
         let key = Self::key_from_path(file);
-        let output = self
-            .client
-            .objects()
-            .get(&self.bucket, &key)
-            .send()?;
+        let output = self.client.objects().get(&self.bucket, &key).send()?;
 
         let raw = output.bytes()?;
 
@@ -104,40 +100,36 @@ impl Storage for S3 {
 
     fn save_stream(
         &self,
-        _reader: &mut dyn Read,
-        _parameters: StorageParameters,
+        reader: &mut dyn Read,
+        parameters: StorageParameters,
     ) -> Result<(), StorageError> {
         todo!("save_stream requires a file path in the trait signature")
     }
 
     fn load_stream(
         &self,
-        _writer: &mut dyn Write,
-        _parameters: StorageParameters,
+        writer: &mut dyn Write,
+        parameters: StorageParameters,
     ) -> Result<(), StorageError> {
         todo!("load_stream requires a file path in the trait signature")
     }
 
     fn delete(&self, file: &Path) -> Result<(), StorageError> {
         let key = Self::key_from_path(file);
-        self.client
-            .objects()
-            .delete(&self.bucket, &key)
-            .send()?;
+        self.client.objects().delete(&self.bucket, &key).send()?;
         Ok(())
     }
 }
 
 #[cfg(test)]
-#[cfg(feature = "integration")]
 mod tests {
     use super::S3;
-    use crate::testing::containers::minio::MINIO;
+    use crate::testing::{containers::MINIO, storage::*};
 
     fn make_storage() -> S3 {
         S3::new(
             &MINIO.endpoint,
-            crate::testing::containers::minio::TEST_BUCKET,
+            crate::testing::containers::TEST_BUCKET,
             &MINIO.access_key,
             &MINIO.secret_key,
         )
@@ -151,21 +143,26 @@ mod tests {
 
     #[test]
     fn test_save_and_load() {
-        crate::testing::trait_tests::assert_save_and_load(&make_storage());
+        assert_save_and_load(&make_storage());
+    }
+
+    #[test]
+    fn test_save_stream_and_load_stream() {
+        assert_save_stream_and_load_stream(&make_storage());
     }
 
     #[test]
     fn test_save_overwrite() {
-        crate::testing::trait_tests::assert_save_overwrite(&make_storage());
+        assert_save_overwrite(&make_storage());
     }
 
     #[test]
     fn test_load_nonexistent() {
-        crate::testing::trait_tests::assert_load_nonexistent(&make_storage());
+        assert_load_nonexistent(&make_storage());
     }
 
     #[test]
     fn test_delete() {
-        crate::testing::trait_tests::assert_delete(&make_storage());
+        assert_delete(&make_storage());
     }
 }
