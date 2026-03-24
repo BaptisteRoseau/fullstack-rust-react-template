@@ -1,9 +1,6 @@
 use config::Config;
 use s3::{AddressingStyle, Auth, BlockingClient, Credentials};
-use std::{
-    io::{Read, Write},
-    path::Path,
-};
+use std::path::Path;
 
 use crate::{
     Storage,
@@ -63,9 +60,9 @@ impl Storage for S3 {
         content: &[u8],
         parameters: StorageParameters,
     ) -> Result<(), StorageError> {
-        let processed = compress_image(content, parameters.image())?;
+        let processed = compress_image(content, &parameters.image)?;
 
-        let body = match parameters.compression() {
+        let body = match parameters.compression {
             Compression::Gzip => compress_bytes(&processed)?,
             Compression::NoCompression => processed,
         };
@@ -80,38 +77,15 @@ impl Storage for S3 {
         Ok(())
     }
 
-    fn load(
-        &self,
-        file: &Path,
-        parameters: StorageParameters,
-    ) -> Result<Vec<u8>, StorageError> {
+    fn load(&self, file: &Path) -> Result<Vec<u8>, StorageError> {
         let key = Self::key_from_path(file);
         let output = self.client.objects().get(&self.bucket, &key).send()?;
 
         let raw = output.bytes()?;
 
-        let data = match parameters.compression() {
-            Compression::Gzip => decompress_bytes(&raw)?,
-            Compression::NoCompression => raw.to_vec(),
-        };
+        let data = raw.to_vec();
 
         Ok(data)
-    }
-
-    fn save_stream(
-        &self,
-        reader: &mut dyn Read,
-        parameters: StorageParameters,
-    ) -> Result<(), StorageError> {
-        todo!("save_stream requires a file path in the trait signature")
-    }
-
-    fn load_stream(
-        &self,
-        writer: &mut dyn Write,
-        parameters: StorageParameters,
-    ) -> Result<(), StorageError> {
-        todo!("load_stream requires a file path in the trait signature")
     }
 
     fn delete(&self, file: &Path) -> Result<(), StorageError> {
@@ -144,11 +118,6 @@ mod tests {
     #[test]
     fn test_save_and_load() {
         assert_save_and_load(&make_storage());
-    }
-
-    #[test]
-    fn test_save_stream_and_load_stream() {
-        assert_save_stream_and_load_stream(&make_storage());
     }
 
     #[test]

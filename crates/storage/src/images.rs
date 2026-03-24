@@ -172,7 +172,6 @@ mod tests {
     #[test]
     #[ignore]
     fn test_compress_in_memory_with_png_fixture() {
-        todo!("This test requires a fixture that does not exists yet.");
         let img_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("tests/fixtures/1x1.png");
         let image = std::fs::read(&img_path)

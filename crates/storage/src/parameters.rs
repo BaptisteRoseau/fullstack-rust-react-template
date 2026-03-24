@@ -17,12 +17,6 @@
 // the file being stored.
 
 #[derive(Copy, Clone, PartialEq)]
-pub enum EncryptionType {
-    NoEncryption,
-    Encryption,
-}
-
-#[derive(Copy, Clone, PartialEq)]
 pub enum Compression {
     NoCompression,
     Gzip,
@@ -58,15 +52,10 @@ pub struct ImageParameters {
     pub resize: ImageResize,
 }
 
-/// Struct representing overall compression parameters for storage.
-///
-/// Fields:
-///     TODO: Documentation of the whole parameters.
 #[derive(Copy, Clone)]
 pub struct StorageParameters {
-    encryption: EncryptionType,
-    compression: Compression,
-    image: ImageParameters,
+    pub compression: Compression,
+    pub image: ImageParameters,
 }
 
 impl Default for StorageParameters {
@@ -90,23 +79,14 @@ impl StorageParameters {
         self
     }
 
-    pub fn compression(&self) -> Compression {
-        self.compression
-    }
-
     pub fn no_image_compression(&mut self) -> &mut Self {
         self.image.compression = ImageCompression::NoCompression;
         self
-    }
-
-    pub fn image(&self) -> &ImageParameters {
-        &self.image
     }
 }
 
 fn initialize_parameters() -> StorageParameters {
     StorageParameters {
-        encryption: EncryptionType::NoEncryption,
         compression: Compression::Gzip,
         image: ImageParameters {
             compression: ImageCompression::Auto,

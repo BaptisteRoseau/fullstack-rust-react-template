@@ -1,4 +1,3 @@
-#[warn(unused)]
 mod compressor;
 mod images;
 mod storage;
