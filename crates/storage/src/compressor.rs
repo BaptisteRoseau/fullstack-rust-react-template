@@ -3,14 +3,14 @@ use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;
 use std::io::{self, Cursor, Read, Write};
 
-fn compress_bytes(input: &[u8]) -> io::Result<Vec<u8>> {
+pub(crate) fn compress_bytes(input: &[u8]) -> io::Result<Vec<u8>> {
     let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
     encoder.write_all(input)?;
     let compressed_data = encoder.finish()?;
     Ok(compressed_data)
 }
 
-fn decompress_bytes(input: &[u8]) -> io::Result<Vec<u8>> {
+pub(crate) fn decompress_bytes(input: &[u8]) -> io::Result<Vec<u8>> {
     let cursor = Cursor::new(input);
     let mut decoder = GzDecoder::new(cursor);
     let mut decompressed_data = Vec::new();
@@ -18,14 +18,14 @@ fn decompress_bytes(input: &[u8]) -> io::Result<Vec<u8>> {
     Ok(decompressed_data)
 }
 
-fn compress_stream<R: Read>(mut reader: R) -> io::Result<Vec<u8>> {
+pub(crate) fn compress_stream<R: Read>(mut reader: R) -> io::Result<Vec<u8>> {
     let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
     io::copy(&mut reader, &mut encoder)?;
     let compressed = encoder.finish()?;
     Ok(compressed)
 }
 
-fn decompress_stream<R: Read>(reader: R) -> io::Result<Vec<u8>> {
+pub(crate) fn decompress_stream<R: Read>(reader: R) -> io::Result<Vec<u8>> {
     let mut decoder = GzDecoder::new(reader);
     let mut out = Vec::new();
     decoder.read_to_end(&mut out)?;

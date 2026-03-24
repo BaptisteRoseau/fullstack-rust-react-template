@@ -6,4 +6,6 @@ pub enum StorageError {
     ImageHandlingError(#[from] caesium::error::CaesiumError),
     #[error(transparent)]
     S3Error(#[from] s3::Error),
+    #[error(transparent)]
+    IoError(#[from] std::io::Error),
 }
