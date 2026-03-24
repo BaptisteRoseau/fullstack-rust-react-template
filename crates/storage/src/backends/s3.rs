@@ -55,14 +55,6 @@ impl Storage for S3 {
         todo!()
     }
 
-    fn direct_save(&self, _file: &Path) -> Result<(), StorageError> {
-        todo!()
-    }
-
-    fn direct_load(&self, _file: &Path) -> Result<Vec<u8>, StorageError> {
-        todo!()
-    }
-
     fn delete(&self, _file: &Path) -> Result<(), StorageError> {
         todo!()
     }
