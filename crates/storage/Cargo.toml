@@ -13,3 +13,11 @@ s3 = { version = "0", features = ["checksums", "metrics", "tracing"] }
 # reqx 0.1.29 added a `message` field to Error::Transport that breaks s3 0.1.22
 reqx = ">=0.1.27, <0.1.29"
 thiserror = "2"
+
+[features]
+integration = []
+
+[dev-dependencies]
+testcontainers = "0.24"
+testcontainers-modules = { version = "0.12", features = ["minio"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
