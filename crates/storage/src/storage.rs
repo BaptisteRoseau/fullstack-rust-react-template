@@ -39,14 +39,6 @@ pub trait Storage: Send + Sync {
         parameters: StorageParameters,
     ) -> Result<(), StorageError>;
 
-    /// Returns a presigned URL to save the file directly in the S3 without being
-    /// processed by the backend.
-    fn direct_save(&self, file: &Path) -> Result<(), StorageError>;
-
-    /// Returns a presigned URL to load the file directly in the S3 without being
-    /// processed by the backend.
-    fn direct_load(&self, file: &Path) -> Result<Vec<u8>, StorageError>;
-
     // Delete a stored file.
     fn delete(&self, file: &Path) -> Result<(), StorageError>;
 }
