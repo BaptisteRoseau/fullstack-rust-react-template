@@ -1,0 +1,100 @@
+use std::io::Cursor;
+use std::path::Path;
+
+use crate::parameters::StorageParameters;
+use crate::Storage;
+
+pub fn assert_save_and_load(storage: &dyn Storage) {
+    let path = Path::new("test-trait/save_and_load.bin");
+    let data = b"hello, storage!";
+    let mut params = StorageParameters::new();
+    params.no_compression();
+
+    storage.save(path, data, params).expect("save failed");
+    let loaded = storage.load(path, params).expect("load failed");
+    assert_eq!(loaded, data);
+
+    let _ = storage.delete(path);
+}
+
+pub fn assert_save_overwrite(storage: &dyn Storage) {
+    let path = Path::new("test-trait/save_overwrite.bin");
+    let mut params = StorageParameters::new();
+    params.no_compression();
+
+    storage
+        .save(path, b"version-1", params)
+        .expect("first save failed");
+    storage
+        .save(path, b"version-2", params)
+        .expect("second save failed");
+
+    let loaded = storage.load(path, params).expect("load failed");
+    assert_eq!(loaded, b"version-2");
+
+    let _ = storage.delete(path);
+}
+
+pub fn assert_load_nonexistent(storage: &dyn Storage) {
+    let path = Path::new("test-trait/nonexistent.bin");
+    let mut params = StorageParameters::new();
+    params.no_compression();
+
+    let result = storage.load(path, params);
+    assert!(result.is_err(), "loading a nonexistent file should fail");
+}
+
+pub fn assert_save_stream_and_load_stream(storage: &dyn Storage) {
+    let data = b"streamed content for testing";
+    let mut reader = Cursor::new(data);
+    let mut params = StorageParameters::new();
+    params.no_compression();
+
+    storage
+        .save_stream(&mut reader, params)
+        .expect("save_stream failed");
+
+    let mut output = Vec::new();
+    storage
+        .load_stream(&mut output, params)
+        .expect("load_stream failed");
+    assert_eq!(output, data);
+}
+
+pub fn assert_delete(storage: &dyn Storage) {
+    let path = Path::new("test-trait/delete.bin");
+    let mut params = StorageParameters::new();
+    params.no_compression();
+
+    storage
+        .save(path, b"to be deleted", params)
+        .expect("save failed");
+    storage.delete(path).expect("delete failed");
+
+    let result = storage.load(path, params);
+    assert!(result.is_err(), "load after delete should fail");
+}
+
+pub fn assert_direct_save(storage: &dyn Storage) {
+    let path = Path::new("test-trait/direct_save.bin");
+    let result = storage.direct_save(path);
+    assert!(result.is_ok(), "direct_save should not error");
+
+    let _ = storage.delete(path);
+}
+
+pub fn assert_direct_load(storage: &dyn Storage) {
+    let path = Path::new("test-trait/direct_load.bin");
+    let mut params = StorageParameters::new();
+    params.no_compression();
+
+    // Save something first so there's content to load directly
+    storage
+        .save(path, b"direct load content", params)
+        .expect("save failed");
+
+    let result = storage.direct_load(path);
+    assert!(result.is_ok(), "direct_load should not error");
+
+    let _ = storage.delete(path);
+}
