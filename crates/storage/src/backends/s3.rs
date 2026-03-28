@@ -2,6 +2,8 @@ use config::Config;
 use s3::{AddressingStyle, Auth, Client, Credentials};
 use std::path::Path;
 
+use async_trait::async_trait;
+
 use crate::{
     Storage,
     compressor::{handle_compression, handle_decompression},
@@ -67,6 +69,7 @@ impl TryFrom<&Config> for S3 {
     }
 }
 
+#[async_trait]
 impl Storage for S3 {
     async fn save(
         &self,
