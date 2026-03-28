@@ -8,6 +8,7 @@ api = { path = "../../api"}
 logging = { path = "../../logging" }
 storage = { path = "../../storage" }
 config = { path = "../../config"}
+cache = { path = "../../cache"}
 database = { path = "../../database"}
 anyhow = "1"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "full"] }

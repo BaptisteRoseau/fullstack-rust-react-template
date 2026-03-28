@@ -38,7 +38,10 @@
 /// ```
 use crate::{
     app_state::AppState,
-    endpoints::storage::endpoints::{__path_download, __path_upload, download, upload},
+    endpoints::{
+        storage::endpoints::{__path_download, __path_upload, download, upload},
+        user::endpoints::{__path_get_user, get_user},
+    },
     misc::{__path_health_check, health_check},
 };
 use axum::{Router, routing::get};
@@ -75,6 +78,7 @@ pub fn public_routes(config: &Config, state: AppState) -> Router {
         .routes(routes!(health_check))
         .routes(routes!(upload))
         .routes(routes!(download))
+        // .routes(routes!(get_user))
         .split_for_parts();
 
     let api_routes = api_routes.merge(swagger(config, openapi));

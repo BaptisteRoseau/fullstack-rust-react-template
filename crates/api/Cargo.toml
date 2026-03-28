@@ -9,6 +9,7 @@ config = { path = "../config" }
 app_core = { path = "../app_core" }
 database = { path = "../database" }
 storage = { path = "../storage" }
+cache = { path = "../cache" }
 authentication = { path = "../authentication" }
 anyhow = { version = "1" }
 async-trait = "0"

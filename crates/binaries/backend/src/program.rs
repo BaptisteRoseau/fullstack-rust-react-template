@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use cache::backends::redis::Redis;
 use tokio::sync::RwLock;
 
 use anyhow::Error;
@@ -29,9 +30,14 @@ pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
     let storage = S3::try_from(config)?;
     info!("Initialized Storage");
 
+    info!("Initializing Cache...");
+    let cache = Redis::try_from(config)?;
+    info!("Initialized Cache");
+
     let state = AppState::new(
         Arc::new(RwLock::new(database)),
         Arc::new(RwLock::new(storage)),
+        Arc::new(RwLock::new(cache)),
     );
 
     /* ===========================
@@ -59,7 +65,7 @@ pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
         let metrics_routes = try_metrics_routes(&prometheus_config.path, metric_handle)?;
 
         if prometheus_config.ip == config.server.ip
-            && prometheus_config.port == config.server.port 
+            && prometheus_config.port == config.server.port
         {
             warn!("Merging Prometheus metrics endpoint with public API");
             public_routes = public_routes.merge(metrics_routes);

@@ -7,8 +7,6 @@ use lettre::message::{Mailbox, MessageBuilder};
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::{Message, SmtpTransport};
 
-// =======================
-
 pub struct Email {
     mailer: SmtpTransport,
     email: Message,

@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use crate::{error::ApiError, extractors::errors::ExtractorError, models::User};
 
-pub struct OptionalUser(pub Option<User>);
+pub struct OptionalUser(Option<User>);
 
 impl OptionalUser {
     pub fn inner(self) -> Option<User> {

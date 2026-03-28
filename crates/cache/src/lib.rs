@@ -1,6 +1,6 @@
 #[warn(unused)]
-mod backends;
 mod cache;
 
-pub use backends::redis::Redis;
+pub mod error;
+pub mod backends;
 pub use cache::Cache;
