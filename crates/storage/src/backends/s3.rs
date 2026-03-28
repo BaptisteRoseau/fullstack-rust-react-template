@@ -62,12 +62,7 @@ impl Storage for S3 {
         content: &[u8],
         parameters: &StorageParameters,
     ) -> Result<(), Box<StorageError>> {
-        let processed = match parameters.image {
-            Some(image_compression_parameters) => {
-                compress_image(content, &image_compression_parameters)?
-            }
-            None => content.into(),
-        };
+        let processed = compress_image(content, &parameters.image)?;
 
         let body = handle_compression(&processed, parameters.compression)?;
 
