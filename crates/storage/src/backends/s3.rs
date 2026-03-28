@@ -105,7 +105,7 @@ impl Storage for S3 {
 #[cfg(test)]
 mod tests {
     use super::S3;
-    use crate::testing::{containers::MINIO, storage::*};
+    use crate::testing::containers::MINIO;
 
     fn make_storage() -> S3 {
         S3::try_new(
@@ -117,10 +117,10 @@ mod tests {
         .expect("failed to create S3 client")
     }
 
+    crate::storage_trait_tests!(make_storage);
+
     #[test]
     fn test_minio_connection() {
         let _storage = make_storage();
     }
-
-    crate::storage_trait_tests!(make_storage);
 }

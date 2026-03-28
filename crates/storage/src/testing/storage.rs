@@ -32,6 +32,11 @@ macro_rules! storage_trait_tests {
         use $crate::testing::storage::*;
 
         #[test]
+        fn test_save_and_load_compressed() {
+            assert_save_and_load_compressed(&$builder());
+        }
+
+        #[test]
         fn test_save_and_load() {
             assert_save_and_load(&$builder());
         }
@@ -47,6 +52,11 @@ macro_rules! storage_trait_tests {
         }
 
         #[test]
+        fn test_delete_nonexistent() {
+            assert_delete_nonexistent(&$builder());
+        }
+
+        #[test]
         fn test_delete() {
             assert_delete(&$builder());
         }
@@ -56,16 +66,28 @@ macro_rules! storage_trait_tests {
 fn no_compression() -> StorageParameters {
     StorageParameters::default()
 }
-pub fn assert_save_and_load(storage: &dyn Storage) {
+
+fn with_compression() -> StorageParameters {
+    *StorageParameters::default().with_compression()
+}
+
+fn save_and_load_idempotent(storage: &dyn Storage, params: StorageParameters) {
     let path = Path::new("test-trait/save_and_load.bin");
     let data = b"hello, storage!";
-    let params = no_compression();
 
     storage.save(path, data, params).expect("save failed");
     let loaded = storage.load(path).expect("load failed");
     assert_eq!(loaded, data);
 
     let _ = storage.delete(path);
+}
+
+pub fn assert_save_and_load_compressed(storage: &dyn Storage) {
+    save_and_load_idempotent(storage, with_compression());
+}
+
+pub fn assert_save_and_load(storage: &dyn Storage) {
+    save_and_load_idempotent(storage, no_compression());
 }
 
 pub fn assert_save_overwrite(storage: &dyn Storage) {
@@ -89,6 +111,12 @@ pub fn assert_load_nonexistent(storage: &dyn Storage) {
     let path = Path::new("test-trait/nonexistent.bin");
     let result = storage.load(path);
     assert!(result.is_err(), "loading a nonexistent file should fail");
+}
+
+pub fn assert_delete_nonexistent(storage: &dyn Storage) {
+    let path = Path::new("test-trait/nonexistent.bin");
+    let result = storage.delete(path);
+    assert!(result.is_err(), "deleting a nonexistent file should fail");
 }
 
 pub fn assert_delete(storage: &dyn Storage) {
