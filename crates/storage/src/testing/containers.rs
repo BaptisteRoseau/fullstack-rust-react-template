@@ -16,8 +16,9 @@ pub struct MinioFixture {
 
 /// Global singleton — one MinIO container shared across all tests.
 pub static MINIO: LazyLock<MinioFixture> = LazyLock::new(|| {
-    let fixture = Runtime::new().unwrap().block_on(MinioFixture::start());
-    fixture.create_bucket(TEST_BUCKET).await;
+    let rt = Runtime::new().unwrap();
+    let fixture = rt.block_on(MinioFixture::start());
+    rt.block_on(fixture.create_bucket(TEST_BUCKET));
     fixture
 });
 
