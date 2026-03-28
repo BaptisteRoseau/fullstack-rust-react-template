@@ -5,6 +5,8 @@ use serde::Serialize;
 use std::fmt::Debug;
 use utoipa::ToSchema;
 
+use storage::error::StorageError;
+
 use crate::extractors::errors::ExtractorError;
 
 /// This is the API standard struct supposed to be sent
@@ -87,6 +89,8 @@ pub enum ApiError {
     CoreError(#[from] CoreError),
     #[error(transparent)]
     ExtractorError(#[from] ExtractorError),
+    #[error("Storage Error: {0}")]
+    StorageError(#[from] Box<StorageError>),
     #[error("Unexpected Error")]
     Unexpected(#[from] anyhow::Error),
 }
@@ -98,6 +102,7 @@ impl From<ApiError> for ApiErrorResponse {
             ApiError::IoError(_) => ApiErrorResponse::unexpected(),
             ApiError::CoreError(e) => e.into(),
             ApiError::ExtractorError(e) => e.into(),
+            ApiError::StorageError(_) => ApiErrorResponse::unexpected(),
             ApiError::Unexpected(e) => e.into(),
         }
     }

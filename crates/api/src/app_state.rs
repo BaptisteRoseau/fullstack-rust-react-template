@@ -1,8 +1,9 @@
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 
 use axum::extract::FromRef;
 use database::Database;
 use storage::Storage;
+use tokio::sync::RwLock;
 
 #[derive(Clone)]
 pub struct AppState {
