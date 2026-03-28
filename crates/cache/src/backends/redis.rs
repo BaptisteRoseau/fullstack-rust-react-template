@@ -47,7 +47,7 @@ impl TryFrom<&Config> for Redis {
 
 #[async_trait]
 impl Cache for Redis {
-    async fn set(
+    async fn set_raw(
         &self,
         key: &str,
         value: &Value,
@@ -78,7 +78,7 @@ impl Cache for Redis {
         Ok(())
     }
 
-    async fn get(&self, key: &str) -> Result<Option<Value>, CacheError> {
+    async fn get_raw(&self, key: &str) -> Result<Option<Value>, CacheError> {
         let redis_key = self.prefixed_key(key);
         let mut conn = self.pool.get().await?;
         let value: Option<String> = cmd("GET").arg(&redis_key).query_async(&mut conn).await?;
@@ -88,7 +88,7 @@ impl Cache for Redis {
         }
     }
 
-    async fn delete(&self, key: &str) -> Result<(), CacheError> {
+    async fn delete_raw(&self, key: &str) -> Result<(), CacheError> {
         let redis_key = self.prefixed_key(key);
         let mut conn = self.pool.get().await?;
         cmd("DEL")
@@ -98,7 +98,7 @@ impl Cache for Redis {
         Ok(())
     }
 
-    async fn set_many(
+    async fn set_many_raw(
         &self,
         mappings: &HashMap<String, Value>,
         timeout_s: Option<u32>,
@@ -138,7 +138,7 @@ impl Cache for Redis {
         Ok(())
     }
 
-    async fn get_many(
+    async fn get_many_raw(
         &self,
         keys: &[&str],
     ) -> Result<HashMap<String, Value>, CacheError> {
@@ -168,7 +168,7 @@ impl Cache for Redis {
         Ok(result)
     }
 
-    async fn delete_many(&self, keys: &[&str]) -> Result<(), CacheError> {
+    async fn delete_many_raw(&self, keys: &[&str]) -> Result<(), CacheError> {
         if keys.is_empty() {
             return Ok(());
         }

@@ -120,10 +120,10 @@ macro_rules! cache_trait_tests {
     }};
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
 struct SerdeStruct {
     field1: String,
-    field2: u32
+    field2: u32,
 }
 
 /// Unique key prefix to avoid collisions between parallel tests.
@@ -167,7 +167,7 @@ pub async fn assert_set_and_get(cache: &impl Cache) {
 
 pub async fn assert_get_nonexistent(cache: &impl Cache) {
     let key = unique_key("nonexistent");
-    let value = cache.get(&key).await.expect("get failed");
+    let value: Option<Value> = cache.get(&key).await.expect("get failed");
     assert!(
         value.is_none(),
         "expected None for nonexistent key, got {value:?}"
@@ -202,7 +202,7 @@ pub async fn assert_delete(cache: &impl Cache) {
         .await
         .expect("set failed");
     cache.delete(&key).await.expect("delete failed");
-    let value = cache.get(&key).await.expect("get after delete failed");
+    let value: Option<Value> = cache.get(&key).await.expect("get after delete failed");
     assert!(value.is_none(), "expected None after delete, got {value:?}");
 }
 
@@ -278,7 +278,8 @@ pub async fn assert_get_many_nonexistent(cache: &impl Cache) {
     let k2 = format!("{prefix}:b");
     let k3 = format!("{prefix}:c");
     let keys = vec![k1.as_str(), k2.as_str(), k3.as_str()];
-    let result = cache.get_many(&keys).await.expect("get_many failed");
+    let result: HashMap<String, Value> =
+        cache.get_many(&keys).await.expect("get_many failed");
     assert_eq!(result.len(), 0);
 }
 
@@ -300,9 +301,9 @@ pub async fn assert_delete_many(cache: &impl Cache) {
     let keys: Vec<&str> = vec![k1.as_str(), k2.as_str(), k3.as_str()];
     cache.delete_many(&keys).await.expect("delete_many failed");
 
-    let v1 = cache.get(&k1).await.expect("get k1 failed");
-    let v2 = cache.get(&k2).await.expect("get k2 failed");
-    let v3 = cache.get(&k3).await.expect("get k2 failed");
+    let v1: Option<Value> = cache.get(&k1).await.expect("get k1 failed");
+    let v2: Option<Value> = cache.get(&k2).await.expect("get k2 failed");
+    let v3: Option<Value> = cache.get(&k3).await.expect("get k2 failed");
     assert!(
         v1.is_none(),
         "expected None for k1 after delete_many, got {v1:?}"
