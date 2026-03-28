@@ -71,8 +71,7 @@ fn with_compression() -> StorageParameters {
     *StorageParameters::default().with_compression()
 }
 
-async fn save_and_load_idempotent(storage: &impl Storage, params: StorageParameters) {
-    let path = Path::new("test-trait/save_and_load.bin");
+async fn save_and_load_idempotent(storage: &impl Storage, params: StorageParameters, path: &Path) {
     let data = b"hello, storage!";
 
     storage
@@ -86,11 +85,13 @@ async fn save_and_load_idempotent(storage: &impl Storage, params: StorageParamet
 }
 
 pub async fn assert_save_and_load_compressed(storage: &impl Storage) {
-    save_and_load_idempotent(storage, with_compression()).await;
+    let path = Path::new("test-trait/save_and_load_compressed.bin");
+    save_and_load_idempotent(storage, with_compression(), path).await;
 }
 
 pub async fn assert_save_and_load(storage: &impl Storage) {
-    save_and_load_idempotent(storage, no_compression()).await;
+    let path = Path::new("test-trait/save_and_load.bin");
+    save_and_load_idempotent(storage, no_compression(), path).await;
 }
 
 pub async fn assert_save_overwrite(storage: &impl Storage) {
