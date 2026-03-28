@@ -38,6 +38,7 @@
 /// ```
 use crate::{
     app_state::AppState,
+    endpoints::storage::endpoints::{__path_download, __path_upload, download, upload},
     misc::{__path_health_check, health_check},
 };
 use axum::{Router, routing::get};
@@ -69,10 +70,10 @@ use utoipa_swagger_ui::SwaggerUi;
 // Bookmark this: https://docs.rs/axum/latest/axum/routing/struct.Router.html
 
 /// Public routes that qre exposed to the world
-// pub(crate) fn public_routes(config: &Config, storage: Arc<Rwlock<Storage>>, core: Arc<Rwlock<Core>>) -> (Router, OpenApi) {
 pub fn public_routes(config: &Config, state: AppState) -> Router {
     let (api_routes, openapi) = OpenApiRouter::new()
-        .routes(routes!(health_check))
+        .routes(routes!(health_check, upload, download))
+        // .routes(routes!(health_check, get_user, upload, download))
         .split_for_parts();
 
     let api_routes = api_routes.merge(swagger(config, openapi));

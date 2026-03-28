@@ -16,7 +16,7 @@ use crate::extractors::OptionalUser;
 )]
 pub(crate) async fn get_user(
     // State(database): Arc<RwLock<dyn Database>>,
-    _opt_user: OptionalUser,
+    OptionalUser(opt_user): OptionalUser,
     _uuid: Path<Uuid>,
 ) -> Result<GetUserResponse, ApiError> {
     todo!()
