@@ -4,13 +4,11 @@ use std::path::Path;
 
 use crate::{
     Storage,
-    compressor::{compress_bytes, handle_compression},
+    compressor::{handle_compression, handle_decompression},
     error::StorageError,
     images::compress_image,
     parameters::{Compression, StorageParameters},
 };
-
-// TODO: Save the parameters alongside the file
 
 #[derive(Clone)]
 pub struct S3 {
@@ -39,6 +37,20 @@ impl S3 {
 
     fn key_from_path(file: &Path) -> String {
         file.to_string_lossy().to_string()
+    }
+
+    fn content_type_for(compression: Compression) -> &'static str {
+        match compression {
+            Compression::Gzip => "application/gzip",
+            Compression::NoCompression => "application/octet-stream",
+        }
+    }
+
+    fn compression_from_content_type(content_type: &Option<String>) -> Compression {
+        match content_type.as_deref() {
+            Some("application/gzip") => Compression::Gzip,
+            _ => Compression::NoCompression,
+        }
     }
 }
 
@@ -71,6 +83,7 @@ impl Storage for S3 {
             .objects()
             .put(&self.bucket, &key)
             .body_bytes(body)
+            .content_type(Self::content_type_for(parameters.compression))
             .send()
             .await?;
 
@@ -80,8 +93,9 @@ impl Storage for S3 {
     async fn load(&self, file: &Path) -> Result<Vec<u8>, Box<StorageError>> {
         let key = Self::key_from_path(file);
         let output = self.client.objects().get(&self.bucket, &key).send().await?;
+        let compression = Self::compression_from_content_type(&output.content_type);
         let raw = output.bytes().await?;
-        let data = raw.to_vec();
+        let data = handle_decompression(&raw, compression)?;
         Ok(data)
     }
 
