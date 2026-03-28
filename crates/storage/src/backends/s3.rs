@@ -122,23 +122,5 @@ mod tests {
         let _storage = make_storage();
     }
 
-    #[test]
-    fn test_save_and_load() {
-        assert_save_and_load(&make_storage());
-    }
-
-    #[test]
-    fn test_save_overwrite() {
-        assert_save_overwrite(&make_storage());
-    }
-
-    #[test]
-    fn test_load_nonexistent() {
-        assert_load_nonexistent(&make_storage());
-    }
-
-    #[test]
-    fn test_delete() {
-        assert_delete(&make_storage());
-    }
+    crate::storage_trait_tests!(make_storage);
 }
