@@ -73,7 +73,7 @@ pub(crate) struct CliConfig {
     /* ===============
     S3
     ================ */
-    /// Database host
+    /// Database url
     #[arg(long, env, default_value_t = DEFAULT_S3_URL.to_string())]
     pub(crate) s3_url: String,
 
