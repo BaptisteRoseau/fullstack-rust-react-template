@@ -1,4 +1,6 @@
-use std::path::Path;
+use std::path::PathBuf;
+
+use uuid::Uuid;
 
 use crate::Storage;
 use crate::parameters::StorageParameters;
@@ -7,6 +9,11 @@ use crate::parameters::StorageParameters;
 // - helpers are regular private functions
 // - tests signature is `pub async fn assert_<my test>(storage: &impl Storage)`
 // - new tests should be added in the `storage_trait_tests` macro
+
+/// Generate a unique test path to avoid blob collisions between parallel tests.
+fn unique_path(name: &str) -> PathBuf {
+    PathBuf::from(format!("test-trait/{}/{name}", Uuid::new_v4()))
+}
 
 /// Set of unit tests for the storage trait.
 /// Simply pass it a function to create the object that implements the trait.
@@ -71,7 +78,11 @@ fn with_compression() -> StorageParameters {
     *StorageParameters::default().with_compression()
 }
 
-async fn save_and_load_idempotent(storage: &impl Storage, params: StorageParameters, path: &Path) {
+async fn save_and_load_idempotent(
+    storage: &impl Storage,
+    params: StorageParameters,
+    path: &PathBuf,
+) {
     let data = b"hello, storage!";
 
     storage
@@ -85,56 +96,59 @@ async fn save_and_load_idempotent(storage: &impl Storage, params: StorageParamet
 }
 
 pub async fn assert_save_and_load_compressed(storage: &impl Storage) {
-    let path = Path::new("test-trait/save_and_load_compressed.bin");
-    save_and_load_idempotent(storage, with_compression(), path).await;
+    let path = unique_path("save_and_load_compressed.bin");
+    save_and_load_idempotent(storage, with_compression(), &path).await;
 }
 
 pub async fn assert_save_and_load(storage: &impl Storage) {
-    let path = Path::new("test-trait/save_and_load.bin");
-    save_and_load_idempotent(storage, no_compression(), path).await;
+    let path = unique_path("save_and_load.bin");
+    save_and_load_idempotent(storage, no_compression(), &path).await;
 }
 
 pub async fn assert_save_overwrite(storage: &impl Storage) {
-    let path = Path::new("test-trait/save_overwrite.bin");
+    let path = unique_path("save_overwrite.bin");
     let params = no_compression();
 
     storage
-        .save(path, b"version-1", &params)
+        .save(&path, b"version-1", &params)
         .await
         .expect("first save failed");
     storage
-        .save(path, b"version-2", &params)
+        .save(&path, b"version-2", &params)
         .await
         .expect("second save failed");
 
-    let loaded = storage.load(path).await.expect("load failed");
+    let loaded = storage.load(&path).await.expect("load failed");
     assert_eq!(loaded, b"version-2");
 
-    let _ = storage.delete(path).await;
+    let _ = storage.delete(&path).await;
 }
 
 pub async fn assert_load_nonexistent(storage: &impl Storage) {
-    let path = Path::new("test-trait/nonexistent.bin");
-    let result = storage.load(path).await;
+    let path = unique_path("nonexistent.bin");
+    let result = storage.load(&path).await;
     assert!(result.is_err(), "loading a nonexistent file should fail");
 }
 
 pub async fn assert_delete_nonexistent(storage: &impl Storage) {
-    let path = Path::new("test-trait/nonexistent.bin");
-    let result = storage.delete(path).await;
-    assert!(result.is_ok(), "deleting a nonexistent file should not result in an error");
+    let path = unique_path("nonexistent.bin");
+    let result = storage.delete(&path).await;
+    assert!(
+        result.is_ok(),
+        "deleting a nonexistent file should not result in an error"
+    );
 }
 
 pub async fn assert_delete(storage: &impl Storage) {
-    let path = Path::new("test-trait/delete.bin");
+    let path = unique_path("delete.bin");
     let params = no_compression();
 
     storage
-        .save(path, b"to be deleted", &params)
+        .save(&path, b"to be deleted", &params)
         .await
         .expect("save failed");
-    storage.delete(path).await.expect("delete failed");
+    storage.delete(&path).await.expect("delete failed");
 
-    let result = storage.load(path).await;
+    let result = storage.load(&path).await;
     assert!(result.is_err(), "load after delete should fail");
 }

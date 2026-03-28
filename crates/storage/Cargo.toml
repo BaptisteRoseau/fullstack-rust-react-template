@@ -21,3 +21,4 @@ integration = []
 testcontainers = "0.24"
 testcontainers-modules = { version = "0.12", features = ["minio"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+uuid = { version = "1", features = ["v4"] }
