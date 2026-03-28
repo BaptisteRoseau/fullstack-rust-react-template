@@ -10,6 +10,8 @@ use crate::{
     parameters::{Compression, StorageParameters},
 };
 
+// TODO: Save the parameters alongside the file
+
 #[derive(Clone)]
 pub struct S3 {
     client: BlockingClient,
@@ -17,7 +19,7 @@ pub struct S3 {
 }
 
 impl S3 {
-    pub fn new(
+    pub fn try_new(
         endpoint: &str,
         bucket: &str,
         access_key: &str,
@@ -44,7 +46,7 @@ impl TryFrom<&Config> for S3 {
     type Error = StorageError;
 
     fn try_from(value: &Config) -> Result<Self, Self::Error> {
-        Self::new(
+        Self::try_new(
             &value.s3.host,
             "default",
             &value.s3.user,
@@ -60,7 +62,12 @@ impl Storage for S3 {
         content: &[u8],
         parameters: StorageParameters,
     ) -> Result<(), StorageError> {
-        let processed = compress_image(content, &parameters.image)?;
+        let processed = match parameters.image {
+            Some(image_compression_parameters) => {
+                compress_image(content, &image_compression_parameters)?
+            }
+            None => content.into(),
+        };
 
         let body = match parameters.compression {
             Compression::Gzip => compress_bytes(&processed)?,
@@ -101,7 +108,7 @@ mod tests {
     use crate::testing::{containers::MINIO, storage::*};
 
     fn make_storage() -> S3 {
-        S3::new(
+        S3::try_new(
             &MINIO.endpoint,
             crate::testing::containers::TEST_BUCKET,
             &MINIO.access_key,

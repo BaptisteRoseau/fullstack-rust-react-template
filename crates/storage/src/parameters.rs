@@ -1,21 +1,3 @@
-// TODO: Auto-select parameters and/or make prebuilt ones.
-//
-// This file selects how to handle a file's compression, encryption
-// and optimization based of its filemime.
-//
-// For saving, it will:
-//     1. Optimize the file based on its type (ex. PNG)
-//     2. Compress the file based on the given parameters
-//     3. Encrypt the file based on the given parameters
-//
-// For loading, it will:
-//     1. Decrypt the file
-//     2. Decompress the file
-//
-// If the "auto" options are selected, it will select special options
-// like lossy image compression or resizing based of the size of
-// the file being stored.
-
 #[derive(Copy, Clone, PartialEq)]
 pub enum Compression {
     NoCompression,
@@ -52,49 +34,81 @@ pub struct ImageParameters {
     pub resize: ImageResize,
 }
 
-#[derive(Copy, Clone)]
-pub struct StorageParameters {
-    pub compression: Compression,
-    pub image: ImageParameters,
-}
-
-impl Default for StorageParameters {
+impl Default for ImageParameters {
     fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl StorageParameters {
-    pub fn new() -> StorageParameters {
-        initialize_parameters()
-    }
-
-    pub fn to_webp(&mut self) -> &mut Self {
-        self.image.conversion = ImageConversion::Webp;
-        self
-    }
-
-    pub fn no_compression(&mut self) -> &mut Self {
-        self.compression = Compression::NoCompression;
-        self
-    }
-
-    pub fn no_image_compression(&mut self) -> &mut Self {
-        self.image.compression = ImageCompression::NoCompression;
-        self
-    }
-}
-
-fn initialize_parameters() -> StorageParameters {
-    StorageParameters {
-        compression: Compression::Gzip,
-        image: ImageParameters {
-            compression: ImageCompression::Auto,
+        Self {
+            compression: ImageCompression::NoCompression,
             conversion: ImageConversion::NoConversion,
             resize: ImageResize {
                 height: None,
                 width: None,
             },
-        },
+        }
+    }
+}
+
+#[derive(Copy, Clone)]
+pub struct StorageParameters {
+    pub compression: Compression,
+    pub image: Option<ImageParameters>,
+}
+
+impl Default for StorageParameters {
+    /// Default parameters, does not alter the file.
+    fn default() -> Self {
+        StorageParameters {
+            compression: Compression::NoCompression,
+            image: None,
+        }
+    }
+}
+
+impl StorageParameters {
+    /// Compress the file. Images are compressed using a lossless compression algorithm.
+    pub fn compressed() -> Self {
+        *Self::default()
+            .with_compression()
+            .with_image_compression(ImageCompression::Lossless)
+    }
+
+    /// Compress the file. Images are compressed using a lossy compression algorithm.
+    pub fn compressed_lossy() -> Self {
+        *Self::default()
+            .with_compression()
+            .with_image_compression(ImageCompression::Lossy)
+    }
+
+    pub fn with_compression(&mut self) -> &mut Self {
+        self.compression = Compression::Gzip;
+        self
+    }
+
+    pub fn with_image_compression(&mut self, compression: ImageCompression) -> &mut Self {
+        if self.image.is_none() {
+            self.image = Some(ImageParameters::default());
+        }
+        self.image.unwrap().compression = compression;
+        self
+    }
+
+    pub fn with_image_conversion(&mut self, conversion: ImageConversion) -> &mut Self {
+        if self.image.is_none() {
+            self.image = Some(ImageParameters::default());
+        }
+        self.image.unwrap().conversion = conversion;
+        self
+    }
+
+    /// Allows to resize the image to the desired size.
+    pub fn with_image_resize(
+        &mut self,
+        height: Option<u32>,
+        width: Option<u32>,
+    ) -> &mut Self {
+        if self.image.is_none() {
+            self.image = Some(ImageParameters::default());
+        }
+        self.image.unwrap().resize = ImageResize { height, width };
+        self
     }
 }

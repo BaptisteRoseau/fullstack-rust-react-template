@@ -4,33 +4,11 @@ use crate::Storage;
 use crate::parameters::StorageParameters;
 
 // TODO: Test suite with different parameters.
+// Parameterized tests + make a macro to avoid writing 5000 tests in the backends
 
 fn no_compression() -> StorageParameters {
-    StorageParameters::new()
-        .no_compression()
-        .no_image_compression()
-        .to_owned()
+    StorageParameters::default()
 }
-
-fn gzip_compression() -> StorageParameters {
-    let mut params = StorageParameters::new().no_image_compression().to_owned();
-    params.compression = crate::parameters::Compression::Gzip;
-    params
-}
-
-fn image_compression() -> StorageParameters {
-    let mut params = StorageParameters::new().no_image_compression().to_owned();
-    params.compression = crate::parameters::Compression::Gzip;
-    params.image.compression = crate::parameters::ImageCompression::Lossy;
-    params
-}
-
-fn image_and_gzip_compression() -> StorageParameters {
-    let mut params = StorageParameters::new().no_image_compression().to_owned();
-    params.compression = crate::parameters::Compression::Gzip;
-    params
-}
-
 pub fn assert_save_and_load(storage: &dyn Storage) {
     let path = Path::new("test-trait/save_and_load.bin");
     let data = b"hello, storage!";
