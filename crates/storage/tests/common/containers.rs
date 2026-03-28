@@ -1,9 +1,6 @@
-use std::sync::LazyLock;
-
 use s3::{AddressingStyle, Auth, Client, Credentials};
 use testcontainers::{ContainerAsync, runners::AsyncRunner};
 use testcontainers_modules::minio::MinIO;
-use tokio::runtime::Runtime;
 
 pub const TEST_BUCKET: &str = "test-bucket";
 
@@ -14,18 +11,8 @@ pub struct MinioFixture {
     pub secret_key: String,
 }
 
-/// Global singleton — one MinIO container shared across all tests.
-/// The `watchdog` feature on testcontainers ensures the container is
-/// cleaned up on process exit (SIGTERM/SIGINT/SIGQUIT).
-pub static MINIO: LazyLock<MinioFixture> = LazyLock::new(|| {
-    let rt = Runtime::new().unwrap();
-    let fixture = rt.block_on(MinioFixture::start());
-    rt.block_on(fixture.create_bucket(TEST_BUCKET));
-    fixture
-});
-
 impl MinioFixture {
-    async fn start() -> Self {
+    pub async fn start() -> Self {
         let container = MinIO::default()
             .start()
             .await
@@ -39,7 +26,7 @@ impl MinioFixture {
         }
     }
 
-    async fn create_bucket(&self, name: &str) {
+    pub async fn create_bucket(&self, name: &str) {
         let credentials = Credentials::new(&self.access_key, &self.secret_key)
             .expect("invalid credentials");
         let client = Client::builder(&self.endpoint)
