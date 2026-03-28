@@ -121,7 +121,7 @@ pub async fn assert_load_nonexistent(storage: &impl Storage) {
 pub async fn assert_delete_nonexistent(storage: &impl Storage) {
     let path = Path::new("test-trait/nonexistent.bin");
     let result = storage.delete(path).await;
-    assert!(result.is_err(), "deleting a nonexistent file should fail");
+    assert!(result.is_ok(), "deleting a nonexistent file should not result in an error");
 }
 
 pub async fn assert_delete(storage: &impl Storage) {
