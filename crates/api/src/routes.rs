@@ -78,7 +78,7 @@ pub fn public_routes(config: &Config, state: AppState) -> Router {
         .routes(routes!(health_check))
         .routes(routes!(upload))
         .routes(routes!(download))
-        // .routes(routes!(get_user))
+        .routes(routes!(get_user))
         .split_for_parts();
 
     let api_routes = api_routes.merge(swagger(config, openapi));

@@ -143,13 +143,3 @@ impl Database for Postgres {
         todo!()
     }
 }
-// TESTS: See https://testcontainers.com/ & https://docs.rs/testcontainers/latest/testcontainers/
-//TODO: Rename tests modules as unit_tests and integration_tests
-// to be able to launch one or the other rapidly
-
-#[cfg(test)]
-mod test{
-    use super::*;
-    use testcontainers_modules::postgres::Postgres;
-
-}

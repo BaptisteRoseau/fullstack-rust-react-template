@@ -1,6 +1,5 @@
-use serde::{Deserialize, Serialize};
-use utoipa::{IntoParams, ToResponse, ToSchema};
-use uuid::Uuid;
+use serde::Serialize;
+use utoipa::{ToResponse, ToSchema};
 
 /// Here is the documentation of the response
 #[derive(Debug, Serialize, ToSchema, ToResponse)]
@@ -9,13 +8,7 @@ pub(crate) struct GetUserResponse {
 }
 
 impl From<String> for GetUserResponse {
-    fn from(value: String) -> Self {
-        Self { name: value }
+    fn from(name: String) -> Self {
+        Self { name }
     }
-}
-
-/// Here is the documentation of the parameter
-#[derive(Debug, Deserialize, ToSchema, IntoParams)]
-pub(crate) struct PostUserParams {
-    pub id: Uuid,
 }
