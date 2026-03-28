@@ -7,5 +7,5 @@ pub mod error;
 pub mod parameters;
 pub use storage::Storage;
 
-#[cfg(test)]
+#[cfg(any(test, feature = "integration"))]
 pub mod testing;
