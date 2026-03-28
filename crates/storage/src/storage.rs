@@ -8,7 +8,7 @@ pub trait Storage: Send + Sync {
         &self,
         file: &Path,
         content: &[u8],
-        parameters: StorageParameters,
+        parameters: &StorageParameters,
     ) -> impl Future<Output = Result<(), Box<StorageError>>> + Send;
 
     /// Load a small file that does not require streaming and can fit in-memory.

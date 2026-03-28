@@ -4,7 +4,7 @@ use std::path::Path;
 
 use crate::{
     Storage,
-    compressor::compress_bytes,
+    compressor::{compress_bytes, handle_compression},
     error::StorageError,
     images::compress_image,
     parameters::{Compression, StorageParameters},
@@ -60,7 +60,7 @@ impl Storage for S3 {
         &self,
         file: &Path,
         content: &[u8],
-        parameters: StorageParameters,
+        parameters: &StorageParameters,
     ) -> Result<(), Box<StorageError>> {
         let processed = match parameters.image {
             Some(image_compression_parameters) => {
@@ -69,10 +69,7 @@ impl Storage for S3 {
             None => content.into(),
         };
 
-        let body = match parameters.compression {
-            Compression::Gzip => compress_bytes(&processed)?,
-            Compression::NoCompression => processed,
-        };
+        let body = handle_compression(&processed, parameters.compression)?;
 
         let key = Self::key_from_path(file);
         self.client
