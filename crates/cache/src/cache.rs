@@ -14,7 +14,7 @@ pub trait Cache: Send + Sync {
         timeout_s: Option<u32>,
     ) -> Result<(), CacheError>;
 
-    async fn get<T: DeserializeOwned>(&self, key: &str) -> Result<Option<T>, CacheError>;
+    async fn get<T: DeserializeOwned + Send>(&self, key: &str) -> Result<Option<T>, CacheError>;
     async fn delete(&self, key: &str) -> Result<(), CacheError>;
 
     async fn set_many<T: Serialize + Send + Sync>(
@@ -23,7 +23,7 @@ pub trait Cache: Send + Sync {
         timeout_s: Option<u32>,
     ) -> Result<(), CacheError>;
 
-    async fn get_many<T: DeserializeOwned>(
+    async fn get_many<T: DeserializeOwned + Send>(
         &self,
         keys: &[&str],
     ) -> Result<HashMap<String, T>, CacheError>;
