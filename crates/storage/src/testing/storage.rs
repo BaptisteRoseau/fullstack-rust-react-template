@@ -75,7 +75,10 @@ async fn save_and_load_idempotent(storage: &impl Storage, params: StorageParamet
     let path = Path::new("test-trait/save_and_load.bin");
     let data = b"hello, storage!";
 
-    storage.save(path, data, params).await.expect("save failed");
+    storage
+        .save(path, data, &params)
+        .await
+        .expect("save failed");
     let loaded = storage.load(path).await.expect("load failed");
     assert_eq!(loaded, data);
 
@@ -95,11 +98,11 @@ pub async fn assert_save_overwrite(storage: &impl Storage) {
     let params = no_compression();
 
     storage
-        .save(path, b"version-1", params)
+        .save(path, b"version-1", &params)
         .await
         .expect("first save failed");
     storage
-        .save(path, b"version-2", params)
+        .save(path, b"version-2", &params)
         .await
         .expect("second save failed");
 
@@ -126,7 +129,7 @@ pub async fn assert_delete(storage: &impl Storage) {
     let params = no_compression();
 
     storage
-        .save(path, b"to be deleted", params)
+        .save(path, b"to be deleted", &params)
         .await
         .expect("save failed");
     storage.delete(path).await.expect("delete failed");
