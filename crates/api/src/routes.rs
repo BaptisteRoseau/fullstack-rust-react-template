@@ -71,9 +71,10 @@ use utoipa_swagger_ui::SwaggerUi;
 
 /// Public routes that qre exposed to the world
 pub fn public_routes(config: &Config, state: AppState) -> Router {
-    let (api_routes, openapi) = OpenApiRouter::new()
-        .routes(routes!(health_check, upload, download))
-        // .routes(routes!(health_check, get_user, upload, download))
+    let (api_routes, openapi) = OpenApiRouter::<AppState>::new()
+        .routes(routes!(health_check))
+        .routes(routes!(upload))
+        .routes(routes!(download))
         .split_for_parts();
 
     let api_routes = api_routes.merge(swagger(config, openapi));
@@ -94,10 +95,7 @@ pub fn public_routes(config: &Config, state: AppState) -> Router {
             Duration::from_secs(config.api.timeout_sec.into()),
         ));
 
-    api_routes
-        .layer(middleware)
-        .with_state(config.clone())
-        .with_state(state)
+    api_routes.layer(middleware).with_state(state)
 }
 
 /// Swagger UI and OpenAPI routes layer.
