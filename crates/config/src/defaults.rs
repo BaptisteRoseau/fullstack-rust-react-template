@@ -23,6 +23,8 @@ pub(crate) const DEFAULT_S3_URL: &str = "http://127.0.0.1:9000";
 pub(crate) const DEFAULT_S3_USER: &str = "backend";
 pub(crate) const DEFAULT_S3_PASSWORD: &str = "password";
 
+pub(crate) const DEFAULT_REDIS_URL: &str = "redis://127.0.0.1:6379";
+
 pub(crate) const DEFAULT_API_TIMEOUT_SEC: u16 = 20;
 
 pub(crate) const DEFAULT_CONFIG_FILE_PATH: &str = ".config.yaml";

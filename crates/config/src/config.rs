@@ -32,6 +32,11 @@ pub struct S3Config {
     pub password: String,
 }
 
+#[derive(Debug, Clone)]
+pub struct RedisConfig {
+    pub url: String,
+}
+
 type ServerBindingConfig = BindingConfig;
 
 #[derive(Debug, Clone)]
@@ -62,6 +67,7 @@ pub struct Config {
     pub api: ApiConfig,
     pub server: ServerBindingConfig,
     pub s3: S3Config,
+    pub redis: RedisConfig,
     pub postgres: PostgresConfig,
     pub prometheus: Option<PrometheusConfig>,
     pub swagger: Option<SwaggerConfig>,
@@ -113,6 +119,9 @@ impl TryFrom<CliConfig> for Config {
                 url: value.s3_url,
                 user: value.s3_user,
                 password: value.s3_password,
+            },
+            redis: RedisConfig {
+                url: value.redis_url,
             },
             postgres: PostgresConfig {
                 host: value.database_host,
@@ -171,6 +180,7 @@ mod test {
                 s3_url: DEFAULT_S3_URL.to_string(),
                 s3_user: DEFAULT_S3_USER.to_string(),
                 s3_password: DEFAULT_S3_PASSWORD.to_string(),
+                redis_url: DEFAULT_REDIS_URL.to_string(),
                 database_host: DEFAULT_DATABASE_HOST.to_string(),
                 database_port: DEFAULT_DATABASE_PORT,
                 database_name: DEFAULT_DATABASE_NAME.to_string(),

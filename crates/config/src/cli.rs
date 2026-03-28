@@ -86,6 +86,13 @@ pub(crate) struct CliConfig {
     pub(crate) s3_password: String,
 
     /* ===============
+    REDIS
+    ================ */
+    /// Redis URL (e.g. redis://127.0.0.1:6379)
+    #[arg(long, env, default_value_t = DEFAULT_REDIS_URL.to_string())]
+    pub(crate) redis_url: String,
+
+    /* ===============
     PROMETHEUS
     ================ */
     /// Prometheus server host
