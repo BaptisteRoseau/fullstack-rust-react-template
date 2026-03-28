@@ -50,7 +50,7 @@ impl Default for ImageParameters {
 #[derive(Copy, Clone)]
 pub struct StorageParameters {
     pub compression: Compression,
-    pub image: Option<ImageParameters>,
+    pub image: ImageParameters,
 }
 
 impl Default for StorageParameters {
@@ -58,7 +58,7 @@ impl Default for StorageParameters {
     fn default() -> Self {
         StorageParameters {
             compression: Compression::NoCompression,
-            image: None,
+            image: ImageParameters::default(),
         }
     }
 }
@@ -84,18 +84,12 @@ impl StorageParameters {
     }
 
     pub fn with_image_compression(&mut self, compression: ImageCompression) -> &mut Self {
-        if self.image.is_none() {
-            self.image = Some(ImageParameters::default());
-        }
-        self.image.unwrap().compression = compression;
+        self.image.compression = compression;
         self
     }
 
     pub fn with_image_conversion(&mut self, conversion: ImageConversion) -> &mut Self {
-        if self.image.is_none() {
-            self.image = Some(ImageParameters::default());
-        }
-        self.image.unwrap().conversion = conversion;
+        self.image.conversion = conversion;
         self
     }
 
@@ -105,10 +99,7 @@ impl StorageParameters {
         height: Option<u32>,
         width: Option<u32>,
     ) -> &mut Self {
-        if self.image.is_none() {
-            self.image = Some(ImageParameters::default());
-        }
-        self.image.unwrap().resize = ImageResize { height, width };
+        self.image.resize = ImageResize { height, width };
         self
     }
 }
