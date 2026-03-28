@@ -11,7 +11,7 @@ use storage::parameters::StorageParameters;
 // - new tests should be added in the `storage_trait_tests` macro
 
 /// Set of integration tests for the Storage trait.
-/// Simply pass it a function to create the object that implements the trait.
+/// Returns a `Vec<Trial>` for use with `libtest-mimic`.
 /// The caller must have `mod common;` declared beforehand.
 ///
 /// For example:
@@ -19,47 +19,79 @@ use storage::parameters::StorageParameters;
 /// ```rs
 /// mod common;
 ///
-/// use common::containers::{MINIO, TEST_BUCKET};
+/// use common::containers::{MinioFixture, TEST_BUCKET};
 /// use storage::backends::S3;
 ///
-/// fn make_storage() -> S3 { /* ... */ }
-///
-/// storage_trait_tests!(make_storage);
+/// fn main() {
+///     let rt = tokio::runtime::Runtime::new().unwrap();
+///     let fixture = rt.block_on(async { /* ... */ });
+///     let make_storage = || S3::try_new(/* ... */).unwrap();
+///     let tests = storage_trait_tests!(make_storage, &rt);
+///     let conclusion = libtest_mimic::run(&args, tests);
+///     drop(fixture);
+///     conclusion.exit();
+/// }
 /// ```
 macro_rules! storage_trait_tests {
-    ($builder:expr) => {
+    ($builder:expr, $rt:expr) => {{
         use common::storage::*;
+        use libtest_mimic::Trial;
+        use std::sync::Arc;
 
-        #[tokio::test]
-        async fn test_save_and_load_compressed() {
-            assert_save_and_load_compressed(&$builder()).await;
-        }
+        let rt: Arc<tokio::runtime::Runtime> = $rt;
+        let builder = Arc::new($builder);
 
-        #[tokio::test]
-        async fn test_save_and_load() {
-            assert_save_and_load(&$builder()).await;
-        }
-
-        #[tokio::test]
-        async fn test_save_overwrite() {
-            assert_save_overwrite(&$builder()).await;
-        }
-
-        #[tokio::test]
-        async fn test_load_nonexistent() {
-            assert_load_nonexistent(&$builder()).await;
-        }
-
-        #[tokio::test]
-        async fn test_delete_nonexistent() {
-            assert_delete_nonexistent(&$builder()).await;
-        }
-
-        #[tokio::test]
-        async fn test_delete() {
-            assert_delete(&$builder()).await;
-        }
-    };
+        vec![
+            {
+                let rt = rt.clone();
+                let builder = builder.clone();
+                Trial::test("save_and_load_compressed", move || {
+                    rt.block_on(assert_save_and_load_compressed(&builder()));
+                    Ok(())
+                })
+            },
+            {
+                let rt = rt.clone();
+                let builder = builder.clone();
+                Trial::test("save_and_load", move || {
+                    rt.block_on(assert_save_and_load(&builder()));
+                    Ok(())
+                })
+            },
+            {
+                let rt = rt.clone();
+                let builder = builder.clone();
+                Trial::test("save_overwrite", move || {
+                    rt.block_on(assert_save_overwrite(&builder()));
+                    Ok(())
+                })
+            },
+            {
+                let rt = rt.clone();
+                let builder = builder.clone();
+                Trial::test("load_nonexistent", move || {
+                    rt.block_on(assert_load_nonexistent(&builder()));
+                    Ok(())
+                })
+            },
+            {
+                let rt = rt.clone();
+                let builder = builder.clone();
+                Trial::test("delete_nonexistent", move || {
+                    rt.block_on(assert_delete_nonexistent(&builder()));
+                    Ok(())
+                })
+            },
+            {
+                let rt = rt.clone();
+                let builder = builder.clone();
+                Trial::test("delete", move || {
+                    rt.block_on(assert_delete(&builder()));
+                    Ok(())
+                })
+            },
+        ]
+    }};
 }
 
 /// Generate a unique test path to avoid blob collisions between parallel tests.
