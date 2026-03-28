@@ -11,3 +11,15 @@ deadpool-redis = "0"
 thiserror = "2"
 serde = "1"
 serde_json = "1"
+
+[dev-dependencies]
+libtest-mimic = "0.8"
+testcontainers = "0.24"
+testcontainers-modules = { version = "0.12", features = ["redis"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+serde = { version = "1", features = ["derive"] }
+uuid = { version = "1", features = ["v4"] }
+
+[[test]]
+name = "redis"
+harness = false

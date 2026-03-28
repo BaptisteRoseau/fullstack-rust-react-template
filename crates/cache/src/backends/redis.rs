@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use async_trait::async_trait;
 use config::Config;
 use deadpool_redis::{Pool, Runtime, redis::cmd};
-use serde::{Serialize, de::DeserializeOwned};
+use serde_json::Value;
 
 use crate::{Cache, error::CacheError};
 
@@ -30,10 +30,10 @@ impl TryFrom<&Config> for Redis {
 
 #[async_trait]
 impl Cache for Redis {
-    async fn set<T: Serialize + Send + Sync>(
+    async fn set(
         &self,
         key: &str,
-        value: &T,
+        value: &Value,
         timeout_s: Option<u32>,
     ) -> Result<(), CacheError> {
         let serialized = serde_json::to_string(value)?;
@@ -60,7 +60,7 @@ impl Cache for Redis {
         Ok(())
     }
 
-    async fn get<T: DeserializeOwned + Send>(&self, key: &str) -> Result<Option<T>, CacheError> {
+    async fn get(&self, key: &str) -> Result<Option<Value>, CacheError> {
         let mut conn = self.pool.get().await?;
         let value: Option<String> = cmd("GET").arg(key).query_async(&mut conn).await?;
         match value {
@@ -75,9 +75,9 @@ impl Cache for Redis {
         Ok(())
     }
 
-    async fn set_many<T: Serialize + Send + Sync>(
+    async fn set_many(
         &self,
-        mappings: &HashMap<String, T>,
+        mappings: &HashMap<String, Value>,
         timeout_s: Option<u32>,
     ) -> Result<(), CacheError> {
         for (key, value) in mappings {
@@ -86,10 +86,7 @@ impl Cache for Redis {
         Ok(())
     }
 
-    async fn get_many<T: DeserializeOwned + Send>(
-        &self,
-        keys: &[&str],
-    ) -> Result<HashMap<String, T>, CacheError> {
+    async fn get_many(&self, keys: &[&str]) -> Result<HashMap<String, Value>, CacheError> {
         let mut result = HashMap::new();
         for key in keys {
             if let Some(value) = self.get(key).await? {
