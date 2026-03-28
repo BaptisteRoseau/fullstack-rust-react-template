@@ -1,9 +1,7 @@
-use async_trait::async_trait;
 use std::path::Path;
 
 use crate::{error::StorageError, parameters::StorageParameters};
 
-#[async_trait]
 pub trait Storage: Send + Sync {
     /// Save a small file that does not require streaming and can fit in-memory.
     fn save(
@@ -11,11 +9,11 @@ pub trait Storage: Send + Sync {
         file: &Path,
         content: &[u8],
         parameters: StorageParameters,
-    ) -> Result<(), StorageError>;
+    ) -> impl Future<Output = Result<(), StorageError>> + Send;
 
     /// Load a small file that does not require streaming and can fit in-memory.
-    fn load(&self, file: &Path) -> Result<Vec<u8>, StorageError>;
+    fn load(&self, file: &Path) -> impl Future<Output = Result<Vec<u8>, StorageError>> + Send;
 
     // Delete a stored file.
-    fn delete(&self, file: &Path) -> Result<(), StorageError>;
+    fn delete(&self, file: &Path) -> impl Future<Output = Result<(), StorageError>> + Send;
 }

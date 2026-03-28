@@ -1,10 +1,10 @@
 use config::Config;
-use s3::{AddressingStyle, Auth, BlockingClient, Credentials};
+use s3::{AddressingStyle, Auth, Client, Credentials};
 use std::path::Path;
 
 use crate::{
     Storage,
-    compressor::{compress_bytes, decompress_bytes},
+    compressor::compress_bytes,
     error::StorageError,
     images::compress_image,
     parameters::{Compression, StorageParameters},
@@ -14,7 +14,7 @@ use crate::{
 
 #[derive(Clone)]
 pub struct S3 {
-    client: BlockingClient,
+    client: Client,
     bucket: String,
 }
 
@@ -26,8 +26,8 @@ impl S3 {
         secret_key: &str,
     ) -> Result<Self, StorageError> {
         let credentials = Credentials::new(access_key, secret_key)?;
-        let client = BlockingClient::builder(endpoint)?
-            .region("us-east-1")
+        let client = Client::builder(endpoint)?
+            .region("myregion")
             .auth(Auth::Static(credentials))
             .addressing_style(AddressingStyle::Path)
             .build()?;
@@ -56,7 +56,7 @@ impl TryFrom<&Config> for S3 {
 }
 
 impl Storage for S3 {
-    fn save(
+    async fn save(
         &self,
         file: &Path,
         content: &[u8],
@@ -79,25 +79,27 @@ impl Storage for S3 {
             .objects()
             .put(&self.bucket, &key)
             .body_bytes(body)
-            .send()?;
+            .send()
+            .await?;
 
         Ok(())
     }
 
-    fn load(&self, file: &Path) -> Result<Vec<u8>, StorageError> {
+    async fn load(&self, file: &Path) -> Result<Vec<u8>, StorageError> {
         let key = Self::key_from_path(file);
-        let output = self.client.objects().get(&self.bucket, &key).send()?;
-
-        let raw = output.bytes()?;
-
+        let output = self.client.objects().get(&self.bucket, &key).send().await?;
+        let raw = output.bytes().await?;
         let data = raw.to_vec();
-
         Ok(data)
     }
 
-    fn delete(&self, file: &Path) -> Result<(), StorageError> {
+    async fn delete(&self, file: &Path) -> Result<(), StorageError> {
         let key = Self::key_from_path(file);
-        self.client.objects().delete(&self.bucket, &key).send()?;
+        self.client
+            .objects()
+            .delete(&self.bucket, &key)
+            .send()
+            .await?;
         Ok(())
     }
 }

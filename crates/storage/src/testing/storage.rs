@@ -5,7 +5,7 @@ use crate::parameters::StorageParameters;
 
 // When adding a new test here:
 // - helpers are regular private functions
-// - tests signature is `pub fn assert_<my test>(storage: &dyn Storage)`
+// - tests signature is `pub async fn assert_<my test>(storage: &impl Storage)`
 // - new tests should be added in the `storage_trait_tests` macro
 
 /// Set of unit tests for the storage trait.
@@ -31,34 +31,34 @@ macro_rules! storage_trait_tests {
     ($builder:expr) => {
         use $crate::testing::storage::*;
 
-        #[test]
-        fn test_save_and_load_compressed() {
-            assert_save_and_load_compressed(&$builder());
+        #[tokio::test]
+        async fn test_save_and_load_compressed() {
+            assert_save_and_load_compressed(&$builder()).await;
         }
 
-        #[test]
-        fn test_save_and_load() {
-            assert_save_and_load(&$builder());
+        #[tokio::test]
+        async fn test_save_and_load() {
+            assert_save_and_load(&$builder()).await;
         }
 
-        #[test]
-        fn test_save_overwrite() {
-            assert_save_overwrite(&$builder());
+        #[tokio::test]
+        async fn test_save_overwrite() {
+            assert_save_overwrite(&$builder()).await;
         }
 
-        #[test]
-        fn test_load_nonexistent() {
-            assert_load_nonexistent(&$builder());
+        #[tokio::test]
+        async fn test_load_nonexistent() {
+            assert_load_nonexistent(&$builder()).await;
         }
 
-        #[test]
-        fn test_delete_nonexistent() {
-            assert_delete_nonexistent(&$builder());
+        #[tokio::test]
+        async fn test_delete_nonexistent() {
+            assert_delete_nonexistent(&$builder()).await;
         }
 
-        #[test]
-        fn test_delete() {
-            assert_delete(&$builder());
+        #[tokio::test]
+        async fn test_delete() {
+            assert_delete(&$builder()).await;
         }
     };
 }
@@ -71,63 +71,66 @@ fn with_compression() -> StorageParameters {
     *StorageParameters::default().with_compression()
 }
 
-fn save_and_load_idempotent(storage: &dyn Storage, params: StorageParameters) {
+async fn save_and_load_idempotent(storage: &impl Storage, params: StorageParameters) {
     let path = Path::new("test-trait/save_and_load.bin");
     let data = b"hello, storage!";
 
-    storage.save(path, data, params).expect("save failed");
-    let loaded = storage.load(path).expect("load failed");
+    storage.save(path, data, params).await.expect("save failed");
+    let loaded = storage.load(path).await.expect("load failed");
     assert_eq!(loaded, data);
 
-    let _ = storage.delete(path);
+    let _ = storage.delete(path).await;
 }
 
-pub fn assert_save_and_load_compressed(storage: &dyn Storage) {
-    save_and_load_idempotent(storage, with_compression());
+pub async fn assert_save_and_load_compressed(storage: &impl Storage) {
+    save_and_load_idempotent(storage, with_compression()).await;
 }
 
-pub fn assert_save_and_load(storage: &dyn Storage) {
-    save_and_load_idempotent(storage, no_compression());
+pub async fn assert_save_and_load(storage: &impl Storage) {
+    save_and_load_idempotent(storage, no_compression()).await;
 }
 
-pub fn assert_save_overwrite(storage: &dyn Storage) {
+pub async fn assert_save_overwrite(storage: &impl Storage) {
     let path = Path::new("test-trait/save_overwrite.bin");
     let params = no_compression();
 
     storage
         .save(path, b"version-1", params)
+        .await
         .expect("first save failed");
     storage
         .save(path, b"version-2", params)
+        .await
         .expect("second save failed");
 
-    let loaded = storage.load(path).expect("load failed");
+    let loaded = storage.load(path).await.expect("load failed");
     assert_eq!(loaded, b"version-2");
 
-    let _ = storage.delete(path);
+    let _ = storage.delete(path).await;
 }
 
-pub fn assert_load_nonexistent(storage: &dyn Storage) {
+pub async fn assert_load_nonexistent(storage: &impl Storage) {
     let path = Path::new("test-trait/nonexistent.bin");
-    let result = storage.load(path);
+    let result = storage.load(path).await;
     assert!(result.is_err(), "loading a nonexistent file should fail");
 }
 
-pub fn assert_delete_nonexistent(storage: &dyn Storage) {
+pub async fn assert_delete_nonexistent(storage: &impl Storage) {
     let path = Path::new("test-trait/nonexistent.bin");
-    let result = storage.delete(path);
+    let result = storage.delete(path).await;
     assert!(result.is_err(), "deleting a nonexistent file should fail");
 }
 
-pub fn assert_delete(storage: &dyn Storage) {
+pub async fn assert_delete(storage: &impl Storage) {
     let path = Path::new("test-trait/delete.bin");
     let params = no_compression();
 
     storage
         .save(path, b"to be deleted", params)
+        .await
         .expect("save failed");
-    storage.delete(path).expect("delete failed");
+    storage.delete(path).await.expect("delete failed");
 
-    let result = storage.load(path);
+    let result = storage.load(path).await;
     assert!(result.is_err(), "load after delete should fail");
 }

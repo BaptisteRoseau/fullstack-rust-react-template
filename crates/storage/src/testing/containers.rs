@@ -1,6 +1,6 @@
 use std::sync::LazyLock;
 
-use s3::{AddressingStyle, Auth, BlockingClient, Credentials};
+use s3::{AddressingStyle, Auth, Client, Credentials};
 use testcontainers::{ContainerAsync, runners::AsyncRunner};
 use testcontainers_modules::minio::MinIO;
 use tokio::runtime::Runtime;
@@ -17,7 +17,7 @@ pub struct MinioFixture {
 /// Global singleton — one MinIO container shared across all tests.
 pub static MINIO: LazyLock<MinioFixture> = LazyLock::new(|| {
     let fixture = Runtime::new().unwrap().block_on(MinioFixture::start());
-    fixture.create_bucket(TEST_BUCKET);
+    fixture.create_bucket(TEST_BUCKET).await;
     fixture
 });
 
@@ -36,10 +36,10 @@ impl MinioFixture {
         }
     }
 
-    fn create_bucket(&self, name: &str) {
+    async fn create_bucket(&self, name: &str) {
         let credentials = Credentials::new(&self.access_key, &self.secret_key)
             .expect("invalid credentials");
-        let client = BlockingClient::builder(&self.endpoint)
+        let client = Client::builder(&self.endpoint)
             .expect("invalid endpoint")
             .region("us-east-1")
             .auth(Auth::Static(credentials))
@@ -50,6 +50,7 @@ impl MinioFixture {
             .buckets()
             .create(name)
             .send()
+            .await
             .expect("failed to create test bucket");
     }
 }
