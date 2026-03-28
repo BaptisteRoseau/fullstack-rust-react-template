@@ -17,10 +17,10 @@ impl Redis {
 impl TryFrom<&Config> for Redis {
     type Error = CacheError;
 
-    fn try_from(value: &Config) -> Result<Self, Self::Error> {
+    fn try_from(_value: &Config) -> Result<Self, Self::Error> {
         // TODO: Actually implement the cache
         Ok(Self { timeout_s: None })
     }
 }
 
-impl Cache for Redis {}
+// impl Cache for Redis {}
