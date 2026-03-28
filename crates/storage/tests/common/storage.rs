@@ -8,7 +8,60 @@ use storage::parameters::StorageParameters;
 // When adding a new test here:
 // - helpers are regular private functions
 // - tests signature is `pub async fn assert_<my test>(storage: &impl Storage)`
-// - new tests should be added in the test file that uses them (e.g. s3.rs)
+// - new tests should be added in the `storage_trait_tests` macro
+
+/// Set of integration tests for the Storage trait.
+/// Simply pass it a function to create the object that implements the trait.
+/// The caller must have `mod common;` declared beforehand.
+///
+/// For example:
+///
+/// ```rs
+/// mod common;
+///
+/// use common::containers::{MINIO, TEST_BUCKET};
+/// use storage::backends::S3;
+///
+/// fn make_storage() -> S3 { /* ... */ }
+///
+/// storage_trait_tests!(make_storage);
+/// ```
+macro_rules! storage_trait_tests {
+    ($builder:expr) => {
+        use common::storage::*;
+
+        #[tokio::test]
+        async fn test_save_and_load_compressed() {
+            assert_save_and_load_compressed(&$builder()).await;
+        }
+
+        #[tokio::test]
+        async fn test_save_and_load() {
+            assert_save_and_load(&$builder()).await;
+        }
+
+        #[tokio::test]
+        async fn test_save_overwrite() {
+            assert_save_overwrite(&$builder()).await;
+        }
+
+        #[tokio::test]
+        async fn test_load_nonexistent() {
+            assert_load_nonexistent(&$builder()).await;
+        }
+
+        #[tokio::test]
+        async fn test_delete_nonexistent() {
+            assert_delete_nonexistent(&$builder()).await;
+        }
+
+        #[tokio::test]
+        async fn test_delete() {
+            assert_delete(&$builder()).await;
+        }
+    };
+}
+
 
 /// Generate a unique test path to avoid blob collisions between parallel tests.
 fn unique_path(name: &str) -> PathBuf {
