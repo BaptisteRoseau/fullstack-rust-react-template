@@ -1,14 +1,13 @@
-use std::sync::{Arc, RwLock};
-
 use super::models::GetUserResponse;
-use crate::{error::ApiError};
+use crate::{AppState, error::ApiError};
 use axum::extract::{Path, State};
-use database::Database;
+use axum::response::Json;
 use uuid::Uuid;
 
 use crate::extractors::OptionalUser;
 
 /// Get the information of a user.
+#[axum_macros::debug_handler]
 #[utoipa::path(
     get,
     path = "/user/:uuid",
@@ -20,10 +19,10 @@ use crate::extractors::OptionalUser;
 pub(crate) async fn get_user(
     _uuid: Path<Uuid>,
     opt_user: OptionalUser,
-    State(_database): State<Arc<RwLock<dyn Database>>>,
-) -> Result<GetUserResponse, ApiError> {
+    State(_state): State<AppState>,
+) -> Result<Json<GetUserResponse>, ApiError> {
     match opt_user.inner() {
-        Some(user) => Ok(GetUserResponse::from(user.name())),
-        None => Ok(GetUserResponse::from("Nothing".to_string())),
+        Some(user) => Ok(GetUserResponse::from(user.name()).into()),
+        None => Ok(GetUserResponse::from("Nothing".to_string()).into()),
     }
 }
