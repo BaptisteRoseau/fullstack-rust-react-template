@@ -172,7 +172,7 @@ mod tests {
 
     fn load_jpg_image() -> Vec<u8> {
         let img_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("src/testing/assets/test_picture.jpg");
+            .join("tests/assets/test_picture.jpg");
         let image = std::fs::read(&img_path).unwrap_or_else(|_| {
             panic!("Put a small JPG at {}", img_path.to_string_lossy())
         });

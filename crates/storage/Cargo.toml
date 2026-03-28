@@ -14,33 +14,6 @@ s3 = { version = "0", features = ["checksums", "metrics"] }
 reqx = ">=0.1.27, <0.1.29"
 thiserror = "2"
 
-[features]
-integration = [
-    "dep:testcontainers",
-    "dep:testcontainers-modules",
-    "dep:tokio",
-    "dep:uuid",
-]
-
-[dependencies.testcontainers]
-version = "0.24"
-optional = true
-
-[dependencies.testcontainers-modules]
-version = "0.12"
-features = ["minio"]
-optional = true
-
-[dependencies.tokio]
-version = "1"
-features = ["rt-multi-thread", "macros"]
-optional = true
-
-[dependencies.uuid]
-version = "1"
-features = ["v4"]
-optional = true
-
 [dev-dependencies]
 testcontainers = "0.24"
 testcontainers-modules = { version = "0.12", features = ["minio"] }

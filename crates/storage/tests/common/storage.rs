@@ -2,72 +2,17 @@ use std::path::PathBuf;
 
 use uuid::Uuid;
 
-use crate::Storage;
-use crate::parameters::StorageParameters;
+use storage::Storage;
+use storage::parameters::StorageParameters;
 
 // When adding a new test here:
 // - helpers are regular private functions
 // - tests signature is `pub async fn assert_<my test>(storage: &impl Storage)`
-// - new tests should be added in the `storage_trait_tests` macro
+// - new tests should be added in the test file that uses them (e.g. s3.rs)
 
 /// Generate a unique test path to avoid blob collisions between parallel tests.
 fn unique_path(name: &str) -> PathBuf {
     PathBuf::from(format!("test-trait/{}/{name}", Uuid::new_v4()))
-}
-
-/// Set of unit tests for the storage trait.
-/// Simply pass it a function to create the object that implements the trait.
-///
-/// For example:
-///
-/// ```rs
-// fn make_storage() -> S3 {
-//     S3::try_new(
-//         &MINIO.endpoint,
-//         crate::testing::containers::TEST_BUCKET,
-//         &MINIO.access_key,
-//         &MINIO.secret_key,
-//     )
-//     .expect("failed to create S3 client")
-// }
-//
-// storage_trait_tests!(make_storage)
-/// ```
-#[macro_export]
-macro_rules! storage_trait_tests {
-    ($builder:expr) => {
-        use $crate::testing::storage::*;
-
-        #[tokio::test]
-        async fn test_save_and_load_compressed() {
-            assert_save_and_load_compressed(&$builder()).await;
-        }
-
-        #[tokio::test]
-        async fn test_save_and_load() {
-            assert_save_and_load(&$builder()).await;
-        }
-
-        #[tokio::test]
-        async fn test_save_overwrite() {
-            assert_save_overwrite(&$builder()).await;
-        }
-
-        #[tokio::test]
-        async fn test_load_nonexistent() {
-            assert_load_nonexistent(&$builder()).await;
-        }
-
-        #[tokio::test]
-        async fn test_delete_nonexistent() {
-            assert_delete_nonexistent(&$builder()).await;
-        }
-
-        #[tokio::test]
-        async fn test_delete() {
-            assert_delete(&$builder()).await;
-        }
-    };
 }
 
 fn no_compression() -> StorageParameters {
