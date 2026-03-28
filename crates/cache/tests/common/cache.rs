@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use cache::Cache;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
 /// Set of integration tests for the Cache trait.
@@ -107,13 +108,48 @@ macro_rules! cache_trait_tests {
                     Ok(())
                 })
             },
+            {
+                let rt = rt.clone();
+                let builder = builder.clone();
+                Trial::test("set_and_get_serde_struct", move || {
+                    rt.block_on(assert_set_and_get_serde_struct(&builder()));
+                    Ok(())
+                })
+            },
         ]
     }};
+}
+
+#[derive(Serialize, Deserialize)]
+struct SerdeStruct {
+    field1: String,
+    field2: u32
 }
 
 /// Unique key prefix to avoid collisions between parallel tests.
 fn unique_key(suffix: &str) -> String {
     format!("test:{}:{suffix}", uuid::Uuid::new_v4())
+}
+
+pub async fn assert_set_and_get_serde_struct(cache: &impl Cache) {
+    let ukey = unique_key("set_and_get");
+    let key = SerdeStruct{
+        field1: ukey,
+        field2: 42
+    };
+    let value = SerdeStruct{
+        field1: "Hello".into(),
+        field2: 69
+    };
+
+    cache.set(&key, &value, None).await.expect("set failed");
+    let output = cache.get(&key).await.expect("get failed");
+    assert_eq!(
+        output,
+        Some(value),
+        "expected Some(\"hello\"), got {output:?}"
+    );
+    let _ = cache.delete(&key).await;
 }
 
 pub async fn assert_set_and_get(cache: &impl Cache) {
