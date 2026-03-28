@@ -9,7 +9,6 @@ It should provide a `Storage` trait and structures for client code, and as a bac
 It transparently optimizes the size of blobs:
 
 - Images and videos are optimized using the `caesium` crate
-- Every blod is compressed before being stored, and decompressed when accessed
-- Optionally encrypt/decrypt data before being stored
+- Every blob is compressed before being stored, and decompressed when accessed
 
-Utlimately it should support streaming too but it is not required yet.
+The control of the compression behavior is done through the `StorageParameters` struct.
