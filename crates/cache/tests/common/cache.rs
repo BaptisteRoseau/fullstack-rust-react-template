@@ -99,6 +99,14 @@ macro_rules! cache_trait_tests {
                     Ok(())
                 })
             },
+            {
+                let rt = rt.clone();
+                let builder = builder.clone();
+                Trial::test("get_many_nonexistent", move || {
+                    rt.block_on(assert_get_many_nonexistent(&builder()));
+                    Ok(())
+                })
+            },
         ]
     }};
 }
@@ -110,15 +118,13 @@ fn unique_key(suffix: &str) -> String {
 
 pub async fn assert_set_and_get(cache: &impl Cache) {
     let key = unique_key("set_and_get");
-    cache
-        .set(&key, &json!("hello"), None)
-        .await
-        .expect("set failed");
-    let value = cache.get(&key).await.expect("get failed");
+    let input = json!("hello");
+    cache.set(&key, &input, None).await.expect("set failed");
+    let output = cache.get(&key).await.expect("get failed");
     assert_eq!(
-        value,
-        Some(json!("hello")),
-        "expected Some(\"hello\"), got {value:?}"
+        output,
+        Some(input),
+        "expected Some(\"hello\"), got {output:?}"
     );
     let _ = cache.delete(&key).await;
 }
@@ -126,23 +132,28 @@ pub async fn assert_set_and_get(cache: &impl Cache) {
 pub async fn assert_get_nonexistent(cache: &impl Cache) {
     let key = unique_key("nonexistent");
     let value = cache.get(&key).await.expect("get failed");
-    assert!(value.is_none(), "expected None for nonexistent key, got {value:?}");
+    assert!(
+        value.is_none(),
+        "expected None for nonexistent key, got {value:?}"
+    );
 }
 
 pub async fn assert_overwrite(cache: &impl Cache) {
     let key = unique_key("overwrite");
+    let input1 = json!("v1");
+    let input2 = json!("v2");
     cache
-        .set(&key, &json!("v1"), None)
+        .set(&key, &input1, None)
         .await
         .expect("first set failed");
     cache
-        .set(&key, &json!("v2"), None)
+        .set(&key, &input2, None)
         .await
         .expect("second set failed");
     let value = cache.get(&key).await.expect("get failed");
     assert_eq!(
         value,
-        Some(json!("v2")),
+        Some(input2),
         "expected Some(\"v2\") after overwrite, got {value:?}"
     );
     let _ = cache.delete(&key).await;
@@ -164,20 +175,21 @@ pub async fn assert_delete_nonexistent(cache: &impl Cache) {
     let result = cache.delete(&key).await;
     assert!(
         result.is_ok(),
-        "deleting a nonexistent key should not error, got {result:?}"
+        "deleting a nonexistent key should not throw error, got {result:?}"
     );
 }
 
 pub async fn assert_set_with_timeout(cache: &impl Cache) {
     let key = unique_key("timeout");
+    let input = json!("ephemeral");
     cache
-        .set(&key, &json!("ephemeral"), Some(10))
+        .set(&key, &input, Some(10))
         .await
         .expect("set with timeout failed");
     let value = cache.get(&key).await.expect("get failed");
     assert_eq!(
         value,
-        Some(json!("ephemeral")),
+        Some(input),
         "expected Some(\"ephemeral\") before expiry, got {value:?}"
     );
     let _ = cache.delete(&key).await;
@@ -199,7 +211,9 @@ pub async fn assert_set_many_and_get_many(cache: &impl Cache) {
         .await
         .expect("set_many failed");
 
-    let keys: Vec<&str> = vec![k1.as_str(), k2.as_str(), k3.as_str()];
+    let mut keys: Vec<&str> = mappings.keys().map(|k| k.as_str()).collect();
+    let k4 = format!("{prefix}:d");
+    keys.push(k4.as_str());
     let result = cache.get_many(&keys).await.expect("get_many failed");
 
     assert_eq!(result.len(), 3, "expected 3 results, got {}", result.len());
@@ -222,6 +236,16 @@ pub async fn assert_set_many_and_get_many(cache: &impl Cache) {
     let _ = cache.delete_many(&keys).await;
 }
 
+pub async fn assert_get_many_nonexistent(cache: &impl Cache) {
+    let prefix = unique_key("many");
+    let k1 = format!("{prefix}:a");
+    let k2 = format!("{prefix}:b");
+    let k3 = format!("{prefix}:c");
+    let keys = vec![k1.as_str(), k2.as_str(), k3.as_str()];
+    let result = cache.get_many(&keys).await.expect("get_many failed");
+    assert_eq!(result.len(), 0);
+}
+
 pub async fn assert_delete_many(cache: &impl Cache) {
     let prefix = unique_key("delete_many");
     let k1 = format!("{prefix}:a");
@@ -236,11 +260,23 @@ pub async fn assert_delete_many(cache: &impl Cache) {
         .await
         .expect("set k2 failed");
 
-    let keys: Vec<&str> = vec![k1.as_str(), k2.as_str()];
+    let k3 = format!("{prefix}:b");
+    let keys: Vec<&str> = vec![k1.as_str(), k2.as_str(), k3.as_str()];
     cache.delete_many(&keys).await.expect("delete_many failed");
 
     let v1 = cache.get(&k1).await.expect("get k1 failed");
     let v2 = cache.get(&k2).await.expect("get k2 failed");
-    assert!(v1.is_none(), "expected None for k1 after delete_many, got {v1:?}");
-    assert!(v2.is_none(), "expected None for k2 after delete_many, got {v2:?}");
+    let v3 = cache.get(&k3).await.expect("get k2 failed");
+    assert!(
+        v1.is_none(),
+        "expected None for k1 after delete_many, got {v1:?}"
+    );
+    assert!(
+        v2.is_none(),
+        "expected None for k2 after delete_many, got {v2:?}"
+    );
+    assert!(
+        v3.is_none(),
+        "expected None for k2 after delete_many, got {v2:?}"
+    );
 }
