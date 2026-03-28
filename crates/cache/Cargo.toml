@@ -9,3 +9,4 @@ config = { path = "../config" }
 async-trait = "0"
 thiserror = "2"
 serde = "1"
+serde_json = "1"

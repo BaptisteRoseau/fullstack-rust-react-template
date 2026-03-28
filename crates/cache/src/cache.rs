@@ -1,23 +1,32 @@
 use std::collections::HashMap;
 
 use async_trait::async_trait;
-use serde::{Deserialize, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
+
+use crate::error::CacheError;
 
 #[async_trait]
 pub trait Cache: Send + Sync {
-    async fn set<T: Serialize + Deserialize<'de>>(
-        key: &'a dyn ToString,
-        value: &'de T,
+    async fn set<T: Serialize + Send + Sync>(
+        &self,
+        key: &str,
+        value: &T,
         timeout_s: Option<u32>,
-    );
-    async fn get<T: Deserialize>(key: &dyn ToString) -> T;
-    async fn delete<T: Deserialize>(key: &dyn ToString);
+    ) -> Result<(), CacheError>;
 
-    async fn set_many<T: Serialize + Deserialize>(
-        mappings: HashMap<&dyn ToString, T>,
+    async fn get<T: DeserializeOwned>(&self, key: &str) -> Result<Option<T>, CacheError>;
+    async fn delete(&self, key: &str) -> Result<(), CacheError>;
+
+    async fn set_many<T: Serialize + Send + Sync>(
+        &self,
+        mappings: &HashMap<String, T>,
         timeout_s: Option<u32>,
-    );
+    ) -> Result<(), CacheError>;
 
-    async fn get_many<T: Deserialize>(key: &[&dyn ToString]) -> HashMap<String, T>;
-    async fn delete_many<T: Deserialize>(keys: &[&dyn ToString]);
+    async fn get_many<T: DeserializeOwned>(
+        &self,
+        keys: &[&str],
+    ) -> Result<HashMap<String, T>, CacheError>;
+
+    async fn delete_many(&self, keys: &[&str]) -> Result<(), CacheError>;
 }
