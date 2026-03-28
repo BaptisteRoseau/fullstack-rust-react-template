@@ -62,10 +62,9 @@ macro_rules! storage_trait_tests {
     };
 }
 
-
 /// Generate a unique test path to avoid blob collisions between parallel tests.
-fn unique_path(name: &str) -> PathBuf {
-    PathBuf::from(format!("test-trait/{}/{name}", Uuid::new_v4()))
+fn unique_path() -> PathBuf {
+    PathBuf::from(format!("test-trait/{}", Uuid::new_v4()))
 }
 
 fn no_compression() -> StorageParameters {
@@ -94,17 +93,15 @@ async fn save_and_load_idempotent(
 }
 
 pub async fn assert_save_and_load_compressed(storage: &impl Storage) {
-    let path = unique_path("save_and_load_compressed.bin");
-    save_and_load_idempotent(storage, with_compression(), &path).await;
+    save_and_load_idempotent(storage, with_compression(), &unique_path()).await;
 }
 
 pub async fn assert_save_and_load(storage: &impl Storage) {
-    let path = unique_path("save_and_load.bin");
-    save_and_load_idempotent(storage, no_compression(), &path).await;
+    save_and_load_idempotent(storage, no_compression(), &unique_path()).await;
 }
 
 pub async fn assert_save_overwrite(storage: &impl Storage) {
-    let path = unique_path("save_overwrite.bin");
+    let path = unique_path();
     let params = no_compression();
 
     storage
@@ -123,14 +120,12 @@ pub async fn assert_save_overwrite(storage: &impl Storage) {
 }
 
 pub async fn assert_load_nonexistent(storage: &impl Storage) {
-    let path = unique_path("nonexistent.bin");
-    let result = storage.load(&path).await;
+    let result = storage.load(&unique_path()).await;
     assert!(result.is_err(), "loading a nonexistent file should fail");
 }
 
 pub async fn assert_delete_nonexistent(storage: &impl Storage) {
-    let path = unique_path("nonexistent.bin");
-    let result = storage.delete(&path).await;
+    let result = storage.delete(&unique_path()).await;
     assert!(
         result.is_ok(),
         "deleting a nonexistent file should not result in an error"
@@ -138,7 +133,7 @@ pub async fn assert_delete_nonexistent(storage: &impl Storage) {
 }
 
 pub async fn assert_delete(storage: &impl Storage) {
-    let path = unique_path("delete.bin");
+    let path = unique_path();
     let params = no_compression();
 
     storage
