@@ -73,19 +73,23 @@ use crate::error::ApiError;
     )
 )]
 pub(crate) async fn get_user(
-    opt_user: OptionalUser,
     uuid: Path<Uuid>,
-) -> Result<GetUserResponse, ApiError> {
+    opt_user: OptionalUser,
+    State(state): State<AppState>,
+) -> Result<Json<GetUserResponse>, ApiError> {
     todo!()
 }
 ```
 
 Make sure to:
 
-- Return a `Result<TheCorrespondingResponseModel, ApiError>`
+- Return a `Result<Json<TheCorrespondingResponseModel>, ApiError>`
 - Document the API using a docstring, this will be used to generate user documentation.
 - Document the parameters and responses
 - Use the correct HTTP method
+- Use `State(state): State<AppState>` when accessing the state is required
+- Use a minimal windows when using a lock from an object in the state
+- Implement the actual logic from in the `crates/app_core` crate, the `api` only handles the input/output/state management
 
 ## Mod
 
