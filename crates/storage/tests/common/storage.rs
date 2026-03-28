@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use uuid::Uuid;
 
@@ -26,7 +26,7 @@ fn with_compression() -> StorageParameters {
 async fn save_and_load_idempotent(
     storage: &impl Storage,
     params: StorageParameters,
-    path: &PathBuf,
+    path: &Path,
 ) {
     let data = b"hello, storage!";
 
