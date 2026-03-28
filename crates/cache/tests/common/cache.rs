@@ -126,6 +126,12 @@ struct SerdeStruct {
     field2: u32,
 }
 
+#[derive(Serialize, PartialEq, Debug)]
+struct SerStruct {
+    field1: String,
+    field2: u32,
+}
+
 /// Unique key prefix to avoid collisions between parallel tests.
 fn unique_key(suffix: &str) -> String {
     format!("test:{}:{suffix}", uuid::Uuid::new_v4())
@@ -133,7 +139,7 @@ fn unique_key(suffix: &str) -> String {
 
 pub async fn assert_set_and_get_serde_struct(cache: &impl Cache) {
     let ukey = unique_key("set_and_get");
-    let key = SerdeStruct{
+    let key = SerStruct{
         field1: ukey,
         field2: 42
     };
