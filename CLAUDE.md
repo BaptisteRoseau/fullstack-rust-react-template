@@ -49,6 +49,8 @@ Always run the unit tests and linters. If running in an IDE environment, use its
 
 Be critical on the issues: is the problem from the test or the codebase ? If in doubt, consider it is from the codebase and do not update the test, otherwise carefully update the test.
 
+In the assert!, always add a string to display the value of the variables to help debugging the tests.
+
 ## Documentation
 
 Whenever you work in a directory, read the README.md in this directory and the one in all its parent directories if they exists.
