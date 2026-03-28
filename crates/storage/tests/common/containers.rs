@@ -8,20 +8,15 @@ use tokio::runtime::Runtime;
 pub const TEST_BUCKET: &str = "test-bucket";
 
 pub struct MinioFixture {
-    container: ContainerAsync<MinIO>,
-    rt: Runtime,
+    _container: ContainerAsync<MinIO>,
     pub endpoint: String,
     pub access_key: String,
     pub secret_key: String,
 }
 
-impl Drop for MinioFixture {
-    fn drop(&mut self) {
-        let _ = self.rt.block_on(self.container.stop());
-    }
-}
-
 /// Global singleton — one MinIO container shared across all tests.
+/// The `watchdog` feature on testcontainers ensures the container is
+/// cleaned up on process exit (SIGTERM/SIGINT/SIGQUIT).
 pub static MINIO: LazyLock<MinioFixture> = LazyLock::new(|| {
     let rt = Runtime::new().unwrap();
     let fixture = rt.block_on(MinioFixture::start());
@@ -37,8 +32,7 @@ impl MinioFixture {
             .expect("failed to start minio container");
         let port = container.get_host_port_ipv4(9000).await.unwrap();
         Self {
-            container,
-            rt: Runtime::new().expect("failed to create cleanup runtime"),
+            _container: container,
             endpoint: format!("http://127.0.0.1:{port}"),
             access_key: "minioadmin".to_string(),
             secret_key: "minioadmin".to_string(),

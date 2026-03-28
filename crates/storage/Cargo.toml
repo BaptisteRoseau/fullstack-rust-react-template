@@ -15,7 +15,7 @@ reqx = ">=0.1.27, <0.1.29"
 thiserror = "2"
 
 [dev-dependencies]
-testcontainers = "0.24"
+testcontainers = { version = "0.24", features = ["watchdog"] }
 testcontainers-modules = { version = "0.12", features = ["minio"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 uuid = { version = "1", features = ["v4"] }
