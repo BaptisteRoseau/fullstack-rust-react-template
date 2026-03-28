@@ -3,7 +3,6 @@ use crate::parameters::{
     ImageCompression, ImageConversion, ImageParameters, ImageResize,
 };
 use caesium::compress_in_memory;
-use caesium::error::CaesiumError;
 use caesium::parameters::{
     ChromaSubsampling, GifParameters, JpegParameters, PngParameters, TiffDeflateLevel,
     TiffParameters, WebPParameters,
