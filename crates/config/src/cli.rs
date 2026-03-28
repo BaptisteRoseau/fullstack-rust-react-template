@@ -74,12 +74,8 @@ pub(crate) struct CliConfig {
     S3
     ================ */
     /// Database host
-    #[arg(long, env, default_value_t = DEFAULT_S3_HOST.to_string())]
-    pub(crate) s3_host: String,
-
-    /// Database port
-    #[arg(long, env, default_value_t = DEFAULT_S3_PORT)]
-    pub(crate) s3_port: u16,
+    #[arg(long, env, default_value_t = DEFAULT_S3_URL.to_string())]
+    pub(crate) s3_url: String,
 
     /// Database user
     #[arg(long, env, default_value_t = DEFAULT_S3_USER.to_string())]

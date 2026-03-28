@@ -27,8 +27,7 @@ pub struct PostgresConfig {
 
 #[derive(Debug, Clone)]
 pub struct S3Config {
-    pub host: String,
-    pub port: u16,
+    pub url: String,
     pub user: String,
     pub password: String,
 }
@@ -111,8 +110,7 @@ impl TryFrom<CliConfig> for Config {
                 port: value.port,
             },
             s3: S3Config {
-                host: value.s3_host,
-                port: value.s3_port,
+                url: value.s3_url,
                 user: value.s3_user,
                 password: value.s3_password,
             },
@@ -170,8 +168,7 @@ mod test {
                 debug: false,
                 ip: LOCALHOST,
                 port: DEFAULT_PORT,
-                s3_host: DEFAULT_S3_HOST.to_string(),
-                s3_port: DEFAULT_S3_PORT,
+                s3_url: DEFAULT_S3_URL.to_string(),
                 s3_user: DEFAULT_S3_USER.to_string(),
                 s3_password: DEFAULT_S3_PASSWORD.to_string(),
                 database_host: DEFAULT_DATABASE_HOST.to_string(),

@@ -61,7 +61,7 @@ impl TryFrom<&Config> for S3 {
 
     fn try_from(value: &Config) -> Result<Self, Self::Error> {
         Self::try_new(
-            &value.s3.host,
+            &value.s3.url,
             "default",
             &value.s3.user,
             &value.s3.password,

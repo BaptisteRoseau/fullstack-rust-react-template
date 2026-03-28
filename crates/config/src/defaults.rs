@@ -19,8 +19,7 @@ pub(crate) const DEFAULT_DATABASE_NAME: &str = "backend";
 pub(crate) const DEFAULT_DATABASE_USER: &str = "backend";
 pub(crate) const DEFAULT_DATABASE_PASSWORD: &str = "password";
 
-pub(crate) const DEFAULT_S3_HOST: &str = "127.0.0.1";
-pub(crate) const DEFAULT_S3_PORT: u16 = 9000;
+pub(crate) const DEFAULT_S3_URL: &str = "http://127.0.0.1:9000";
 pub(crate) const DEFAULT_S3_USER: &str = "backend";
 pub(crate) const DEFAULT_S3_PASSWORD: &str = "password";
 
