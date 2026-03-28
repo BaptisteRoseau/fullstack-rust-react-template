@@ -15,7 +15,10 @@ fn main() {
 
     let make_cache = {
         let fixture = fixture.clone();
-        move || Redis::new(&fixture.url, None).expect("failed to create Redis client")
+        move || {
+            Redis::new(&fixture.url, None, Some("test".to_string()))
+                .expect("failed to create Redis client")
+        }
     };
 
     let tests = cache_trait_tests!(make_cache, rt.clone());
