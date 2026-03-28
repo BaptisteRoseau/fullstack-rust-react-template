@@ -12,7 +12,7 @@ use caesium::{SupportedFileTypes, convert_in_memory, parameters::CSParameters};
 pub(crate) fn compress_image(
     image: &[u8],
     parameters: &ImageParameters,
-) -> Result<Vec<u8>, StorageError> {
+) -> Result<Vec<u8>, Box<StorageError>> {
     let mut compression_parameters = select_compression(&parameters.compression);
     update_dimensions(&parameters.resize, &mut compression_parameters);
 
@@ -59,7 +59,7 @@ fn handle_compression_only(
     image: &[u8],
     parameters: &ImageParameters,
     compression_parameters: &CSParameters,
-) -> Result<Vec<u8>, StorageError> {
+) -> Result<Vec<u8>, Box<StorageError>> {
     if matches!(parameters.compression, ImageCompression::NoCompression)
         && parameters.resize.height.is_none()
         && parameters.resize.width.is_none()

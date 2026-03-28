@@ -24,7 +24,7 @@ impl S3 {
         bucket: &str,
         access_key: &str,
         secret_key: &str,
-    ) -> Result<Self, StorageError> {
+    ) -> Result<Self, Box<StorageError>> {
         let credentials = Credentials::new(access_key, secret_key)?;
         let client = Client::builder(endpoint)?
             .region("myregion")
@@ -43,7 +43,7 @@ impl S3 {
 }
 
 impl TryFrom<&Config> for S3 {
-    type Error = StorageError;
+    type Error = Box<StorageError>;
 
     fn try_from(value: &Config) -> Result<Self, Self::Error> {
         Self::try_new(
@@ -61,7 +61,7 @@ impl Storage for S3 {
         file: &Path,
         content: &[u8],
         parameters: StorageParameters,
-    ) -> Result<(), StorageError> {
+    ) -> Result<(), Box<StorageError>> {
         let processed = match parameters.image {
             Some(image_compression_parameters) => {
                 compress_image(content, &image_compression_parameters)?
@@ -85,7 +85,7 @@ impl Storage for S3 {
         Ok(())
     }
 
-    async fn load(&self, file: &Path) -> Result<Vec<u8>, StorageError> {
+    async fn load(&self, file: &Path) -> Result<Vec<u8>, Box<StorageError>> {
         let key = Self::key_from_path(file);
         let output = self.client.objects().get(&self.bucket, &key).send().await?;
         let raw = output.bytes().await?;
@@ -93,7 +93,7 @@ impl Storage for S3 {
         Ok(data)
     }
 
-    async fn delete(&self, file: &Path) -> Result<(), StorageError> {
+    async fn delete(&self, file: &Path) -> Result<(), Box<StorageError>> {
         let key = Self::key_from_path(file);
         self.client
             .objects()
