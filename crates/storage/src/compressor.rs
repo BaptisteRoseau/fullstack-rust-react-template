@@ -25,14 +25,14 @@ pub(crate) fn handle_decompression(
     }
 }
 
-pub(crate) fn compress_bytes(input: &[u8]) -> io::Result<Vec<u8>> {
+fn compress_bytes(input: &[u8]) -> io::Result<Vec<u8>> {
     let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
     encoder.write_all(input)?;
     let compressed_data = encoder.finish()?;
     Ok(compressed_data)
 }
 
-pub(crate) fn decompress_bytes(input: &[u8]) -> io::Result<Vec<u8>> {
+fn decompress_bytes(input: &[u8]) -> io::Result<Vec<u8>> {
     let cursor = Cursor::new(input);
     let mut decoder = GzDecoder::new(cursor);
     let mut decompressed_data = Vec::new();
