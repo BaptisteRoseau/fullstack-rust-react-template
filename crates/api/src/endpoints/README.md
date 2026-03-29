@@ -66,7 +66,7 @@ use crate::error::ApiError;
     path = "/user/:uuid",
     responses(
         (status = OK, body = GetUserResponse, description = "The user information."),
-        (status = NOT_FOUND, body = ApiError, description = "The user does not exist."),
+        (status = NOT_FOUND, body = ApiErrorResponse, description = "The user does not exist."),
     ),
     params(
         ("uuid" = Uuid, Path, description = "The user uuid"),

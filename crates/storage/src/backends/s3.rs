@@ -60,12 +60,7 @@ impl TryFrom<&Config> for S3 {
     type Error = Box<StorageError>;
 
     fn try_from(value: &Config) -> Result<Self, Self::Error> {
-        Self::try_new(
-            &value.s3.url,
-            "default",
-            &value.s3.user,
-            &value.s3.password,
-        )
+        Self::try_new(&value.s3.url, "default", &value.s3.user, &value.s3.password)
     }
 }
 
@@ -78,10 +73,10 @@ impl Storage for S3 {
         parameters: &StorageParameters,
     ) -> Result<(), Box<StorageError>> {
         let processed = compress_image(content, &parameters.image)?;
-
         let body = handle_compression(&processed, parameters.compression)?;
-
         let key = Self::key_from_path(file);
+
+        let _ = self.client.buckets().create(&self.bucket).send().await?;
         self.client
             .objects()
             .put(&self.bucket, &key)

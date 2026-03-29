@@ -9,12 +9,9 @@ use storage::error::StorageError;
 
 use crate::extractors::errors::ExtractorError;
 
-/// This is the API standard struct supposed to be sent
-/// as a response every time an error occurs.
-///
-/// Should only be used through `ApiError` enum.
+/// This is the standard API error returned by endpoints.
 #[derive(Serialize, ToSchema)]
-struct ApiErrorResponse {
+pub(crate) struct ApiErrorResponse {
     id: String,
     error: String,
     #[serde(skip_serializing)]

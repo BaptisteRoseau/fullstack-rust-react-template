@@ -2,6 +2,8 @@
 
 - [ ] Refine error handling to have client-facing and internal errors
 - [ ] Avoid creating new boxes every time we convert an error, just let it flow
+- [ ] Find a way to factorize openapi specs for error responses
+- [ ] Add the file name to the upload/download endpoint using the file metadata (currently downloading a blob)
 
 ## Milestones
 
