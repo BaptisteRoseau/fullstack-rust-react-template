@@ -1,6 +1,7 @@
 # TODO
 
 - [ ] Refine error handling to have client-facing and internal errors
+- [ ] Avoid creating new boxes every time we convert an error, just let it flow
 
 ## Milestones
 
