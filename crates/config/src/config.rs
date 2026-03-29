@@ -48,8 +48,6 @@ pub struct PrometheusConfig {
 
 #[derive(Debug, Clone)]
 pub struct SwaggerConfig {
-    pub ip: IpAddr,
-    pub port: u16,
     pub swagger_ui_path: String,
     pub openapi_path: String,
 }
@@ -99,8 +97,6 @@ impl TryFrom<CliConfig> for Config {
             None
         } else {
             Some(SwaggerConfig {
-                ip: value.swagger_ip,
-                port: value.swagger_port,
                 swagger_ui_path: value.swagger_ui_path,
                 openapi_path: value.swagger_openapi_path,
             })
@@ -145,12 +141,6 @@ impl Config {
         // Errors: Incompatible config, these return ConfigParsingError
 
         // Warnings: Ignored or deprecated configs
-        if cli_config.no_swagger
-            && (cli_config.swagger_ip != DEFAULT_SWAGGER_IP
-                || cli_config.swagger_port != DEFAULT_SWAGGER_PORT)
-        {
-            warn!("Ignoring Swagger server configuration because it is deactivated.");
-        }
         if cli_config.no_prometheus
             && (cli_config.prometheus_ip != DEFAULT_PROMETHEUS_IP
                 || cli_config.prometheus_port != DEFAULT_PROMETHEUS_PORT)
@@ -191,8 +181,6 @@ mod test {
                 prometheus_path: DEFAULT_PROMETHEUS_PATH.to_string(),
                 api_timeout_sec: DEFAULT_API_TIMEOUT_SEC,
                 no_prometheus: false,
-                swagger_ip: DEFAULT_SWAGGER_IP,
-                swagger_port: DEFAULT_SWAGGER_PORT,
                 swagger_ui_path: DEFAULT_SWAGGER_UI_PATH.to_string(),
                 swagger_openapi_path: DEFAULT_OPENAPI_PATH.to_string(),
                 no_swagger: false,
@@ -204,8 +192,6 @@ mod test {
     fn test_validate_ignore_swagger_config() {
         let mut cli_config = CliConfig::default();
         cli_config.no_swagger = true;
-        cli_config.swagger_ip = IpAddr::V4(Ipv4Addr::new(192, 168, 0, 1));
-        cli_config.swagger_port = 8080;
 
         let result = Config::validate(&cli_config);
         let config = Config::try_from(cli_config);

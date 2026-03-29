@@ -114,14 +114,6 @@ pub(crate) struct CliConfig {
     /* ===============
     SWAGGER
     ================ */
-    /// The IP where to bind the swagger server
-    #[arg(long, env, default_value_t = DEFAULT_SWAGGER_IP)]
-    pub(crate) swagger_ip: IpAddr,
-
-    /// The port where to bind the swagger server
-    #[arg(long, env, default_value_t = DEFAULT_SWAGGER_PORT)]
-    pub(crate) swagger_port: u16,
-
     /// The path where to bind the swagger server
     #[arg(long, env, default_value_t = DEFAULT_SWAGGER_UI_PATH.to_string())]
     pub(crate) swagger_ui_path: String,

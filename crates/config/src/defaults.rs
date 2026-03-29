@@ -3,9 +3,6 @@ use std::net::{IpAddr, Ipv4Addr};
 pub(crate) const LOCALHOST: IpAddr = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
 pub(crate) const DEFAULT_PORT: u16 = 6969;
 
-pub(crate) const DEFAULT_SWAGGER_IP: IpAddr = LOCALHOST;
-pub(crate) const DEFAULT_SWAGGER_PORT: u16 = 7070;
-
 pub(crate) const DEFAULT_SWAGGER_UI_PATH: &str = "/v1/docs/swagger-ui";
 pub(crate) const DEFAULT_OPENAPI_PATH: &str = "/v1/docs/openapi.json";
 
