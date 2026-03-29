@@ -138,16 +138,24 @@ impl CrudExecutor for Postgres {
 
 #[async_trait]
 impl Database for Postgres {
-    async fn create_user(&mut self, _patch: UserPatch) -> Result<User, Box<DatabaseError>>{
-        todo!()
+    async fn create_user(
+        &mut self,
+        patch: UserPatch,
+    ) -> Result<User, Box<DatabaseError>> {
+        Ok(patch.execute(self).await?)
     }
-    async fn update_user(&mut self, _patch: UserPatch) -> Result<User, Box<DatabaseError>>{
-        todo!()
+    async fn update_user(
+        &mut self,
+        patch: UserPatch,
+    ) -> Result<User, Box<DatabaseError>> {
+        Ok(patch.execute(self).await?)
     }
-    async fn read_user(&self, uuid: Uuid) -> Result<User, Box<DatabaseError>>{
-        todo!()
+    async fn read_user(&self, uuid: Uuid) -> Result<User, Box<DatabaseError>> {
+        let q = sqlx::query_as::<_, User>("SELECT * FROM user where id == %s").bind(uuid);
+        Ok(q.fetch_one(&self.pool).await?)
     }
-    async fn delete_user(&mut self, uuid: Uuid) -> Result<(), Box<DatabaseError>>{
-        todo!()
+    async fn delete_user(&mut self, uuid: Uuid) -> Result<bool, Box<DatabaseError>> {
+        let q = sqlx::query("DELETE * FROM user where id == %s").bind(uuid);
+        Ok(q.execute(&self.pool).await?.rows_affected() == 1)
     }
 }
