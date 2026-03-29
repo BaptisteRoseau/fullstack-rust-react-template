@@ -11,6 +11,7 @@
 - [ ] Nix & k3s infra
 
 - [ ] Cache uuid <-> username in Redis
+- [ ] Use testcontainers for `can_reach_google` test
 
 ## Milestones
 
