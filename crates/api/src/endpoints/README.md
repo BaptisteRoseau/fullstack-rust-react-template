@@ -39,12 +39,6 @@ pub(crate) struct GetUserResponse {
     pub name: String,
 }
 
-impl From<String> for GetUserResponse {
-    fn from(value: String) -> Self {
-        Self { name: value }
-    }
-}
-
 /// <Here should be the documentation of the parameter>
 #[derive(Debug, Deserialize, ToSchema, IntoParams)]
 pub(crate) struct PostUserParams {
@@ -67,16 +61,13 @@ use crate::error::ApiError;
     responses(
         (status = OK, body = GetUserResponse, description = "The user information."),
         (status = NOT_FOUND, body = ApiErrorResponse, description = "The user does not exist."),
-    ),
-    params(
-        ("uuid" = Uuid, Path, description = "The user uuid"),
     )
 )]
 pub(crate) async fn get_user(
     uuid: Path<Uuid>,
     opt_user: OptionalUser,
     State(state): State<AppState>,
-) -> Result<Json<GetUserResponse>, ApiError> {
+) -> Result<impl IntoResponse, ApiError> {
     todo!()
 }
 ```

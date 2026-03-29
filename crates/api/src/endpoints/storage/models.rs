@@ -59,6 +59,12 @@ impl PostUploadParams {
 
 /// Response returned after a successful file upload.
 #[derive(Debug, Serialize, ToSchema, ToResponse)]
-pub(crate) struct PostUploadResponse {
+pub(crate) struct PutUploadResponse {
+    pub file: String,
+}
+
+/// Response returned after a successful file deletion.
+#[derive(Debug, Serialize, ToSchema, ToResponse)]
+pub(crate) struct DeleteRemoveResponse {
     pub file: String,
 }

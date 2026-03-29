@@ -8,22 +8,23 @@ use axum::response::IntoResponse;
 use storage::Storage;
 use tokio::sync::RwLock;
 
-use super::models::{PostUploadParams, PostUploadResponse};
-use crate::error::ApiError;
+use super::models::{PostUploadParams, PutUploadResponse};
+use crate::endpoints::storage::models::DeleteRemoveResponse;
+use crate::error::{ApiError, ApiErrorResponse};
 use crate::extractors::OptionalUser;
 
 /// Upload a file to storage.
 #[utoipa::path(
-    post,
-    path = "/upload/{file}",
+    put,
+    path = "/storage/upload/{file}",
     request_body(content = String, content_type = "application/octet-stream", description = "The raw file content"),
     params(
         ("file" = String, Path, description = "The file path/name to store"),
         PostUploadParams,
     ),
     responses(
-        (status = OK, body = PostUploadResponse, description = "File has been successfully uploaded."),
-        (status = INTERNAL_SERVER_ERROR, description = "Storage error."),
+        (status = OK, body = PutUploadResponse, description = "File has been successfully uploaded."),
+        (status = INTERNAL_SERVER_ERROR,body = ApiErrorResponse, description = "Storage error."),
     ),
 )]
 pub(crate) async fn upload(
@@ -32,7 +33,7 @@ pub(crate) async fn upload(
     Path(file): Path<String>,
     Query(params): Query<PostUploadParams>,
     body: Bytes,
-) -> Result<axum::Json<PostUploadResponse>, ApiError> {
+) -> Result<impl IntoResponse, ApiError> {
     let storage_params = params.into_storage_parameters();
     let file_path = FilePath::new(&file);
 
@@ -42,19 +43,19 @@ pub(crate) async fn upload(
         .await
         .map_err(ApiError::StorageError)?;
 
-    Ok(axum::Json(PostUploadResponse { file }))
+    Ok(axum::Json(PutUploadResponse { file }))
 }
 
 /// Download a file from storage.
 #[utoipa::path(
     get,
-    path = "/download/{file}",
+    path = "/storage/download/{file}",
     params(
         ("file" = String, Path, description = "The file path/name to retrieve"),
     ),
     responses(
         (status = OK, description = "File successfully downloaded.", content_type = "application/octet-stream"),
-        (status = INTERNAL_SERVER_ERROR, description = "Storage error."),
+        (status = INTERNAL_SERVER_ERROR,body = ApiErrorResponse, description = "Storage error."),
     ),
 )]
 pub(crate) async fn download(
@@ -77,4 +78,41 @@ pub(crate) async fn download(
     );
 
     Ok((headers, content))
+}
+
+/// Download a file from storage.
+#[utoipa::path(
+    delete,
+    path = "/storage/delete/{file}",
+    params(
+        ("file" = String, Path, description = "The file path/name to delete"),
+    ),
+    responses(
+        (status = OK, description = "File successfully deleted."),
+        (status = INTERNAL_SERVER_ERROR, body = ApiErrorResponse, description = "Storage error."),
+    ),
+)]
+pub(crate) async fn delete_stored_file(
+    _user: OptionalUser,
+    State(storage): State<Arc<RwLock<dyn Storage>>>,
+    Path(file): Path<String>,
+) -> Result<impl IntoResponse, ApiError> {
+    let file_path = FilePath::new(&file);
+
+    let storage = storage.write().await;
+    storage
+        .delete(file_path)
+        .await
+        .map_err(ApiError::StorageError)?;
+
+    let file_path_string = match file_path.to_str() {
+        Some(s) => s.to_string(),
+        None => {
+            tracing::error!("Could not convert file path to string: {:?}", file_path);
+            "Could not convert file path !".into()
+        }
+    };
+    Ok(axum::Json(DeleteRemoveResponse {
+        file: file_path_string,
+    }))
 }

@@ -76,7 +76,7 @@ impl Storage for S3 {
         let body = handle_compression(&processed, parameters.compression)?;
         let key = Self::key_from_path(file);
 
-        let _ = self.client.buckets().create(&self.bucket).send().await?;
+        let _ = self.client.buckets().create(&self.bucket).send().await;
         self.client
             .objects()
             .put(&self.bucket, &key)

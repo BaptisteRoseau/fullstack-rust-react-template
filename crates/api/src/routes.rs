@@ -39,7 +39,10 @@
 use crate::{
     app_state::AppState,
     endpoints::{
-        storage::endpoints::{__path_download, __path_upload, download, upload},
+        storage::endpoints::{
+            __path_delete_stored_file, __path_download, __path_upload,
+            delete_stored_file, download, upload,
+        },
         user::endpoints::{__path_get_user, get_user},
     },
     misc::{__path_health_check, health_check},
@@ -78,6 +81,7 @@ pub fn public_routes(config: &Config, state: AppState) -> Router {
         .routes(routes!(health_check))
         .routes(routes!(upload))
         .routes(routes!(download))
+        .routes(routes!(delete_stored_file))
         .routes(routes!(get_user))
         .split_for_parts();
 
