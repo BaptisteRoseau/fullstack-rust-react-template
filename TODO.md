@@ -8,6 +8,10 @@
 - [ ] Add the file name to the upload/download endpoint using the file metadata (currently downloading a blob)
 - [ ] Maybe use the s3 client directly instead of `Storage` since its interface is so good
 
+- [ ] Nix & k3s infra
+
+- [ ] Cache uuid <-> username in Redis
+
 ## Milestones
 
 ### Current

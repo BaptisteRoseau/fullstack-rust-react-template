@@ -1,0 +1,11 @@
+[package]
+name = "rbac"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+uuid = { version = "1", features = ["fast-rng", "serde"] }
+serde = { version = "1", features = ["derive"] }
+
+[dev-dependencies]
+uuid = { version = "1", features = ["fast-rng", "serde", "v4"] }
