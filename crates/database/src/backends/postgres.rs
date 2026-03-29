@@ -1,11 +1,13 @@
 use async_trait::async_trait;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{FromRow, PgPool};
+use uuid::Uuid;
 
 use crate::crud::{CrudError, CrudExecutor, CrudValue};
 #[warn(dead_code)]
 use crate::database::Database;
 use crate::error::DatabaseError;
+use crate::models::{User, UserPatch};
 use config::Config;
 use tracing::warn;
 
@@ -134,12 +136,18 @@ impl CrudExecutor for Postgres {
     }
 }
 
+#[async_trait]
 impl Database for Postgres {
-    fn close(&mut self) -> Result<(), DatabaseError> {
+    async fn create_user(&mut self, _patch: UserPatch) -> Result<User, Box<DatabaseError>>{
         todo!()
     }
-
-    fn init(&mut self, _config: &Config) -> Result<(), DatabaseError> {
+    async fn update_user(&mut self, _patch: UserPatch) -> Result<User, Box<DatabaseError>>{
+        todo!()
+    }
+    async fn read_user(&self, uuid: Uuid) -> Result<User, Box<DatabaseError>>{
+        todo!()
+    }
+    async fn delete_user(&mut self, uuid: Uuid) -> Result<(), Box<DatabaseError>>{
         todo!()
     }
 }

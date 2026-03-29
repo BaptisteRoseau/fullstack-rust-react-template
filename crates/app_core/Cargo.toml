@@ -8,3 +8,5 @@ database = { path = "../database"}
 logging = { path = "../logging" }
 config = { path = "../config" }
 thiserror = "2.0.17"
+uuid = { version = "1", features = ["fast-rng", "serde", "v7"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "full"] }

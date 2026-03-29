@@ -1,5 +1,7 @@
 # TODO
 
+- [ ] Refine error handling to have client-facing and internal errors
+
 ## Milestones
 
 ### Current
