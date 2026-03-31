@@ -116,23 +116,57 @@ mod test {
     }
 
     #[test]
-    #[ignore]
     fn mixed_access_allowed_user_match() {
+        let permissions = &user_permissions();
 
-        // assert!(scope.allows_access_to(permissions))
+        let mut users = HashSet::new();
+        users.insert(permissions.id);
+        users.insert(Uuid::new_v4());
+
+        let groups = HashSet::new();
+
+        let scope = PermissionScope::Mixed(MixedPermissionScope::new(users, groups));
+
+        assert!(
+            scope.allows_access_to(permissions),
+            "Mixed scope should allow access when user id {:?} is in the users set",
+            permissions.id
+        );
     }
 
     #[test]
-    #[ignore]
     fn mixed_access_allowed_group_match() {
+        let permissions = &user_permissions();
 
-        // assert!(scope.allows_access_to(permissions))
+        let users = HashSet::new();
+
+        let mut groups = HashSet::new();
+        groups.insert(*permissions.group_ids.iter().next().unwrap());
+        groups.insert(Uuid::new_v4());
+
+        let scope = PermissionScope::Mixed(MixedPermissionScope::new(users, groups));
+
+        assert!(
+            scope.allows_access_to(permissions),
+            "Mixed scope should allow access when a group id matches"
+        );
     }
 
     #[test]
-    #[ignore]
     fn mixed_access_denied() {
+        let permissions = &user_permissions();
 
-        // assert!(!scope.allows_access_to(permissions))
+        let mut users = HashSet::new();
+        users.insert(Uuid::new_v4());
+
+        let mut groups = HashSet::new();
+        groups.insert(Uuid::new_v4());
+
+        let scope = PermissionScope::Mixed(MixedPermissionScope::new(users, groups));
+
+        assert!(
+            !scope.allows_access_to(permissions),
+            "Mixed scope should deny access when neither user id nor group ids match"
+        );
     }
 }
