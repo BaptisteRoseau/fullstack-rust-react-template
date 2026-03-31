@@ -1,4 +1,4 @@
-use std::{collections::HashSet, default};
+use std::collections::HashSet;
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -133,7 +133,11 @@ mod test {
 
         let groups = HashSet::new();
 
-        let scope = PermissionScope::Mixed(MixedPermissionScope::new(users, groups));
+        let scope = Scope::Mixed {
+            users,
+            groups,
+            denied_users: HashSet::default(),
+        };
 
         assert!(
             scope.allows_access_to(permissions),
@@ -152,7 +156,11 @@ mod test {
         groups.insert(*permissions.group_ids.iter().next().unwrap());
         groups.insert(Uuid::new_v4());
 
-        let scope = PermissionScope::Mixed(MixedPermissionScope::new(users, groups));
+        let scope = Scope::Mixed {
+            users,
+            groups,
+            denied_users: HashSet::default(),
+        };
 
         assert!(
             scope.allows_access_to(permissions),
@@ -170,7 +178,35 @@ mod test {
         let mut groups = HashSet::new();
         groups.insert(Uuid::new_v4());
 
-        let scope = PermissionScope::Mixed(MixedPermissionScope::new(users, groups));
+        let scope = Scope::Mixed {
+            users,
+            groups,
+            denied_users: HashSet::default(),
+        };
+
+        assert!(
+            !scope.allows_access_to(permissions),
+            "Mixed scope should deny access when neither user id nor group ids match"
+        );
+    }
+
+    #[test]
+    fn mixed_specific_user_access_denied() {
+        let permissions = &user_permissions();
+
+        // User is in a group that is allowed to access the item...
+        let mut groups = HashSet::new();
+        groups.insert(Uuid::new_v4());
+
+        // .. but has specifically been denied.
+        let mut denied_users = HashSet::new();
+        denied_users.insert(Uuid::new_v4());
+
+        let scope = Scope::Mixed {
+            users: HashSet::default(),
+            groups,
+            denied_users,
+        };
 
         assert!(
             !scope.allows_access_to(permissions),

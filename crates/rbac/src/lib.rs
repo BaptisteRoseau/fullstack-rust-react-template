@@ -10,4 +10,4 @@ pub use role::Role;
 pub use scope::Scope;
 
 // TODO: Unit tests, prefabs && documentation of the crate
-// Rename to make more sense on what are restriction scope etc..
+// serialize/deserialize tests in integration to ensure smooth storage/retrieval

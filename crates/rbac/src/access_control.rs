@@ -78,14 +78,14 @@ mod test {
 
     #[test]
     fn default_is_public_no_permissions() {
-        let obj = ObjectPermissions::default();
+        let obj = AccessControl::default();
 
         assert!(
             obj.required_permissions.is_none(),
             "Default should have no required permissions"
         );
         assert!(
-            matches!(obj.scope, PermissionScope::Public),
+            matches!(obj.scope, Scope::Public),
             "Default scope should be Public, got {:?}",
             obj.scope
         );
@@ -93,23 +93,23 @@ mod test {
 
     #[test]
     fn default_grants_access_to_any_user() {
-        let obj = ObjectPermissions::default();
+        let obj = AccessControl::default();
         let user = make_user(HashSet::new());
 
         assert!(
             obj.has_access(&user),
-            "Default ObjectPermissions should grant access to any user"
+            "Default AccessControl should grant access to any user"
         );
     }
 
     #[test]
     fn set_scope_changes_scope() {
-        let mut obj = ObjectPermissions::default();
+        let mut obj = AccessControl::default();
         let user = make_user(HashSet::new());
 
         let mut allowed_users = HashSet::new();
         allowed_users.insert(Uuid::new_v4());
-        obj.set_scope(PermissionScope::Users(allowed_users));
+        obj.set_scope(Scope::Users(allowed_users));
 
         assert!(
             !obj.has_access(&user),
@@ -119,7 +119,7 @@ mod test {
 
     #[test]
     fn set_permissions_with_empty_set_clears() {
-        let mut obj = ObjectPermissions::default();
+        let mut obj = AccessControl::default();
         let mut perms = HashSet::new();
         perms.insert(Permissions::UploadFile);
         obj.set_permissions(perms);
@@ -139,7 +139,7 @@ mod test {
 
     #[test]
     fn access_denied_without_required_permission() {
-        let mut obj = ObjectPermissions::default();
+        let mut obj = AccessControl::default();
         let mut required = HashSet::new();
         required.insert(Permissions::UploadFile);
         obj.set_permissions(required);
@@ -154,7 +154,7 @@ mod test {
 
     #[test]
     fn access_granted_with_required_permission() {
-        let mut obj = ObjectPermissions::default();
+        let mut obj = AccessControl::default();
         let mut required = HashSet::new();
         required.insert(Permissions::UploadFile);
         obj.set_permissions(required);
@@ -171,7 +171,7 @@ mod test {
 
     #[test]
     fn access_denied_with_permission_but_wrong_scope() {
-        let mut obj = ObjectPermissions::default();
+        let mut obj = AccessControl::default();
 
         let mut required = HashSet::new();
         required.insert(Permissions::UploadFile);
@@ -179,7 +179,7 @@ mod test {
 
         let mut allowed_users = HashSet::new();
         allowed_users.insert(Uuid::new_v4());
-        obj.set_scope(PermissionScope::Users(allowed_users));
+        obj.set_scope(Scope::Users(allowed_users));
 
         let mut user_perms = HashSet::new();
         user_perms.insert(Permissions::UploadFile);
@@ -193,12 +193,12 @@ mod test {
 
     #[test]
     fn access_denied_with_scope_but_missing_permission() {
-        let mut obj = ObjectPermissions::default();
+        let mut obj = AccessControl::default();
         let user = make_user(HashSet::new());
 
         let mut allowed_users = HashSet::new();
         allowed_users.insert(user.id);
-        obj.set_scope(PermissionScope::Users(allowed_users));
+        obj.set_scope(Scope::Users(allowed_users));
 
         let mut required = HashSet::new();
         required.insert(Permissions::UploadFile);
@@ -212,7 +212,7 @@ mod test {
 
     #[test]
     fn access_granted_with_permission_and_scope() {
-        let mut obj = ObjectPermissions::default();
+        let mut obj = AccessControl::default();
 
         let mut user_perms = HashSet::new();
         user_perms.insert(Permissions::UploadFile);
@@ -220,7 +220,7 @@ mod test {
 
         let mut allowed_users = HashSet::new();
         allowed_users.insert(user.id);
-        obj.set_scope(PermissionScope::Users(allowed_users));
+        obj.set_scope(Scope::Users(allowed_users));
 
         let mut required = HashSet::new();
         required.insert(Permissions::UploadFile);
@@ -234,7 +234,7 @@ mod test {
 
     #[test]
     fn set_methods_return_mutable_self() {
-        let mut obj = ObjectPermissions::default();
+        let mut obj = AccessControl::default();
         let mut users = HashSet::new();
         users.insert(Uuid::new_v4());
 
@@ -242,7 +242,7 @@ mod test {
         perms.insert(Permissions::UploadFile);
 
         // Test method chaining
-        obj.set_scope(PermissionScope::Users(users))
+        obj.set_scope(Scope::Users(users))
             .set_permissions(perms);
 
         assert!(
@@ -250,7 +250,7 @@ mod test {
             "Chained set_permissions should work"
         );
         assert!(
-            matches!(obj.scope, PermissionScope::Users(_)),
+            matches!(obj.scope, Scope::Users(_)),
             "Chained set_scope should work, got {:?}",
             obj.scope
         );
