@@ -1,11 +1,25 @@
 use crate::{Authenticator, UserInfo, error::AuthenticatorError};
 use async_trait::async_trait;
+use cache::Cache;
 use config::Config;
+use database::Database;
 use jsonwebtoken::jwk::JwkSet;
 use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode, decode_header};
 use serde::Deserialize;
 use std::collections::{BTreeMap, HashSet};
+use std::sync::Arc;
+use tokio::sync::RwLock;
 use uuid::Uuid;
+
+// Claude prompt for the next steps:
+// Look at the @crates/authenticator/ crate. It implements a JWT decoding logic from a service that exposes JWK keys. I want you to: 1.
+// Add the audiences and provider_url in the config, defaulting to keycloak default endpoint (see
+// @infrastructure/docker-compose/docker-compose.authentication.yml  ), 2. uncomment the
+// @crates/authenticator/src/backends/secrets_provider.rs code, 3. fix the conversion errors from Box<> in
+// @crates/authenticator/src/error.rs, 3. Similarly to the ApiState, add Arc<Rwlock<dyn Database>> and Arc<Rwlock<dyn Cache>> and use them
+// to retrieve the API keys in the corresponding function, consider the function for the DB simply exist and comment it out and add a
+// todo!() instruction above, we will implement it later. That's it for now, wait for my input next. use cargo clippy to validate your
+// work, rust-analyzer LSP to navigate in the code, commit for each step, and ignore "unused" errors.
 
 #[derive(Debug, Deserialize)]
 struct Claims {
@@ -29,10 +43,11 @@ impl Into<UserInfo> for Claims {
 
 pub struct SecretsProvider {
     provider_url: String,
-    audience: Vec<String>,
+    audiences: Vec<String>,
     keys: Option<JwkSet>,
     token2userinfo: BTreeMap<String, UserInfo>,
-    // Should also have a Database and cache to check for API keys
+    cache: Arc<RwLock<dyn Cache>>,
+    database: Arc<RwLock<dyn Database>>,
 }
 
 impl From<&Config> for SecretsProvider {
