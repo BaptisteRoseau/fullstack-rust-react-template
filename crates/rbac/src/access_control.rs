@@ -1,4 +1,4 @@
-use crate::{permissions::Permissions, scope::PermissionScope};
+use crate::{permissions::Permissions, scope::Scope};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use uuid::Uuid;
@@ -26,23 +26,23 @@ impl UserPermissions {
 
 /// Permissions of an object
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ObjectPermissions {
+pub struct AccessControl {
     pub required_permissions: Option<HashSet<Permissions>>,
-    pub scope: PermissionScope,
+    pub scope: Scope,
 }
 
-impl Default for ObjectPermissions {
+impl Default for AccessControl {
     /// Default permission are permissive: no required permission and scope is Public.
     fn default() -> Self {
         Self {
             required_permissions: None,
-            scope: PermissionScope::Public,
+            scope: Scope::Public,
         }
     }
 }
 
-impl ObjectPermissions {
-    pub fn set_scope(&mut self, scope: PermissionScope) -> &mut Self {
+impl AccessControl {
+    pub fn set_scope(&mut self, scope: Scope) -> &mut Self {
         self.scope = scope;
         self
     }

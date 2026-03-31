@@ -1,43 +1,50 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, default};
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::object_permissions::UserPermissions;
-/// An object that can be accessed either by a groups or by users.
-#[derive(Debug, Serialize, Deserialize)]
-pub struct MixedPermissionScope {
-    pub users: HashSet<Uuid>,
-    pub groups: HashSet<Uuid>,
-    pub denied_users: HashSet<Uuid>,
-}
-
-impl MixedPermissionScope {
-    pub fn new(users: HashSet<Uuid>, groups: HashSet<Uuid>, denied_users: HashSet<Uuid>) -> Self {
-        Self { users, groups, denied_users }
-    }
-}
+use crate::access_control::UserPermissions;
 
 /// Sets the permission access to an object
-#[derive(Debug, Serialize, Deserialize)]
-pub enum PermissionScope {
+#[derive(Debug, Serialize, Deserialize, Default)]
+pub enum Scope {
+    #[default]
     Public,
     Users(HashSet<Uuid>),
     Groups(HashSet<Uuid>),
-    Mixed(MixedPermissionScope),
+    Mixed {
+        users: HashSet<Uuid>,
+        groups: HashSet<Uuid>,
+        denied_users: HashSet<Uuid>,
+    },
 }
 
-impl PermissionScope {
+impl Scope {
+    pub fn public() -> Self {
+        Scope::Public
+    }
+
+    pub fn users() -> Self {
+        Scope::Public
+    }
+
     pub(crate) fn allows_access_to(&self, user_permissions: &UserPermissions) -> bool {
         match self {
             Self::Public => true,
             Self::Users(users) => users.contains(&user_permissions.id),
             Self::Groups(groups) => !groups.is_disjoint(&user_permissions.group_ids),
-            Self::Mixed(mixed) => {
-                if mixed.users.contains(&user_permissions.id) {
+            Self::Mixed {
+                users,
+                groups,
+                denied_users,
+            } => {
+                if denied_users.contains(&user_permissions.id) {
+                    return false;
+                }
+                if users.contains(&user_permissions.id) {
                     return true;
                 }
-                !mixed.groups.is_disjoint(&user_permissions.group_ids)
+                !groups.is_disjoint(&user_permissions.group_ids)
             }
         }
     }
@@ -64,7 +71,7 @@ mod test {
 
     #[test]
     fn has_access_to_public_scope() {
-        let scope = PermissionScope::Public;
+        let scope = Scope::Public;
         assert!(scope.allows_access_to(&user_permissions()))
     }
 
@@ -75,7 +82,7 @@ mod test {
         let mut scope_uids = HashSet::new();
         scope_uids.insert(Uuid::new_v4());
         scope_uids.insert(permissions.id);
-        let scope = PermissionScope::Users(scope_uids);
+        let scope = Scope::Users(scope_uids);
 
         assert!(scope.allows_access_to(permissions))
     }
@@ -87,7 +94,7 @@ mod test {
         let mut scope_uids = HashSet::new();
         scope_uids.insert(Uuid::new_v4());
         scope_uids.insert(Uuid::new_v4());
-        let scope = PermissionScope::Users(scope_uids);
+        let scope = Scope::Users(scope_uids);
 
         assert!(!scope.allows_access_to(permissions))
     }
@@ -99,7 +106,7 @@ mod test {
         let mut scope_gids = HashSet::new();
         scope_gids.insert(Uuid::new_v4());
         scope_gids.insert(*permissions.group_ids.iter().next().unwrap());
-        let scope = PermissionScope::Groups(scope_gids);
+        let scope = Scope::Groups(scope_gids);
 
         assert!(scope.allows_access_to(permissions))
     }
@@ -111,7 +118,7 @@ mod test {
         let mut scope_gids = HashSet::new();
         scope_gids.insert(Uuid::new_v4());
         scope_gids.insert(Uuid::new_v4());
-        let scope = PermissionScope::Groups(scope_gids);
+        let scope = Scope::Groups(scope_gids);
 
         assert!(!scope.allows_access_to(permissions))
     }
