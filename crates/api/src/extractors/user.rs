@@ -1,21 +1,21 @@
+use crate::models::UserToken;
+use crate::{AppState, error::ApiError, extractors::errors::ExtractorError};
 use axum::{
+    RequestPartsExt,
     extract::FromRequestParts,
     http::{HeaderMap, header, request::Parts},
 };
 use tracing::debug;
-use uuid::Uuid;
 
-use crate::{error::ApiError, extractors::errors::ExtractorError, models::User};
-
-pub struct OptionalUser(Option<User>);
+pub struct OptionalUser(Option<UserToken>);
 
 impl OptionalUser {
-    pub fn inner(self) -> Option<User> {
+    pub fn inner(self) -> Option<UserToken> {
         self.0
     }
 }
 
-impl From<OptionalUser> for Option<User> {
+impl From<OptionalUser> for Option<UserToken> {
     fn from(value: OptionalUser) -> Self {
         value.0
     }
@@ -47,12 +47,15 @@ where
             .strip_prefix("Bearer ")
             .unwrap_or(token.as_str())
             .to_string();
-        let user = User::new(&Uuid::now_v7(), &"name");
-        Ok(OptionalUser(Some(user)))
+
+        let app_state = parts.extract_with_state::<AppState, _>(state).await?;
+        let authenticator = app_state.authenticator.read().await;
+        let user = authenticator.validate(&token).await?;
+        Ok(OptionalUser(Some(user.into())))
     }
 }
 
-impl<S> FromRequestParts<S> for User
+impl<S> FromRequestParts<S> for UserToken
 where
     S: Send + Sync,
 {

@@ -1,4 +1,4 @@
-use crate::{Authenticator, UserInfo, error::AuthenticatorError};
+use crate::{Authenticator, UserToken, error::AuthenticatorError};
 use async_trait::async_trait;
 use cache::Cache;
 use config::Config;
@@ -31,9 +31,9 @@ struct Claims {
     roles: Option<HashSet<Uuid>>,
 }
 
-impl Into<UserInfo> for Claims {
-    fn into(self) -> UserInfo {
-        UserInfo {
+impl Into<UserToken> for Claims {
+    fn into(self) -> UserToken {
+        UserToken {
             id: self.id,
             groups: self.groups.unwrap_or_default(),
             roles: self.roles.unwrap_or_default(),
@@ -45,7 +45,7 @@ pub struct SecretsProvider {
     provider_url: String,
     audiences: Vec<String>,
     keys: Option<JwkSet>,
-    token2userinfo: BTreeMap<String, UserInfo>,
+    token2userinfo: BTreeMap<String, UserToken>,
     cache: Arc<RwLock<dyn Cache>>,
     database: Arc<RwLock<dyn Database>>,
 }
@@ -57,7 +57,7 @@ impl From<&Config> for SecretsProvider {
 }
 
 impl SecretsProvider {
-    async fn refresh_keys(&mut self) -> Result<UserInfo, Box<AuthenticatorError>> {
+    async fn refresh_keys(&mut self) -> Result<UserToken, Box<AuthenticatorError>> {
         todo!()
         // self.keys = Some(reqwest::get(self.provider_url).await?.json().await?);
     }
@@ -65,7 +65,7 @@ impl SecretsProvider {
     async fn validate_jwt(
         &self,
         token: &str,
-    ) -> Result<UserInfo, Box<AuthenticatorError>> {
+    ) -> Result<UserToken, Box<AuthenticatorError>> {
         todo!()
         // let header = decode_header(token)?;
         // let kid = header.kid.ok_or("No 'kid' in token header")?;
@@ -85,7 +85,7 @@ impl SecretsProvider {
     async fn validate_api_key(
         &self,
         token: &str,
-    ) -> Result<UserInfo, Box<AuthenticatorError>> {
+    ) -> Result<UserToken, Box<AuthenticatorError>> {
         // TODO: Fetch API key in the cache, fallback to DB
         todo!()
     }
@@ -93,7 +93,7 @@ impl SecretsProvider {
 
 #[async_trait]
 impl Authenticator for SecretsProvider {
-    async fn validate(&self, token: &str) -> Result<UserInfo, Box<AuthenticatorError>> {
+    async fn validate(&self, token: &str) -> Result<UserToken, Box<AuthenticatorError>> {
         if let Some(info) = self.token2userinfo.get(token) {
             return Ok(info.clone());
         }

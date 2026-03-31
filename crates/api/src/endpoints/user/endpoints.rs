@@ -23,7 +23,7 @@ pub(crate) async fn get_user(
     State(_state): State<AppState>,
 ) -> Result<Json<GetUserResponse>, ApiError> {
     match opt_user.inner() {
-        Some(user) => Ok(GetUserResponse::from(user.name()).into()),
+        Some(user) => Ok(GetUserResponse::from(user.id.to_string()).into()),
         None => Ok(GetUserResponse::from("Nothing".to_string()).into()),
     }
 }

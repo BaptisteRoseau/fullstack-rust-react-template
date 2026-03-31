@@ -1,4 +1,5 @@
 use app_core::error::CoreError;
+use authenticator::error::AuthenticatorError;
 use axum::{http::StatusCode, response::IntoResponse};
 use jsonwebtoken::errors::ErrorKind as JwtErrorKind;
 use serde::Serialize;
@@ -86,6 +87,8 @@ pub enum ApiError {
     CoreError(#[from] CoreError),
     #[error(transparent)]
     ExtractorError(#[from] ExtractorError),
+    #[error(transparent)]
+    AuthenticatorError(#[from] Box<AuthenticatorError>),
     #[error("Storage Error: {0}")]
     StorageError(#[from] Box<StorageError>),
     #[error("Unexpected Error")]
@@ -101,6 +104,7 @@ impl From<ApiError> for ApiErrorResponse {
             ApiError::ExtractorError(e) => e.into(),
             ApiError::StorageError(_) => ApiErrorResponse::unexpected(),
             ApiError::Unexpected(e) => e.into(),
+            ApiError::AuthenticatorError(e) => e.into(),
         }
     }
 }
@@ -143,6 +147,16 @@ impl From<jsonwebtoken::errors::Error> for ApiErrorResponse {
                 "Your authentication token has expired. Please log back in.",
                 StatusCode::UNAUTHORIZED,
             ),
+            _ => ApiErrorResponse::unexpected(),
+        }
+    }
+}
+
+impl From<Box<AuthenticatorError>> for ApiErrorResponse {
+    fn from(val: Box<AuthenticatorError>) -> Self {
+        match *val {
+            AuthenticatorError::InvalidSignarture
+            | AuthenticatorError::AuthenticationFailure => Self::forbidden(),
             _ => ApiErrorResponse::unexpected(),
         }
     }

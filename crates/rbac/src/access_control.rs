@@ -5,9 +5,9 @@ use uuid::Uuid;
 
 /// Defines the scope of what a user has access to.
 pub struct UserPermissions {
-    pub(crate) id: Uuid,
-    pub(crate) group_ids: HashSet<Uuid>,
-    pub(crate) permissions: HashSet<Permissions>,
+    pub id: Uuid,
+    pub group_ids: HashSet<Uuid>,
+    pub permissions: HashSet<Permissions>,
 }
 
 impl UserPermissions {
