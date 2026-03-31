@@ -10,7 +10,7 @@ app_core = { path = "../app_core" }
 database = { path = "../database" }
 storage = { path = "../storage" }
 cache = { path = "../cache" }
-authentication = { path = "../authentication" }
+authenticator = { path = "../authenticator" }
 anyhow = { version = "1" }
 async-trait = "0"
 axum = { version = "0", features = ["http1", "http2"] }
