@@ -9,11 +9,12 @@ use crate::object_permissions::UserPermissions;
 pub struct MixedPermissionScope {
     pub users: HashSet<Uuid>,
     pub groups: HashSet<Uuid>,
+    pub denied_users: HashSet<Uuid>,
 }
 
 impl MixedPermissionScope {
-    pub fn new(users: HashSet<Uuid>, groups: HashSet<Uuid>) -> Self {
-        Self { users, groups }
+    pub fn new(users: HashSet<Uuid>, groups: HashSet<Uuid>, denied_users: HashSet<Uuid>) -> Self {
+        Self { users, groups, denied_users }
     }
 }
 

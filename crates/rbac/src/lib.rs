@@ -1,8 +1,10 @@
 #[allow(dead_code)]
 mod object_permissions;
 mod permissions;
+mod role;
 mod scope;
 
+pub use role::Role;
 pub use permissions::Permissions;
 pub use object_permissions::{ObjectPermissions, UserPermissions};
 pub use scope::{PermissionScope, MixedPermissionScope};
