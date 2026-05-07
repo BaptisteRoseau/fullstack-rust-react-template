@@ -13,7 +13,7 @@ members = [
   "crates/database_crud_derive",
   "crates/logging",
   "crates/storage",
-  "tools/http_health_checker", "crates/rbac",
+  "tools/http_health_checker", "crates/rbac", "crates/models",
 ]
 
 [profile.release]

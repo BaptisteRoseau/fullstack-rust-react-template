@@ -54,22 +54,23 @@
 - [ ] CRUD macro (see something like <https://docs.rs/sqlx-crud/latest/sqlx_crud/traits/trait.Schema.html>)
 - [ ] Use a script to generate the database models: <https://github.com/jayy-lmao/sql-gen?tab=readme-ov-file>
 - The two previous milestones should allow you to make the database crate basic CRUD functionalities across all tables trivial, so that you can focus on the more interesting ones :D
+- [ ] Split database into multiple traits then use T1 + T2 + T3 .. to avoid having a giant one.
 
 ### API Layer
 
 - [ ] Set a request ID for logging purposes
-- [ ] Use axum-tower-session and axum-login for session management
+- [ ] Use axum-tower-session and axum-login for session management ?
 - [ ] Use a Protobuf schema to generate Rust models and Typescript structures
 - [ ] Add CORS middleware
-- [ ] Add compression middleware
-- [ ] Add tracing middleware (set sensitive headers before)
-- [ ] Add timeout middleware
-- [ ] Add Swagger UI & openapi.json
+- [X] Add compression middleware
+- [X] Add tracing middleware (set sensitive headers before)
+- [X] Add timeout middleware
+- [X] Add Swagger UI & openapi.json
 - [ ] Add rate limiter middleware
 - [ ] Aggregate middlewares cleanly
 - [ ] Convert `app_core` models to API models and vice-versa
-- [ ] Add error handling middleware & global error conversion
-- [ ] Trace errors & normalize error response
+- [X] Add error handling middleware & global error conversion
+- [X] Trace errors & normalize error response
 - [ ] Support both REST & gRCP from the same handler (split with `/rest/` and `/grpc/` in the URL)
 
 ### Testing, CI/CD, Docker and scripts
@@ -78,7 +79,7 @@
 - [ ] Fix all docker-compose files, services & interaction
 - [ ] Fix scripts for test execution, audit & licenses
 - [ ] Add formatting checker script
-- [ ] Add sqlx JSON schema generation from migration scripts and blank container
+- [X] Add sqlx JSON schema generation from migration scripts and blank container
 - [ ] Add sqlx JSON schema checker (current vs expected from migrations)
 - [ ] Add protobuf models generation (front & back)
 - [ ] Add generated models checker (expected vs actual)

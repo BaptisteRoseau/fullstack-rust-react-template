@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use authenticator::backends::SecretsProvider;
 use cache::backends::redis::Redis;
 use tokio::sync::RwLock;
 
@@ -34,10 +35,15 @@ pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
     let cache = Redis::try_from(config)?;
     info!("Initialized Cache");
 
+    info!("Initializing Authenticator...");
+    let authenticator = SecretsProvider::try_from(config)?;
+    info!("Initialized Authenticator");
+
     let state = AppState::new(
         Arc::new(RwLock::new(database)),
         Arc::new(RwLock::new(storage)),
         Arc::new(RwLock::new(cache)),
+        Arc::new(RwLock::new(authenticator)),
     );
 
     /* ===========================

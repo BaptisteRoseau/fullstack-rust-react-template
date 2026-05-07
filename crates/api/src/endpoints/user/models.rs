@@ -3,6 +3,7 @@ use utoipa::{ToResponse, ToSchema};
 
 /// Here is the documentation of the response
 #[derive(Debug, Serialize, ToSchema, ToResponse)]
+#[serde(rename_all = "camelCase")]
 pub(crate) struct GetUserResponse {
     pub name: String,
 }

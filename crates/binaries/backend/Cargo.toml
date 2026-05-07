@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 api = { path = "../../api"}
 logging = { path = "../../logging" }
+authenticator = { path = "../../authenticator" }
 storage = { path = "../../storage" }
 config = { path = "../../config"}
 cache = { path = "../../cache"}

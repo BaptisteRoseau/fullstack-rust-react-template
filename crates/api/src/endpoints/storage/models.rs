@@ -7,6 +7,7 @@ use utoipa::{IntoParams, ToResponse, ToSchema};
 /// Query parameters for file upload, controlling compression and image processing.
 /// All fields are optional; defaults to gzip compression with lossy image compression.
 #[derive(Debug, Deserialize, ToSchema, IntoParams)]
+#[serde(rename_all = "camelCase")]
 pub(crate) struct PostUploadParams {
     /// Enable gzip compression. Defaults to true.
     pub compression: Option<bool>,
@@ -59,12 +60,14 @@ impl PostUploadParams {
 
 /// Response returned after a successful file upload.
 #[derive(Debug, Serialize, ToSchema, ToResponse)]
+#[serde(rename_all = "camelCase")]
 pub(crate) struct PutUploadResponse {
     pub file: String,
 }
 
 /// Response returned after a successful file deletion.
 #[derive(Debug, Serialize, ToSchema, ToResponse)]
+#[serde(rename_all = "camelCase")]
 pub(crate) struct DeleteRemoveResponse {
     pub file: String,
 }

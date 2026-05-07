@@ -101,7 +101,7 @@ impl Authenticator for SecretsProvider {
             Ok(info) => Ok(info),
             Err(e) => match e {
                 //TODO: valid error cases requiring fallback to API key
-                // => return self.validate_api_key(token).await,
+                // AuthenticatorError:: => return self.validate_api_key(token).await,
                 _ => Err(Box::new(AuthenticatorError::AuthenticationFailure)),
             },
         }

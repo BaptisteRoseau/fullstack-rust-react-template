@@ -18,6 +18,7 @@ Each endpoint should be defined under a directory as follows:
 Models are the specific inputs and outputs of an API.
 
 Each model should derive from `Debug` and `utoipa::ToSchema`. It is possible to add `From<T>` when necessary in an endpoint.
+Each model should have derive from `#[serde(rename_all = "camelCase")]`.
 
 Parameters should derive from `Deserialize` and `IntoParams`.
 Responses should derive from `Serialize` and `ToResponse`.
@@ -35,12 +36,14 @@ use uuid::Uuid;
 
 /// <Here should be the documentation of the response>
 #[derive(Debug, Serialize, ToSchema, ToResponse)]
+#[serde(rename_all = "camelCase")]
 pub(crate) struct GetUserResponse {
     pub name: String,
 }
 
 /// <Here should be the documentation of the parameter>
 #[derive(Debug, Deserialize, ToSchema, IntoParams)]
+#[serde(rename_all = "camelCase")]
 pub(crate) struct PostUserParams {
     pub id: Uuid,
 }

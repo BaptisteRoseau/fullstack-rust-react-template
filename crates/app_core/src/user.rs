@@ -18,3 +18,36 @@ pub async fn create_user<U: Into<UserPatch>>(
         Ok(db.create_user(patch).await?)
     }
 }
+
+pub async fn update_user<U: Into<UserPatch>>(
+    user: U,
+    database: Arc<RwLock<dyn Database>>,
+) -> Result<User, Box<CoreError>> {
+    let patch: UserPatch = user.into();
+    {
+        let mut db = database.write().await;
+        Ok(db.create_user(patch).await?)
+    }
+}
+
+pub async fn get_user<U: Into<UserPatch>>(
+    user: U,
+    database: Arc<RwLock<dyn Database>>,
+) -> Result<User, Box<CoreError>> {
+    let patch: UserPatch = user.into();
+    {
+        let mut db = database.write().await;
+        Ok(db.create_user(patch).await?)
+    }
+}
+
+pub async fn delete_user<U: Into<UserPatch>>(
+    user: U,
+    database: Arc<RwLock<dyn Database>>,
+) -> Result<User, Box<CoreError>> {
+    let patch: UserPatch = user.into();
+    {
+        let mut db = database.write().await;
+        Ok(db.create_user(patch).await?)
+    }
+}

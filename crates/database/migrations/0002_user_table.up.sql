@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
     last_name varchar(128) NOT NULL,
     first_name varchar(128) NOT NULL,
     email varchar(255) NOT NULL,
-    address varchar(255) DEFAULT NULL,
+    permissions JSON DEFAULT '[]'
     PRIMARY KEY(id)
 );
 

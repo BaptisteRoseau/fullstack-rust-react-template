@@ -48,10 +48,11 @@ where
             .unwrap_or(token.as_str())
             .to_string();
 
-        let app_state = parts.extract_with_state::<AppState, _>(state).await?;
-        let authenticator = app_state.authenticator.read().await;
-        let user = authenticator.validate(&token).await?;
-        Ok(OptionalUser(Some(user.into())))
+        // let app_state = parts.extract_with_state::<AppState, _>(state).await?;
+        // let authenticator = app_state.authenticator.read().await;
+        // let user = authenticator.validate(&token).await?;
+        // Ok(OptionalUser(Some(user.into())))
+        Ok(OptionalUser(None))
     }
 }
 

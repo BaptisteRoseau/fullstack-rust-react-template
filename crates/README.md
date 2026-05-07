@@ -10,18 +10,48 @@ Most importantly:
 - [config](./config): The configuration either from a file or the CLI, with defaults. This config is passed to all the previous layers and is read-only once parsed.
 - [storage](./storage): The API to store blobs and files. Consider your environment read-only, every write operation should either be in the database for data, or the storage API for files.
 
-The module relashionship should be `api` > `app_core` > `database`. Each outer layer cannot import inner layer to keep a coherent architecture and allow working on modules independently.
+The module relashionship should be `api` > `app_core` > `database`. Each inner layer cannot import outer layers to keep a coherent architecture and allow working on modules independently.
 
 Here:
 
 - `app_core` cannot use `api`
 - `database` can neither use `app_core` nor `api`
 - `app_core` can use `database`
-- `api` can use `app_core` but not `database`
+- `api` can use `app_core` and `database`
 
 ## Types of crates
 
 Each crate is this folder is library only. For binaries, go into [binaries](./binaries) and import the required libraries.
+
+Except `core` and `api`, most crates follow this pattern:
+
+```
+mycrate
+├── Cargo.toml
+├── README.md
+├── src
+│   ├── backends
+│   │   ├── mod.rs
+│   │   └── some_backend.rs
+│   ├── mycrate.rs
+│   ├── error.rs
+│   └── lib.rs
+└── tests
+    ├── common
+    │   ├── cache.rs
+    │   ├── containers.rs
+    │   └── mod.rs
+    └── some_backend.rs
+```
+
+The crate exposes a public trait that is `Send + Sync`, this is the one that will be used in `app_core` and `api` crates.
+In `src/backends` are store structs that implement this trait.
+
+## mods.rs and lib.rs
+
+These file should never contain custom code, but only `mod` and `use` imports and export.
+
+If you need to add custom code to them, put it in a new or existing file instead.
 
 ## Tech Stack
 
