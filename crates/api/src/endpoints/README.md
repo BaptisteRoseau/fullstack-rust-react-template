@@ -13,6 +13,9 @@ Each endpoint should be defined under a directory as follows:
 └── mod.rs
 ```
 
+By convention, for nested endpoint we use directories separated by `__` per `/`.
+For example, CRUD endpoints for `/user/ressources` would be under `user__ressources.`
+
 ## Models
 
 Models are the specific inputs and outputs of an API.
