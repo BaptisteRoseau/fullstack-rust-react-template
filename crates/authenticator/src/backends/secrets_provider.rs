@@ -6,7 +6,7 @@ use database::Database;
 use jsonwebtoken::jwk::JwkSet;
 use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode, decode_header};
 use serde::Deserialize;
-use std::collections::{BTreeMap, HashSet};
+use std::collections::BTreeMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use uuid::Uuid;
@@ -24,19 +24,17 @@ use uuid::Uuid;
 #[derive(Debug, Deserialize)]
 struct Claims {
     sub: String, // User's unique ID
-    iss: String, // Issuer (should match your Authentik URL)
+    iss: String, // Issuer (should match your Keyckoak URL)
     exp: usize,  // Expiration time
     id: Uuid,
-    groups: Option<HashSet<Uuid>>,
-    roles: Option<HashSet<Uuid>>,
+    realm: String,
 }
 
 impl Into<UserToken> for Claims {
     fn into(self) -> UserToken {
         UserToken {
             id: self.id,
-            groups: self.groups.unwrap_or_default(),
-            roles: self.roles.unwrap_or_default(),
+            realm: self.realm,
         }
     }
 }
@@ -45,65 +43,88 @@ pub struct SecretsProvider {
     provider_url: String,
     audiences: Vec<String>,
     keys: Option<JwkSet>,
-    token2userinfo: BTreeMap<String, UserToken>,
     cache: Arc<RwLock<dyn Cache>>,
     database: Arc<RwLock<dyn Database>>,
 }
 
-impl From<&Config> for SecretsProvider {
-    fn from(value: &Config) -> Self {
-        todo!()
-    }
-}
-
 impl SecretsProvider {
-    async fn refresh_keys(&mut self) -> Result<UserToken, Box<AuthenticatorError>> {
-        todo!()
-        // self.keys = Some(reqwest::get(self.provider_url).await?.json().await?);
+    fn try_new(
+        config: &Config,
+        cache: Arc<RwLock<dyn Cache>>,
+        database: Arc<RwLock<dyn Database>>,
+    ) -> Result<Self, Box<AuthenticatorError>> {
+        todo!("Add config for authenticator");
+        // let mut authenticator = Self {
+        //     provider_url: config.authenticator.provider_url,
+        //     audiences: config.authenticator.audiences,
+        //     keys: None,
+        //     cache,
+        //     database,
+        // };
+        // authenticator.refresh()?;
+        // authenticator
     }
 
     async fn validate_jwt(
         &self,
         token: &str,
     ) -> Result<UserToken, Box<AuthenticatorError>> {
-        todo!()
-        // let header = decode_header(token)?;
-        // let kid = header.kid.ok_or("No 'kid' in token header")?;
-        // let jwk = self
-        //     .keys
-        //     .find(&kid)
-        //     .ok_or("No matching key found in JWKS")?;
-        // let decoding_key = DecodingKey::from_jwk(jwk)?;
+        let header = decode_header(token)?;
+        let kid = header.kid.ok_or("No 'kid' in token header")?;
+        let jwk = self
+            .keys
+            .map(|f| f.find(&kid).ok_or("No matching key found in JWKS"))?;
+        // Err(Box::new(AuthenticatorError::NoJwk)
+        let decoding_key = DecodingKey::from_jwk(jwk)?;
 
-        // let mut validation = Validation::new(Algorithm::RS256);
-        // validation.set_audience(&self.audience);
+        let mut validation = Validation::new(Algorithm::RS256);
+        validation.set_audience(&self.audience);
 
-        // let decoded_token = decode::<Claims>(token, &decoding_key, &validation)?;
-        // Ok(decoded_token.claims.into())
+        let decoded_token = decode::<Claims>(token, &decoding_key, &validation)?;
+        Ok(decoded_token.claims.into())
     }
 
     async fn validate_api_key(
         &self,
         token: &str,
     ) -> Result<UserToken, Box<AuthenticatorError>> {
-        // TODO: Fetch API key in the cache, fallback to DB
-        todo!()
+        // TODO:
+        // 1. Hash API key (sha256 ? bcrypt ?)
+        // 2. Fetch API in cache -> OK return
+        // 3. Fallback to DB -> OK return
+        // 4. Return error
+        // let hashed = "Should hash the token";
+        // if let Some(_match) = self.cache.read().await.get_nofail(&hashed).await {
+        //     let user_token = 
+        //     return Ok(user_token);
+        // }
+
+        // if let Some(_match) = self.database.read().await. {
+            
+        // }
+
+        Err(Box::new(AuthenticatorError::AuthenticationFailure))
     }
 }
 
 #[async_trait]
 impl Authenticator for SecretsProvider {
     async fn validate(&self, token: &str) -> Result<UserToken, Box<AuthenticatorError>> {
-        if let Some(info) = self.token2userinfo.get(token) {
-            return Ok(info.clone());
-        }
-        match self.validate_jwt(token).await {
-            Ok(info) => Ok(info),
-            Err(e) => match e {
-                //TODO: valid error cases requiring fallback to API key
-                // AuthenticatorError:: => return self.validate_api_key(token).await,
-                _ => Err(Box::new(AuthenticatorError::AuthenticationFailure)),
+        // Only JWT contain dots
+        match token.contains('.') {
+            true => match self.validate_jwt(token).await {
+                Ok(info) => Ok(info),
+                Err(e) => Err(e),
+            },
+            false => match self.validate_api_key(token).await {
+                Ok(info) => Ok(info),
+                Err(e) => Err(e),
             },
         }
+    }
+
+    async fn refresh(&mut self) -> Result<(), Box<AuthenticatorError>> {
+        self.keys = Some(reqwest::get(&self.provider_url).await?.json().await?);
+        Ok(())
     }
 }

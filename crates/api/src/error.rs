@@ -155,7 +155,7 @@ impl From<jsonwebtoken::errors::Error> for ApiErrorResponse {
 impl From<Box<AuthenticatorError>> for ApiErrorResponse {
     fn from(val: Box<AuthenticatorError>) -> Self {
         match *val {
-            AuthenticatorError::InvalidSignarture
+            AuthenticatorError::InvalidSignature
             | AuthenticatorError::AuthenticationFailure => Self::forbidden(),
             _ => ApiErrorResponse::unexpected(),
         }
