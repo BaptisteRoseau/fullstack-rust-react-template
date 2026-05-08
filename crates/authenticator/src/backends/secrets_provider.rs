@@ -13,23 +13,17 @@ use uuid::Uuid;
 
 #[derive(Debug, Deserialize)]
 struct Claims {
-    #[allow(dead_code)]
     sub: String,
-    #[allow(dead_code)]
     iss: String,
-    #[allow(dead_code)]
-    exp: usize,
-    id: Uuid,
-    realm: String,
 }
 
-impl From<Claims> for UserToken {
-    fn from(claims: Claims) -> Self {
-        UserToken {
-            id: claims.id,
-            realm: claims.realm,
-        }
-    }
+// Keycloak sets iss to "http://<host>/realms/<realm-name>"; extract the last segment.
+fn realm_from_iss(iss: &str) -> String {
+    iss.trim_end_matches('/')
+        .rsplit('/')
+        .next()
+        .unwrap_or("")
+        .to_string()
 }
 
 pub struct SecretsProvider {
@@ -67,8 +61,13 @@ impl SecretsProvider {
         let mut validation = Validation::new(Algorithm::RS256);
         validation.set_audience(&self.audiences);
 
-        let decoded_token = decode::<Claims>(token, &decoding_key, &validation)?;
-        Ok(decoded_token.claims.into())
+        let claims = decode::<Claims>(token, &decoding_key, &validation)?.claims;
+        let id = Uuid::parse_str(&claims.sub)
+            .map_err(|e| AuthenticatorError::Message(format!("invalid sub UUID: {e}")))?;
+        Ok(UserToken {
+            id,
+            realm: realm_from_iss(&claims.iss),
+        })
     }
 
     async fn validate_api_key(&self, token: &str) -> Result<UserToken, Box<AuthenticatorError>> {

@@ -2,7 +2,7 @@ use crate::models::UserToken;
 use crate::{AppState, error::ApiError, extractors::errors::ExtractorError};
 use axum::{
     RequestPartsExt,
-    extract::FromRequestParts,
+    extract::{FromRef, FromRequestParts},
     http::{HeaderMap, header, request::Parts},
 };
 use tracing::debug;
@@ -24,6 +24,7 @@ impl From<OptionalUser> for Option<UserToken> {
 impl<S> FromRequestParts<S> for OptionalUser
 where
     S: Send + Sync,
+    AppState: FromRef<S>,
 {
     type Rejection = ApiError;
 
@@ -42,23 +43,23 @@ where
             }
         };
 
-        let token: String = header.to_str().unwrap().to_string();
-        let _token = token
-            .strip_prefix("Bearer ")
-            .unwrap_or(token.as_str())
-            .to_string();
+        let raw = header.to_str().map_err(|e| anyhow::anyhow!(e))?;
+        let token = raw.strip_prefix("Bearer ").unwrap_or(raw);
 
-        // let app_state = parts.extract_with_state::<AppState, _>(state).await?;
-        // let authenticator = app_state.authenticator.read().await;
-        // let user = authenticator.validate(&token).await?;
-        // Ok(OptionalUser(Some(user.into())))
-        Ok(OptionalUser(None))
+        let app_state = parts.extract_with_state::<AppState, _>(state).await?;
+        let user;
+        {
+            let authenticator = app_state.authenticator.read().await;
+            user = authenticator.validate(token).await?;
+        }
+        Ok(OptionalUser(Some(user.into())))
     }
 }
 
 impl<S> FromRequestParts<S> for UserToken
 where
     S: Send + Sync,
+    AppState: FromRef<S>,
 {
     type Rejection = ApiError;
 

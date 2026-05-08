@@ -1,20 +1,17 @@
 use authenticator::UserToken as AuthUserToken;
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
 use uuid::Uuid;
 
 pub struct UserToken {
     pub id: Uuid,
-    pub groups: HashSet<Uuid>,
-    pub roles: HashSet<Uuid>,
+    pub realm: String,
 }
 
 impl From<AuthUserToken> for UserToken {
     fn from(value: AuthUserToken) -> Self {
         Self {
             id: value.id,
-            groups: HashSet::new(),
-            roles: HashSet::new(),
+            realm: value.realm,
         }
     }
 }
