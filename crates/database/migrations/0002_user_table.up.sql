@@ -7,6 +7,6 @@ CREATE TABLE IF NOT EXISTS users (
     PRIMARY KEY(id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_users_last_name ON users (last_name);
-CREATE INDEX IF NOT EXISTS idx_users_first_name ON users (first_name);
-CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
+CREATE INDEX IF NOT EXISTS idx__users__last_name ON users (last_name);
+CREATE INDEX IF NOT EXISTS idx__users__first_name ON users (first_name);
+CREATE INDEX IF NOT EXISTS idx__users__email ON users (email);
