@@ -37,6 +37,12 @@ pub struct RedisConfig {
     pub url: String,
 }
 
+#[derive(Debug, Clone)]
+pub struct AuthenticatorConfig {
+    pub provider_url: String,
+    pub audiences: Vec<String>,
+}
+
 type ServerBindingConfig = BindingConfig;
 
 #[derive(Debug, Clone)]
@@ -69,6 +75,7 @@ pub struct Config {
     pub postgres: PostgresConfig,
     pub prometheus: Option<PrometheusConfig>,
     pub swagger: Option<SwaggerConfig>,
+    pub authenticator: AuthenticatorConfig,
 }
 
 impl Config {
@@ -128,6 +135,15 @@ impl TryFrom<CliConfig> for Config {
             },
             prometheus,
             swagger,
+            authenticator: AuthenticatorConfig {
+                provider_url: value.authenticator_provider_url,
+                audiences: value
+                    .authenticator_audiences
+                    .split(',')
+                    .filter(|s| !s.is_empty())
+                    .map(str::to_string)
+                    .collect(),
+            },
         })
     }
 }
@@ -184,6 +200,8 @@ mod test {
                 swagger_ui_path: DEFAULT_SWAGGER_UI_PATH.to_string(),
                 swagger_openapi_path: DEFAULT_OPENAPI_PATH.to_string(),
                 no_swagger: false,
+                authenticator_provider_url: DEFAULT_AUTHENTICATOR_PROVIDER_URL.to_string(),
+                authenticator_audiences: DEFAULT_AUTHENTICATOR_AUDIENCES.to_string(),
             }
         }
     }

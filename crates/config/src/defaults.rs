@@ -25,3 +25,8 @@ pub(crate) const DEFAULT_REDIS_URL: &str = "redis://127.0.0.1:6379";
 pub(crate) const DEFAULT_API_TIMEOUT_SEC: u16 = 20;
 
 pub(crate) const DEFAULT_CONFIG_FILE_PATH: &str = ".config.yaml";
+
+// Keycloak default JWKS endpoint (from docker-compose.authentication.yml: port 8090 → 8080)
+pub(crate) const DEFAULT_AUTHENTICATOR_PROVIDER_URL: &str =
+    "http://127.0.0.1:8090/realms/master/protocol/openid-connect/certs";
+pub(crate) const DEFAULT_AUTHENTICATOR_AUDIENCES: &str = "backend";

@@ -13,8 +13,8 @@ impl From<AuthUserToken> for UserToken {
     fn from(value: AuthUserToken) -> Self {
         Self {
             id: value.id,
-            groups: value.groups,
-            roles: value.roles,
+            groups: HashSet::new(),
+            roles: HashSet::new(),
         }
     }
 }

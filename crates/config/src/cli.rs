@@ -125,6 +125,17 @@ pub(crate) struct CliConfig {
     /// Deactivate Swagger server
     #[arg(long, env, default_value_t = false)]
     pub(crate) no_swagger: bool,
+
+    /* ===============
+    AUTHENTICATOR
+    ================ */
+    /// JWKS provider URL (e.g. http://localhost:8090/realms/master/protocol/openid-connect/certs)
+    #[arg(long, env, default_value_t = DEFAULT_AUTHENTICATOR_PROVIDER_URL.to_string())]
+    pub(crate) authenticator_provider_url: String,
+
+    /// Comma-separated list of accepted JWT audiences
+    #[arg(long, env, default_value_t = DEFAULT_AUTHENTICATOR_AUDIENCES.to_string())]
+    pub(crate) authenticator_audiences: String,
 }
 
 impl CliConfig {

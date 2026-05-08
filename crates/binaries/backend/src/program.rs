@@ -24,25 +24,33 @@ pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
     =========================== */
 
     info!("Initializing Database...");
-    let database = Postgres::try_from(config).await?;
+    let database: Arc<RwLock<dyn database::Database>> =
+        Arc::new(RwLock::new(Postgres::try_from(config).await?));
     info!("Initialized Database");
 
     info!("Initializing Storage...");
-    let storage = S3::try_from(config)?;
+    let storage: Arc<RwLock<dyn storage::Storage>> =
+        Arc::new(RwLock::new(S3::try_from(config)?));
     info!("Initialized Storage");
 
     info!("Initializing Cache...");
-    let cache = Redis::try_from(config)?;
+    let cache: Arc<RwLock<dyn cache::Cache>> =
+        Arc::new(RwLock::new(Redis::try_from(config)?));
     info!("Initialized Cache");
 
     info!("Initializing Authenticator...");
-    let authenticator = SecretsProvider::try_from(config)?;
+    let authenticator = SecretsProvider::try_new(
+        config,
+        Arc::clone(&cache),
+        Arc::clone(&database),
+    )
+    .await?;
     info!("Initialized Authenticator");
 
     let state = AppState::new(
-        Arc::new(RwLock::new(database)),
-        Arc::new(RwLock::new(storage)),
-        Arc::new(RwLock::new(cache)),
+        database,
+        storage,
+        cache,
         Arc::new(RwLock::new(authenticator)),
     );
 

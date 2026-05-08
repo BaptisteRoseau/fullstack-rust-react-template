@@ -1,3 +1,5 @@
+use jsonwebtoken::errors::Error as JwtError;
+
 #[derive(thiserror::Error, Debug)]
 pub enum AuthenticatorError {
     #[error("No JWK sent from the Auth provider")]
@@ -10,12 +12,26 @@ pub enum AuthenticatorError {
     RequestError(#[from] reqwest::Error),
     #[error("The user's authentication failed")]
     AuthenticationFailure,
-    #[error("Unexpected Error")]
-    Unexpected(#[from] Box<dyn std::error::Error>),
+    #[error("JWT error: {0}")]
+    JwtError(#[from] JwtError),
+    #[error("{0}")]
+    Message(String),
 }
 
 impl From<reqwest::Error> for Box<AuthenticatorError> {
     fn from(value: reqwest::Error) -> Self {
         Box::new(value.into())
+    }
+}
+
+impl From<JwtError> for Box<AuthenticatorError> {
+    fn from(value: JwtError) -> Self {
+        Box::new(value.into())
+    }
+}
+
+impl From<&str> for Box<AuthenticatorError> {
+    fn from(value: &str) -> Self {
+        Box::new(AuthenticatorError::Message(value.to_string()))
     }
 }

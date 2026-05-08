@@ -6,35 +6,28 @@ use database::Database;
 use jsonwebtoken::jwk::JwkSet;
 use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode, decode_header};
 use serde::Deserialize;
-use std::collections::BTreeMap;
+use sha2::{Digest, Sha256};
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use uuid::Uuid;
 
-// Claude prompt for the next steps:
-// Look at the @crates/authenticator/ crate. It implements a JWT decoding logic from a service that exposes JWK keys. I want you to: 1.
-// Add the audiences and provider_url in the config, defaulting to keycloak default endpoint (see
-// @infrastructure/docker-compose/docker-compose.authentication.yml  ), 2. uncomment the
-// @crates/authenticator/src/backends/secrets_provider.rs code, 3. fix the conversion errors from Box<> in
-// @crates/authenticator/src/error.rs, 3. Similarly to the ApiState, add Arc<Rwlock<dyn Database>> and Arc<Rwlock<dyn Cache>> and use them
-// to retrieve the API keys in the corresponding function, consider the function for the DB simply exist and comment it out and add a
-// todo!() instruction above, we will implement it later. That's it for now, wait for my input next. use cargo clippy to validate your
-// work, rust-analyzer LSP to navigate in the code, commit for each step, and ignore "unused" errors.
-
 #[derive(Debug, Deserialize)]
 struct Claims {
-    sub: String, // User's unique ID
-    iss: String, // Issuer (should match your Keyckoak URL)
-    exp: usize,  // Expiration time
+    #[allow(dead_code)]
+    sub: String,
+    #[allow(dead_code)]
+    iss: String,
+    #[allow(dead_code)]
+    exp: usize,
     id: Uuid,
     realm: String,
 }
 
-impl Into<UserToken> for Claims {
-    fn into(self) -> UserToken {
+impl From<Claims> for UserToken {
+    fn from(claims: Claims) -> Self {
         UserToken {
-            id: self.id,
-            realm: self.realm,
+            id: claims.id,
+            realm: claims.realm,
         }
     }
 }
@@ -48,78 +41,69 @@ pub struct SecretsProvider {
 }
 
 impl SecretsProvider {
-    fn try_new(
+    pub async fn try_new(
         config: &Config,
         cache: Arc<RwLock<dyn Cache>>,
         database: Arc<RwLock<dyn Database>>,
     ) -> Result<Self, Box<AuthenticatorError>> {
-        todo!("Add config for authenticator");
-        // let mut authenticator = Self {
-        //     provider_url: config.authenticator.provider_url,
-        //     audiences: config.authenticator.audiences,
-        //     keys: None,
-        //     cache,
-        //     database,
-        // };
-        // authenticator.refresh()?;
-        // authenticator
+        let mut authenticator = Self {
+            provider_url: config.authenticator.provider_url.clone(),
+            audiences: config.authenticator.audiences.clone(),
+            keys: None,
+            cache,
+            database,
+        };
+        authenticator.refresh().await?;
+        Ok(authenticator)
     }
 
-    async fn validate_jwt(
-        &self,
-        token: &str,
-    ) -> Result<UserToken, Box<AuthenticatorError>> {
+    async fn validate_jwt(&self, token: &str) -> Result<UserToken, Box<AuthenticatorError>> {
         let header = decode_header(token)?;
         let kid = header.kid.ok_or("No 'kid' in token header")?;
-        let jwk = self
-            .keys
-            .map(|f| f.find(&kid).ok_or("No matching key found in JWKS"))?;
-        // Err(Box::new(AuthenticatorError::NoJwk)
+        let jwks = self.keys.as_ref().ok_or(AuthenticatorError::NoJwk)?;
+        let jwk = jwks.find(&kid).ok_or("No matching key found in JWKS")?;
         let decoding_key = DecodingKey::from_jwk(jwk)?;
 
         let mut validation = Validation::new(Algorithm::RS256);
-        validation.set_audience(&self.audience);
+        validation.set_audience(&self.audiences);
 
         let decoded_token = decode::<Claims>(token, &decoding_key, &validation)?;
         Ok(decoded_token.claims.into())
     }
 
-    async fn validate_api_key(
-        &self,
-        token: &str,
-    ) -> Result<UserToken, Box<AuthenticatorError>> {
-        // TODO:
-        // 1. Hash API key (sha256 ? bcrypt ?)
-        // 2. Fetch API in cache -> OK return
-        // 3. Fallback to DB -> OK return
-        // 4. Return error
-        // let hashed = "Should hash the token";
-        // if let Some(_match) = self.cache.read().await.get_nofail(&hashed).await {
-        //     let user_token = 
-        //     return Ok(user_token);
-        // }
+    async fn validate_api_key(&self, token: &str) -> Result<UserToken, Box<AuthenticatorError>> {
+        let hashed = hex_sha256(token);
 
-        // if let Some(_match) = self.database.read().await. {
-            
+        if let Some(value) = self.cache.read().await.get_nofail(&hashed).await
+            && let Ok(user_token) = serde_json::from_value::<UserToken>(value)
+        {
+            return Ok(user_token);
+        }
+
+        // todo!() - look up the hashed API key in the database
+        // if let Some(user_token) = self.database.read().await.get_api_key(&hashed).await? {
+        //     return Ok(user_token);
         // }
 
         Err(Box::new(AuthenticatorError::AuthenticationFailure))
     }
 }
 
+fn hex_sha256(input: &str) -> String {
+    Sha256::digest(input.as_bytes())
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect()
+}
+
 #[async_trait]
 impl Authenticator for SecretsProvider {
     async fn validate(&self, token: &str) -> Result<UserToken, Box<AuthenticatorError>> {
         // Only JWT contain dots
-        match token.contains('.') {
-            true => match self.validate_jwt(token).await {
-                Ok(info) => Ok(info),
-                Err(e) => Err(e),
-            },
-            false => match self.validate_api_key(token).await {
-                Ok(info) => Ok(info),
-                Err(e) => Err(e),
-            },
+        if token.contains('.') {
+            self.validate_jwt(token).await
+        } else {
+            self.validate_api_key(token).await
         }
     }
 
