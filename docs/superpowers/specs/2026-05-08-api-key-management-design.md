@@ -51,13 +51,15 @@ DROP INDEX IF EXISTS idx__api_key__hash;
 
 ### Generated model (`generated_models.rs`, after re-running `build_database_rust_models.sh`)
 
+The raw database representation — lives only in the `database` crate, never imported by `api`:
+
 ```rust
 pub struct ApiKey {
     id: uuid::Uuid,
     hash: String,
     name: String,
     owner: uuid::Uuid,
-    permissions: serde_json::Value,
+    permissions: serde_json::Value,  // JSON array, e.g. ["UploadFile"]
     created_at: chrono::DateTime<chrono::Utc>,
     updated_at: chrono::DateTime<chrono::Utc>,
 }
@@ -65,7 +67,7 @@ pub struct ApiKey {
 
 ### Public accessors (`crates/database/src/models.rs`)
 
-The `Crud` derive macro does not generate field getters — all generated fields are private. An explicit `impl ApiKey` block is added in `models.rs` (same crate, so it can access private fields) exposing the fields needed externally:
+The `Crud` derive macro does not generate field getters — all generated fields are private. An explicit `impl ApiKey` block is added in `models.rs` (same crate, so it can access private fields) exposing only the fields needed externally:
 
 ```rust
 impl ApiKey {
@@ -78,6 +80,22 @@ impl ApiKey {
 }
 ```
 
+### Domain model (`crates/models/src/api_key.rs`)
+
+The `api` and `app_core` crates use this type, never `database::ApiKey` directly. `models` gains a dependency on `rbac`.
+
+```rust
+pub struct ApiKey {
+    pub id: uuid::Uuid,
+    pub name: String,
+    pub owner: uuid::Uuid,
+    pub permissions: Vec<rbac::Permissions>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+}
+```
+
+`TryFrom<database::ApiKey>` is implemented in `app_core` (the only crate that depends on both `database` and `models`), deserializing the `serde_json::Value` permissions into `Vec<rbac::Permissions>`.
+
 ### New methods on `Database` trait (`crates/database/src/database.rs`)
 
 ```rust
@@ -86,12 +104,12 @@ async fn create_api_key(
     owner: Uuid,
     name: String,
     hash: String,
-    permissions: Vec<String>,
-) -> Result<ApiKey, Box<DatabaseError>>;
+    permissions: serde_json::Value,  // pre-serialized from Vec<rbac::Permissions> in app_core
+) -> Result<database::ApiKey, Box<DatabaseError>>;
 
 async fn delete_api_key(&mut self, id: Uuid) -> Result<bool, Box<DatabaseError>>;
 
-async fn read_api_key_by_hash(&self, hash: &str) -> Result<ApiKey, Box<DatabaseError>>;
+async fn read_api_key_by_hash(&self, hash: &str) -> Result<database::ApiKey, Box<DatabaseError>>;
 ```
 
 `DatabaseError` gets a new `HashCollision` variant for unique constraint violations on `hash`, so the retry loop in `app_core` can pattern-match cleanly.
@@ -111,13 +129,17 @@ pub async fn create_api_key(
     db: &mut impl Database,
     owner: Uuid,
     name: String,
-    permissions: Vec<String>,
-) -> Result<(String, ApiKey), CoreError> {
+    permissions: Vec<rbac::Permissions>,
+) -> Result<(String, models::ApiKey), CoreError> {
+    let permissions_json = serde_json::to_value(&permissions)?;
     loop {
         let raw_key = generate_random_key(); // 32 random bytes → 64-char hex string
-        let hash = hex_sha256(&raw_key);     // reuse hex_sha256 from the authenticator crate
-        match db.create_api_key(owner, name.clone(), hash, permissions.clone()).await {
-            Ok(api_key) => return Ok((raw_key, api_key)),
+        let hash = hex_sha256(&raw_key);
+        match db.create_api_key(owner, name.clone(), hash, permissions_json.clone()).await {
+            Ok(db_key) => {
+                let api_key = models::ApiKey::try_from(db_key)?;
+                return Ok((raw_key, api_key));
+            }
             Err(e) if e.is_hash_collision() => continue,
             Err(e) => return Err(e.into()),
         }
@@ -182,7 +204,7 @@ async fn validate_api_key(&self, token: &str) -> Result<UserToken, Box<Authentic
         return Ok(user_token);
     }
 
-    // Look up in DB
+    // Look up in DB — returns database::ApiKey, only owner() needed here
     let api_key = self.database.read().await
         .read_api_key_by_hash(&hashed).await
         .map_err(|_| AuthenticatorError::AuthenticationFailure)?;
@@ -191,6 +213,8 @@ async fn validate_api_key(&self, token: &str) -> Result<UserToken, Box<Authentic
         id: api_key.owner(),
         realm: "api_key".to_string(),
     };
+    // Note: permissions are intentionally not included in UserToken;
+    // they are enforced at the endpoint level via the models::ApiKey.
 
     // Cache result
     // ...
