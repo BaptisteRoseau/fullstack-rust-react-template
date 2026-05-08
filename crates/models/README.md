@@ -1,8 +1,10 @@
 # Models
 
-This crate contains the main models used throughout the core of the application.
+These are the core models for the application objects used mainly by the [app_core](../app_core) crate.
+Other layer crates convert from/to these models by implementing `From<T>` and `Into<T>` trait.
 
-Each layer should implement From<T> and/or Into<T> where T is defined in this crate for interoperation.
+For example, the [app_core](../app_core)
 
-For example, this crate may defined a `User` model. The `api` and `database` crates may have their own `User` models for API communication or database storage.
-These will have to implement the above trait to pass the user to inner/outer layer.
+## Structure
+
+Each model has its own file where they implement their structure definition, traits, methods, and tests.
