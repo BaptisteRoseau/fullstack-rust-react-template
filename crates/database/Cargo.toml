@@ -18,5 +18,13 @@ thiserror = "2"
 tracing = { version = "0", features = ["async-await"] }
 
 [dev-dependencies]
+libtest-mimic = "0.8"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 testcontainers = "0"
 testcontainers-modules = { version = "0", features = ["postgres"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4", "fast-rng"] }
+
+[[test]]
+name = "postgres"
+harness = false
