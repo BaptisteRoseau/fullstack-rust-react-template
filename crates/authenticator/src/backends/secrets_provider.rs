@@ -79,12 +79,28 @@ impl SecretsProvider {
             return Ok(user_token);
         }
 
-        // todo!() - look up the hashed API key in the database
-        // if let Some(user_token) = self.database.read().await.get_api_key(&hashed).await? {
-        //     return Ok(user_token);
-        // }
+        let api_key = self
+            .database
+            .read()
+            .await
+            .read_api_key_by_hash(&hashed)
+            .await
+            .map_err(|_| AuthenticatorError::AuthenticationFailure)?;
 
-        Err(Box::new(AuthenticatorError::AuthenticationFailure))
+        let user_token = UserToken {
+            id: api_key.owner(),
+            realm: "api_key".to_string(),
+        };
+
+        if let Ok(value) = serde_json::to_value(&user_token) {
+            self.cache
+                .read()
+                .await
+                .set_nofail(&hashed, &value, Some(300))
+                .await;
+        }
+
+        Ok(user_token)
     }
 }
 
