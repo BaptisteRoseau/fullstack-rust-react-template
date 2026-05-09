@@ -75,6 +75,7 @@ where
         CrudValue::OptionI64(v) => query.bind(v),
         CrudValue::F64(v) => query.bind(v),
         CrudValue::OptionF64(v) => query.bind(v),
+        CrudValue::Json(v) => query.bind(v),
     }
 }
 
@@ -96,6 +97,7 @@ fn bind_crud_value_query(
         CrudValue::OptionI64(v) => query.bind(v),
         CrudValue::F64(v) => query.bind(v),
         CrudValue::OptionF64(v) => query.bind(v),
+        CrudValue::Json(v) => query.bind(v),
     }
 }
 

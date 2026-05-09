@@ -29,6 +29,7 @@ pub enum CrudValue {
     OptionI64(Option<i64>),
     F64(f64),
     OptionF64(Option<f64>),
+    Json(serde_json::Value),
 }
 
 /// Abstraction for executing CRUD queries.

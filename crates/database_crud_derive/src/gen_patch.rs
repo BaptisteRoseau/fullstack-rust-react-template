@@ -194,6 +194,7 @@ fn to_crud_value_non_option(
         "i32" => quote! { crate::crud::CrudValue::I32(#value_expr) },
         "i64" => quote! { crate::crud::CrudValue::I64(#value_expr) },
         "f64" => quote! { crate::crud::CrudValue::F64(#value_expr) },
+        "Value" => quote! { crate::crud::CrudValue::Json(#value_expr) },
         other => {
             let msg = format!("Unsupported type for CrudValue: {other}");
             let lit = proc_macro2::Literal::string(&msg);

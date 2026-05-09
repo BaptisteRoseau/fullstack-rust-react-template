@@ -4,7 +4,7 @@ pub struct ApiKey {
     pub hash: String,
     pub name: String,
     pub owner: uuid::Uuid,
-    pub permissions: String,
+    pub permissions: serde_json::Value,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }

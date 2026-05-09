@@ -42,6 +42,7 @@ pub fn to_crud_value(field: &FieldInfo, value_expr: &TokenStream) -> TokenStream
             "i32" => quote! { crate::crud::CrudValue::I32(#value_expr) },
             "i64" => quote! { crate::crud::CrudValue::I64(#value_expr) },
             "f64" => quote! { crate::crud::CrudValue::F64(#value_expr) },
+            "Value" => quote! { crate::crud::CrudValue::Json(#value_expr) },
             other => {
                 let msg = format!("Unsupported type for CrudValue: {other}");
                 let lit = proc_macro2::Literal::string(&msg);
@@ -110,6 +111,7 @@ pub fn create_param_to_crud_value(field: &FieldInfo) -> TokenStream {
             "i32" => quote! { crate::crud::CrudValue::I32(#ident) },
             "i64" => quote! { crate::crud::CrudValue::I64(#ident) },
             "f64" => quote! { crate::crud::CrudValue::F64(#ident) },
+            "Value" => quote! { crate::crud::CrudValue::Json(#ident) },
             _ => quote! { compile_error!("Unsupported type") },
         }
     }
@@ -174,6 +176,7 @@ pub fn read_param_to_crud_value(field: &FieldInfo) -> TokenStream {
             "i32" => quote! { crate::crud::CrudValue::I32(#ident) },
             "i64" => quote! { crate::crud::CrudValue::I64(#ident) },
             "f64" => quote! { crate::crud::CrudValue::F64(#ident) },
+            "Value" => quote! { crate::crud::CrudValue::Json(#ident) },
             _ => quote! { compile_error!("Unsupported type") },
         }
     }
