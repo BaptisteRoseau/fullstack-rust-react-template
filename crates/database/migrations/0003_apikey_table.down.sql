@@ -1,2 +1,3 @@
--- Add down migration script here
-DROP TABLE IF EXISTS apikey;
+DROP INDEX IF EXISTS idx__api_key__hash;
+DROP INDEX IF EXISTS idx__api_key__owner;
+DROP TABLE IF EXISTS api_key;
