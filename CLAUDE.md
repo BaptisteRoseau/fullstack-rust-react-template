@@ -24,7 +24,6 @@ When working on a new task, first search for pieces of code that are similar to 
 
 When working on a task:
 
-- Create a branch for your task if not already on a new one
 - Make a clear TODO list of the tasks
 - First have a read-only approach: list what pieces of information you need to retrieve as bulletpoints
 - Then, use an agent to go in the codebase, database and documentation find those information and summarize them
@@ -33,13 +32,9 @@ When working on a task:
     - implement a chunk, read it, criticize it and refactor it until it is satisfied
     - Test it using the unit tests, compiler and linter (use the scripts)
     - Only if necessary, add unit tests
-- Commit your code with: git commit --author=Claude -m "<message>"
 - Go onto the next chunk and repeat
-- When finished, tell the user your task is done and ask for a review. Do not merge the branch yourself.
 
 Store relevant information, delete obsolete information and find a clever way to index them to find them quickly whenever possible.
-
-Regularly run `git pull` and `git push` to share your work.
 
 Do not invent, if you need information or documentation, use the codebase, your memory and use the context7 MCP when you need documentation.
 
