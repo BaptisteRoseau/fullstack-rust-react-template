@@ -215,7 +215,7 @@ impl Database for Postgres {
             .await
             .map_err(|e| match e {
                 sqlx::Error::RowNotFound => {
-                    Box::new(DatabaseError::NotFound(hash.to_string()))
+                    Box::new(DatabaseError::NotFound("api_key".to_string()))
                 }
                 other => Box::new(DatabaseError::Sqlx(other)),
             })

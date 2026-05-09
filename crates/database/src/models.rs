@@ -8,4 +8,5 @@ impl ApiKey {
     pub fn hash(&self) -> &str { &self.hash }
     pub fn permissions(&self) -> &serde_json::Value { &self.permissions }
     pub fn created_at(&self) -> chrono::DateTime<chrono::Utc> { self.created_at }
+    pub fn updated_at(&self) -> chrono::DateTime<chrono::Utc> { self.updated_at }
 }

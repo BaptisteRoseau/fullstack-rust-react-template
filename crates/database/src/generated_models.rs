@@ -10,11 +10,11 @@ pub struct User {
 
 #[derive(Debug, Clone, sqlx::FromRow)]
 pub struct ApiKey {
-    pub id: uuid::Uuid,
-    pub hash: String,
-    pub name: String,
-    pub owner: uuid::Uuid,
-    pub permissions: serde_json::Value,
-    pub created_at: chrono::DateTime<chrono::Utc>,
-    pub updated_at: chrono::DateTime<chrono::Utc>,
+    pub(crate) id: uuid::Uuid,
+    pub(crate) hash: String,
+    pub(crate) name: String,
+    pub(crate) owner: uuid::Uuid,
+    pub(crate) permissions: serde_json::Value,
+    pub(crate) created_at: chrono::DateTime<chrono::Utc>,
+    pub(crate) updated_at: chrono::DateTime<chrono::Utc>,
 }

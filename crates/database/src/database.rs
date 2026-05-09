@@ -4,6 +4,7 @@ use super::error::DatabaseError;
 use async_trait::async_trait;
 use uuid::Uuid;
 
+/// Defines the Database trait interface.
 #[async_trait]
 pub trait Database: Send + Sync {
     async fn create_user(&mut self, patch: UserPatch) -> Result<User, Box<DatabaseError>>;
