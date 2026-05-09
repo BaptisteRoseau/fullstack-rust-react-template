@@ -39,6 +39,10 @@
 use crate::{
     app_state::AppState,
     endpoints::{
+        api_key::endpoints::{
+            __path_create_api_key, __path_delete_api_key, __path_get_api_key,
+            create_api_key, delete_api_key, get_api_key,
+        },
         storage::endpoints::{
             __path_delete_stored_file, __path_download, __path_upload,
             delete_stored_file, download, upload,
@@ -83,6 +87,9 @@ pub fn public_routes(config: &Config, state: AppState) -> Router {
         .routes(routes!(download))
         .routes(routes!(delete_stored_file))
         .routes(routes!(get_user))
+        .routes(routes!(create_api_key))
+        .routes(routes!(get_api_key))
+        .routes(routes!(delete_api_key))
         .split_for_parts();
 
     let api_routes = api_routes.merge(swagger(config, openapi));

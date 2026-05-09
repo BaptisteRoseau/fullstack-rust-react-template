@@ -6,7 +6,7 @@ use crate::models::api_key_from_db;
 use database::Database;
 
 pub async fn create_api_key(
-    db: &mut impl Database,
+    db: &mut dyn Database,
     owner: Uuid,
     name: String,
     permissions: Vec<rbac::Permissions>,
