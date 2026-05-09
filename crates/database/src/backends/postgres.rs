@@ -7,7 +7,7 @@ use crate::crud::{CrudError, CrudExecutor, CrudValue};
 #[warn(dead_code)]
 use crate::database::Database;
 use crate::error::DatabaseError;
-use crate::models::{User, UserPatch};
+use crate::models::{ApiKey, User, UserPatch};
 use config::Config;
 use tracing::warn;
 
@@ -39,6 +39,14 @@ impl Postgres {
                 Ok(Self { pool })
             }
         }
+    }
+
+    pub async fn try_from_url(url: &str) -> Result<Self, DatabaseError> {
+        let pool = PgPoolOptions::new()
+            .max_connections(10)
+            .connect(url)
+            .await?;
+        Ok(Self { pool })
     }
 
     pub fn pool(&self) -> &PgPool {
@@ -157,5 +165,68 @@ impl Database for Postgres {
     async fn delete_user(&mut self, uuid: Uuid) -> Result<bool, Box<DatabaseError>> {
         let q = sqlx::query("DELETE * FROM user where id == %s").bind(uuid);
         Ok(q.execute(&self.pool).await?.rows_affected() == 1)
+    }
+
+    async fn create_api_key(
+        &mut self,
+        owner: Uuid,
+        name: String,
+        hash: String,
+        permissions: serde_json::Value,
+    ) -> Result<ApiKey, Box<DatabaseError>> {
+        let result = sqlx::query_as::<_, ApiKey>(
+            "INSERT INTO api_key (owner, name, hash, permissions) VALUES ($1, $2, $3, $4) RETURNING *",
+        )
+        .bind(owner)
+        .bind(name)
+        .bind(hash)
+        .bind(permissions)
+        .fetch_one(&self.pool)
+        .await;
+
+        match result {
+            Ok(key) => Ok(key),
+            Err(sqlx::Error::Database(db_err))
+                if db_err.constraint() == Some("api_key_hash_key") =>
+            {
+                Err(Box::new(DatabaseError::HashCollision))
+            }
+            Err(e) => Err(Box::new(DatabaseError::Sqlx(e))),
+        }
+    }
+
+    async fn read_api_key_by_id(&self, id: Uuid) -> Result<ApiKey, Box<DatabaseError>> {
+        sqlx::query_as::<_, ApiKey>("SELECT * FROM api_key WHERE id = $1")
+            .bind(id)
+            .fetch_one(&self.pool)
+            .await
+            .map_err(|e| match e {
+                sqlx::Error::RowNotFound => {
+                    Box::new(DatabaseError::NotFound(id.to_string()))
+                }
+                other => Box::new(DatabaseError::Sqlx(other)),
+            })
+    }
+
+    async fn read_api_key_by_hash(&self, hash: &str) -> Result<ApiKey, Box<DatabaseError>> {
+        sqlx::query_as::<_, ApiKey>("SELECT * FROM api_key WHERE hash = $1")
+            .bind(hash)
+            .fetch_one(&self.pool)
+            .await
+            .map_err(|e| match e {
+                sqlx::Error::RowNotFound => {
+                    Box::new(DatabaseError::NotFound(hash.to_string()))
+                }
+                other => Box::new(DatabaseError::Sqlx(other)),
+            })
+    }
+
+    async fn delete_api_key(&mut self, id: Uuid) -> Result<bool, Box<DatabaseError>> {
+        let rows = sqlx::query("DELETE FROM api_key WHERE id = $1")
+            .bind(id)
+            .execute(&self.pool)
+            .await
+            .map_err(|e| Box::new(DatabaseError::Sqlx(e)))?;
+        Ok(rows.rows_affected() == 1)
     }
 }

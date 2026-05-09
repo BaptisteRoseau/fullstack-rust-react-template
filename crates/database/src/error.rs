@@ -10,6 +10,14 @@ pub enum DatabaseError {
     Sqlx(#[from] sqlx::Error),
     #[error("The item was not found.")]
     NotFound(String),
+    #[error("Hash collision on insert.")]
+    HashCollision,
+}
+
+impl DatabaseError {
+    pub fn is_hash_collision(&self) -> bool {
+        matches!(self, DatabaseError::HashCollision)
+    }
 }
 
 impl From<CrudError> for Box<DatabaseError> {
