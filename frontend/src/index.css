@@ -2,7 +2,8 @@
 /*! modern-normalize v3.0.1 | MIT License | https://github.com/sindresorhus/modern-normalize */
 /*! CSS Course https://www.slayingthedragon.io/ */
 /*! Vite Template https://vite.dev/ */
-@import "tailwind/preflight";
+@tailwind base;
+@tailwind components;
 @tailwind utilities;
 
 *,
