@@ -3,14 +3,12 @@
 const defaultTheme = require('tailwindcss/defaultTheme');
 
 module.exports = {
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  mode: 'all',
+  content: ['./src/**/*.{html,css,ts,js,tsx,jsx}'],
   theme: {
     container: {
       center: true,
       padding: '2rem',
-      screens: {
-        '2xl': '1400px',
-      },
     },
     extend: {
       fontFamily: {
