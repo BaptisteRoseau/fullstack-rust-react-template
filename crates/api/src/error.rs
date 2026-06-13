@@ -8,12 +8,23 @@ use utoipa::ToSchema;
 
 use storage::error::StorageError;
 
-use crate::extractors::errors::ExtractorError;
+use crate::extractors::error::ExtractorError;
+
+/// An enum representing and API error.
+// TODO: Serde uppercanse
+#[derive(Serialize, ToSchema)]
+enum ApiErrorId {
+    Unexpected,
+    Unauthorized,
+    Forbidden,
+    TokenExpired,
+    NotFound,
+}
 
 /// This is the standard API error returned by endpoints.
 #[derive(Serialize, ToSchema)]
 pub(crate) struct ApiErrorResponse {
-    id: String,
+    id: ApiErrorId,
     error: String,
     #[serde(skip_serializing)]
     status_code: StatusCode,
@@ -22,11 +33,11 @@ pub(crate) struct ApiErrorResponse {
 impl ApiErrorResponse {
     fn new<I, E>(id: I, error: E, code: StatusCode) -> Self
     where
-        I: ToString,
+        I: Into<ApiErrorId>,
         E: ToString,
     {
         Self {
-            id: id.to_string(),
+            id: id.into(),
             error: error.to_string(),
             status_code: code,
         }
@@ -35,7 +46,7 @@ impl ApiErrorResponse {
     /// Template for unexpected error
     fn unexpected() -> Self {
         Self::new(
-            "UNEXPECTED",
+            ApiErrorId::Unexpected,
             "An unexpected error occurred.",
             StatusCode::INTERNAL_SERVER_ERROR,
         )
@@ -43,17 +54,25 @@ impl ApiErrorResponse {
 
     /// Template for forbidden responses
     fn unauthorized() -> Self {
-        Self::new("UNAUTHORIZED", "", StatusCode::UNAUTHORIZED)
+        Self::new(
+            ApiErrorId::Unauthorized,
+            "You need to be logged in to access this ressource",
+            StatusCode::UNAUTHORIZED,
+        )
     }
 
     /// Template for forbidden responses
     fn forbidden() -> Self {
-        Self::new("FORBIDDEN", "", StatusCode::FORBIDDEN)
+        Self::new(
+            ApiErrorId::Forbidden,
+            "You are not allowed to access this ressource.",
+            StatusCode::FORBIDDEN,
+        )
     }
 
     /// Template for not found responses
     fn not_found() -> Self {
-        Self::new("NOT_FOUND", "", StatusCode::NOT_FOUND)
+        Self::new(ApiErrorId::NotFound, "Not found.", StatusCode::NOT_FOUND)
     }
 }
 
@@ -143,7 +162,7 @@ impl From<jsonwebtoken::errors::Error> for ApiErrorResponse {
             | JwtErrorKind::InvalidIssuer
             | JwtErrorKind::InvalidSignature => ApiErrorResponse::forbidden(),
             JwtErrorKind::ExpiredSignature => ApiErrorResponse::new(
-                "TOKEN_EXPIRED",
+                ApiErrorId::TokenExpired,
                 "Your authentication token has expired. Please log back in.",
                 StatusCode::UNAUTHORIZED,
             ),

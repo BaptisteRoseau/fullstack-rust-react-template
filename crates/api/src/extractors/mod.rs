@@ -1,5 +1,5 @@
 mod app_state;
-pub mod errors;
+pub mod error;
 mod user;
 
 pub use user::OptionalUser;

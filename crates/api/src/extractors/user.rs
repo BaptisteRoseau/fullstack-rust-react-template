@@ -1,5 +1,5 @@
 use crate::models::UserToken;
-use crate::{AppState, error::ApiError, extractors::errors::ExtractorError};
+use crate::{AppState, error::ApiError, extractors::error::ExtractorError};
 use axum::{
     RequestPartsExt,
     extract::{FromRef, FromRequestParts},
