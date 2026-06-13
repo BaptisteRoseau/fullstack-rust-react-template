@@ -1,17 +1,17 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
+import * as React from 'react';
+import { createRoot } from 'react-dom/client';
 
-const root = document.getElementById('root')
-if (root) {
-    createRoot(root).render(
-        <StrictMode>
-            <App />
-        </StrictMode>
-    )
-} else {
-    console.warn(
-        'createRoot called in a non-browser environment. Skipping render.'
-    )
-}
+import './index.css';
+import { App } from './app';
+import { enableMocking } from './testing/mocks';
+
+const root = document.getElementById('root');
+if (!root) throw new Error('No root element found');
+
+enableMocking().then(() => {
+  createRoot(root).render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+  );
+});

@@ -1,20 +1,30 @@
-# Frontend Template
+# React Vite Application
 
-## Tech Stack
+## Get Started
 
-- ReactJS
-- TailwindCSS
-- Vite
-- Bun
-- Prettier
-- ESLint
-- TypeScript
-- Docker
+Prerequisites:
 
-## How To Build
+- Node 20+
+- Bun 1.22+
 
-TODO
+To set up the app execute the following commands.
 
-## How To Run
+```bash
+git clone https://github.com/alan2207/bulletproof-react.git
+cd bulletproof-react
+cd apps/react-vite
+cp .env.example .env
+bun install
+```
 
-TODO
+##### `bun run dev`
+
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+
+##### `bun build`
+
+Builds the app for production to the `dist` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
+
+See the section about [deployment](https://vitejs.dev/guide/static-deploy) for more information.

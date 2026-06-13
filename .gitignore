@@ -38,4 +38,5 @@ frontend*.tar.gz
 packages/
 
 .env
-.llm_memory/
+*.pnp
+*.pnp.js
