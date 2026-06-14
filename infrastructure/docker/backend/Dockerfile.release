@@ -36,5 +36,5 @@ HEALTHCHECK \
     --interval=10s \
     --timeout=10s \
     --retries=3 \
-    CMD [ "/http_health_checker", "http://127.0.0.1:9876/" ]
+    CMD [ "/http_health_checker", "http://127.0.0.1:9876/ping" ]
 ENTRYPOINT [ "/backend", "--port", "9876", "--config", "/etc/backend/config.yml" ]

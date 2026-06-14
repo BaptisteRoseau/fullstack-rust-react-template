@@ -27,7 +27,9 @@
     - [ ] Fix bun run dev
     - [ ] Simple echo API with a simple button (somehow like a TOOD app)
     - [ ] CRUD files s3
- 
+
+- [ ] Generate `frontend/src/types/api.ts` from the openapi of the backend.
+
 1. [x] Fix SQLx migrations
 2. [x] Generate Rust models from SQLx
 3. [ ] Build or use a CRUD macro trait for Rust models
