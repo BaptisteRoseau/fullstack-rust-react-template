@@ -1,5 +1,5 @@
 use crate::models::UserToken;
-use crate::{AppState, error::ApiError, extractors::error::ExtractorError};
+use crate::{AppState, error::ApiError};
 use axum::{
     RequestPartsExt,
     extract::{FromRef, FromRequestParts},
@@ -53,28 +53,5 @@ where
             user = authenticator.validate(token).await?;
         }
         Ok(OptionalUser(Some(user.into())))
-    }
-}
-
-impl<S> FromRequestParts<S> for UserToken
-where
-    S: Send + Sync,
-    AppState: FromRef<S>,
-{
-    type Rejection = ApiError;
-
-    /// Extract the user if possible. If not, directly return an error without getting to
-    /// the handler.
-    async fn from_request_parts(
-        parts: &mut Parts,
-        state: &S,
-    ) -> Result<Self, Self::Rejection> {
-        match OptionalUser::from_request_parts(parts, state).await {
-            Ok(opt_user) => match opt_user.inner() {
-                Some(user) => Ok(user),
-                None => Err(ApiError::from(ExtractorError::NotLoggedIn)),
-            },
-            Err(e) => Err(e),
-        }
     }
 }

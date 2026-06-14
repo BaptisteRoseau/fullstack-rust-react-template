@@ -1,7 +1,7 @@
 mod app_state;
 pub mod error;
-mod user;
+mod optional_user;
+mod required_user;
 
-pub use user::OptionalUser;
-
-//TODO: A little README.md here ? :D
+pub use optional_user::OptionalUser;
+pub use required_user::RequiredUser;

@@ -3,7 +3,6 @@
 - [ ] Refine error handling to have client-facing and internal errors
     - [ ] Avoid creating new boxes every time we convert an error ?
     - [ ] Find a way to factorize openapi specs for error responses
-    - [ ] Use utoipa #[to_response] with enums for the main API error response
     - [ ] Create endpoint-specific error response schemas
 - [ ] Add the file name to the upload/download endpoint using the file metadata (currently downloading a blob)
 - [ ] Maybe use the s3 client directly instead of `Storage` since its interface is so good
@@ -24,7 +23,7 @@
     - [X] Backend
     - [X] Metrics endpoint
     - [X] Frontend
-    - [ ] Fix bun run dev
+    - [X] Fix bun run dev
     - [ ] Simple echo API with a simple button (somehow like a TOOD app)
     - [ ] CRUD files s3
 
