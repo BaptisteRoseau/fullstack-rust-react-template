@@ -1,3 +1,6 @@
+use std::collections::HashMap;
+use std::sync::Mutex;
+
 use async_trait::async_trait;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{FromRow, PgPool};
@@ -52,6 +55,22 @@ impl Postgres {
     pub fn pool(&self) -> &PgPool {
         &self.pool
     }
+}
+
+// sqlx 0.8+ requires `&'static str` for prepared-statement caching.
+// We intern each unique SQL string so it is leaked at most once per unique query,
+// bounding total allocation to the (small, finite) set of distinct SQL strings used.
+static SQL_INTERN: Mutex<Option<HashMap<String, &'static str>>> = Mutex::new(None);
+
+fn intern_sql(sql: &str) -> &'static str {
+    let mut guard = SQL_INTERN.lock().unwrap();
+    let map = guard.get_or_insert_with(HashMap::new);
+    if let Some(&s) = map.get(sql) {
+        return s;
+    }
+    let leaked: &'static str = Box::leak(sql.to_string().into_boxed_str());
+    map.insert(sql.to_string(), leaked);
+    leaked
 }
 
 fn bind_crud_value_query_as<'q, T>(
@@ -111,7 +130,7 @@ impl CrudExecutor for Postgres {
     where
         T: for<'r> FromRow<'r, sqlx::postgres::PgRow> + Send + Unpin,
     {
-        let mut q = sqlx::query_as::<_, T>(query);
+        let mut q = sqlx::query_as::<_, T>(intern_sql(query));
         for arg in args {
             q = bind_crud_value_query_as(q, arg);
         }
@@ -126,7 +145,7 @@ impl CrudExecutor for Postgres {
     where
         T: for<'r> FromRow<'r, sqlx::postgres::PgRow> + Send + Unpin,
     {
-        let mut q = sqlx::query_as::<_, T>(query);
+        let mut q = sqlx::query_as::<_, T>(intern_sql(query));
         for arg in args {
             q = bind_crud_value_query_as(q, arg);
         }
@@ -138,7 +157,7 @@ impl CrudExecutor for Postgres {
         query: &str,
         args: Vec<CrudValue>,
     ) -> Result<u64, CrudError> {
-        let mut q = sqlx::query(query);
+        let mut q = sqlx::query(intern_sql(query));
         for arg in args {
             q = bind_crud_value_query(q, arg);
         }
@@ -210,7 +229,10 @@ impl Database for Postgres {
             })
     }
 
-    async fn read_api_key_by_hash(&self, hash: &str) -> Result<ApiKey, Box<DatabaseError>> {
+    async fn read_api_key_by_hash(
+        &self,
+        hash: &str,
+    ) -> Result<ApiKey, Box<DatabaseError>> {
         sqlx::query_as::<_, ApiKey>("SELECT * FROM api_key WHERE hash = $1")
             .bind(hash)
             .fetch_one(&self.pool)
