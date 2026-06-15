@@ -149,6 +149,13 @@
     }
 }
 
+@layer utilities {
+    .container {
+        border: 2px solid red;
+        margin: 0 auto;
+    }
+}
+
 html {
     font-family:
         system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif,
