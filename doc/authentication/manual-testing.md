@@ -114,15 +114,15 @@ echo $ACCESS_TOKEN | cut -d. -f2 | base64 -d 2>/dev/null | jq .
 
 ## 5. Call the API
 
-The backend runs on port **6969** by default.
+The backend runs on port **8080** by default.
 
 ```bash
 # Authenticated request
-curl -s http://localhost:6969/some-endpoint \
+curl -s http://localhost:8080/some-endpoint \
   -H "Authorization: Bearer $ACCESS_TOKEN" | jq .
 
 # Health check (no auth required)
-curl -s http://localhost:6969/
+curl -s http://localhost:8080/
 ```
 
 ---
