@@ -1,27 +1,27 @@
-import '@testing-library/jest-dom/vitest';
+import '@testing-library/jest-dom/vitest'
 
-import { initializeDb, resetDb } from '@/testing/mocks/db';
-import { server } from '@/testing/mocks/server';
+import { initializeDb, resetDb } from '@/testing/mocks/db'
+import { server } from '@/testing/mocks/server'
 
-vi.mock('zustand');
+vi.mock('zustand')
 
-beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
-afterAll(() => server.close());
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+afterAll(() => server.close())
 beforeEach(() => {
-  const ResizeObserverMock = vi.fn(() => ({
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
-  }));
+    const ResizeObserverMock = vi.fn(() => ({
+        observe: vi.fn(),
+        unobserve: vi.fn(),
+        disconnect: vi.fn(),
+    }))
 
-  vi.stubGlobal('ResizeObserver', ResizeObserverMock);
+    vi.stubGlobal('ResizeObserver', ResizeObserverMock)
 
-  window.btoa = (str: string) => Buffer.from(str, 'binary').toString('base64');
-  window.atob = (str: string) => Buffer.from(str, 'base64').toString('binary');
+    window.btoa = (str: string) => Buffer.from(str, 'binary').toString('base64')
+    window.atob = (str: string) => Buffer.from(str, 'base64').toString('binary')
 
-  initializeDb();
-});
+    initializeDb()
+})
 afterEach(() => {
-  server.resetHandlers();
-  resetDb();
-});
+    server.resetHandlers()
+    resetDb()
+})

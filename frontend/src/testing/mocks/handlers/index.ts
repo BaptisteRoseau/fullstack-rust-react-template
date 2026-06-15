@@ -1,23 +1,23 @@
-import { HttpResponse, http } from 'msw';
+import { HttpResponse, http } from 'msw'
 
-import { env } from '@/config/env';
+import { env } from '@/config/env'
 
-import { networkDelay } from '../utils';
+import { networkDelay } from '../utils'
 
-import { authHandlers } from './auth';
-import { commentsHandlers } from './comments';
-import { discussionsHandlers } from './discussions';
-import { teamsHandlers } from './teams';
-import { usersHandlers } from './users';
+import { authHandlers } from './auth'
+import { commentsHandlers } from './comments'
+import { discussionsHandlers } from './discussions'
+import { teamsHandlers } from './teams'
+import { usersHandlers } from './users'
 
 export const handlers = [
-  ...authHandlers,
-  ...commentsHandlers,
-  ...discussionsHandlers,
-  ...teamsHandlers,
-  ...usersHandlers,
-  http.get(`${env.API_URL}/healthcheck`, async () => {
-    await networkDelay();
-    return HttpResponse.json({ ok: true });
-  }),
-];
+    ...authHandlers,
+    ...commentsHandlers,
+    ...discussionsHandlers,
+    ...teamsHandlers,
+    ...usersHandlers,
+    http.get(`${env.API_URL}/healthcheck`, async () => {
+        await networkDelay()
+        return HttpResponse.json({ ok: true })
+    }),
+]

@@ -18,10 +18,10 @@ Ideally, code splitting should be implemented at the routes level, ensuring that
 
 ```javascript
 // instead of this which would be executed on every re-render:
-const [state, setState] = React.useState(myExpensiveFn());
+const [state, setState] = React.useState(myExpensiveFn())
 
 // prefer this which is executed only once:
-const [state, setState] = React.useState(() => myExpensiveFn());
+const [state, setState] = React.useState(() => myExpensiveFn())
 ```
 
 - If you develop an application that requires a state to track many elements at once, you might consider state management libraries with atomic updates such as [jotai](https://jotai.pmnd.rs/).
@@ -36,44 +36,44 @@ const [state, setState] = React.useState(() => myExpensiveFn());
 
 ```javascript
 // Not optimized example
-const App = () => <Counter />;
+const App = () => <Counter />
 
 const Counter = () => {
-  const [count, setCount] = useState(0);
+    const [count, setCount] = useState(0)
 
-  return (
-    <div>
-      <button onClick={() => setCount((count) => count + 1)}>
-        count is {count}
-      </button>
-      <PureComponent /> // will rerender whenever "count" updates
-    </div>
-  );
-};
+    return (
+        <div>
+            <button onClick={() => setCount((count) => count + 1)}>
+                count is {count}
+            </button>
+            <PureComponent /> // will rerender whenever "count" updates
+        </div>
+    )
+}
 
-const PureComponent = () => <p>Pure Component</p>;
+const PureComponent = () => <p>Pure Component</p>
 
 // Optimized example
 const App = () => (
-  <Counter>
-    <PureComponent />
-  </Counter>
-);
+    <Counter>
+        <PureComponent />
+    </Counter>
+)
 
 const Counter = ({ children }) => {
-  const [count, setCount] = useState(0);
+    const [count, setCount] = useState(0)
 
-  return (
-    <div>
-      <button onClick={() => setCount((count) => count + 1)}>
-        count is {count}
-      </button>
-      {children} // won't rerender whenever "count" updates
-    </div>
-  );
-};
+    return (
+        <div>
+            <button onClick={() => setCount((count) => count + 1)}>
+                count is {count}
+            </button>
+            {children} // won't rerender whenever "count" updates
+        </div>
+    )
+}
 
-const PureComponent = () => <p>Pure Component</p>;
+const PureComponent = () => <p>Pure Component</p>
 ```
 
 ### Image optimizations

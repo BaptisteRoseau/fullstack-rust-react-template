@@ -1,46 +1,46 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { z } from 'zod';
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { z } from 'zod'
 
-import { api } from '@/lib/api-client';
-import { MutationConfig } from '@/lib/react-query';
-import { Discussion } from '@/types/api';
+import { api } from '@/lib/api-client'
+import { MutationConfig } from '@/lib/react-query'
+import { Discussion } from '@/types/api'
 
-import { getDiscussionsQueryOptions } from './get-discussions';
+import { getDiscussionsQueryOptions } from './get-discussions'
 
 export const createDiscussionInputSchema = z.object({
-  title: z.string().min(1, 'Required'),
-  body: z.string().min(1, 'Required'),
-});
+    title: z.string().min(1, 'Required'),
+    body: z.string().min(1, 'Required'),
+})
 
-export type CreateDiscussionInput = z.infer<typeof createDiscussionInputSchema>;
+export type CreateDiscussionInput = z.infer<typeof createDiscussionInputSchema>
 
 export const createDiscussion = ({
-  data,
+    data,
 }: {
-  data: CreateDiscussionInput;
+    data: CreateDiscussionInput
 }): Promise<Discussion> => {
-  return api.post(`/discussions`, data);
-};
+    return api.post(`/discussions`, data)
+}
 
 type UseCreateDiscussionOptions = {
-  mutationConfig?: MutationConfig<typeof createDiscussion>;
-};
+    mutationConfig?: MutationConfig<typeof createDiscussion>
+}
 
 export const useCreateDiscussion = ({
-  mutationConfig,
+    mutationConfig,
 }: UseCreateDiscussionOptions = {}) => {
-  const queryClient = useQueryClient();
+    const queryClient = useQueryClient()
 
-  const { onSuccess, ...restConfig } = mutationConfig || {};
+    const { onSuccess, ...restConfig } = mutationConfig || {}
 
-  return useMutation({
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({
-        queryKey: getDiscussionsQueryOptions().queryKey,
-      });
-      onSuccess?.(...args);
-    },
-    ...restConfig,
-    mutationFn: createDiscussion,
-  });
-};
+    return useMutation({
+        onSuccess: (...args) => {
+            queryClient.invalidateQueries({
+                queryKey: getDiscussionsQueryOptions().queryKey,
+            })
+            onSuccess?.(...args)
+        },
+        ...restConfig,
+        mutationFn: createDiscussion,
+    })
+}

@@ -1,1 +1,1 @@
-export * from './md-preview';
+export * from './md-preview'

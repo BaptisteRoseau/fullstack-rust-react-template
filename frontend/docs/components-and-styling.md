@@ -13,23 +13,23 @@ Do not add multiple rendering functions inside your application, this gets out o
 ```javascript
 // this is very difficult to maintain as soon as the component starts growing
 function Component() {
-  function renderItems() {
-    return <ul>...</ul>;
-  }
-  return <div>{renderItems()}</div>;
+    function renderItems() {
+        return <ul>...</ul>
+    }
+    return <div>{renderItems()}</div>
 }
 
 // extract it in a separate component
 function Items() {
-  return <ul>...</ul>;
+    return <ul>...</ul>
 }
 
 function Component() {
-  return (
-    <div>
-      <Items />
-    </div>
-  );
+    return (
+        <div>
+            <Items />
+        </div>
+    )
 }
 ```
 

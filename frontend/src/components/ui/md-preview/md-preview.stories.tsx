@@ -1,17 +1,17 @@
-import { Meta, StoryObj } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react'
 
-import { MDPreview } from './md-preview';
+import { MDPreview } from './md-preview'
 
 const meta: Meta<typeof MDPreview> = {
-  component: MDPreview,
-};
+    component: MDPreview,
+}
 
-export default meta;
+export default meta
 
-type Story = StoryObj<typeof MDPreview>;
+type Story = StoryObj<typeof MDPreview>
 
 export const Default: Story = {
-  args: {
-    value: `## Hello World!`,
-  },
-};
+    args: {
+        value: `## Hello World!`,
+    },
+}
