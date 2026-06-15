@@ -9,7 +9,7 @@ import { ProtectedRoute } from '@/lib/auth';
 import {
   default as AppRoot,
   ErrorBoundary as AppRootErrorBoundary,
-} from './routes/app/root';
+} from './pages/app/root';
 
 const convert = (queryClient: QueryClient) => (m: any) => {
   const { clientLoader, clientAction, default: Component, ...rest } = m;
@@ -25,15 +25,15 @@ export const createAppRouter = (queryClient: QueryClient) =>
   createBrowserRouter([
     {
       path: paths.home.path,
-      lazy: () => import('./routes/landing').then(convert(queryClient)),
+      lazy: () => import('./pages/landing').then(convert(queryClient)),
     },
     {
       path: paths.auth.register.path,
-      lazy: () => import('./routes/auth/register').then(convert(queryClient)),
+      lazy: () => import('./pages/auth/register').then(convert(queryClient)),
     },
     {
       path: paths.auth.login.path,
-      lazy: () => import('./routes/auth/login').then(convert(queryClient)),
+      lazy: () => import('./pages/auth/login').then(convert(queryClient)),
     },
     {
       path: paths.app.root.path,
@@ -47,35 +47,35 @@ export const createAppRouter = (queryClient: QueryClient) =>
         {
           path: paths.app.discussions.path,
           lazy: () =>
-            import('./routes/app/discussions/discussions').then(
+            import('./pages/app/discussions/discussions').then(
               convert(queryClient),
             ),
         },
         {
           path: paths.app.discussion.path,
           lazy: () =>
-            import('./routes/app/discussions/discussion').then(
+            import('./pages/app/discussions/discussion').then(
               convert(queryClient),
             ),
         },
         {
           path: paths.app.users.path,
-          lazy: () => import('./routes/app/users').then(convert(queryClient)),
+          lazy: () => import('./pages/app/users').then(convert(queryClient)),
         },
         {
           path: paths.app.profile.path,
-          lazy: () => import('./routes/app/profile').then(convert(queryClient)),
+          lazy: () => import('./pages/app/profile').then(convert(queryClient)),
         },
         {
           path: paths.app.dashboard.path,
           lazy: () =>
-            import('./routes/app/dashboard').then(convert(queryClient)),
+            import('./pages/app/dashboard').then(convert(queryClient)),
         },
       ],
     },
     {
       path: '*',
-      lazy: () => import('./routes/not-found').then(convert(queryClient)),
+      lazy: () => import('./pages/not-found').then(convert(queryClient)),
     },
   ]);
 

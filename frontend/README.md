@@ -10,9 +10,6 @@ Prerequisites:
 To set up the app execute the following commands.
 
 ```bash
-git clone https://github.com/alan2207/bulletproof-react.git
-cd bulletproof-react
-cd apps/react-vite
 cp .env.example .env
 bun install
 ```
