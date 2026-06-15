@@ -68,7 +68,7 @@ export const RegisterForm = ({
                                 onCheckedChange={setChooseTeam}
                                 className={`${
                                     chooseTeam ? 'bg-blue-600' : 'bg-gray-200'
-                                } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2`}
+                                } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:outline-none`}
                                 id="choose-team"
                             />
                             <Label htmlFor="airplane-mode">

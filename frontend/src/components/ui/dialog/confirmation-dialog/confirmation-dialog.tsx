@@ -74,7 +74,7 @@ export const ConfirmationDialog = ({
                     </DialogTitle>
                 </DialogHeader>
 
-                <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                     {body && (
                         <div className="mt-2">
                             <p>{body}</p>
