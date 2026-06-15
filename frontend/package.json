@@ -7,6 +7,7 @@
         "dev": "vite",
         "build": "tsc && vite build --base=/",
         "preview": "vite preview",
+        "format": "prettier -w .",
         "test": "vitest",
         "test-e2e": "pm2 start \"bun run run-mock-server\" --name server && bunx playwright test",
         "prepare": "husky",
