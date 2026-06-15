@@ -21,6 +21,9 @@ module.exports = {
                 'import/resolver': {
                     typescript: {},
                 },
+                tailwindcss: {
+                    config: require('path').resolve(__dirname, 'src/index.css'),
+                },
             },
             env: {
                 browser: true,
