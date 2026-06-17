@@ -1,18 +1,9 @@
-module.exports = {
-    stories: [
-        '../src/**/*.stories.mdx',
-        '../src/**/*.stories.@(js|jsx|ts|tsx)',
-    ],
+import type { StorybookConfig } from '@storybook/react-vite'
+import type { InlineConfig } from 'vite'
 
-    addons: [
-        '@storybook/addon-actions',
-        '@storybook/addon-links',
-        '@storybook/node-logger',
-        '@storybook/addon-essentials',
-        '@storybook/addon-interactions',
-        '@storybook/addon-docs',
-        '@storybook/addon-a11y',
-    ],
+const config: StorybookConfig = {
+    stories: ['../src/**/*.stories.@(js|jsx|ts|tsx)'],
+    addons: ['@storybook/addon-links', '@storybook/addon-a11y'],
     framework: {
         name: '@storybook/react-vite',
         options: {},
@@ -22,5 +13,14 @@ module.exports = {
     },
     typescript: {
         reactDocgen: 'react-docgen-typescript',
+        reactDocgenTypescriptOptions: {
+            include: ['../src/**/*.{ts,tsx}'],
+        },
     },
+    viteFinal: (config: InlineConfig) => ({
+        ...config,
+        build: { ...config.build, chunkSizeWarningLimit: 1000 },
+    }),
 }
+
+export default config

@@ -3,6 +3,8 @@
 /*! CSS Course https://www.slayingthedragon.io/ */
 /*! Vite Template https://vite.dev/ */
 @import 'tailwindcss';
+@plugin "tailwindcss-animate";
+@plugin "@tailwindcss/typography";
 
 @theme inline {
     --color-border: hsl(var(--border));
@@ -34,9 +36,6 @@
     --animate-accordion-down: accordion-down 0.2s ease-out;
     --animate-accordion-up: accordion-up 0.2s ease-out;
 }
-
-@plugin "tailwindcss-animate";
-@plugin "@tailwindcss/typography";
 
 *,
 ::before,
@@ -149,11 +148,8 @@
     }
 }
 
-@layer utilities {
-    .container {
-        border: 2px solid red;
-        margin: 0 auto;
-    }
+@utility container {
+    margin-inline: auto;
 }
 
 html {

@@ -1,15 +1,16 @@
+import type { Preview } from '@storybook/react-vite'
 import React from 'react'
-import { BrowserRouter as Router } from 'react-router'
+import { MemoryRouter } from 'react-router'
 import '../src/index.css'
 
-export const parameters = {
-    actions: { argTypesRegex: '^on[A-Z].*' },
+const preview: Preview = {
+    decorators: [
+        (Story) => (
+            <MemoryRouter>
+                <Story />
+            </MemoryRouter>
+        ),
+    ],
 }
 
-export const decorators = [
-    (Story) => (
-        <Router>
-            <Story />
-        </Router>
-    ),
-]
+export default preview

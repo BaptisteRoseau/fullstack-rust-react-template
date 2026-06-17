@@ -22,7 +22,7 @@ import { Link } from '../ui/link'
 type SideNavigationItem = {
     name: string
     to: string
-    icon: (props: React.SVGProps<SVGSVGElement>) => JSX.Element
+    icon: (props: React.SVGProps<SVGSVGElement>) => React.JSX.Element
 }
 
 const Logo = () => {
@@ -43,10 +43,12 @@ const Progress = () => {
     const { state, location } = useNavigation()
 
     const [progress, setProgress] = useState(0)
+    const [prevPathname, setPrevPathname] = useState(location?.pathname)
 
-    useEffect(() => {
+    if (prevPathname !== location?.pathname) {
+        setPrevPathname(location?.pathname)
         setProgress(0)
-    }, [location?.pathname])
+    }
 
     useEffect(() => {
         if (state === 'loading') {

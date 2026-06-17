@@ -173,27 +173,29 @@ const FormMessage = React.forwardRef<
 })
 FormMessage.displayName = 'FormMessage'
 
-type FormProps<TFormValues extends FieldValues, Schema> = {
-    onSubmit: SubmitHandler<TFormValues>
+type FormProps<Schema extends ZodType<any, any>> = {
+    onSubmit: SubmitHandler<z.output<Schema>>
     schema: Schema
     className?: string
-    children: (methods: UseFormReturn<TFormValues>) => React.ReactNode
-    options?: UseFormProps<TFormValues>
+    children: (
+        methods: UseFormReturn<z.input<Schema>, unknown, z.output<Schema>>,
+    ) => React.ReactNode
+    options?: UseFormProps<z.input<Schema>, unknown, z.output<Schema>>
     id?: string
 }
 
-const Form = <
-    Schema extends ZodType<any, any, any>,
-    TFormValues extends FieldValues = z.infer<Schema>,
->({
+const Form = <Schema extends ZodType<any, any>>({
     onSubmit,
     children,
     className,
     options,
     id,
     schema,
-}: FormProps<TFormValues, Schema>) => {
-    const form = useForm({ ...options, resolver: zodResolver(schema) })
+}: FormProps<Schema>) => {
+    const form = useForm<z.input<Schema>, unknown, z.output<Schema>>({
+        ...options,
+        resolver: zodResolver(schema),
+    })
     return (
         <FormProvider {...form}>
             <form

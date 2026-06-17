@@ -76,6 +76,7 @@ test('should update discussion', async () => {
 
 test(
     'should create and delete a comment on the discussion',
+    { timeout: 20000 },
     async () => {
         await renderDiscussion()
 
@@ -140,8 +141,5 @@ test(
                 within(commentsList).queryByText(comment),
             ).not.toBeInTheDocument()
         })
-    },
-    {
-        timeout: 20000,
     },
 )

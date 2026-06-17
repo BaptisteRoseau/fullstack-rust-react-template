@@ -1,14 +1,15 @@
-/// <reference types="vitest" />
 /// <reference types="vite/client" />
 
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
-import viteTsconfigPaths from 'vite-tsconfig-paths'
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
     base: './',
-    plugins: [react(), viteTsconfigPaths(), tailwindcss()],
+    plugins: [react(), tailwindcss()],
+    resolve: {
+        tsconfigPaths: true,
+    },
     server: {
         port: 3000,
     },
@@ -26,11 +27,9 @@ export default defineConfig({
     },
     optimizeDeps: { exclude: ['fsevents'] },
     build: {
+        chunkSizeWarningLimit: 1000,
         rollupOptions: {
             external: ['fs/promises'],
-            output: {
-                experimentalMinChunkSize: 3500,
-            },
         },
     },
 })
