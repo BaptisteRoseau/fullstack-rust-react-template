@@ -2,11 +2,12 @@
 
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import { lingui } from '@lingui/vite-plugin'
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
     base: './',
-    plugins: [react(), tailwindcss()],
+    plugins: [react(), tailwindcss(), lingui()],
     resolve: {
         tsconfigPaths: true,
     },

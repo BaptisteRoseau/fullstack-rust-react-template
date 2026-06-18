@@ -1,3 +1,4 @@
+import { t, Trans } from '@lingui/macro'
 import { Plus } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -17,7 +18,7 @@ export const CreateDiscussion = () => {
             onSuccess: () => {
                 addNotification({
                     type: 'success',
-                    title: 'Discussion Created',
+                    title: t`Discussion Created`,
                 })
             },
         },
@@ -29,10 +30,10 @@ export const CreateDiscussion = () => {
                 isDone={createDiscussionMutation.isSuccess}
                 triggerButton={
                     <Button size="sm" icon={<Plus className="size-4" />}>
-                        Create Discussion
+                        <Trans>Create Discussion</Trans>
                     </Button>
                 }
-                title="Create Discussion"
+                title={t`Create Discussion`}
                 submitButton={
                     <Button
                         form="create-discussion"
@@ -40,7 +41,7 @@ export const CreateDiscussion = () => {
                         size="sm"
                         isLoading={createDiscussionMutation.isPending}
                     >
-                        Submit
+                        <Trans>Submit</Trans>
                     </Button>
                 }
             >
@@ -54,13 +55,13 @@ export const CreateDiscussion = () => {
                     {({ register, formState }) => (
                         <>
                             <Input
-                                label="Title"
+                                label={t`Title`}
                                 error={formState.errors['title']}
                                 registration={register('title')}
                             />
 
                             <Textarea
-                                label="Body"
+                                label={t`Body`}
                                 error={formState.errors['body']}
                                 registration={register('body')}
                             />

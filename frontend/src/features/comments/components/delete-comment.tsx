@@ -1,3 +1,4 @@
+import { t, Trans } from '@lingui/macro'
 import { Trash } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -19,7 +20,7 @@ export const DeleteComment = ({ id, discussionId }: DeleteCommentProps) => {
             onSuccess: () => {
                 addNotification({
                     type: 'success',
-                    title: 'Comment Deleted',
+                    title: t`Comment Deleted`,
                 })
             },
         },
@@ -29,15 +30,15 @@ export const DeleteComment = ({ id, discussionId }: DeleteCommentProps) => {
         <ConfirmationDialog
             isDone={deleteCommentMutation.isSuccess}
             icon="danger"
-            title="Delete Comment"
-            body="Are you sure you want to delete this comment?"
+            title={t`Delete Comment`}
+            body={t`Are you sure you want to delete this comment?`}
             triggerButton={
                 <Button
                     variant="destructive"
                     size="sm"
                     icon={<Trash className="size-4" />}
                 >
-                    Delete Comment
+                    <Trans>Delete Comment</Trans>
                 </Button>
             }
             confirmButton={
@@ -49,7 +50,7 @@ export const DeleteComment = ({ id, discussionId }: DeleteCommentProps) => {
                         deleteCommentMutation.mutate({ commentId: id })
                     }
                 >
-                    Delete Comment
+                    <Trans>Delete Comment</Trans>
                 </Button>
             }
         />

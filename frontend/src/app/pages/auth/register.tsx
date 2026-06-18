@@ -1,3 +1,4 @@
+import { t } from '@lingui/macro'
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 
@@ -19,7 +20,7 @@ const RegisterRoute = () => {
     })
 
     return (
-        <AuthLayout title="Register your account">
+        <AuthLayout title={t`Register your account`}>
             <RegisterForm
                 onSuccess={() => {
                     navigate(

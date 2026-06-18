@@ -1,3 +1,4 @@
+import { t } from '@lingui/macro'
 import { QueryClient, useQueryClient } from '@tanstack/react-query'
 import { LoaderFunctionArgs } from 'react-router'
 
@@ -25,7 +26,7 @@ export const clientLoader =
 const DiscussionsRoute = () => {
     const queryClient = useQueryClient()
     return (
-        <ContentLayout title="Discussions">
+        <ContentLayout title={t`Discussions`}>
             <div className="flex justify-end">
                 <CreateDiscussion />
             </div>

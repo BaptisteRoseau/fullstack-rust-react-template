@@ -1,3 +1,4 @@
+import { t, Trans } from '@lingui/macro'
 import { useQueryClient } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router'
 
@@ -44,11 +45,11 @@ export const DiscussionsList = ({
             data={discussions}
             columns={[
                 {
-                    title: 'Title',
+                    title: t`Title`,
                     field: 'title',
                 },
                 {
-                    title: 'Created At',
+                    title: t`Created At`,
                     field: 'createdAt',
                     Cell({ entry: { createdAt } }) {
                         return <span>{formatDate(createdAt)}</span>
@@ -69,7 +70,7 @@ export const DiscussionsList = ({
                                 }}
                                 to={paths.app.discussion.getHref(id)}
                             >
-                                View
+                                <Trans>View</Trans>
                             </Link>
                         )
                     },

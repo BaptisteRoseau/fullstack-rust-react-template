@@ -1,3 +1,4 @@
+import { t, Trans } from '@lingui/macro'
 import { Pen } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -23,7 +24,7 @@ export const UpdateDiscussion = ({ discussionId }: UpdateDiscussionProps) => {
             onSuccess: () => {
                 addNotification({
                     type: 'success',
-                    title: 'Discussion Updated',
+                    title: t`Discussion Updated`,
                 })
             },
         },
@@ -37,10 +38,10 @@ export const UpdateDiscussion = ({ discussionId }: UpdateDiscussionProps) => {
                 isDone={updateDiscussionMutation.isSuccess}
                 triggerButton={
                     <Button icon={<Pen className="size-4" />} size="sm">
-                        Update Discussion
+                        <Trans>Update Discussion</Trans>
                     </Button>
                 }
-                title="Update Discussion"
+                title={t`Update Discussion`}
                 submitButton={
                     <Button
                         form="update-discussion"
@@ -48,7 +49,7 @@ export const UpdateDiscussion = ({ discussionId }: UpdateDiscussionProps) => {
                         size="sm"
                         isLoading={updateDiscussionMutation.isPending}
                     >
-                        Submit
+                        <Trans>Submit</Trans>
                     </Button>
                 }
             >
@@ -71,12 +72,12 @@ export const UpdateDiscussion = ({ discussionId }: UpdateDiscussionProps) => {
                     {({ register, formState }) => (
                         <>
                             <Input
-                                label="Title"
+                                label={t`Title`}
                                 error={formState.errors['title']}
                                 registration={register('title')}
                             />
                             <Textarea
-                                label="Body"
+                                label={t`Body`}
                                 error={formState.errors['body']}
                                 registration={register('body')}
                             />

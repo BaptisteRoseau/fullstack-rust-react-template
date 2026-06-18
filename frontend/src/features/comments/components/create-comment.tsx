@@ -1,3 +1,4 @@
+import { t, Trans } from '@lingui/macro'
 import { Plus } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -21,7 +22,7 @@ export const CreateComment = ({ discussionId }: CreateCommentProps) => {
             onSuccess: () => {
                 addNotification({
                     type: 'success',
-                    title: 'Comment Created',
+                    title: t`Comment Created`,
                 })
             },
         },
@@ -32,10 +33,10 @@ export const CreateComment = ({ discussionId }: CreateCommentProps) => {
             isDone={createCommentMutation.isSuccess}
             triggerButton={
                 <Button size="sm" icon={<Plus className="size-4" />}>
-                    Create Comment
+                    <Trans>Create Comment</Trans>
                 </Button>
             }
-            title="Create Comment"
+            title={t`Create Comment`}
             submitButton={
                 <Button
                     isLoading={createCommentMutation.isPending}
@@ -44,7 +45,7 @@ export const CreateComment = ({ discussionId }: CreateCommentProps) => {
                     size="sm"
                     disabled={createCommentMutation.isPending}
                 >
-                    Submit
+                    <Trans>Submit</Trans>
                 </Button>
             }
         >
@@ -65,7 +66,7 @@ export const CreateComment = ({ discussionId }: CreateCommentProps) => {
             >
                 {({ register, formState }) => (
                     <Textarea
-                        label="Body"
+                        label={t`Body`}
                         error={formState.errors['body']}
                         registration={register('body')}
                     />

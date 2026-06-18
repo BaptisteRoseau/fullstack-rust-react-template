@@ -1,3 +1,4 @@
+import { t, Trans } from '@lingui/macro'
 import { useNavigate } from 'react-router'
 
 import logo from '@/assets/logo.svg'
@@ -20,16 +21,20 @@ const LandingRoute = () => {
 
     return (
         <>
-            <Head description="Welcome to bulletproof react" />
+            <Head description={t`Welcome to bulletproof react`} />
             <div className="flex h-screen items-center bg-white">
                 <div className="container py-12 text-center lg:py-16">
                     <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-                        <span className="block">Bulletproof React</span>
+                        <span className="block">
+                            <Trans>Bulletproof React</Trans>
+                        </span>
                     </h2>
-                    <img src={logo} alt="react" />
+                    <img src={logo} alt={t`react`} />
                     <p>
-                        Showcasing Best Practices For Building React
-                        Applications
+                        <Trans>
+                            Showcasing Best Practices For Building React
+                            Applications
+                        </Trans>
                     </p>
                     <div className="mt-8 flex justify-center">
                         <div className="inline-flex rounded-md shadow">
@@ -52,7 +57,7 @@ const LandingRoute = () => {
                                     </svg>
                                 }
                             >
-                                Get started
+                                <Trans>Get started</Trans>
                             </Button>
                         </div>
                         <div className="ml-3 inline-flex">
@@ -77,7 +82,7 @@ const LandingRoute = () => {
                                         </svg>
                                     }
                                 >
-                                    Github Repo
+                                    <Trans>Github Repo</Trans>
                                 </Button>
                             </a>
                         </div>

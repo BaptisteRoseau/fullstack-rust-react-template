@@ -1,3 +1,5 @@
+import { Trans } from '@lingui/macro'
+
 import { MDPreview } from '@/components/ui/md-preview'
 import { Spinner } from '@/components/ui/spinner'
 import { formatDate } from '@/utils/format'
@@ -29,8 +31,10 @@ export const DiscussionView = ({ discussionId }: { discussionId: string }) => {
             </span>
             {discussion.author && (
                 <span className="ml-2 text-sm font-bold">
-                    by {discussion.author.firstName}{' '}
-                    {discussion.author.lastName}
+                    <Trans>
+                        by {discussion.author.firstName}{' '}
+                        {discussion.author.lastName}
+                    </Trans>
                 </span>
             )}
             <div className="mt-6 flex flex-col space-y-16">

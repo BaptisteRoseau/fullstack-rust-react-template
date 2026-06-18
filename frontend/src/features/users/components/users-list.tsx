@@ -1,3 +1,5 @@
+import { t } from '@lingui/macro'
+
 import { Spinner } from '@/components/ui/spinner'
 import { Table } from '@/components/ui/table'
 import { formatDate } from '@/utils/format'
@@ -26,23 +28,23 @@ export const UsersList = () => {
             data={users}
             columns={[
                 {
-                    title: 'First Name',
+                    title: t`First Name`,
                     field: 'firstName',
                 },
                 {
-                    title: 'Last Name',
+                    title: t`Last Name`,
                     field: 'lastName',
                 },
                 {
-                    title: 'Email',
+                    title: t`Email`,
                     field: 'email',
                 },
                 {
-                    title: 'Role',
+                    title: t`Role`,
                     field: 'role',
                 },
                 {
-                    title: 'Created At',
+                    title: t`Created At`,
                     field: 'createdAt',
                     Cell({ entry: { createdAt } }) {
                         return <span>{formatDate(createdAt)}</span>

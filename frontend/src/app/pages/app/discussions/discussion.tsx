@@ -1,3 +1,4 @@
+import { Trans } from '@lingui/macro'
 import { QueryClient } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useParams, LoaderFunctionArgs } from 'react-router'
@@ -62,13 +63,16 @@ const DiscussionRoute = () => {
                     <ErrorBoundary
                         fallback={
                             <div>
-                                Failed to load comments. Try to refresh the
-                                page.
+                                <Trans>
+                                    Failed to load comments. Try to refresh the
+                                    page.
+                                </Trans>
                             </div>
                         }
                     >
                         <Comments discussionId={discussionId} />
                     </ErrorBoundary>
+
                 </div>
             </ContentLayout>
         </>

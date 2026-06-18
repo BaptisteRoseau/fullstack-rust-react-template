@@ -1,3 +1,4 @@
+import { t, Trans } from '@lingui/macro'
 import { Trash } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -18,7 +19,7 @@ export const DeleteDiscussion = ({ id }: DeleteDiscussionProps) => {
             onSuccess: () => {
                 addNotification({
                     type: 'success',
-                    title: 'Discussion Deleted',
+                    title: t`Discussion Deleted`,
                 })
             },
         },
@@ -28,14 +29,14 @@ export const DeleteDiscussion = ({ id }: DeleteDiscussionProps) => {
         <Authorization allowedRoles={[ROLES.ADMIN]}>
             <ConfirmationDialog
                 icon="danger"
-                title="Delete Discussion"
-                body="Are you sure you want to delete this discussion?"
+                title={t`Delete Discussion`}
+                body={t`Are you sure you want to delete this discussion?`}
                 triggerButton={
                     <Button
                         variant="destructive"
                         icon={<Trash className="size-4" />}
                     >
-                        Delete Discussion
+                        <Trans>Delete Discussion</Trans>
                     </Button>
                 }
                 confirmButton={
@@ -49,7 +50,7 @@ export const DeleteDiscussion = ({ id }: DeleteDiscussionProps) => {
                             })
                         }
                     >
-                        Delete Discussion
+                        <Trans>Delete Discussion</Trans>
                     </Button>
                 }
             />

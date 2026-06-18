@@ -1,3 +1,4 @@
+import { Trans } from '@lingui/macro'
 import { ArchiveX } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -38,7 +39,9 @@ export const CommentsList = ({ discussionId }: CommentsListProps) => {
                 className="flex h-40 flex-col items-center justify-center bg-white text-gray-500"
             >
                 <ArchiveX className="size-10" />
-                <h4>No Comments Found</h4>
+                <h4>
+                    <Trans>No Comments Found</Trans>
+                </h4>
             </div>
         )
 
@@ -64,9 +67,11 @@ export const CommentsList = ({ discussionId }: CommentsListProps) => {
                                     </span>
                                     {comment.author && (
                                         <span className="text-xs font-bold">
-                                            {' '}
-                                            by {comment.author.firstName}{' '}
-                                            {comment.author.lastName}
+                                            <Trans>
+                                                {' '}
+                                                by {comment.author.firstName}{' '}
+                                                {comment.author.lastName}
+                                            </Trans>
                                         </span>
                                     )}
                                 </div>
@@ -87,7 +92,7 @@ export const CommentsList = ({ discussionId }: CommentsListProps) => {
                         {commentsQuery.isFetchingNextPage ? (
                             <Spinner />
                         ) : (
-                            'Load More Comments'
+                            <Trans>Load More Comments</Trans>
                         )}
                     </Button>
                 </div>

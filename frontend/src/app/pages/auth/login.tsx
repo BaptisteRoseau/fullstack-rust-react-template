@@ -1,3 +1,4 @@
+import { t } from '@lingui/macro'
 import { useNavigate, useSearchParams } from 'react-router'
 
 import { AuthLayout } from '@/components/layouts/auth-layout'
@@ -10,7 +11,7 @@ const LoginRoute = () => {
     const redirectTo = searchParams.get('redirectTo')
 
     return (
-        <AuthLayout title="Log in to your account">
+        <AuthLayout title={t`Log in to your account`}>
             <LoginForm
                 onSuccess={() => {
                     navigate(

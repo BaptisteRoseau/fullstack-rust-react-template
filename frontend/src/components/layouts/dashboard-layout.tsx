@@ -1,3 +1,4 @@
+import { t, Trans } from '@lingui/macro'
 import { Home, PanelLeft, Folder, Users, User2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { NavLink, useNavigate, useNavigation } from 'react-router'
@@ -33,7 +34,7 @@ const Logo = () => {
         >
             <img className="h-8 w-auto" src={logo} alt="Workflow" />
             <span className="text-sm font-semibold text-white">
-                Bulletproof React
+                <Trans>Bulletproof React</Trans>
             </span>
         </Link>
     )
@@ -88,14 +89,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     })
     const { checkAccess } = useAuthorization()
     const navigation = [
-        { name: 'Dashboard', to: paths.app.dashboard.getHref(), icon: Home },
+        { name: t`Dashboard`, to: paths.app.dashboard.getHref(), icon: Home },
         {
-            name: 'Discussions',
+            name: t`Discussions`,
             to: paths.app.discussions.getHref(),
             icon: Folder,
         },
         checkAccess({ allowedRoles: [ROLES.ADMIN] }) && {
-            name: 'Users',
+            name: t`Users`,
             to: paths.app.users.getHref(),
             icon: Users,
         },
@@ -144,7 +145,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                                 className="sm:hidden"
                             >
                                 <PanelLeft className="size-5" />
-                                <span className="sr-only">Toggle Menu</span>
+                                <span className="sr-only">
+                                    <Trans>Toggle Menu</Trans>
+                                </span>
                             </Button>
                         </DrawerTrigger>
                         <DrawerContent
@@ -189,7 +192,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                                 size="icon"
                                 className="overflow-hidden rounded-full"
                             >
-                                <span className="sr-only">Open user menu</span>
+                                <span className="sr-only">
+                                    <Trans>Open user menu</Trans>
+                                </span>
                                 <User2 className="size-6 rounded-full" />
                             </Button>
                         </DropdownMenuTrigger>
@@ -202,7 +207,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                                     'block px-4 py-2 text-sm text-gray-700',
                                 )}
                             >
-                                Your Profile
+                                <Trans>Your Profile</Trans>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -211,7 +216,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                                 )}
                                 onClick={() => logout.mutate({})}
                             >
-                                Sign Out
+                                <Trans>Sign Out</Trans>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>

@@ -1,3 +1,5 @@
+import { Trans } from '@lingui/macro'
+
 import { CommentsList } from './comments-list'
 import { CreateComment } from './create-comment'
 
@@ -9,7 +11,9 @@ export const Comments = ({ discussionId }: CommentsProps) => {
     return (
         <div>
             <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-xl font-bold">Comments:</h3>
+                <h3 className="text-xl font-bold">
+                    <Trans>Comments:</Trans>
+                </h3>
                 <CreateComment discussionId={discussionId} />
             </div>
             <CommentsList discussionId={discussionId} />

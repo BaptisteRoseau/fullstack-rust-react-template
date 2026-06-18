@@ -1,3 +1,4 @@
+import { t, Trans } from '@lingui/macro'
 import { Pen } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -18,7 +19,7 @@ export const UpdateProfile = () => {
             onSuccess: () => {
                 addNotification({
                     type: 'success',
-                    title: 'Profile Updated',
+                    title: t`Profile Updated`,
                 })
             },
         },
@@ -29,10 +30,10 @@ export const UpdateProfile = () => {
             isDone={updateProfileMutation.isSuccess}
             triggerButton={
                 <Button icon={<Pen className="size-4" />} size="sm">
-                    Update Profile
+                    <Trans>Update Profile</Trans>
                 </Button>
             }
-            title="Update Profile"
+            title={t`Update Profile`}
             submitButton={
                 <Button
                     form="update-profile"
@@ -40,7 +41,7 @@ export const UpdateProfile = () => {
                     size="sm"
                     isLoading={updateProfileMutation.isPending}
                 >
-                    Submit
+                    <Trans>Submit</Trans>
                 </Button>
             }
         >
@@ -62,24 +63,24 @@ export const UpdateProfile = () => {
                 {({ register, formState }) => (
                     <>
                         <Input
-                            label="First Name"
+                            label={t`First Name`}
                             error={formState.errors['firstName']}
                             registration={register('firstName')}
                         />
                         <Input
-                            label="Last Name"
+                            label={t`Last Name`}
                             error={formState.errors['lastName']}
                             registration={register('lastName')}
                         />
                         <Input
-                            label="Email Address"
+                            label={t`Email Address`}
                             type="email"
                             error={formState.errors['email']}
                             registration={register('email')}
                         />
 
                         <Textarea
-                            label="Bio"
+                            label={t`Bio`}
                             error={formState.errors['bio']}
                             registration={register('bio')}
                         />

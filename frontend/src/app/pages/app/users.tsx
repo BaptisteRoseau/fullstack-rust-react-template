@@ -1,3 +1,4 @@
+import { t, Trans } from '@lingui/macro'
 import { QueryClient } from '@tanstack/react-query'
 
 import { ContentLayout } from '@/components/layouts'
@@ -16,9 +17,13 @@ export const clientLoader = (queryClient: QueryClient) => async () => {
 
 const UsersRoute = () => {
     return (
-        <ContentLayout title="Users">
+        <ContentLayout title={t`Users`}>
             <Authorization
-                forbiddenFallback={<div>Only admin can view this.</div>}
+                forbiddenFallback={
+                    <div>
+                        <Trans>Only admin can view this.</Trans>
+                    </div>
+                }
                 allowedRoles={[ROLES.ADMIN]}
             >
                 <UsersList />
