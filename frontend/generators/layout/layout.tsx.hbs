@@ -1,0 +1,19 @@
+import * as React from 'react'
+
+import { Head } from '../seo'
+
+type {{properCase name}}LayoutProps = {
+    children: React.ReactNode
+    title: string
+}
+
+export const {{properCase name}}Layout = ({ children, title }: {{properCase name}}LayoutProps) => {
+    return (
+        <>
+            <Head title={title} />
+            <div className="py-6">
+                <div className="container">{children}</div>
+            </div>
+        </>
+    )
+}

@@ -1,0 +1,15 @@
+import { renderHook, act } from '@testing-library/react'
+
+import { use{{properCase name}} } from '../use-{{kebabCase name}}'
+
+test('should toggle the state', () => {
+    const { result } = renderHook(() => use{{properCase name}}())
+
+    expect(result.current.state).toBe(false)
+
+    act(() => {
+        result.current.toggle()
+    })
+
+    expect(result.current.state).toBe(true)
+})

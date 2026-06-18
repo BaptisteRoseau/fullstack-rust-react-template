@@ -1,0 +1,9 @@
+import * as React from 'react'
+
+export const use{{properCase name}} = (initial = false) => {
+    const [state, setState] = React.useState(initial)
+
+    const toggle = React.useCallback(() => setState((s) => !s), [])
+
+    return { state, toggle }
+}

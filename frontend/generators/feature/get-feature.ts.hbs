@@ -1,0 +1,26 @@
+import { queryOptions, useQuery } from '@tanstack/react-query'
+
+import { api } from '@/lib/api-client'
+import { QueryConfig } from '@/lib/react-query'
+
+export const get{{properCase name}} = (): Promise<{ data: unknown[] }> => {
+    return api.get(`/{{kebabCase name}}`)
+}
+
+export const get{{properCase name}}QueryOptions = () => {
+    return queryOptions({
+        queryKey: ['{{kebabCase name}}'],
+        queryFn: get{{properCase name}},
+    })
+}
+
+type Use{{properCase name}}Options = {
+    queryConfig?: QueryConfig<typeof get{{properCase name}}QueryOptions>
+}
+
+export const use{{properCase name}} = ({ queryConfig }: Use{{properCase name}}Options = {}) => {
+    return useQuery({
+        ...get{{properCase name}}QueryOptions(),
+        ...queryConfig,
+    })
+}

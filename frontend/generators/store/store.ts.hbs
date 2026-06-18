@@ -1,0 +1,22 @@
+import { create } from 'zustand'
+
+type {{properCase name}}State = {
+    isOpen: boolean
+}
+
+type {{properCase name}}Store = {{properCase name}}State & {
+    open: () => void
+    close: () => void
+    reset: () => void
+}
+
+const initialState: {{properCase name}}State = {
+    isOpen: false,
+}
+
+export const use{{properCase name}} = create<{{properCase name}}Store>((set) => ({
+    ...initialState,
+    open: () => set(() => ({ isOpen: true })),
+    close: () => set(() => ({ isOpen: false })),
+    reset: () => set(() => ({ ...initialState })),
+}))

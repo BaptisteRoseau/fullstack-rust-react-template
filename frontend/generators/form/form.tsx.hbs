@@ -1,0 +1,66 @@
+import { t, Trans } from '@lingui/macro'
+import { Plus } from 'lucide-react'
+
+import { Button } from '@/components/ui/button'
+import { Form, FormDrawer, Input } from '@/components/ui/form'
+import { useNotifications } from '@/components/ui/notifications'
+import { Authorization, ROLES } from '@/lib/authorization'
+
+import {
+    create{{properCase noun}}InputSchema,
+    useCreate{{properCase noun}},
+} from '../api/create-{{kebabCase noun}}'
+
+export const Create{{properCase noun}} = () => {
+    const { addNotification } = useNotifications()
+    const create{{properCase noun}}Mutation = useCreate{{properCase noun}}({
+        mutationConfig: {
+            onSuccess: () => {
+                addNotification({
+                    type: 'success',
+                    title: t`{{properCase noun}} Created`,
+                })
+            },
+        },
+    })
+
+    return (
+        <Authorization allowedRoles={[ROLES.ADMIN]}>
+            <FormDrawer
+                isDone={create{{properCase noun}}Mutation.isSuccess}
+                triggerButton={
+                    <Button size="sm" icon={<Plus className="size-4" />}>
+                        <Trans>Create {{properCase noun}}</Trans>
+                    </Button>
+                }
+                title={t`Create {{properCase noun}}`}
+                submitButton={
+                    <Button
+                        form="create-{{kebabCase noun}}"
+                        type="submit"
+                        size="sm"
+                        isLoading={create{{properCase noun}}Mutation.isPending}
+                    >
+                        <Trans>Submit</Trans>
+                    </Button>
+                }
+            >
+                <Form
+                    id="create-{{kebabCase noun}}"
+                    onSubmit={(values) => {
+                        create{{properCase noun}}Mutation.mutate({ data: values })
+                    }}
+                    schema={create{{properCase noun}}InputSchema}
+                >
+                    {({ register, formState }) => (
+                        <Input
+                            label={t`Name`}
+                            error={formState.errors['name']}
+                            registration={register('name')}
+                        />
+                    )}
+                </Form>
+            </FormDrawer>
+        </Authorization>
+    )
+}
