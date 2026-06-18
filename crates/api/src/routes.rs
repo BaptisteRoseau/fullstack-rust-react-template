@@ -79,9 +79,13 @@ use utoipa_swagger_ui::SwaggerUi;
 
 // Bookmark this: https://docs.rs/axum/latest/axum/routing/struct.Router.html
 
-/// Public routes that qre exposed to the world
-pub fn public_routes(config: &Config, state: AppState) -> Router {
-    let (api_routes, openapi) = OpenApiRouter::<AppState>::new()
+/// Builds the [`OpenApiRouter`] holding every public API route.
+///
+/// This only assembles the route definitions and their generated schemas, so it
+/// can be called without any running service (database, cache, storage, ...).
+/// It is the single source of truth shared by [`public_routes`] and [`openapi`].
+fn api_router() -> OpenApiRouter<AppState> {
+    OpenApiRouter::<AppState>::new()
         .routes(routes!(ping))
         .routes(routes!(upload))
         .routes(routes!(download))
@@ -90,7 +94,30 @@ pub fn public_routes(config: &Config, state: AppState) -> Router {
         .routes(routes!(create_api_key))
         .routes(routes!(get_api_key))
         .routes(routes!(delete_api_key))
-        .split_for_parts();
+}
+
+/// Metadata advertised in the generated OpenAPI document.
+fn api_info() -> utoipa::openapi::Info {
+    InfoBuilder::new()
+        .title(env!("CARGO_PKG_NAME"))
+        .description(option_env!("CARGO_PKG_DESCRIPTION"))
+        .version(env!("CARGO_PKG_VERSION"))
+        .build()
+}
+
+/// Builds the OpenAPI document describing the public API.
+///
+/// Requires no running service, so it can be serialized offline (e.g. to
+/// generate the frontend API types).
+pub fn openapi() -> OpenApi {
+    let (_, mut openapi) = api_router().split_for_parts();
+    openapi.info = api_info();
+    openapi
+}
+
+/// Public routes that qre exposed to the world
+pub fn public_routes(config: &Config, state: AppState) -> Router {
+    let (api_routes, openapi) = api_router().split_for_parts();
 
     let api_routes = api_routes.merge(swagger(config, openapi));
 
@@ -119,11 +146,7 @@ fn swagger(config: &Config, openapi: OpenApi) -> SwaggerUi {
     let swagger_ui_path = swagger_config.swagger_ui_path;
     let openapi_path = swagger_config.openapi_path;
     let mut openapi = openapi;
-    openapi.info = InfoBuilder::new()
-        .title(env!("CARGO_PKG_NAME"))
-        .description(option_env!("CARGO_PKG_DESCRIPTION"))
-        .version(env!("CARGO_PKG_VERSION"))
-        .build();
+    openapi.info = api_info();
     SwaggerUi::new(swagger_ui_path).url(openapi_path, openapi)
 }
 

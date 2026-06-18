@@ -1,0 +1,9 @@
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[package]
+name = "openapi_generator"
+version = "1.0.0"
+edition = "2024"
+authors = ["Baptiste Roseau"]
+
+[dependencies]
+api = { path = "../../crates/api" }

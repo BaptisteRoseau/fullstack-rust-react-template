@@ -14,6 +14,7 @@ members = [
   "crates/logging",
   "crates/storage",
   "tools/http_health_checker", "crates/rbac", "crates/models",
+  "tools/openapi_generator",
 ]
 
 [profile.release]
