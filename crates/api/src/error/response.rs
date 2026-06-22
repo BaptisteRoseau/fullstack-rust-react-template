@@ -1,19 +1,16 @@
+use crate::{error::ApiError, extractors::error::ExtractorError};
 use app_core::error::CoreError;
 use authenticator::error::AuthenticatorError;
-use axum::{http::StatusCode, response::IntoResponse};
+use axum::http::StatusCode;
+use axum::response::IntoResponse;
 use jsonwebtoken::errors::ErrorKind as JwtErrorKind;
 use serde::Serialize;
-use std::fmt::Debug;
 use utoipa::ToSchema;
-
-use storage::error::StorageError;
-
-use crate::extractors::error::ExtractorError;
 
 /// An enum representing and API error.
 // TODO: Serde uppercanse
 #[derive(Serialize, ToSchema)]
-enum ApiErrorId {
+pub(crate) enum ApiErrorId {
     Unexpected,
     Unauthorized,
     Forbidden,
@@ -24,10 +21,10 @@ enum ApiErrorId {
 /// This is the standard API error returned by endpoints.
 #[derive(Serialize, ToSchema)]
 pub(crate) struct ApiErrorResponse {
-    id: ApiErrorId,
-    error: String,
+    pub id: ApiErrorId,
+    pub error: String,
     #[serde(skip_serializing)]
-    status_code: StatusCode,
+    pub status_code: StatusCode,
 }
 
 impl ApiErrorResponse {
@@ -78,41 +75,32 @@ impl ApiErrorResponse {
 
 impl IntoResponse for ApiErrorResponse {
     fn into_response(self) -> axum::response::Response {
-        // Do not return a body in case of a forbidden or not found
-        // error code.
-        match self.status_code {
-            StatusCode::FORBIDDEN | StatusCode::NOT_FOUND => {
-                self.status_code.into_response()
-            }
-            _ => (self.status_code, axum::response::Json(self)).into_response(),
-        }
+        (self.status_code, axum::response::Json(self)).into_response()
     }
 }
 
-/// API list of all errors that can happen in the backend.
-///
-/// The errors can be made into an API response using the
-/// `ApiErrorResponse` structure to automatically send them back in the
-/// HTTP API though Axum's error management.
-///
-/// The error message will be logged but not sent in the server response.
-#[derive(Debug, thiserror::Error)]
-pub enum ApiError {
-    #[error("Not found: {0}")]
-    NotFound(String),
-    #[error("Hardware Error: {0}")]
-    IoError(#[from] std::io::Error),
-    #[error(transparent)]
-    CoreError(#[from] CoreError),
-    #[error(transparent)]
-    ExtractorError(#[from] ExtractorError),
-    #[error(transparent)]
-    AuthenticatorError(#[from] Box<AuthenticatorError>),
-    #[error("Storage Error: {0}")]
-    StorageError(#[from] Box<StorageError>),
-    #[error("Unexpected Error")]
-    Unexpected(#[from] anyhow::Error),
-}
+/* =======================================================================================
+ * CONVERSIONS
+
+This block contains conversion for errors into ApiErrorResponse.
+Every error from the whole backend should be convertible into ApiErrorResponse,
+which is the single type of response returned by the API.
+
+Errors should be converted using a `match` arm as follows:
+
+```
+ impl From<MyCustomError> for ApiErrorResponse {
+ fn from(_val: MyCustomError) -> Self {
+         MyCustomError::Unexpected => { ApiErrorResponse::unexpected() },
+         MyCustomError::TokenExpired =>  ApiErrorResponse::new(
+             ApiErrorId::TokenExpired,
+             "Your authentication token has expired. Please log back in.",
+             StatusCode::UNAUTHORIZED,
+         )
+     }
+ }
+ ```
+======================================================================================= */
 
 impl From<ApiError> for ApiErrorResponse {
     fn from(val: ApiError) -> Self {
@@ -178,13 +166,5 @@ impl From<Box<AuthenticatorError>> for ApiErrorResponse {
             | AuthenticatorError::AuthenticationFailure => Self::forbidden(),
             _ => ApiErrorResponse::unexpected(),
         }
-    }
-}
-
-impl IntoResponse for ApiError {
-    fn into_response(self) -> axum::response::Response {
-        tracing::error!("API ERROR: {:?}", &self);
-        let api_error: ApiErrorResponse = self.into();
-        api_error.into_response()
     }
 }
