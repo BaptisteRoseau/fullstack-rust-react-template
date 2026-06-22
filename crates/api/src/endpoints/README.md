@@ -16,7 +16,7 @@ Each endpoint should be defined under a directory as follows:
 By convention, for nested endpoint we use directories separated by `__` per `/`.
 For example, CRUD endpoints for `/user/ressources` would be under `user__ressources.`
 
-## Models
+### Models
 
 Models are the specific inputs and outputs of an API.
 
@@ -52,7 +52,7 @@ pub(crate) struct PostUserParams {
 }
 ```
 
-## Endpoints
+### Endpoints
 
 Endpoints are defined using the utoipa crate as follows:
 
@@ -88,7 +88,7 @@ Make sure to:
 - Use a minimal windows when using a lock from an object in the state
 - Implement the actual logic from in the `crates/app_core` crate, the `api` only handles the input/output/state management
 
-## Mod
+### Mod
 
 Should always be:
 
@@ -96,3 +96,13 @@ Should always be:
 pub mod models;
 pub mod endpoints;
 ```
+
+## Changelog
+
+These structures represent the end-user API contract.
+
+Mark the commit with a "BREAKING CHANGES:" footer with the list of breaking changes prefixed with "API:" in the following cases:
+
+- **removing** fields or enum keys from endpoints
+- **renaming** fields or enum keys from endpoints
+- **changing the type of** fields or enum keys from endpoints
