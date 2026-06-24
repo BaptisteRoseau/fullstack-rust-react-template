@@ -5,7 +5,7 @@ import logo from '@/assets/logo.svg'
 import { Head } from '@/components/seo'
 import { Button } from '@/components/ui/button'
 import { paths } from '@/config/paths'
-import { useUser } from '@/lib/auth'
+import { login, useUser } from '@/lib/auth'
 
 const LandingRoute = () => {
     const navigate = useNavigate()
@@ -15,7 +15,7 @@ const LandingRoute = () => {
         if (user.data) {
             navigate(paths.app.dashboard.getHref())
         } else {
-            navigate(paths.auth.login.getHref())
+            login(paths.app.dashboard.getHref())
         }
     }
 

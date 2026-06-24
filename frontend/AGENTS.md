@@ -3,6 +3,7 @@
 > Reference for understanding, extending, and reproducing the `frontend` React app.
 
 This document has two goals:
+
 1. **Navigate & extend** the existing codebase quickly and to current norms.
 2. **Reproduce** the same clean architecture from scratch in another project.
 
@@ -16,25 +17,26 @@ conventions: a **feature-based** layout with a strictly **unidirectional** depen
 (`shared → features → app`) enforced by ESLint.
 
 ### Toolchain
-| Concern         | Tool |
-|-----------------|------|
-| Runtime / PM    | [Bun](https://bun.sh) (`bun install`, `bun run dev`) |
-| Bundler         | Vite 8 (config in `vite.config.ts`) |
-| Language        | TypeScript 6 (`strict`), JSX via `@vitejs/plugin-react` |
-| Styling         | Tailwind CSS 4 (via `@tailwindcss/vite`) + `cva` + `tailwind-merge` |
-| UI primitives   | Radix UI (headless) following the ShadCN/UI copy-in pattern; `lucide-react` icons |
-| Data fetching   | TanStack Query (React Query) v5 + Axios |
-| Client state    | Zustand (modals, notifications) |
-| Forms           | React Hook Form + Zod (`@hookform/resolvers`) |
-| Auth            | `react-query-auth` (`configureAuth`) |
-| Routing         | React Router 8 (data router, `lazy` routes) |
-| API mocking     | MSW (browser, tests, and standalone `mock-server.ts`) + `@mswjs/data` |
-| i18n            | Lingui (`@lingui/macro`, `@lingui/react`, PO catalogs) |
-| Docs            | Storybook 10 (`@storybook/react-vite`) |
-| Unit/Integ tests| Vitest + Testing Library |
-| E2E tests       | Playwright (against the MSW mock server) |
-| Lint / Format   | ESLint (flat config) + Prettier, 4-space indent, kebab-case enforced |
-| Codegen         | Plop (`bun run generate`) |
+
+| Concern          | Tool                                                                              |
+| ---------------- | --------------------------------------------------------------------------------- |
+| Runtime / PM     | [Bun](https://bun.sh) (`bun install`, `bun run dev`)                              |
+| Bundler          | Vite 8 (config in `vite.config.ts`)                                               |
+| Language         | TypeScript 6 (`strict`), JSX via `@vitejs/plugin-react`                           |
+| Styling          | Tailwind CSS 4 (via `@tailwindcss/vite`) + `cva` + `tailwind-merge`               |
+| UI primitives    | Radix UI (headless) following the ShadCN/UI copy-in pattern; `lucide-react` icons |
+| Data fetching    | TanStack Query (React Query) v5 + Axios                                           |
+| Client state     | Zustand (modals, notifications)                                                   |
+| Forms            | React Hook Form + Zod (`@hookform/resolvers`)                                     |
+| Auth             | `react-query-auth` (`configureAuth`)                                              |
+| Routing          | React Router 8 (data router, `lazy` routes)                                       |
+| API mocking      | MSW (browser, tests, and standalone `mock-server.ts`) + `@mswjs/data`             |
+| i18n             | Lingui (`@lingui/macro`, `@lingui/react`, PO catalogs)                            |
+| Docs             | Storybook 10 (`@storybook/react-vite`)                                            |
+| Unit/Integ tests | Vitest + Testing Library                                                          |
+| E2E tests        | Playwright (against the MSW mock server)                                          |
+| Lint / Format    | ESLint (flat config) + Prettier, 4-space indent, kebab-case enforced              |
+| Codegen          | Plop (`bun run generate`)                                                         |
 
 ---
 
@@ -95,6 +97,7 @@ app/
 ```
 
 **Provider stack (`provider.tsx`)** — every cross-cutting concern wraps the app here:
+
 ```tsx
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const [queryClient] = React.useState(
@@ -121,20 +124,37 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 **Router (`router.tsx`)** — a data router built from `paths`. Routes are **code-split with `lazy`**;
 a `convert()` adapter maps each module's `clientLoader`/`clientAction`/`default` to React Router's
 `loader`/`action`/`Component`. The `/app` subtree is wrapped in `<ProtectedRoute>`:
+
 ```tsx
 export const createAppRouter = (queryClient: QueryClient) =>
     createBrowserRouter([
-        { path: paths.home.path, lazy: () => import('./pages/landing').then(convert(queryClient)) },
+        {
+            path: paths.home.path,
+            lazy: () => import('./pages/landing').then(convert(queryClient)),
+        },
         {
             path: paths.app.root.path,
-            element: <ProtectedRoute><AppRoot /></ProtectedRoute>,
+            element: (
+                <ProtectedRoute>
+                    <AppRoot />
+                </ProtectedRoute>
+            ),
             ErrorBoundary: AppRootErrorBoundary,
             children: [
-                { path: paths.app.discussions.path, lazy: () => import('./pages/app/discussions/discussions').then(convert(queryClient)) },
+                {
+                    path: paths.app.discussions.path,
+                    lazy: () =>
+                        import('./pages/app/discussions/discussions').then(
+                            convert(queryClient),
+                        ),
+                },
                 // ...
             ],
         },
-        { path: '*', lazy: () => import('./pages/not-found').then(convert(queryClient)) },
+        {
+            path: '*',
+            lazy: () => import('./pages/not-found').then(convert(queryClient)),
+        },
     ])
 ```
 
@@ -166,14 +186,18 @@ the api-call definitions + `configureAuth` live in `lib/auth.tsx` (shared across
 ### 3.3 `api/` layer (colocated in each feature)
 
 The data-access pattern. Every endpoint declaration consists of **three parts in one file**:
+
 1. **Zod schema + inferred input type** (for mutations / validated requests).
 2. A **fetcher** using the shared `api` client.
 3. A **React Query hook** (`useQuery` for reads, `useMutation` for writes) plus a
    `queryOptions` factory so loaders and components share the same key.
 
 **Read (`get-discussions.ts`):**
+
 ```ts
-export const getDiscussions = (page = 1): Promise<{ data: Discussion[]; meta: Meta }> =>
+export const getDiscussions = (
+    page = 1,
+): Promise<{ data: Discussion[]; meta: Meta }> =>
     api.get(`/discussions`, { params: { page } })
 
 export const getDiscussionsQueryOptions = ({ page }: { page?: number } = {}) =>
@@ -188,6 +212,7 @@ export const useDiscussions = ({ queryConfig, page }: UseDiscussionsOptions) =>
 
 **Write (`create-discussion.ts`)** — schema drives both validation and the input type; the mutation
 **invalidates** the matching list query on success so the cache stays fresh:
+
 ```ts
 export const createDiscussionInputSchema = z.object({
     title: z.string().min(1, 'Required'),
@@ -195,15 +220,22 @@ export const createDiscussionInputSchema = z.object({
 })
 export type CreateDiscussionInput = z.infer<typeof createDiscussionInputSchema>
 
-export const createDiscussion = ({ data }: { data: CreateDiscussionInput }): Promise<Discussion> =>
-    api.post(`/discussions`, data)
+export const createDiscussion = ({
+    data,
+}: {
+    data: CreateDiscussionInput
+}): Promise<Discussion> => api.post(`/discussions`, data)
 
-export const useCreateDiscussion = ({ mutationConfig }: UseCreateDiscussionOptions = {}) => {
+export const useCreateDiscussion = ({
+    mutationConfig,
+}: UseCreateDiscussionOptions = {}) => {
     const queryClient = useQueryClient()
     const { onSuccess, ...restConfig } = mutationConfig || {}
     return useMutation({
         onSuccess: (...args) => {
-            queryClient.invalidateQueries({ queryKey: getDiscussionsQueryOptions().queryKey })
+            queryClient.invalidateQueries({
+                queryKey: getDiscussionsQueryOptions().queryKey,
+            })
             onSuccess?.(...args)
         },
         ...restConfig,
@@ -229,16 +261,21 @@ lib/
 
 **`api-client.ts`** — the one HTTP client. Response interceptor unwraps `.data`, fires an error
 toast via the Zustand notifications store, and redirects to login on `401`:
+
 ```ts
 export const api = Axios.create({ baseURL: env.API_URL })
-api.interceptors.request.use(authRequestInterceptor)      // sets Accept + withCredentials
+api.interceptors.request.use(authRequestInterceptor) // sets Accept + withCredentials
 api.interceptors.response.use(
     (response) => response.data,
     (error) => {
         const message = error.response?.data?.message || error.message
-        useNotifications.getState().addNotification({ type: 'error', title: 'Error', message })
+        useNotifications
+            .getState()
+            .addNotification({ type: 'error', title: 'Error', message })
         if (error.response?.status === 401) {
-            window.location.href = paths.auth.login.getHref(window.location.pathname)
+            window.location.href = paths.auth.login.getHref(
+                window.location.pathname,
+            )
         }
         return Promise.reject(error)
     },
@@ -250,10 +287,12 @@ api.interceptors.response.use(
 
 **`authorization.tsx`** — two-tier access control. `ROLES` (`ADMIN`/`USER`) for role checks, `POLICIES`
 for granular per-resource checks. UI gates render through `<Authorization>`:
+
 ```tsx
 <Authorization allowedRoles={[ROLES.ADMIN]}>…</Authorization>
 <Authorization policyCheck={POLICIES['comment:delete'](user, comment)}>…</Authorization>
 ```
+
 Authorization is **UX only** — always validate on the server.
 
 ### 3.5 `components/` — shared UI
@@ -271,6 +310,7 @@ components/
 ```
 
 **A `ui/` component directory:**
+
 ```
 ui/button/
 ├── button.tsx          # Component (PascalCase export, kebab-case file)
@@ -281,6 +321,7 @@ ui/button/
 
 **Component skeleton** — `cva` for variants, `cn()` (clsx + tailwind-merge) to merge classes,
 `asChild` via Radix `Slot` for polymorphism:
+
 ```tsx
 const buttonVariants = cva('inline-flex items-center justify-center rounded-md …', {
     variants: { variant: { default: '…', destructive: '…', outline: '…' }, size: { default: '…', sm: '…' } },
@@ -305,6 +346,7 @@ trigger button + drawer + submit for create/update flows. See `features/discussi
 - **`env.ts`** — validated, typed env vars (e.g. `API_URL`), read from `import.meta.env`.
 - **`paths.ts`** — the **single source of truth for routes**. Every route has a `path` (for the
   router) and a `getHref(...)` builder (for links/redirects). Never hardcode a URL string:
+
 ```ts
 export const paths = {
     home: { path: '/', getHref: () => '/' },
@@ -339,10 +381,12 @@ testing/
 
 **`renderApp()`** seeds a user into the mock DB, logs them in via cookie, mounts the UI inside the
 real `AppProvider` + a `createMemoryRouter`, and waits for loading spinners to clear:
+
 ```tsx
 const { user } = await renderApp(<Discussions />, { url: '/app/discussions' })
 // pass `user: null` to render unauthenticated
 ```
+
 Tests hit **real HTTP through MSW** (no `fetch` mocking) — the same handlers power dev, tests, e2e,
 and the standalone `mock-server.ts`. Tests live in `__tests__/` folders beside the code.
 
@@ -353,6 +397,7 @@ i18n/
 ├── index.ts            # i18n instance, Locale type ('en'|'fr'), defaultLocale, loadLocale()
 └── locales/{en,fr}/messages.po
 ```
+
 Mark strings with the Lingui macros in code: `<Trans>Create Discussion</Trans>` in JSX, `` t`Title` ``
 in expressions. The `@lingui/vite-plugin` compiles catalogs. Workflow:
 `bun run i18n:extract` → translate the PO files → `bun run i18n:compile` (`i18n:check` runs both `--strict`).
@@ -375,7 +420,7 @@ in expressions. The `@lingui/vite-plugin` compiles catalogs. Workflow:
   feature/component folder.
 - **No cross-feature imports.** No `app` imports from shared (`features`/`app` depend on shared, never
   the reverse). Boundaries enforced by ESLint `import/no-restricted-paths`.
-- **No feature barrels.** Import the concrete file (better tree-shaking); `ui/` components *do* keep an
+- **No feature barrels.** Import the concrete file (better tree-shaking); `ui/` components _do_ keep an
   `index.ts` barrel as their public surface.
 - **Data:** read via `useQuery`, write via `useMutation` — one file per endpoint colocating schema +
   fetcher + hook; invalidate the related query on mutation success. Never call `api` directly in a component.

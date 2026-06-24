@@ -52,10 +52,10 @@ export const UpdateProfile = () => {
                 }}
                 options={{
                     defaultValues: {
-                        firstName: user.data?.firstName ?? '',
-                        lastName: user.data?.lastName ?? '',
+                        firstName: '',
+                        lastName: '',
                         email: user.data?.email ?? '',
-                        bio: user.data?.bio ?? '',
+                        bio: '',
                     },
                 }}
                 schema={updateProfileInputSchema}

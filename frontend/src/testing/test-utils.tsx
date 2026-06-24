@@ -28,6 +28,8 @@ export const createDiscussion = async (discussionProperties?: any) => {
     return res
 }
 
+// Seed a user into the mock DB and set the auth cookie so MSW /auth/me returns it.
+// The returned object includes { user: { id, email, role, ... }, jwt }.
 export const loginAsUser = async (user: any) => {
     const authUser = await authenticate(user)
     Cookies.set(AUTH_COOKIE, authUser.jwt)

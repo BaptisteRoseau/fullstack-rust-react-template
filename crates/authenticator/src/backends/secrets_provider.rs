@@ -11,10 +11,20 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 use uuid::Uuid;
 
+#[derive(Debug, Deserialize, Default)]
+struct RealmAccess {
+    #[serde(default)]
+    roles: Vec<String>,
+}
+
 #[derive(Debug, Deserialize)]
 struct Claims {
     sub: String,
     iss: String,
+    #[serde(default)]
+    email: Option<String>,
+    #[serde(default)]
+    realm_access: RealmAccess,
 }
 
 // Keycloak sets iss to "http://<host>/realms/<realm-name>"; extract the last segment.
@@ -67,6 +77,8 @@ impl SecretsProvider {
         Ok(UserToken {
             id,
             realm: realm_from_iss(&claims.iss),
+            email: claims.email,
+            roles: claims.realm_access.roles,
         })
     }
 
@@ -90,6 +102,8 @@ impl SecretsProvider {
         let user_token = UserToken {
             id: api_key.owner(),
             realm: "api_key".to_string(),
+            email: None,
+            roles: vec![],
         };
 
         if let Ok(value) = serde_json::to_value(&user_token) {
@@ -109,6 +123,76 @@ fn hex_sha256(input: &str) -> String {
         .iter()
         .map(|b| format!("{b:02x}"))
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_claims_deserialize_email_and_roles() {
+        let json = r#"{
+            "sub": "550e8400-e29b-41d4-a716-446655440000",
+            "iss": "http://localhost:8090/realms/application",
+            "email": "user@example.com",
+            "realm_access": {
+                "roles": ["ADMIN", "USER"]
+            }
+        }"#;
+
+        let claims: Claims =
+            serde_json::from_str(json).expect("claims JSON should deserialize without error");
+
+        assert_eq!(
+            claims.sub, "550e8400-e29b-41d4-a716-446655440000",
+            "sub mismatch: got {:?}",
+            claims.sub
+        );
+        assert_eq!(
+            claims.email,
+            Some("user@example.com".to_string()),
+            "email mismatch: got {:?}",
+            claims.email
+        );
+        assert_eq!(
+            claims.realm_access.roles,
+            vec!["ADMIN", "USER"],
+            "roles mismatch: got {:?}",
+            claims.realm_access.roles
+        );
+    }
+
+    #[test]
+    fn test_claims_deserialize_missing_optional_fields() {
+        let json = r#"{
+            "sub": "550e8400-e29b-41d4-a716-446655440000",
+            "iss": "http://localhost:8090/realms/application"
+        }"#;
+
+        let claims: Claims =
+            serde_json::from_str(json).expect("claims JSON with no optional fields should deserialize");
+
+        assert!(
+            claims.email.is_none(),
+            "email should be None when absent, got {:?}",
+            claims.email
+        );
+        assert!(
+            claims.realm_access.roles.is_empty(),
+            "roles should be empty when absent, got {:?}",
+            claims.realm_access.roles
+        );
+    }
+
+    #[test]
+    fn test_realm_from_iss() {
+        let realm = realm_from_iss("http://localhost:8090/realms/application");
+        assert_eq!(
+            realm, "application",
+            "realm extraction mismatch: got {:?}",
+            realm
+        );
+    }
 }
 
 #[async_trait]

@@ -1,75 +1,51 @@
 import { configureAuth } from 'react-query-auth'
-import { Navigate, useLocation } from 'react-router'
-import { z } from 'zod'
+import { useLocation } from 'react-router'
 
+import { env } from '@/config/env'
 import { paths } from '@/config/paths'
-import { AuthResponse, User } from '@/types/api'
+import { User } from '@/types/api'
 
 import { api } from './api-client'
 
-// api call definitions for auth (types, schemas, requests):
-// these are not part of features as this is a module shared across features
+// Derive the backend origin from API_URL (strip any trailing path segments).
+// e.g. "http://localhost:8080" stays "http://localhost:8080"
+const getApiOrigin = (): string => {
+    try {
+        const url = new URL(env.API_URL)
+        return url.origin
+    } catch {
+        return env.API_URL
+    }
+}
 
 const getUser = async (): Promise<User> => {
-    const response = await api.get('/auth/me')
-
-    return response.data
+    return api.get('/auth/me')
 }
 
-const logout = (): Promise<void> => {
-    return api.post('/auth/logout')
+// Redirect the browser to the backend OIDC login endpoint.
+// The backend owns the OIDC flow and will set an HttpOnly cookie on completion.
+export const login = (redirectTo?: string): void => {
+    const origin = getApiOrigin()
+    const redirect = encodeURIComponent(redirectTo ?? window.location.pathname)
+    window.location.href = `${origin}/auth/login?redirect=${redirect}`
 }
 
-export const loginInputSchema = z.object({
-    email: z.string().min(1, 'Required').email('Invalid email'),
-    password: z.string().min(5, 'Required'),
-})
-
-export type LoginInput = z.infer<typeof loginInputSchema>
-const loginWithEmailAndPassword = (data: LoginInput): Promise<AuthResponse> => {
-    return api.post('/auth/login', data)
-}
-
-export const registerInputSchema = z
-    .object({
-        email: z.string().min(1, 'Required'),
-        firstName: z.string().min(1, 'Required'),
-        lastName: z.string().min(1, 'Required'),
-        password: z.string().min(5, 'Required'),
-    })
-    .and(
-        z
-            .object({
-                teamId: z.string().min(1, 'Required'),
-                teamName: z.null().default(null),
-            })
-            .or(
-                z.object({
-                    teamName: z.string().min(1, 'Required'),
-                    teamId: z.null().default(null),
-                }),
-            ),
-    )
-
-export type RegisterInput = z.infer<typeof registerInputSchema>
-
-const registerWithEmailAndPassword = (
-    data: RegisterInput,
-): Promise<AuthResponse> => {
-    return api.post('/auth/register', data)
+const logoutFn = async (): Promise<void> => {
+    await api.post('/auth/logout')
+    window.location.href = paths.home.getHref()
 }
 
 const authConfig = {
     userFn: getUser,
-    loginFn: async (data: LoginInput) => {
-        const response = await loginWithEmailAndPassword(data)
-        return response.user
+    // loginFn / registerFn are not used — login is a browser redirect.
+    // react-query-auth requires them; provide no-ops that satisfy the type.
+    loginFn: async (): Promise<User> => {
+        throw new Error('Use login() redirect instead')
     },
-    registerFn: async (data: RegisterInput) => {
-        const response = await registerWithEmailAndPassword(data)
-        return response.user
+    registerFn: async (): Promise<User> => {
+        throw new Error('Registration is handled by Keycloak')
     },
-    logoutFn: logout,
+    logoutFn,
 }
 
 export const { useUser, useLogin, useLogout, useRegister, AuthLoader } =
@@ -80,12 +56,9 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const location = useLocation()
 
     if (!user.data) {
-        return (
-            <Navigate
-                to={paths.auth.login.getHref(location.pathname)}
-                replace
-            />
-        )
+        // Trigger the backend OIDC redirect rather than navigating to a local page.
+        login(location.pathname)
+        return null
     }
 
     return children

@@ -1,6 +1,6 @@
 # `features/auth`
 
-Authentication UI. **Note the split:** the auth *logic* — fetchers, Zod schemas, and `configureAuth`
+Authentication UI. **Note the split:** the auth _logic_ — fetchers, Zod schemas, and `configureAuth`
 (producing `useUser`/`useLogin`/`useLogout`/`useRegister`/`AuthLoader`) plus `ProtectedRoute` — lives
 in `@/lib/auth.tsx` because it is shared across features. This folder holds only the **form components**.
 

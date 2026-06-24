@@ -16,16 +16,16 @@ generator, drop a folder here and register it in `plopfile.cjs`.
 
 ## Generators
 
-| Name | Emits | Skill |
-| --- | --- | --- |
-| `component` | `components/<name>/{<name>.tsx, .stories.tsx, index.ts}` under `src/components/<folder>` or a feature | `frontend-react-component` |
-| `page` | A `ContentLayout` page under `src/app/pages/app/`, **plus** a `paths.ts` entry and a lazy route in `router.tsx` | `frontend-react-page` |
-| `layout` | `src/components/layouts/<name>-layout.tsx`, re-exported from the barrel | `frontend-react-layout` |
-| `feature` | A new `src/features/<name>/` slice (read endpoint + list component) | `frontend-react-feature` |
-| `hook` | `use-<name>.ts` in `src/hooks` (+ colocated test) or a feature's `hooks/` | `frontend-react-hook` |
-| `api` | One endpoint file in a feature's `api/` — `query` (read) or `mutation` (write) | `frontend-react-api` |
-| `form` | A `Create<Noun>` FormDrawer component in a feature's `components/` | `frontend-react-form` |
-| `store` | A Zustand `<name>-store.ts` in a feature or component folder | `frontend-react-state` |
+| Name        | Emits                                                                                                           | Skill                      |
+| ----------- | --------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `component` | `components/<name>/{<name>.tsx, .stories.tsx, index.ts}` under `src/components/<folder>` or a feature           | `frontend-react-component` |
+| `page`      | A `ContentLayout` page under `src/app/pages/app/`, **plus** a `paths.ts` entry and a lazy route in `router.tsx` | `frontend-react-page`      |
+| `layout`    | `src/components/layouts/<name>-layout.tsx`, re-exported from the barrel                                         | `frontend-react-layout`    |
+| `feature`   | A new `src/features/<name>/` slice (read endpoint + list component)                                             | `frontend-react-feature`   |
+| `hook`      | `use-<name>.ts` in `src/hooks` (+ colocated test) or a feature's `hooks/`                                       | `frontend-react-hook`      |
+| `api`       | One endpoint file in a feature's `api/` — `query` (read) or `mutation` (write)                                  | `frontend-react-api`       |
+| `form`      | A `Create<Noun>` FormDrawer component in a feature's `components/`                                              | `frontend-react-form`      |
+| `store`     | A Zustand `<name>-store.ts` in a feature or component folder                                                    | `frontend-react-state`     |
 
 ### Notes
 

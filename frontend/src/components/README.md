@@ -3,12 +3,12 @@
 **Shared, app-agnostic** UI used across the whole app. These import only from other shared modules —
 **never** from `@/features/*` or the API client. Business-specific UI belongs in a feature instead.
 
-| Folder | Contents |
-|--------|----------|
-| `ui/` | The design system: `button`, `dialog` (+ `confirmation-dialog`), `drawer`, `dropdown`, `form` (input/textarea/select/switch/label/field-wrapper/error/form-drawer), `table` (+ pagination), `link`, `spinner`, `md-preview`, `notifications`. |
-| `layouts/` | Page shells: `content-layout`, `auth-layout`, `dashboard-layout`. |
-| `errors/` | `MainErrorFallback` used by the root error boundary. |
-| `seo/` | `Head` (wraps `react-helmet-async`) for per-page document titles. |
+| Folder     | Contents                                                                                                                                                                                                                                      |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ui/`      | The design system: `button`, `dialog` (+ `confirmation-dialog`), `drawer`, `dropdown`, `form` (input/textarea/select/switch/label/field-wrapper/error/form-drawer), `table` (+ pagination), `link`, `spinner`, `md-preview`, `notifications`. |
+| `layouts/` | Page shells: `content-layout`, `auth-layout`, `dashboard-layout`.                                                                                                                                                                             |
+| `errors/`  | `MainErrorFallback` used by the root error boundary.                                                                                                                                                                                          |
+| `seo/`     | `Head` (wraps `react-helmet-async`) for per-page document titles.                                                                                                                                                                             |
 
 ## Conventions
 

@@ -10,8 +10,7 @@ const DashboardRoute = () => {
         <ContentLayout title={t`Dashboard`}>
             <h1 className="text-xl">
                 <Trans>
-                    Welcome{' '}
-                    <b>{`${user.data?.firstName} ${user.data?.lastName}`}</b>
+                    Welcome <b>{user.data?.email ?? ''}</b>
                 </Trans>
             </h1>
             <h4 className="my-3">

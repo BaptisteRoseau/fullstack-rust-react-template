@@ -3,12 +3,12 @@
 The **application layer** — the composition root. The only place allowed to import from `features`
 and wire them together.
 
-| File / folder | Role |
-|---------------|------|
-| `index.tsx` | `<App/>` = `<AppProvider><AppRouter/></AppProvider>`. |
-| `provider.tsx` | All global providers: `Suspense → ErrorBoundary → HelmetProvider → QueryClientProvider → Notifications + AuthLoader`. Add new app-wide providers **here**. |
-| `router.tsx` | `createBrowserRouter` with lazy, code-split routes; `convert()` maps each page's `clientLoader`/`clientAction`/`default` to React Router. `/app` subtree is wrapped in `ProtectedRoute`. |
-| `pages/` | Route screens. Thin: compose feature components inside a layout. |
+| File / folder  | Role                                                                                                                                                                                     |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `index.tsx`    | `<App/>` = `<AppProvider><AppRouter/></AppProvider>`.                                                                                                                                    |
+| `provider.tsx` | All global providers: `Suspense → ErrorBoundary → HelmetProvider → QueryClientProvider → Notifications + AuthLoader`. Add new app-wide providers **here**.                               |
+| `router.tsx`   | `createBrowserRouter` with lazy, code-split routes; `convert()` maps each page's `clientLoader`/`clientAction`/`default` to React Router. `/app` subtree is wrapped in `ProtectedRoute`. |
+| `pages/`       | Route screens. Thin: compose feature components inside a layout.                                                                                                                         |
 
 ## Adding a route
 

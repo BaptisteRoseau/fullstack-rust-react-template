@@ -129,13 +129,44 @@ pub(crate) struct CliConfig {
     /* ===============
     AUTHENTICATOR
     ================ */
-    /// JWKS provider URL (e.g. http://localhost:8090/realms/master/protocol/openid-connect/certs)
+    /// JWKS provider URL (e.g. http://localhost:8090/realms/application/protocol/openid-connect/certs)
     #[arg(long, env, default_value_t = DEFAULT_AUTHENTICATOR_PROVIDER_URL.to_string())]
     pub(crate) authenticator_provider_url: String,
 
     /// Comma-separated list of accepted JWT audiences
     #[arg(long, env, default_value_t = DEFAULT_AUTHENTICATOR_AUDIENCES.to_string())]
     pub(crate) authenticator_audiences: String,
+
+    /* ===============
+    OIDC / BFF
+    ================ */
+    /// OIDC issuer URL (e.g. http://localhost:8090/realms/application)
+    #[arg(long, env, default_value_t = DEFAULT_OIDC_ISSUER_URL.to_string())]
+    pub(crate) oidc_issuer_url: String,
+
+    /// OIDC confidential client ID
+    #[arg(long, env, default_value_t = DEFAULT_OIDC_CLIENT_ID.to_string())]
+    pub(crate) oidc_client_id: String,
+
+    /// OIDC confidential client secret
+    #[arg(long, env, default_value_t = DEFAULT_OIDC_CLIENT_SECRET.to_string())]
+    pub(crate) oidc_client_secret: String,
+
+    /// Redirect URI registered in Keycloak (e.g. http://localhost:8080/auth/callback)
+    #[arg(long, env, default_value_t = DEFAULT_OIDC_REDIRECT_URL.to_string())]
+    pub(crate) oidc_redirect_url: String,
+
+    /// Frontend URL to redirect to after a successful login
+    #[arg(long, env, default_value_t = DEFAULT_OIDC_POST_LOGIN_URL.to_string())]
+    pub(crate) oidc_post_login_url: String,
+
+    /// Set the Secure flag on auth cookies (must be true in production behind HTTPS)
+    #[arg(long, env, default_value_t = DEFAULT_OIDC_COOKIE_SECURE)]
+    pub(crate) oidc_cookie_secure: bool,
+
+    /// Optional domain attribute for auth cookies (leave empty to let the browser use the current domain)
+    #[arg(long, env)]
+    pub(crate) oidc_cookie_domain: Option<String>,
 }
 
 impl CliConfig {

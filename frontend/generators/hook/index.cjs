@@ -29,9 +29,7 @@ module.exports = {
     ],
     actions: (answers) => {
         const shared = answers.feature === 'hooks (shared)'
-        const base = shared
-            ? 'src/hooks'
-            : 'src/features/{{feature}}/hooks'
+        const base = shared ? 'src/hooks' : 'src/features/{{feature}}/hooks'
 
         const actions = [
             {

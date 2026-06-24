@@ -17,7 +17,15 @@ export type Meta = {
     totalPages: number
 }
 
-export type User = Entity<{
+// Auth identity returned by GET /auth/me (BFF — no JWT decoding in JS)
+export type User = {
+    id: string
+    email: string | null
+    role: 'ADMIN' | 'USER'
+}
+
+// Full application user record returned by GET /users and embedded in resources
+export type AppUser = Entity<{
     firstName: string
     lastName: string
     email: string
@@ -25,11 +33,6 @@ export type User = Entity<{
     teamId: string
     bio: string
 }>
-
-export type AuthResponse = {
-    jwt: string
-    user: User
-}
 
 export type Team = Entity<{
     name: string
@@ -40,11 +43,11 @@ export type Discussion = Entity<{
     title: string
     body: string
     teamId: string
-    author: User
+    author: AppUser
 }>
 
 export type Comment = Entity<{
     body: string
     discussionId: string
-    author: User
+    author: AppUser
 }>

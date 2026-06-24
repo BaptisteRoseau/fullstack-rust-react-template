@@ -1,0 +1,130 @@
+{
+  "realm": "application",
+  "enabled": true,
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "defaultRole": {
+    "id": "00000000-0000-0000-0000-000000000010",
+    "name": "USER",
+    "description": "Default role assigned to all new users",
+    "composite": false,
+    "clientRole": false,
+    "containerId": "application"
+  },
+  "roles": {
+    "realm": [
+      {
+        "id": "00000000-0000-0000-0000-000000000010",
+        "name": "USER",
+        "description": "Standard application user",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "application"
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000000011",
+        "name": "ADMIN",
+        "description": "Administrator with elevated privileges",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "application"
+      }
+    ]
+  },
+  "defaultRoles": ["USER"],
+  "clients": [
+    {
+      "id": "00000000-0000-0000-0000-000000000020",
+      "clientId": "backend",
+      "name": "Backend API Client",
+      "enabled": true,
+      "publicClient": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "dev-backend-secret-change-me",
+      "redirectUris": [
+        "http://localhost:8080/auth/callback",
+        "http://localhost:8080/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000",
+        "http://localhost:8080",
+        "+"
+      ],
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost:3000/*##http://localhost:8080/*"
+      },
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "roles",
+        "profile",
+        "basic",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ],
+      "protocolMappers": [
+        {
+          "id": "00000000-0000-0000-0000-000000000030",
+          "name": "backend-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "backend",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "id": "00000000-0000-0000-0000-000000000001",
+      "username": "testuser",
+      "email": "testuser@example.com",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Test",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["USER"]
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000002",
+      "username": "adminuser",
+      "email": "adminuser@example.com",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Admin",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["USER", "ADMIN"]
+    }
+  ]
+}

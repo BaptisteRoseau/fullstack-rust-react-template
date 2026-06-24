@@ -5,6 +5,8 @@ use uuid::Uuid;
 pub struct UserToken {
     pub id: Uuid,
     pub realm: String,
+    pub email: Option<String>,
+    pub roles: Vec<String>,
 }
 
 impl From<AuthUserToken> for UserToken {
@@ -12,6 +14,8 @@ impl From<AuthUserToken> for UserToken {
         Self {
             id: value.id,
             realm: value.realm,
+            email: value.email,
+            roles: value.roles,
         }
     }
 }

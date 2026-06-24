@@ -43,6 +43,10 @@ use crate::{
             __path_create_api_key, __path_delete_api_key, __path_get_api_key,
             create_api_key, delete_api_key, get_api_key,
         },
+        auth::endpoints::{
+            __path_callback, __path_get_me, __path_login, __path_logout, __path_refresh_token,
+            callback, get_me, login, logout, refresh_token,
+        },
         ping::endpoints::{__path_ping, ping},
         storage::endpoints::{
             __path_delete_stored_file, __path_download, __path_upload,
@@ -54,7 +58,8 @@ use crate::{
 use axum::{Router, routing::get};
 
 use axum::http::StatusCode;
-use axum::http::header::AUTHORIZATION;
+use axum::http::header::{AUTHORIZATION, CONTENT_TYPE};
+use axum::http::Method;
 use axum_prometheus::metrics_exporter_prometheus::PrometheusHandle;
 use config::Config;
 use std::future::ready;
@@ -94,6 +99,12 @@ fn api_router() -> OpenApiRouter<AppState> {
         .routes(routes!(create_api_key))
         .routes(routes!(get_api_key))
         .routes(routes!(delete_api_key))
+        // Auth: BFF OIDC flow
+        .routes(routes!(login))
+        .routes(routes!(callback))
+        .routes(routes!(logout))
+        .routes(routes!(get_me))
+        .routes(routes!(refresh_token))
 }
 
 /// Metadata advertised in the generated OpenAPI document.
@@ -121,14 +132,32 @@ pub fn public_routes(config: &Config, state: AppState) -> Router {
 
     let api_routes = api_routes.merge(swagger(config, openapi));
 
+    // A wildcard origin is incompatible with allow_credentials; use the configured
+    // frontend origin explicitly.
+    let frontend_origin: axum::http::HeaderValue = config
+        .oidc
+        .post_login_url
+        .parse()
+        .expect("oidc.post_login_url must be a valid HTTP origin");
+
+    let cors = CorsLayer::new()
+        .allow_origin(frontend_origin)
+        .allow_credentials(true)
+        .allow_methods([
+            Method::GET,
+            Method::POST,
+            Method::PUT,
+            Method::DELETE,
+            Method::OPTIONS,
+        ])
+        .allow_headers([AUTHORIZATION, CONTENT_TYPE]);
+
     let middleware = ServiceBuilder::new()
         // Avoid logging these headers content
         .layer(SetSensitiveRequestHeadersLayer::new(once(AUTHORIZATION)))
         .layer(SetSensitiveResponseHeadersLayer::new(once(AUTHORIZATION)))
         .layer(TraceLayer::new_for_http())
-        // Authorize OPTIONS requests for CORS and automatically set up headers
-        //TODO: Set this up based on what is actually available
-        .layer(CorsLayer::permissive())
+        .layer(cors)
         .layer(NormalizePathLayer::trim_trailing_slash())
         .layer(CompressionLayer::new().quality(CompressionLevel::Best))
         .layer(RequestDecompressionLayer::new())

@@ -3,13 +3,13 @@
 MSW mock API. One layer powers **dev** (`browser.ts` worker), **tests** (`server.ts` node server),
 and **e2e** (via the root `mock-server.ts`).
 
-| File / folder | Role |
-|---------------|------|
-| `db.ts` | `@mswjs/data` in-memory database + `initializeDb` / `persistDb`. |
-| `handlers/` | One file per domain (`auth`, `users`, `discussions`, `comments`, `teams`); `index.ts` aggregates them. |
-| `utils.ts` | `requireAuth`, `requireAdmin`, `sanitizeUser`, `networkDelay`, `hash`, `AUTH_COOKIE`. |
-| `server.ts` / `browser.ts` | MSW setup for node / browser. |
-| `index.ts` | `enableMocking()` — gated on `env.ENABLE_API_MOCKING`, called from `main.tsx`. |
+| File / folder              | Role                                                                                                   |
+| -------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `db.ts`                    | `@mswjs/data` in-memory database + `initializeDb` / `persistDb`.                                       |
+| `handlers/`                | One file per domain (`auth`, `users`, `discussions`, `comments`, `teams`); `index.ts` aggregates them. |
+| `utils.ts`                 | `requireAuth`, `requireAdmin`, `sanitizeUser`, `networkDelay`, `hash`, `AUTH_COOKIE`.                  |
+| `server.ts` / `browser.ts` | MSW setup for node / browser.                                                                          |
+| `index.ts`                 | `enableMocking()` — gated on `env.ENABLE_API_MOCKING`, called from `main.tsx`.                         |
 
 ## Adding a handler
 

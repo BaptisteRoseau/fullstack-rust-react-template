@@ -2,11 +2,11 @@
 
 Page shells, re-exported from `index.ts`.
 
-| Layout | Use |
-|--------|-----|
+| Layout            | Use                                                                                                                             |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `DashboardLayout` | Authenticated shell (sidebar + top bar). Parent of all `/app` routes via `app/pages/app/root.tsx`. Owns the `navigation` array. |
-| `ContentLayout` | Per-page wrapper: sets `<Head>` title, renders the page heading + body inside the `container`. Used by every app page. |
-| `AuthLayout` | Login / register shell. |
+| `ContentLayout`   | Per-page wrapper: sets `<Head>` title, renders the page heading + body inside the `container`. Used by every app page.          |
+| `AuthLayout`      | Login / register shell.                                                                                                         |
 
 ## Rules
 

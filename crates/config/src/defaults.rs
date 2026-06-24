@@ -28,5 +28,14 @@ pub(crate) const DEFAULT_CONFIG_FILE_PATH: &str = ".config.yaml";
 
 // Keycloak default JWKS endpoint (from docker-compose.authentication.yml: port 8090 → 8080)
 pub(crate) const DEFAULT_AUTHENTICATOR_PROVIDER_URL: &str =
-    "http://127.0.0.1:8090/realms/master/protocol/openid-connect/certs";
+    "http://127.0.0.1:8090/realms/application/protocol/openid-connect/certs";
 pub(crate) const DEFAULT_AUTHENTICATOR_AUDIENCES: &str = "backend";
+
+// OIDC / BFF defaults — matching the shared contract
+pub(crate) const DEFAULT_OIDC_ISSUER_URL: &str =
+    "http://localhost:8090/realms/application";
+pub(crate) const DEFAULT_OIDC_CLIENT_ID: &str = "backend";
+pub(crate) const DEFAULT_OIDC_CLIENT_SECRET: &str = "dev-backend-secret-change-me";
+pub(crate) const DEFAULT_OIDC_REDIRECT_URL: &str = "http://localhost:8080/auth/callback";
+pub(crate) const DEFAULT_OIDC_POST_LOGIN_URL: &str = "http://localhost:3000";
+pub(crate) const DEFAULT_OIDC_COOKIE_SECURE: bool = false;

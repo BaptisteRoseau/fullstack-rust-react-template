@@ -1,6 +1,8 @@
 services:
   postgres_keycloak:
     image: postgres:15
+    networks:
+      - net
     volumes:
       - postgres_keycloak:/var/lib/postgresql/data
     environment:
@@ -10,7 +12,7 @@ services:
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
-    command: start-dev # Use 'start' for production with proper hostname/certs
+    command: start-dev --import-realm
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres_keycloak:5432/keycloak
@@ -20,15 +22,17 @@ services:
       KEYCLOAK_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
-      # Declarative import on startup:
-      # KC_IMPORT: /opt/keycloak/data/import/realm-export.json
+    networks:
+      - net
     ports:
       - "8090:8080"
     volumes:
-      - keycloak:/opt/keycloak/data/import
+      - ../keycloak:/opt/keycloak/data/import
     depends_on:
       - postgres_keycloak
 
+networks:
+  net:
+
 volumes:
   postgres_keycloak:
-  keycloak:

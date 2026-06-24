@@ -47,11 +47,15 @@ pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
     .await?;
     info!("Initialized Authenticator");
 
+    let http_client = Arc::new(reqwest::Client::new());
+
     let state = AppState::new(
         database,
         storage,
         cache,
         Arc::new(RwLock::new(authenticator)),
+        Arc::new(config.clone()),
+        http_client,
     );
 
     /* ===========================

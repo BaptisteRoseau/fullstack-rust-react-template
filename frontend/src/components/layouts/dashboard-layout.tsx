@@ -84,9 +84,7 @@ const Progress = () => {
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
     const navigate = useNavigate()
-    const logout = useLogout({
-        onSuccess: () => navigate(paths.auth.login.getHref(location.pathname)),
-    })
+    const logout = useLogout({})
     const { checkAccess } = useAuthorization()
     const navigation = [
         { name: t`Dashboard`, to: paths.app.dashboard.getHref(), icon: Home },

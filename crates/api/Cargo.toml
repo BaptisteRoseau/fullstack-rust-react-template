@@ -47,3 +47,8 @@ utoipa = { version = "5", features = ["axum_extras", "uuid", "chrono"] }
 utoipa-axum = { version = "0" }
 utoipa-swagger-ui = { version = "9", features = ["axum"] }
 uuid = { version = "1", features = ["fast-rng", "serde", "v7"] }
+axum-extra = { version = "0.12.6", features = ["cookie"] }
+rand = "0.10.1"
+reqwest = { version = "0", features = ["json", "form"] }
+percent-encoding = "2.3.2"
+time = "0"

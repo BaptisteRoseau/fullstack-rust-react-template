@@ -3,20 +3,20 @@
 All application code. The layout is **feature-based** (bulletproof-react) with a **unidirectional**
 dependency rule enforced by ESLint: code flows **shared → features → app**.
 
-| Folder | What lives here |
-|--------|-----------------|
-| `app/` | Composition root: providers, router, and page components. Only place features are stitched together. |
-| `components/` | Shared, app-agnostic UI: `ui/` design system, `layouts/`, `errors/`, `seo/`. |
-| `features/` | Self-contained domain slices (`auth`, `discussions`, `comments`, `teams`, `users`). **No cross-feature imports.** |
-| `lib/` | Preconfigured singletons: `api-client`, `react-query`, `auth`, `authorization`. |
-| `config/` | `env.ts` (validated env vars) and `paths.ts` (the route source of truth). |
-| `hooks/` | Shared reusable hooks (`use-*.ts`). |
-| `testing/` | `renderApp` test utils, MSW mocks, data generators. |
-| `i18n/` | Lingui setup + `en`/`fr` PO catalogs. |
-| `types/` | Shared types — `api.ts` holds the domain models. |
-| `utils/` | Pure helpers (`cn`, `format`). |
-| `assets/` | Static assets. |
-| `main.tsx` | Runtime bootstrap: starts MSW (if enabled) then mounts `<App/>`. |
+| Folder        | What lives here                                                                                                   |
+| ------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `app/`        | Composition root: providers, router, and page components. Only place features are stitched together.              |
+| `components/` | Shared, app-agnostic UI: `ui/` design system, `layouts/`, `errors/`, `seo/`.                                      |
+| `features/`   | Self-contained domain slices (`auth`, `discussions`, `comments`, `teams`, `users`). **No cross-feature imports.** |
+| `lib/`        | Preconfigured singletons: `api-client`, `react-query`, `auth`, `authorization`.                                   |
+| `config/`     | `env.ts` (validated env vars) and `paths.ts` (the route source of truth).                                         |
+| `hooks/`      | Shared reusable hooks (`use-*.ts`).                                                                               |
+| `testing/`    | `renderApp` test utils, MSW mocks, data generators.                                                               |
+| `i18n/`       | Lingui setup + `en`/`fr` PO catalogs.                                                                             |
+| `types/`      | Shared types — `api.ts` holds the domain models.                                                                  |
+| `utils/`      | Pure helpers (`cn`, `format`).                                                                                    |
+| `assets/`     | Static assets.                                                                                                    |
+| `main.tsx`    | Runtime bootstrap: starts MSW (if enabled) then mounts `<App/>`.                                                  |
 
 ## Dependency rule
 

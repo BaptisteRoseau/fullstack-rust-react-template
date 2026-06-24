@@ -5,6 +5,7 @@ use axum::{
     extract::{FromRef, FromRequestParts},
     http::{HeaderMap, header, request::Parts},
 };
+use axum_extra::extract::CookieJar;
 use tracing::debug;
 
 pub struct OptionalUser(Option<UserToken>);
@@ -35,22 +36,33 @@ where
         let headers = HeaderMap::from_request_parts(parts, state)
             .await
             .map_err(anyhow::Error::from)?;
-        let header = match headers.get(header::AUTHORIZATION) {
-            Some(header) => header,
+
+        // Prefer the Authorization: Bearer header (API keys / programmatic clients).
+        let token_opt = if let Some(auth_header) = headers.get(header::AUTHORIZATION) {
+            let raw = auth_header.to_str().map_err(|e| anyhow::anyhow!(e))?;
+            Some(raw.strip_prefix("Bearer ").unwrap_or(raw).to_owned())
+        } else {
+            // Fall back to the HttpOnly access_token cookie set by the BFF flow.
+            let jar = CookieJar::from_request_parts(parts, state)
+                .await
+                .map_err(anyhow::Error::from)?;
+            jar.get("access_token")
+                .map(|c| c.value().to_owned())
+        };
+
+        let token = match token_opt {
+            Some(t) => t,
             None => {
                 debug!("Anonymous user");
                 return Ok(OptionalUser(None));
             }
         };
 
-        let raw = header.to_str().map_err(|e| anyhow::anyhow!(e))?;
-        let token = raw.strip_prefix("Bearer ").unwrap_or(raw);
-
         let app_state = parts.extract_with_state::<AppState, _>(state).await?;
         let user;
         {
             let authenticator = app_state.authenticator.read().await;
-            user = authenticator.validate(token).await?;
+            user = authenticator.validate(&token).await?;
         }
         Ok(OptionalUser(Some(user.into())))
     }

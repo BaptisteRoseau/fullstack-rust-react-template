@@ -2,10 +2,10 @@
 
 Global configuration.
 
-| File | Role |
-|------|------|
-| `env.ts` | Validates and types env vars with Zod. Reads `VITE_APP_*` from `import.meta.env`, strips the prefix, and throws at startup if anything is missing/invalid. Import the typed `env` object (`env.API_URL`, `env.ENABLE_API_MOCKING`, …). |
-| `paths.ts` | **The single source of truth for routes.** Every route exposes a `path` (for the router) and a `getHref(...)` builder (for links/redirects). |
+| File       | Role                                                                                                                                                                                                                                   |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env.ts`   | Validates and types env vars with Zod. Reads `VITE_APP_*` from `import.meta.env`, strips the prefix, and throws at startup if anything is missing/invalid. Import the typed `env` object (`env.API_URL`, `env.ENABLE_API_MOCKING`, …). |
+| `paths.ts` | **The single source of truth for routes.** Every route exposes a `path` (for the router) and a `getHref(...)` builder (for links/redirects).                                                                                           |
 
 ## Rules
 

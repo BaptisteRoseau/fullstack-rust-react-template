@@ -50,6 +50,8 @@ const omit = <T extends object>(obj: T, keys: string[]): T => {
 export const sanitizeUser = <O extends object>(user: O) =>
     omit<O>(user, ['password', 'iat'])
 
+// Authenticate a user by email/password and return a mock JWT (base64-encoded user).
+// Used by test-utils to seed an authenticated session via AUTH_COOKIE.
 export function authenticate({
     email,
     password,
@@ -103,8 +105,9 @@ export function requireAuth(cookies: Record<string, string>) {
     }
 }
 
-export function requireAdmin(user: any) {
-    if (user.role !== 'ADMIN') {
+// requireAdmin accepts the already-resolved user object (not cookies).
+export function requireAdmin(user: { role?: string } | null | undefined) {
+    if (!user || user.role !== 'ADMIN') {
         throw Error('Unauthorized')
     }
 }

@@ -25,3 +25,7 @@ scrape_configs:
     scheme: "http"
     static_configs:
       - targets: ["grafana:3000"]
+  - job_name: keycloak
+    scheme: "http"
+    static_configs:
+      - targets: ["keycloak:9000"]

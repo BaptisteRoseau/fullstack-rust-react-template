@@ -2,10 +2,10 @@
 
 Internationalization via **Lingui**.
 
-| File / folder | Role |
-|---------------|------|
-| `index.ts` | The shared `i18n` instance, `Locale = 'en' \| 'fr'`, `defaultLocale`, `localeLabels`, and `loadLocale(locale)`. |
-| `locales/{en,fr}/messages.po` | Translation catalogs (gettext PO). |
+| File / folder                 | Role                                                                                                            |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `index.ts`                    | The shared `i18n` instance, `Locale = 'en' \| 'fr'`, `defaultLocale`, `localeLabels`, and `loadLocale(locale)`. |
+| `locales/{en,fr}/messages.po` | Translation catalogs (gettext PO).                                                                              |
 
 Config is `lingui.config.ts`; the `@lingui/vite-plugin` compiles catalogs.
 

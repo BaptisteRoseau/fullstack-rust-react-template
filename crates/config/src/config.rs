@@ -43,6 +43,35 @@ pub struct AuthenticatorConfig {
     pub audiences: Vec<String>,
 }
 
+/// OIDC / BFF configuration for the authorization-code flow.
+#[derive(Debug, Clone)]
+pub struct OidcConfig {
+    pub issuer_url: String,
+    pub client_id: String,
+    pub client_secret: String,
+    pub redirect_url: String,
+    pub post_login_url: String,
+    pub cookie_secure: bool,
+    pub cookie_domain: Option<String>,
+}
+
+impl OidcConfig {
+    /// The Keycloak authorization endpoint derived from the issuer URL.
+    pub fn authorize_url(&self) -> String {
+        format!("{}/protocol/openid-connect/auth", self.issuer_url)
+    }
+
+    /// The Keycloak token endpoint derived from the issuer URL.
+    pub fn token_url(&self) -> String {
+        format!("{}/protocol/openid-connect/token", self.issuer_url)
+    }
+
+    /// The Keycloak end-session endpoint derived from the issuer URL.
+    pub fn end_session_url(&self) -> String {
+        format!("{}/protocol/openid-connect/logout", self.issuer_url)
+    }
+}
+
 type ServerBindingConfig = BindingConfig;
 
 #[derive(Debug, Clone)]
@@ -76,6 +105,7 @@ pub struct Config {
     pub prometheus: Option<PrometheusConfig>,
     pub swagger: Option<SwaggerConfig>,
     pub authenticator: AuthenticatorConfig,
+    pub oidc: OidcConfig,
 }
 
 impl Config {
@@ -144,6 +174,15 @@ impl TryFrom<CliConfig> for Config {
                     .map(str::to_string)
                     .collect(),
             },
+            oidc: OidcConfig {
+                issuer_url: value.oidc_issuer_url,
+                client_id: value.oidc_client_id,
+                client_secret: value.oidc_client_secret,
+                redirect_url: value.oidc_redirect_url,
+                post_login_url: value.oidc_post_login_url,
+                cookie_secure: value.oidc_cookie_secure,
+                cookie_domain: value.oidc_cookie_domain,
+            },
         })
     }
 }
@@ -202,6 +241,13 @@ mod test {
                 no_swagger: false,
                 authenticator_provider_url: DEFAULT_AUTHENTICATOR_PROVIDER_URL.to_string(),
                 authenticator_audiences: DEFAULT_AUTHENTICATOR_AUDIENCES.to_string(),
+                oidc_issuer_url: DEFAULT_OIDC_ISSUER_URL.to_string(),
+                oidc_client_id: DEFAULT_OIDC_CLIENT_ID.to_string(),
+                oidc_client_secret: DEFAULT_OIDC_CLIENT_SECRET.to_string(),
+                oidc_redirect_url: DEFAULT_OIDC_REDIRECT_URL.to_string(),
+                oidc_post_login_url: DEFAULT_OIDC_POST_LOGIN_URL.to_string(),
+                oidc_cookie_secure: DEFAULT_OIDC_COOKIE_SECURE,
+                oidc_cookie_domain: None,
             }
         }
     }

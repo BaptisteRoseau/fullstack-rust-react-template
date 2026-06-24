@@ -1,7 +1,10 @@
 # TODO
 
+- [ ] Change MinIO for GarageFS
+- [ ] Use an Option<T> extractor, now that it is supported by Axum
 - [ ] Refine error handling to have client-facing and internal errors
     - [ ] Avoid creating new boxes every time we convert an error ?
+        - [ ] impl From<Box<Maching>> ET  From<Maching> ? Ajouter dans la box existante ou bien la créer si elel n'existe pas
     - [ ] Find a way to factorize openapi specs for error responses
     - [ ] Create endpoint-specific error response schemas
 - [ ] Add the file name to the upload/download endpoint using the file metadata (currently downloading a blob)
@@ -10,7 +13,7 @@
 - [ ] Nix & k3s infra
 
 - [ ] Cache uuid <-> username in Redis
-- [ ] Use testcontainers for `can_reach_google` test
+- [ ] Use testcontainers for `can_reach_google` test ?
 
 ## Milestones
 
@@ -144,6 +147,7 @@
 
 ### Documentation
 
+- [ ] Separate the --help organized by categories
 - [ ] README.md in every directory explaining best practices of said directory
 - [ ] `doc/` for developer documentation
 - [ ] CLAUDE.md and other LLM templates

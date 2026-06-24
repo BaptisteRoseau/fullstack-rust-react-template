@@ -3,6 +3,7 @@ use std::sync::Arc;
 use authenticator::Authenticator;
 use axum::extract::FromRef;
 use cache::Cache;
+use config::Config;
 use database::Database;
 use storage::Storage;
 use tokio::sync::RwLock;
@@ -13,6 +14,8 @@ pub struct AppState {
     pub storage: Arc<RwLock<dyn Storage>>,
     pub cache: Arc<RwLock<dyn Cache>>,
     pub authenticator: Arc<RwLock<dyn Authenticator>>,
+    pub config: Arc<Config>,
+    pub http_client: Arc<reqwest::Client>,
 }
 
 impl AppState {
@@ -21,12 +24,16 @@ impl AppState {
         storage: Arc<RwLock<dyn Storage>>,
         cache: Arc<RwLock<dyn Cache>>,
         authenticator: Arc<RwLock<dyn Authenticator>>,
+        config: Arc<Config>,
+        http_client: Arc<reqwest::Client>,
     ) -> Self {
         Self {
             database,
             storage,
             cache,
             authenticator,
+            config,
+            http_client,
         }
     }
 }
@@ -52,5 +59,17 @@ impl FromRef<AppState> for Arc<RwLock<dyn Cache>> {
 impl FromRef<AppState> for Arc<RwLock<dyn Authenticator>> {
     fn from_ref(app_state: &AppState) -> Self {
         app_state.authenticator.clone()
+    }
+}
+
+impl FromRef<AppState> for Arc<Config> {
+    fn from_ref(app_state: &AppState) -> Self {
+        app_state.config.clone()
+    }
+}
+
+impl FromRef<AppState> for Arc<reqwest::Client> {
+    fn from_ref(app_state: &AppState) -> Self {
+        app_state.http_client.clone()
     }
 }

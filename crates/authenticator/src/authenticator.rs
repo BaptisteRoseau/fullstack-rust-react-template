@@ -8,6 +8,8 @@ use uuid::Uuid;
 pub struct UserToken {
     pub id: Uuid,
     pub realm: String,
+    pub email: Option<String>,
+    pub roles: Vec<String>,
 }
 
 #[async_trait]

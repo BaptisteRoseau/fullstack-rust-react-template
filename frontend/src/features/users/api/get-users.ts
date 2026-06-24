@@ -2,9 +2,9 @@ import { queryOptions, useQuery } from '@tanstack/react-query'
 
 import { api } from '@/lib/api-client'
 import { QueryConfig } from '@/lib/react-query'
-import { User } from '@/types/api'
+import { AppUser } from '@/types/api'
 
-export const getUsers = (): Promise<{ data: User[] }> => {
+export const getUsers = (): Promise<{ data: AppUser[] }> => {
     return api.get(`/users`)
 }
 
