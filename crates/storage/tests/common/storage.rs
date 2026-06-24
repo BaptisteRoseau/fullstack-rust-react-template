@@ -19,7 +19,7 @@ use storage::parameters::StorageParameters;
 /// ```rs
 /// mod common;
 ///
-/// use common::containers::{MinioFixture, TEST_BUCKET};
+/// use common::containers::{GarageFixture, TEST_BUCKET};
 /// use storage::backends::S3;
 ///
 /// fn main() {

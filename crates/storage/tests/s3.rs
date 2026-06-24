@@ -3,7 +3,7 @@ mod common;
 
 use std::sync::Arc;
 
-use common::containers::{MinioFixture, TEST_BUCKET};
+use common::containers::{GarageFixture, TEST_BUCKET};
 use libtest_mimic::Arguments;
 use storage::backends::S3;
 
@@ -12,7 +12,7 @@ fn main() {
 
     let rt = Arc::new(tokio::runtime::Runtime::new().unwrap());
     let fixture = Arc::new(rt.block_on(async {
-        let f = MinioFixture::start().await;
+        let f = GarageFixture::start().await;
         f.create_bucket(TEST_BUCKET).await;
         f
     }));

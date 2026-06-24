@@ -27,7 +27,7 @@ impl S3 {
     ) -> Result<Self, Box<StorageError>> {
         let credentials = Credentials::new(access_key, secret_key)?;
         let client = Client::builder(endpoint)?
-            .region("myregion")
+            .region("garage")
             .auth(Auth::Static(credentials))
             .addressing_style(AddressingStyle::Path)
             .build()?;
