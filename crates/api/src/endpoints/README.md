@@ -71,7 +71,7 @@ use crate::error::ApiError;
 )]
 pub(crate) async fn get_user(
     uuid: Path<Uuid>,
-    opt_user: OptionalUser,
+    opt_user: Option<UserToken>,
     State(state): State<AppState>,
 ) -> Result<impl IntoResponse, ApiError> {
     todo!()

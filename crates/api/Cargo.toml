@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+# Local crates
 logging = { path = "../logging" }
 config = { path = "../config" }
 app_core = { path = "../app_core" }
@@ -13,6 +14,8 @@ cache = { path = "../cache" }
 models = { path = "../models" }
 rbac = { path = "../rbac" }
 authenticator = { path = "../authenticator" }
+
+# Crates.io
 anyhow = { version = "1" }
 async-trait = "0"
 axum = { version = "0", features = ["http1", "http2"] }
@@ -27,7 +30,7 @@ regex = { version = "*" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2"
-tokio = { version = "1", features = ["rt-multi-thread", "macros", "full"] }
+tokio = { version = "1", features = ["full"] }
 tower = { version = "0" }
 tower-http = { version = "0", features = [
     "decompression-gzip",

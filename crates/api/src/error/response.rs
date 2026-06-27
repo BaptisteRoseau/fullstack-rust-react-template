@@ -16,6 +16,7 @@ pub(crate) enum ApiErrorId {
     Forbidden,
     TokenExpired,
     NotFound,
+    HeaderInvalidAsciiCharacters,
 }
 
 /// This is the standard API error returned by endpoints.
@@ -123,6 +124,11 @@ impl From<ExtractorError> for ApiErrorResponse {
                 ApiErrorResponse::unauthorized()
             }
             ExtractorError::Unexpected(_) => ApiErrorResponse::unexpected(),
+            ExtractorError::InvalidHeaderCharacters(_) => ApiErrorResponse::new(
+                ApiErrorId::HeaderInvalidAsciiCharacters,
+                "Your authentication token has expired. Please log back in.",
+                StatusCode::BAD_REQUEST,
+            ),
         }
     }
 }

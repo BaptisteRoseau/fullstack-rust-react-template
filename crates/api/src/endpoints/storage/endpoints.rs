@@ -11,7 +11,7 @@ use tokio::sync::RwLock;
 use super::models::{PostUploadParams, PutUploadResponse};
 use crate::endpoints::storage::models::DeleteRemoveResponse;
 use crate::error::{ApiError, ApiErrorResponse};
-use crate::extractors::OptionalUser;
+use crate::models::UserToken;
 
 /// Upload a file to storage.
 #[utoipa::path(
@@ -28,7 +28,7 @@ use crate::extractors::OptionalUser;
     ),
 )]
 pub(crate) async fn upload(
-    _user: OptionalUser,
+    _user: Option<UserToken>,
     State(storage): State<Arc<RwLock<dyn Storage>>>,
     Path(file): Path<String>,
     Query(params): Query<PostUploadParams>,
@@ -59,7 +59,7 @@ pub(crate) async fn upload(
     ),
 )]
 pub(crate) async fn download(
-    _user: OptionalUser,
+    _user: Option<UserToken>,
     State(storage): State<Arc<RwLock<dyn Storage>>>,
     Path(file): Path<String>,
 ) -> Result<impl IntoResponse, ApiError> {
@@ -93,7 +93,7 @@ pub(crate) async fn download(
     ),
 )]
 pub(crate) async fn delete_stored_file(
-    _user: OptionalUser,
+    _user: Option<UserToken>,
     State(storage): State<Arc<RwLock<dyn Storage>>>,
     Path(file): Path<String>,
 ) -> Result<impl IntoResponse, ApiError> {

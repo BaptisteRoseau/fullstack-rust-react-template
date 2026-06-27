@@ -91,7 +91,7 @@ use super::models::{GetWidgetResponse, PostWidgetRequest};
 use crate::{
     app_state::AppState,
     error::{ApiError, ApiErrorResponse},
-    extractors::RequiredUser, // or OptionalUser
+    models::UserToken, // required: `UserToken`; optional: `Option<UserToken>`
 };
 
 /// Get a widget by ID.
@@ -107,7 +107,7 @@ use crate::{
     ),
 )]
 pub(crate) async fn get_widget(
-    _user: RequiredUser,
+    _user: UserToken,
     State(db): State<Arc<RwLock<dyn database::Database>>>,
     Path(id): Path<Uuid>,
 ) -> Result<Json<GetWidgetResponse>, ApiError> {
@@ -130,7 +130,7 @@ pub(crate) async fn get_widget(
     ),
 )]
 pub(crate) async fn create_widget(
-    _user: RequiredUser,
+    _user: UserToken,
     State(db): State<Arc<RwLock<dyn database::Database>>>,
     Json(body): Json<PostWidgetRequest>,
 ) -> Result<(StatusCode, Json<GetWidgetResponse>), ApiError> {
@@ -148,7 +148,7 @@ Rules:
 - Write a doc comment above the handler; consider it as the user-facing documentation so be concise but exhaustive.
 - Return `Result<Json<ResponseType>, ApiError>` for standard JSON, or `Result<(StatusCode, Json<ResponseType>), ApiError>` when the status code varies (e.g. 201 Created).
 - Use `State(db): State<Arc<RwLock<dyn database::Database>>>` to access the database. Take a read lock for reads, a write lock for writes. Keep the lock window minimal.
-- Use `RequiredUser` extractor when authentication is mandatory; `OptionalUser` when optional.
+- Use the `UserToken` extractor when authentication is mandatory; `Option<UserToken>` when optional.
 - Map domain errors to `ApiError` variants — do not expose internal error details.
 - Call `app_core::*` for all business logic. The handler itself should contain no domain logic.
 

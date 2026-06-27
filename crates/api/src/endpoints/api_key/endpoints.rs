@@ -12,7 +12,7 @@ use super::models::{CreateApiKeyRequest, CreateApiKeyResponse, GetApiKeyResponse
 use crate::{
     app_state::AppState,
     error::{ApiError, ApiErrorResponse},
-    extractors::RequiredUser,
+    models::UserToken,
 };
 
 fn parse_permissions(raw: &[String]) -> Vec<rbac::Permissions> {
@@ -33,14 +33,14 @@ fn parse_permissions(raw: &[String]) -> Vec<rbac::Permissions> {
     ),
 )]
 pub(crate) async fn create_api_key(
-    user: RequiredUser,
+    user: UserToken,
     State(db): State<Arc<RwLock<dyn database::Database>>>,
     Json(body): Json<CreateApiKeyRequest>,
 ) -> Result<(StatusCode, Json<CreateApiKeyResponse>), ApiError> {
     let permissions = parse_permissions(&body.permissions);
     let mut db = db.write().await;
     let (raw_key, api_key) =
-        app_core::api_key::create_api_key(&mut *db, user.inner().id, body.name, permissions)
+        app_core::api_key::create_api_key(&mut *db, user.id, body.name, permissions)
             .await
             .map_err(|e| ApiError::Unexpected(anyhow::anyhow!("{e}")))?;
 
@@ -63,7 +63,7 @@ pub(crate) async fn create_api_key(
     ),
 )]
 pub(crate) async fn get_api_key(
-    user: RequiredUser,
+    user: UserToken,
     State(db): State<Arc<RwLock<dyn database::Database>>>,
     Path(id): Path<Uuid>,
 ) -> Result<Json<GetApiKeyResponse>, ApiError> {
@@ -73,7 +73,7 @@ pub(crate) async fn get_api_key(
         .await
         .map_err(|_| ApiError::NotFound(id.to_string()))?;
 
-    if db_key.owner() != user.inner().id {
+    if db_key.owner() != user.id {
         return Err(ApiError::NotFound(id.to_string()));
     }
 
@@ -97,7 +97,7 @@ pub(crate) async fn get_api_key(
     ),
 )]
 pub(crate) async fn delete_api_key(
-    user: RequiredUser,
+    user: UserToken,
     State(db): State<Arc<RwLock<dyn database::Database>>>,
     Path(id): Path<Uuid>,
 ) -> Result<StatusCode, ApiError> {
@@ -109,7 +109,7 @@ pub(crate) async fn delete_api_key(
             .map_err(|_| ApiError::NotFound(id.to_string()))?
     };
 
-    if db_key.owner() != user.inner().id {
+    if db_key.owner() != user.id {
         return Err(ApiError::NotFound(id.to_string()));
     }
 

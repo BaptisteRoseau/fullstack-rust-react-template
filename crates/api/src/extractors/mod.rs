@@ -1,7 +1,4 @@
 mod app_state;
-pub mod error;
-mod optional_user;
-mod required_user;
+mod user;
 
-pub use optional_user::OptionalUser;
-pub use required_user::RequiredUser;
+pub mod error;
