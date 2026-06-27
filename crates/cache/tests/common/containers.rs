@@ -1,5 +1,5 @@
 use testcontainers::{ContainerAsync, runners::AsyncRunner};
-use testcontainers_modules::redis::{Redis, REDIS_PORT};
+use testcontainers_modules::redis::{REDIS_PORT, Redis};
 
 pub struct RedisFixture {
     _container: ContainerAsync<Redis>,

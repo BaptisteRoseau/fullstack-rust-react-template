@@ -51,7 +51,10 @@ impl SecretsProvider {
         Ok(authenticator)
     }
 
-    async fn validate_jwt(&self, token: &str) -> Result<UserToken, Box<AuthenticatorError>> {
+    async fn validate_jwt(
+        &self,
+        token: &str,
+    ) -> Result<UserToken, Box<AuthenticatorError>> {
         let header = decode_header(token)?;
         let kid = header.kid.ok_or("No 'kid' in token header")?;
         let jwks = self.keys.as_ref().ok_or(AuthenticatorError::NoJwk)?;
@@ -70,7 +73,10 @@ impl SecretsProvider {
         })
     }
 
-    async fn validate_api_key(&self, token: &str) -> Result<UserToken, Box<AuthenticatorError>> {
+    async fn validate_api_key(
+        &self,
+        token: &str,
+    ) -> Result<UserToken, Box<AuthenticatorError>> {
         let hashed = hex_sha256(token);
 
         if let Some(value) = self.cache.read().await.get_nofail(&hashed).await

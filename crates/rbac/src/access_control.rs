@@ -242,8 +242,7 @@ mod test {
         perms.insert(Permissions::UploadFile);
 
         // Test method chaining
-        obj.set_scope(Scope::Users(users))
-            .set_permissions(perms);
+        obj.set_scope(Scope::Users(users)).set_permissions(perms);
 
         assert!(
             obj.required_permissions.is_some(),

@@ -86,10 +86,7 @@ mod tests {
         async fn read_user(&self, _uuid: Uuid) -> Result<User, Box<DatabaseError>> {
             unimplemented!()
         }
-        async fn delete_user(
-            &mut self,
-            _uuid: Uuid,
-        ) -> Result<bool, Box<DatabaseError>> {
+        async fn delete_user(&mut self, _uuid: Uuid) -> Result<bool, Box<DatabaseError>> {
             unimplemented!()
         }
         async fn read_api_key_by_id(
@@ -138,16 +135,14 @@ mod tests {
         let mut mock = MockDatabase::new();
         let calls = mock.calls.clone();
 
-        let result = create_api_key(
-            &mut mock,
-            Uuid::new_v4(),
-            "my key".into(),
-            vec![],
-        )
-        .await;
+        let result =
+            create_api_key(&mut mock, Uuid::new_v4(), "my key".into(), vec![]).await;
 
         let total_calls = *calls.lock().unwrap();
-        assert_eq!(total_calls, 2, "expected 2 DB calls (1 collision + 1 sentinel), got {total_calls}");
+        assert_eq!(
+            total_calls, 2,
+            "expected 2 DB calls (1 collision + 1 sentinel), got {total_calls}"
+        );
         assert!(result.is_err(), "expected error from sentinel, got Ok");
         // Should NOT be a hash collision error (that was retried)
         if let Err(crate::error::CoreError::DatabaseError(e)) = &result {

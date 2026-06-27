@@ -1,3 +1,4 @@
+use std::net::SocketAddr;
 use std::sync::Arc;
 
 use authenticator::backends::SecretsProvider;
@@ -39,12 +40,9 @@ pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
     info!("Initialized Cache");
 
     info!("Initializing Authenticator...");
-    let authenticator = SecretsProvider::try_new(
-        config,
-        Arc::clone(&cache),
-        Arc::clone(&database),
-    )
-    .await?;
+    let authenticator =
+        SecretsProvider::try_new(config, Arc::clone(&cache), Arc::clone(&database))
+            .await?;
     info!("Initialized Authenticator");
 
     let state = AppState::new(
@@ -129,7 +127,11 @@ where
     A: ToSocketAddrs,
 {
     let listener = TcpListener::bind(address).await?;
-    axum::serve(listener, routes).await?;
+    axum::serve(
+        listener,
+        routes.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .await?;
     Ok(())
 }
 

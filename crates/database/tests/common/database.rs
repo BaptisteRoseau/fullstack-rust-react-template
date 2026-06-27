@@ -1,5 +1,5 @@
-use database::backends::Postgres;
 use database::Database;
+use database::backends::Postgres;
 use uuid::Uuid;
 
 #[macro_export]
@@ -35,9 +35,7 @@ macro_rules! database_trait_tests {
                 let rt = rt.clone();
                 let builder = builder.clone();
                 Trial::test("delete_api_key", move || {
-                    rt.block_on(async {
-                        assert_delete_api_key((builder)().await).await
-                    });
+                    rt.block_on(async { assert_delete_api_key((builder)().await).await });
                     Ok(())
                 })
             },
@@ -82,15 +80,25 @@ pub async fn assert_create_api_key(mut db: Postgres) {
 
     assert_eq!(key.owner(), owner, "owner mismatch: got {}", key.owner());
     assert_eq!(key.name(), "my-key", "name mismatch: got {}", key.name());
-    assert_eq!(key.hash(), "abc123hash", "hash mismatch: got {}", key.hash());
+    assert_eq!(
+        key.hash(),
+        "abc123hash",
+        "hash mismatch: got {}",
+        key.hash()
+    );
 }
 
 pub async fn assert_read_api_key_by_hash(mut db: Postgres) {
     let owner = create_test_user(&db).await;
     let hash = format!("readhash-{}", Uuid::new_v4());
-    db.create_api_key(owner, "read-key".into(), hash.clone(), serde_json::json!([]))
-        .await
-        .expect("create failed");
+    db.create_api_key(
+        owner,
+        "read-key".into(),
+        hash.clone(),
+        serde_json::json!([]),
+    )
+    .await
+    .expect("create failed");
 
     let found = db
         .read_api_key_by_hash(&hash)
@@ -98,7 +106,12 @@ pub async fn assert_read_api_key_by_hash(mut db: Postgres) {
         .expect("read_api_key_by_hash failed");
 
     assert_eq!(found.hash(), hash, "hash mismatch: got {}", found.hash());
-    assert_eq!(found.owner(), owner, "owner mismatch: got {}", found.owner());
+    assert_eq!(
+        found.owner(),
+        owner,
+        "owner mismatch: got {}",
+        found.owner()
+    );
 }
 
 pub async fn assert_delete_api_key(mut db: Postgres) {

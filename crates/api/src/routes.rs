@@ -50,8 +50,9 @@ use crate::{
         },
         user::endpoints::{__path_get_user, get_user},
     },
+    middlewares::rate_limiter::rate_limiter_layer,
+    observability::{MakeRequestUuidV7, make_request_span},
 };
-use crate::observability::{MakeRequestUuidV7, make_request_span};
 use axum::{Router, routing::get};
 
 use axum::http::StatusCode;
@@ -143,7 +144,11 @@ pub fn public_routes(config: &Config, state: AppState) -> Router {
         .layer(TimeoutLayer::with_status_code(
             StatusCode::REQUEST_TIMEOUT,
             Duration::from_secs(config.api.timeout_sec.into()),
-        ));
+        ))
+        // Applied as the outermost layer so rate-limited clients are rejected before
+        // any other middleware runs. Kept out of the ServiceBuilder above so it wraps a
+        // service whose response body is the plain axum body expected by GovernorLayer.
+        .layer(rate_limiter_layer(config));
 
     api_routes.layer(middleware).with_state(state)
 }

@@ -30,7 +30,10 @@ fn main() -> ExitCode {
 fn export(output: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     let json = api::routes::openapi().to_pretty_json()?;
 
-    if let Some(parent) = output.parent().filter(|parent| !parent.as_os_str().is_empty()) {
+    if let Some(parent) = output
+        .parent()
+        .filter(|parent| !parent.as_os_str().is_empty())
+    {
         std::fs::create_dir_all(parent)?;
     }
     std::fs::write(output, format!("{json}\n"))?;

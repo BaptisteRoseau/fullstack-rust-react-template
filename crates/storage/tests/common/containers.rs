@@ -47,14 +47,21 @@ impl GarageFixture {
             .trim();
         exec(
             &container,
-            &["/garage", "layout", "assign", "-z", "dc1", "-c", "1G", node_id],
+            &[
+                "/garage", "layout", "assign", "-z", "dc1", "-c", "1G", node_id,
+            ],
         )
         .await;
-        exec(&container, &["/garage", "layout", "apply", "--version", "1"]).await;
+        exec(
+            &container,
+            &["/garage", "layout", "apply", "--version", "1"],
+        )
+        .await;
 
         // Garage keys are not user/password pairs: create one and read back its
         // generated access key id and secret.
-        let key_output = exec_stdout(&container, &["/garage", "key", "create", GARAGE_KEY_NAME]).await;
+        let key_output =
+            exec_stdout(&container, &["/garage", "key", "create", GARAGE_KEY_NAME]).await;
         let (access_key, secret_key) = parse_key_credentials(&key_output);
 
         Self {
@@ -70,7 +77,14 @@ impl GarageFixture {
         exec(
             &self.container,
             &[
-                "/garage", "bucket", "allow", "--read", "--write", "--owner", name, "--key",
+                "/garage",
+                "bucket",
+                "allow",
+                "--read",
+                "--write",
+                "--owner",
+                name,
+                "--key",
                 GARAGE_KEY_NAME,
             ],
         )
@@ -107,9 +121,9 @@ fn parse_key_credentials(output: &str) -> (String, String) {
             secret_key = Some(value.1.trim().to_string());
         }
     }
-    let access_key =
-        access_key.unwrap_or_else(|| panic!("missing Key ID in garage output:\n{output}"));
-    let secret_key =
-        secret_key.unwrap_or_else(|| panic!("missing Secret key in garage output:\n{output}"));
+    let access_key = access_key
+        .unwrap_or_else(|| panic!("missing Key ID in garage output:\n{output}"));
+    let secret_key = secret_key
+        .unwrap_or_else(|| panic!("missing Secret key in garage output:\n{output}"));
     (access_key, secret_key)
 }

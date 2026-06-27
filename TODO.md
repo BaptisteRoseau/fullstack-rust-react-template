@@ -12,6 +12,8 @@
 - [ ] Cache uuid <-> username in Redis
 - [ ] Use testcontainers for `can_reach_google` test
 
+- [ ] Snippets/tool to make templates (extractors, db queries etc..)
+
 ## Milestones
 
 ### Current
@@ -59,7 +61,7 @@
 
 ### API Layer
 
-- [ ] Set a request ID for logging purposes
+- [X] Set a request ID for logging purposes
 - [ ] Use axum-tower-session and axum-login for session management ?
 - [ ] Use a Protobuf schema to generate Rust models and Typescript structures
 - [ ] Add CORS middleware
@@ -67,7 +69,7 @@
 - [X] Add tracing middleware (set sensitive headers before)
 - [X] Add timeout middleware
 - [X] Add Swagger UI & openapi.json
-- [ ] Add rate limiter middleware
+- [X] Add rate limiter middleware
 - [ ] Aggregate middlewares cleanly
 - [ ] Convert `app_core` models to API models and vice-versa
 - [X] Add error handling middleware & global error conversion

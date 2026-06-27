@@ -28,6 +28,8 @@ pub enum ApiError {
     AuthenticatorError(#[from] Box<AuthenticatorError>),
     #[error("Storage Error: {0}")]
     StorageError(#[from] Box<StorageError>),
+    #[error("Too many requests")]
+    TooManyRequests,
     #[error("Unexpected Error")]
     Unexpected(#[from] anyhow::Error),
 }

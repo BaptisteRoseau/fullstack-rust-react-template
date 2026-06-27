@@ -8,6 +8,8 @@ use crate::defaults::*;
 #[derive(Debug, Clone)]
 pub struct ApiConfig {
     pub timeout_sec: u16,
+    pub rate_limiter_refresh_per_second: u64,
+    pub rate_limiter_burst_size: u32,
 }
 
 #[derive(Debug, Clone)]
@@ -115,6 +117,8 @@ impl TryFrom<CliConfig> for Config {
             log_json: value.log_json,
             api: ApiConfig {
                 timeout_sec: value.api_timeout_sec,
+                rate_limiter_refresh_per_second: value.rate_limiter_refresh_per_second,
+                rate_limiter_burst_size: value.rate_limiter_burst_size,
             },
             server: ServerBindingConfig {
                 ip: value.ip,
@@ -199,11 +203,15 @@ mod test {
                 prometheus_port: DEFAULT_PROMETHEUS_PORT,
                 prometheus_path: DEFAULT_PROMETHEUS_PATH.to_string(),
                 api_timeout_sec: DEFAULT_API_TIMEOUT_SEC,
+                rate_limiter_refresh_per_second:
+                    DEFAULT_RATE_LIMITER_REFRESH_PER_SECOND,
+                rate_limiter_burst_size: DEFAULT_RATE_LIMITER_BURST_SIZE,
                 no_prometheus: false,
                 swagger_ui_path: DEFAULT_SWAGGER_UI_PATH.to_string(),
                 swagger_openapi_path: DEFAULT_OPENAPI_PATH.to_string(),
                 no_swagger: false,
-                authenticator_provider_url: DEFAULT_AUTHENTICATOR_PROVIDER_URL.to_string(),
+                authenticator_provider_url: DEFAULT_AUTHENTICATOR_PROVIDER_URL
+                    .to_string(),
                 authenticator_audiences: DEFAULT_AUTHENTICATOR_AUDIENCES.to_string(),
             }
         }

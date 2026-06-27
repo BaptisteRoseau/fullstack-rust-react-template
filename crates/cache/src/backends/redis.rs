@@ -81,7 +81,8 @@ impl Cache for Redis {
     async fn get(&self, key: &str) -> Result<Option<Value>, CacheError> {
         let redis_key = self.prefixed_key(key);
         let mut conn = self.pool.get().await?;
-        let value: Option<String> = cmd("GET").arg(&redis_key).query_async(&mut conn).await?;
+        let value: Option<String> =
+            cmd("GET").arg(&redis_key).query_async(&mut conn).await?;
         match value {
             Some(serialized) => Ok(Some(serde_json::from_str(&serialized)?)),
             None => Ok(None),

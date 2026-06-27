@@ -5,6 +5,7 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use jsonwebtoken::errors::ErrorKind as JwtErrorKind;
 use serde::Serialize;
+use tower_governor::errors::GovernorError;
 use utoipa::ToSchema;
 
 /// An enum representing and API error.
@@ -16,6 +17,7 @@ pub(crate) enum ApiErrorId {
     Forbidden,
     TokenExpired,
     NotFound,
+    TooManyRequests,
     HeaderInvalidAsciiCharacters,
 }
 
@@ -72,6 +74,15 @@ impl ApiErrorResponse {
     fn not_found() -> Self {
         Self::new(ApiErrorId::NotFound, "Not found.", StatusCode::NOT_FOUND)
     }
+
+    /// Template for rate-limited responses
+    fn too_many_requests() -> Self {
+        Self::new(
+            ApiErrorId::TooManyRequests,
+            "Too many requests. Please slow down and try again later.",
+            StatusCode::TOO_MANY_REQUESTS,
+        )
+    }
 }
 
 impl IntoResponse for ApiErrorResponse {
@@ -111,6 +122,7 @@ impl From<ApiError> for ApiErrorResponse {
             ApiError::CoreError(e) => e.into(),
             ApiError::ExtractorError(e) => e.into(),
             ApiError::StorageError(_) => ApiErrorResponse::unexpected(),
+            ApiError::TooManyRequests => ApiErrorResponse::too_many_requests(),
             ApiError::Unexpected(e) => e.into(),
             ApiError::AuthenticatorError(e) => e.into(),
         }
@@ -171,6 +183,15 @@ impl From<Box<AuthenticatorError>> for ApiErrorResponse {
             AuthenticatorError::InvalidSignature
             | AuthenticatorError::AuthenticationFailure => Self::forbidden(),
             _ => ApiErrorResponse::unexpected(),
+        }
+    }
+}
+
+impl From<GovernorError> for ApiError {
+    fn from(val: GovernorError) -> Self {
+        match val {
+            GovernorError::TooManyRequests { .. } => ApiError::TooManyRequests,
+            other => ApiError::Unexpected(other.into()),
         }
     }
 }

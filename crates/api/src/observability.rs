@@ -49,10 +49,10 @@ pub(crate) fn make_request_span<B>(request: &Request<B>) -> Span {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use axum::Router;
     use axum::body::Body;
     use axum::http::{HeaderMap, StatusCode};
     use axum::routing::get;
-    use axum::Router;
     use std::collections::HashMap;
     use std::sync::{Arc, Mutex};
     use std::time::Duration;
@@ -93,7 +93,10 @@ mod tests {
         }
     }
 
-    fn grab(target: &'static str, record: impl FnOnce(&mut FieldGrabber)) -> Option<String> {
+    fn grab(
+        target: &'static str,
+        record: impl FnOnce(&mut FieldGrabber),
+    ) -> Option<String> {
         let mut grabber = FieldGrabber {
             target,
             value: None,
@@ -134,7 +137,10 @@ mod tests {
             };
             for span in span.scope() {
                 if let Some(request_id) = span.extensions().get::<SpanRequestId>() {
-                    self.seen.lock().unwrap().insert(nonce, request_id.0.clone());
+                    self.seen
+                        .lock()
+                        .unwrap()
+                        .insert(nonce, request_id.0.clone());
                     return;
                 }
             }

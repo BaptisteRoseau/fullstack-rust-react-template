@@ -1,6 +1,8 @@
 use crate::error::CoreError;
 
-pub fn api_key_from_db(db_key: database::models::ApiKey) -> Result<models::ApiKey, CoreError> {
+pub fn api_key_from_db(
+    db_key: database::models::ApiKey,
+) -> Result<models::ApiKey, CoreError> {
     let permissions: Vec<rbac::Permissions> =
         serde_json::from_value(db_key.permissions().clone())?;
     Ok(models::ApiKey {

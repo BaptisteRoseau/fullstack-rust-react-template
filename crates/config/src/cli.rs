@@ -51,6 +51,14 @@ pub(crate) struct CliConfig {
     #[arg(env, default_value_t = u16::from(DEFAULT_API_TIMEOUT_SEC))]
     pub(crate) api_timeout_sec: u16,
 
+    /// Number of seconds after which one request slot is replenished by the rate limiter.
+    #[arg(long, env, default_value_t = DEFAULT_RATE_LIMITER_REFRESH_PER_SECOND)]
+    pub(crate) rate_limiter_refresh_per_second: u64,
+
+    /// Maximum number of requests allowed in a burst before the rate limiter kicks in.
+    #[arg(long, env, default_value_t = DEFAULT_RATE_LIMITER_BURST_SIZE)]
+    pub(crate) rate_limiter_burst_size: u32,
+
     /* ===============
     DATABASE
     ================ */
