@@ -35,6 +35,10 @@ pub(crate) struct CliConfig {
     #[arg(long, env, default_value_t = false)]
     pub(crate) debug: bool,
 
+    /// Output logs in JSON format instead of the human-readable compact format
+    #[arg(long, env, default_value_t = false)]
+    pub(crate) log_json: bool,
+
     /// The IP where to bind the server
     #[arg(short, long, env, default_value_t = LOCALHOST)]
     pub(crate) ip: IpAddr,

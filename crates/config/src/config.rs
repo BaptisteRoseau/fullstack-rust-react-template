@@ -68,6 +68,7 @@ pub struct SwaggerConfig {
 #[derive(Debug, Clone)]
 pub struct Config {
     pub debug: bool,
+    pub log_json: bool,
     pub api: ApiConfig,
     pub server: ServerBindingConfig,
     pub s3: S3Config,
@@ -111,6 +112,7 @@ impl TryFrom<CliConfig> for Config {
 
         Ok(Self {
             debug: value.debug,
+            log_json: value.log_json,
             api: ApiConfig {
                 timeout_sec: value.api_timeout_sec,
             },
@@ -181,6 +183,7 @@ mod test {
             CliConfig {
                 config: None,
                 debug: false,
+                log_json: false,
                 ip: LOCALHOST,
                 port: DEFAULT_PORT,
                 s3_url: DEFAULT_S3_URL.to_string(),

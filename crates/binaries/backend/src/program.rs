@@ -17,7 +17,7 @@ use tokio::task::JoinHandle;
 use tracing::{info, warn};
 
 pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
-    logging::init_logger(config.debug);
+    logging::init_logger(config.debug, config.log_json);
 
     /* ===========================
     * APP STATE
