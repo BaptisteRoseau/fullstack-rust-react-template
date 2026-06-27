@@ -51,6 +51,7 @@ use crate::{
         user::endpoints::{__path_get_user, get_user},
     },
 };
+use crate::observability::{MakeRequestUuidV7, make_request_span};
 use axum::{Router, routing::get};
 
 use axum::http::StatusCode;
@@ -67,6 +68,7 @@ use tower_http::{
     cors::CorsLayer,
     decompression::RequestDecompressionLayer,
     normalize_path::NormalizePathLayer,
+    request_id::{PropagateRequestIdLayer, SetRequestIdLayer},
     sensitive_headers::{
         SetSensitiveRequestHeadersLayer, SetSensitiveResponseHeadersLayer,
     },
@@ -124,8 +126,14 @@ pub fn public_routes(config: &Config, state: AppState) -> Router {
     let middleware = ServiceBuilder::new()
         // Avoid logging these headers content
         .layer(SetSensitiveRequestHeadersLayer::new(once(AUTHORIZATION)))
+        // Reuse an inbound x-request-id or mint a fresh UUID v7. Must run before
+        // the trace layer so the span can read the id from the request headers.
+        .layer(SetRequestIdLayer::x_request_id(MakeRequestUuidV7))
+        // Scope every event of the request under a span carrying the request_id
+        .layer(TraceLayer::new_for_http().make_span_with(make_request_span))
+        // Echo the request id back to the client in the response headers
+        .layer(PropagateRequestIdLayer::x_request_id())
         .layer(SetSensitiveResponseHeadersLayer::new(once(AUTHORIZATION)))
-        .layer(TraceLayer::new_for_http())
         // Authorize OPTIONS requests for CORS and automatically set up headers
         //TODO: Set this up based on what is actually available
         .layer(CorsLayer::permissive())

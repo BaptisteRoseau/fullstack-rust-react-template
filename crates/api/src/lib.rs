@@ -3,6 +3,7 @@ mod app_state;
 mod endpoints;
 mod extractors;
 mod models;
+mod observability;
 
 pub mod error;
 pub mod routes;
