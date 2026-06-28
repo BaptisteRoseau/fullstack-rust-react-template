@@ -146,8 +146,7 @@ pub fn public_routes(config: &Config, state: AppState) -> Router {
             Duration::from_secs(config.api.timeout_sec.into()),
         ))
         // Applied as the outermost layer so rate-limited clients are rejected before
-        // any other middleware runs. Kept out of the ServiceBuilder above so it wraps a
-        // service whose response body is the plain axum body expected by GovernorLayer.
+        // any other middleware runs.
         .layer(rate_limiter_layer(config));
 
     api_routes.layer(middleware).with_state(state)
