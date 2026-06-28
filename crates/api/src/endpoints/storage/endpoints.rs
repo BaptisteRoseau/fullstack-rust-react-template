@@ -28,7 +28,7 @@ use crate::models::UserToken;
     ),
 )]
 pub(crate) async fn upload(
-    _user: Option<UserToken>,
+    // _user: Option<UserToken>,
     State(storage): State<Arc<RwLock<dyn Storage>>>,
     Path(file): Path<String>,
     Query(params): Query<PostUploadParams>,
@@ -59,7 +59,7 @@ pub(crate) async fn upload(
     ),
 )]
 pub(crate) async fn download(
-    _user: Option<UserToken>,
+    // _user: Option<UserToken>,
     State(storage): State<Arc<RwLock<dyn Storage>>>,
     Path(file): Path<String>,
 ) -> Result<impl IntoResponse, ApiError> {

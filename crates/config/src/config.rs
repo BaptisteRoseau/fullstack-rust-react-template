@@ -203,8 +203,7 @@ mod test {
                 prometheus_port: DEFAULT_PROMETHEUS_PORT,
                 prometheus_path: DEFAULT_PROMETHEUS_PATH.to_string(),
                 api_timeout_sec: DEFAULT_API_TIMEOUT_SEC,
-                rate_limiter_refresh_per_second:
-                    DEFAULT_RATE_LIMITER_REFRESH_PER_SECOND,
+                rate_limiter_refresh_per_second: DEFAULT_RATE_LIMITER_REFRESH_PER_SECOND,
                 rate_limiter_burst_size: DEFAULT_RATE_LIMITER_BURST_SIZE,
                 no_prometheus: false,
                 swagger_ui_path: DEFAULT_SWAGGER_UI_PATH.to_string(),

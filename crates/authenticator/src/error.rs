@@ -14,6 +14,8 @@ pub enum AuthenticatorError {
     AuthenticationFailure,
     #[error("JWT error: {0}")]
     JwtError(#[from] JwtError),
+    #[error("Invalid Realm: {0}")]
+    InvalidRealm(String),
     #[error("{0}")]
     Message(String),
 }

@@ -1,3 +1,3 @@
-mod secrets_provider;
+mod keycloak;
 
-pub use secrets_provider::SecretsProvider;
+pub use keycloak::Keycloak;

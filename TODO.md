@@ -1,5 +1,13 @@
 # TODO
 
+- [ ] Implement authentication
+    - [ ] Fetch JWT from the frontend from Keycloak
+    - [X] Decode it in the backend from the authenticator
+    - [ ] Use "Authorization: " and fallback to "Bearer: " header in the extractor
+    - [ ] Store JWT as httponly cookie in the frontend
+    - [ ] Automagically refresh JWT in the frontend when getting a logged out error from the backend
+
+- [ ] Fix garage
 - [ ] Refine error handling to have client-facing and internal errors
     - [ ] Avoid creating new boxes every time we convert an error ?
     - [ ] Find a way to factorize openapi specs for error responses

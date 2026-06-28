@@ -44,6 +44,7 @@ services:
     container_name: s3
     ports:
       - "${S3_PORT}:3900"
+      - "3902:3902"
       - "${S3_ADMIN_PORT}:3903"
     volumes:
       - ../garage/garage.toml:/etc/garage.toml:ro

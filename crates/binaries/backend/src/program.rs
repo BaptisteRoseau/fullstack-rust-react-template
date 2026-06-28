@@ -1,7 +1,7 @@
 use std::net::SocketAddr;
 use std::sync::Arc;
 
-use authenticator::backends::SecretsProvider;
+use authenticator::backends::Keycloak;
 use cache::backends::redis::Redis;
 use tokio::sync::RwLock;
 
@@ -41,8 +41,7 @@ pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
 
     info!("Initializing Authenticator...");
     let authenticator =
-        SecretsProvider::try_new(config, Arc::clone(&cache), Arc::clone(&database))
-            .await?;
+        Keycloak::try_new(config, Arc::clone(&cache), Arc::clone(&database)).await?;
     info!("Initialized Authenticator");
 
     let state = AppState::new(
