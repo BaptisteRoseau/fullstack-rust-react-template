@@ -48,22 +48,22 @@ impl Default for ImageParameters {
 }
 
 #[derive(Copy, Clone)]
-pub struct StorageParameters {
+pub struct CompressionParameters {
     pub compression: Compression,
     pub image: ImageParameters,
 }
 
-impl Default for StorageParameters {
+impl Default for CompressionParameters {
     /// Default parameters, does not alter the file.
     fn default() -> Self {
-        StorageParameters {
+        CompressionParameters {
             compression: Compression::NoCompression,
             image: ImageParameters::default(),
         }
     }
 }
 
-impl StorageParameters {
+impl CompressionParameters {
     /// Compress the file. Images are compressed using a lossless compression algorithm.
     pub fn compressed() -> Self {
         *Self::default()

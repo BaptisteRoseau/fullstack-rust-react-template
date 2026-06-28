@@ -2,7 +2,8 @@ use std::path::Path;
 
 use async_trait::async_trait;
 
-use crate::{error::StorageError, parameters::StorageParameters};
+use crate::{error::StorageError};
+use compressor::parameters::CompressionParameters;
 
 #[async_trait]
 pub trait Storage: Send + Sync {
@@ -11,7 +12,7 @@ pub trait Storage: Send + Sync {
         &self,
         file: &Path,
         content: &[u8],
-        parameters: &StorageParameters,
+        parameters: &CompressionParameters,
     ) -> Result<(), Box<StorageError>>;
 
     /// Load a small file that does not require streaming and can fit in-memory.

@@ -1,0 +1,14 @@
+[package]
+name = "compressor"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+config = { path = "../config" }
+flate2 = "1"
+async-trait = "0"
+libcaesium = { version = "0", features = ["gif", "jpg", "png", "tiff", "webp"] }
+thiserror = "2"
+
+[dev-dependencies]
+uuid = { version = "1", features = ["v4"] }

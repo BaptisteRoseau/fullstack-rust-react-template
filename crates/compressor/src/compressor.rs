@@ -1,11 +1,11 @@
-use flate2::Compression;
 use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;
+use flate2::Compression;
 use std::io::{self, Cursor, Read, Write};
 
 use crate::parameters::Compression as CompressionParameters;
 
-pub(crate) fn handle_compression(
+pub fn handle_compression(
     input: &[u8],
     compression_parameters: CompressionParameters,
 ) -> io::Result<Vec<u8>> {
@@ -15,7 +15,7 @@ pub(crate) fn handle_compression(
     }
 }
 
-pub(crate) fn handle_decompression(
+pub fn handle_decompression(
     input: &[u8],
     compression_parameters: CompressionParameters,
 ) -> io::Result<Vec<u8>> {
@@ -25,14 +25,14 @@ pub(crate) fn handle_decompression(
     }
 }
 
-fn compress_bytes(input: &[u8]) -> io::Result<Vec<u8>> {
+pub fn compress_bytes(input: &[u8]) -> io::Result<Vec<u8>> {
     let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
     encoder.write_all(input)?;
     let compressed_data = encoder.finish()?;
     Ok(compressed_data)
 }
 
-fn decompress_bytes(input: &[u8]) -> io::Result<Vec<u8>> {
+pub fn decompress_bytes(input: &[u8]) -> io::Result<Vec<u8>> {
     let cursor = Cursor::new(input);
     let mut decoder = GzDecoder::new(cursor);
     let mut decompressed_data = Vec::new();

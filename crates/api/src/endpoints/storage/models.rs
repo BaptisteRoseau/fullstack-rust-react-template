@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
-use storage::parameters::{
-    Compression, ImageCompression, ImageConversion, StorageParameters,
+use compressor::parameters::{
+    Compression, ImageCompression, ImageConversion, CompressionParameters,
 };
 use utoipa::{IntoParams, ToResponse, ToSchema};
 
@@ -22,8 +22,8 @@ pub(crate) struct PostUploadParams {
 }
 
 impl PostUploadParams {
-    pub fn into_storage_parameters(self) -> StorageParameters {
-        let mut params = StorageParameters::compressed_lossy();
+    pub fn into_storage_parameters(self) -> CompressionParameters {
+        let mut params = CompressionParameters::compressed_lossy();
 
         if let Some(false) = self.compression {
             params.compression = Compression::NoCompression;

@@ -22,7 +22,7 @@ use database::error::DatabaseError;
 use database::models::{ApiKey, User, UserPatch};
 
 const KEYCLOAK_IMAGE: &str = "quay.io/keycloak/keycloak";
-const KEYCLOAK_TAG: &str = "26.0";
+const KEYCLOAK_TAG: &str = "26.6.4";
 const KEYCLOAK_PORT: u16 = 8080;
 
 pub const REALM: &str = "test-realm";

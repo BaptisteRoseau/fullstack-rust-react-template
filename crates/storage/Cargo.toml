@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 logging = { path = "../logging" }
 config = { path = "../config" }
+compressor = { path = "../compressor" }
 flate2 = "1"
 async-trait = "0"
 libcaesium = { version = "0", features = ["gif", "jpg", "png", "tiff", "webp"] }

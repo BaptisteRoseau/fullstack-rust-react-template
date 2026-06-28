@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use uuid::Uuid;
 
 use storage::Storage;
-use storage::parameters::StorageParameters;
+use compressor::parameters::CompressionParameters;
 
 // When adding a new test here:
 // - helpers are regular private functions
@@ -99,17 +99,17 @@ fn unique_path() -> PathBuf {
     PathBuf::from(format!("test-trait/{}", Uuid::new_v4()))
 }
 
-fn no_compression() -> StorageParameters {
-    StorageParameters::default()
+fn no_compression() -> CompressionParameters {
+    CompressionParameters::default()
 }
 
-fn with_compression() -> StorageParameters {
-    *StorageParameters::default().with_compression()
+fn with_compression() -> CompressionParameters {
+    *CompressionParameters::default().with_compression()
 }
 
 async fn save_and_load_idempotent(
     storage: &impl Storage,
-    params: StorageParameters,
+    params: CompressionParameters,
     path: &Path,
 ) {
     let data = b"hello, storage!";

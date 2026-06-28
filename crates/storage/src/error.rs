@@ -3,16 +3,16 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 pub enum StorageError {
     #[error(transparent)]
-    ImageHandlingError(#[from] caesium::error::CaesiumError),
-    #[error(transparent)]
     S3Error(#[from] s3::Error),
     #[error(transparent)]
     IoError(#[from] std::io::Error),
+    #[error(transparent)]
+    CompressionError(#[from] compressor::error::CompressorError),
 }
 
-impl From<caesium::error::CaesiumError> for Box<StorageError> {
-    fn from(e: caesium::error::CaesiumError) -> Self {
-        Box::new(StorageError::ImageHandlingError(e))
+impl From<Box<compressor::error::CompressorError>> for Box<StorageError> {
+    fn from(e: Box<compressor::error::CompressorError>) -> Self {
+        Box::new(StorageError::CompressionError(*e))
     }
 }
 

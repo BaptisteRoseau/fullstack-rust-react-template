@@ -4,12 +4,11 @@ use std::path::Path;
 
 use async_trait::async_trait;
 
-use crate::{
-    Storage,
+use crate::{Storage, error::StorageError};
+use compressor::{
     compressor::{handle_compression, handle_decompression},
-    error::StorageError,
     images::compress_image,
-    parameters::{Compression, StorageParameters},
+    parameters::{Compression, CompressionParameters},
 };
 
 #[derive(Clone)]
@@ -70,7 +69,7 @@ impl Storage for S3 {
         &self,
         file: &Path,
         content: &[u8],
-        parameters: &StorageParameters,
+        parameters: &CompressionParameters,
     ) -> Result<(), Box<StorageError>> {
         let processed = compress_image(content, &parameters.image)?;
         let body = handle_compression(&processed, parameters.compression)?;

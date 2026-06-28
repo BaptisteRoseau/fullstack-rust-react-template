@@ -88,15 +88,16 @@ use utoipa_swagger_ui::SwaggerUi;
 /// can be called without any running service (database, cache, storage, ...).
 /// It is the single source of truth shared by [`public_routes`] and [`openapi`].
 fn api_router() -> OpenApiRouter<AppState> {
-    OpenApiRouter::<AppState>::new()
-        .routes(routes!(ping))
-        .routes(routes!(upload))
-        .routes(routes!(download))
-        .routes(routes!(delete_stored_file))
-        .routes(routes!(get_user))
-        .routes(routes!(create_api_key))
-        .routes(routes!(get_api_key))
-        .routes(routes!(delete_api_key))
+    OpenApiRouter::<AppState>::new().routes(routes!(
+        ping,
+        upload,
+        download,
+        delete_stored_file,
+        get_user,
+        create_api_key,
+        get_api_key,
+        delete_api_key
+    ))
 }
 
 /// Metadata advertised in the generated OpenAPI document.
@@ -121,7 +122,6 @@ pub fn openapi() -> OpenApi {
 /// Public routes that qre exposed to the world
 pub fn public_routes(config: &Config, state: AppState) -> Router {
     let (api_routes, openapi) = api_router().split_for_parts();
-
     let api_routes = api_routes.merge(swagger(config, openapi));
 
     let middleware = ServiceBuilder::new()

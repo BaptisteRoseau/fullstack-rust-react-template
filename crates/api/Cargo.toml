@@ -13,6 +13,7 @@ storage = { path = "../storage" }
 cache = { path = "../cache" }
 models = { path = "../models" }
 rbac = { path = "../rbac" }
+compressor = { path = "../compressor" }
 authenticator = { path = "../authenticator" }
 
 # Crates.io
