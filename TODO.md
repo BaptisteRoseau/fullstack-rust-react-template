@@ -7,6 +7,8 @@
     - [ ] Store JWT as httponly cookie in the frontend
     - [ ] Automagically refresh JWT in the frontend when getting a logged out error from the backend
 
+- [ ] Install and use cargo nextest
+
 - [ ] Fix garage
 - [ ] Refine error handling to have client-facing and internal errors
     - [ ] Avoid creating new boxes every time we convert an error ?
