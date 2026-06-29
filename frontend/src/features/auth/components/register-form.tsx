@@ -1,112 +1,27 @@
-import * as React from 'react'
-import { t, Trans } from '@lingui/macro'
+import { Trans } from '@lingui/macro'
 import { Link, useSearchParams } from 'react-router'
 
-import { Button } from '@/components/ui/button'
-import { Form, Input, Select, Label, Switch } from '@/components/ui/form'
 import { paths } from '@/config/paths'
-import { useRegister, registerInputSchema } from '@/lib/auth'
-import { Team } from '@/types/api'
+import { registerUrl } from '@/lib/auth'
 
-type RegisterFormProps = {
-    onSuccess: () => void
-    chooseTeam: boolean
-    setChooseTeam: () => void
-    teams?: Team[]
-}
-
-export const RegisterForm = ({
-    onSuccess,
-    chooseTeam,
-    setChooseTeam,
-    teams,
-}: RegisterFormProps) => {
-    const registering = useRegister({ onSuccess })
+export const RegisterForm = () => {
     const [searchParams] = useSearchParams()
     const redirectTo = searchParams.get('redirectTo')
 
     return (
         <div>
-            <Form
-                onSubmit={(values) => {
-                    registering.mutate(values)
-                }}
-                schema={registerInputSchema}
-                options={{
-                    shouldUnregister: true,
-                }}
+            <p className="mb-4 text-center text-sm text-gray-600">
+                <Trans>
+                    You will be redirected to our secure sign-up page to create
+                    your account.
+                </Trans>
+            </p>
+            <a
+                href={registerUrl(redirectTo)}
+                className="flex w-full justify-center rounded-md bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-500"
             >
-                {({ register, formState }) => (
-                    <>
-                        <Input
-                            type="text"
-                            label={t`First Name`}
-                            error={formState.errors['firstName']}
-                            registration={register('firstName')}
-                        />
-                        <Input
-                            type="text"
-                            label={t`Last Name`}
-                            error={formState.errors['lastName']}
-                            registration={register('lastName')}
-                        />
-                        <Input
-                            type="email"
-                            label={t`Email Address`}
-                            error={formState.errors['email']}
-                            registration={register('email')}
-                        />
-                        <Input
-                            type="password"
-                            label={t`Password`}
-                            error={formState.errors['password']}
-                            registration={register('password')}
-                        />
-
-                        <div className="flex items-center space-x-2">
-                            <Switch
-                                checked={chooseTeam}
-                                onCheckedChange={setChooseTeam}
-                                className={`${
-                                    chooseTeam ? 'bg-blue-600' : 'bg-gray-200'
-                                } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:outline-none`}
-                                id="choose-team"
-                            />
-                            <Label htmlFor="airplane-mode">
-                                <Trans>Join Existing Team</Trans>
-                            </Label>
-                        </div>
-
-                        {chooseTeam && teams ? (
-                            <Select
-                                label={t`Team`}
-                                error={formState.errors['teamId']}
-                                registration={register('teamId')}
-                                options={teams?.map((team) => ({
-                                    label: team.name,
-                                    value: team.id,
-                                }))}
-                            />
-                        ) : (
-                            <Input
-                                type="text"
-                                label={t`Team Name`}
-                                error={formState.errors['teamName']}
-                                registration={register('teamName')}
-                            />
-                        )}
-                        <div>
-                            <Button
-                                isLoading={registering.isPending}
-                                type="submit"
-                                className="w-full"
-                            >
-                                <Trans>Register</Trans>
-                            </Button>
-                        </div>
-                    </>
-                )}
-            </Form>
+                <Trans>Create an account</Trans>
+            </a>
             <div className="mt-2 flex items-center justify-end">
                 <div className="text-sm">
                     <Link

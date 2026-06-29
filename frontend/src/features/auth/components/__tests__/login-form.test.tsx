@@ -1,24 +1,13 @@
-import {
-    createUser,
-    renderApp,
-    screen,
-    userEvent,
-    waitFor,
-} from '@/testing/test-utils'
+import { renderApp, screen } from '@/testing/test-utils'
 
 import { LoginForm } from '../login-form'
 
-test('should login new user and call onSuccess cb which should navigate the user to the app', async () => {
-    const newUser = await createUser({ teamId: undefined })
+test('shows a link that starts the Keycloak sign-in flow', async () => {
+    await renderApp(<LoginForm />, { user: null })
 
-    const onSuccess = vi.fn()
+    const link = screen.getByRole('link', {
+        name: /continue to sign in/i,
+    }) as HTMLAnchorElement
 
-    await renderApp(<LoginForm onSuccess={onSuccess} />, { user: null })
-
-    await userEvent.type(screen.getByLabelText(/email address/i), newUser.email)
-    await userEvent.type(screen.getByLabelText(/password/i), newUser.password)
-
-    await userEvent.click(screen.getByRole('button', { name: /log in/i }))
-
-    await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1))
+    expect(link.href).toContain('/auth/login')
 })

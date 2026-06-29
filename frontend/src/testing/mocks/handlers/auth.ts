@@ -150,16 +150,24 @@ export const authHandlers = [
         )
     }),
 
+    // The real backend silently refreshes via an httpOnly cookie; the mock has no
+    // refresh token, so it always reports "logged out".
+    http.post(`${env.API_URL}/auth/refresh`, async () => {
+        await networkDelay()
+
+        return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }),
+
     http.get(`${env.API_URL}/auth/me`, async ({ cookies }) => {
         await networkDelay()
 
         try {
             const { user } = requireAuth(cookies)
-            return HttpResponse.json({ data: user })
+            return HttpResponse.json(user)
         } catch (error: any) {
             return HttpResponse.json(
-                { message: error?.message || 'Server Error' },
-                { status: 500 },
+                { message: error?.message || 'Unauthorized' },
+                { status: 401 },
             )
         }
     }),

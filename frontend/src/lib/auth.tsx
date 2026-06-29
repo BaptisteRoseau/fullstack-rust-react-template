@@ -1,73 +1,56 @@
 import { configureAuth } from 'react-query-auth'
 import { Navigate, useLocation } from 'react-router'
-import { z } from 'zod'
 
+import { env } from '@/config/env'
 import { paths } from '@/config/paths'
-import { AuthResponse, User } from '@/types/api'
+import { User } from '@/types/api'
 
 import { api } from './api-client'
 
-// api call definitions for auth (types, schemas, requests):
-// these are not part of features as this is a module shared across features
+// Auth is delegated to Keycloak through the backend Backend-for-Frontend (BFF):
+// the browser is redirected to the backend, which drives the OAuth Authorization
+// Code + PKCE flow and stores the tokens in httpOnly cookies. The frontend never
+// sees the tokens; it only reads the current user and triggers logout.
 
 const getUser = async (): Promise<User> => {
-    const response = await api.get('/auth/me')
-
-    return response.data
+    // The response interceptor already unwraps to the HTTP body, which is the user.
+    return api.get('/auth/me')
 }
 
 const logout = (): Promise<void> => {
     return api.post('/auth/logout')
 }
 
-export const loginInputSchema = z.object({
-    email: z.string().min(1, 'Required').email('Invalid email'),
-    password: z.string().min(5, 'Required'),
-})
-
-export type LoginInput = z.infer<typeof loginInputSchema>
-const loginWithEmailAndPassword = (data: LoginInput): Promise<AuthResponse> => {
-    return api.post('/auth/login', data)
+// Entry-point of the BFF flow. The backend redirects the browser to Keycloak's
+// hosted login or registration page and handles the callback.
+const authEntrypoint = (
+    screen: 'login' | 'register',
+    redirectTo?: string | null,
+) => {
+    const params = new URLSearchParams()
+    if (screen === 'register') params.set('screen', 'register')
+    if (redirectTo) params.set('redirect', redirectTo)
+    const query = params.toString()
+    return `${env.API_URL}/auth/login${query ? `?${query}` : ''}`
 }
 
-export const registerInputSchema = z
-    .object({
-        email: z.string().min(1, 'Required'),
-        firstName: z.string().min(1, 'Required'),
-        lastName: z.string().min(1, 'Required'),
-        password: z.string().min(5, 'Required'),
-    })
-    .and(
-        z
-            .object({
-                teamId: z.string().min(1, 'Required'),
-                teamName: z.null().default(null),
-            })
-            .or(
-                z.object({
-                    teamName: z.string().min(1, 'Required'),
-                    teamId: z.null().default(null),
-                }),
-            ),
-    )
+export const loginUrl = (redirectTo?: string | null) =>
+    authEntrypoint('login', redirectTo)
 
-export type RegisterInput = z.infer<typeof registerInputSchema>
-
-const registerWithEmailAndPassword = (
-    data: RegisterInput,
-): Promise<AuthResponse> => {
-    return api.post('/auth/register', data)
-}
+export const registerUrl = (redirectTo?: string | null) =>
+    authEntrypoint('register', redirectTo)
 
 const authConfig = {
     userFn: getUser,
-    loginFn: async (data: LoginInput) => {
-        const response = await loginWithEmailAndPassword(data)
-        return response.user
+    // Login and registration happen via a full-page redirect to the backend, so
+    // these resolve into navigation rather than returning a user.
+    loginFn: () => {
+        window.location.href = loginUrl()
+        return new Promise<User>(() => {})
     },
-    registerFn: async (data: RegisterInput) => {
-        const response = await registerWithEmailAndPassword(data)
-        return response.user
+    registerFn: () => {
+        window.location.href = registerUrl()
+        return new Promise<User>(() => {})
     },
     logoutFn: logout,
 }

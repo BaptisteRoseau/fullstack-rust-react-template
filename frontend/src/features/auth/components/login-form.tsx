@@ -1,56 +1,26 @@
-import { t, Trans } from '@lingui/macro'
+import { Trans } from '@lingui/macro'
 import { Link, useSearchParams } from 'react-router'
 
-import { Button } from '@/components/ui/button'
-import { Form, Input } from '@/components/ui/form'
 import { paths } from '@/config/paths'
-import { useLogin, loginInputSchema } from '@/lib/auth'
+import { loginUrl } from '@/lib/auth'
 
-type LoginFormProps = {
-    onSuccess: () => void
-}
-
-export const LoginForm = ({ onSuccess }: LoginFormProps) => {
-    const login = useLogin({
-        onSuccess,
-    })
+export const LoginForm = () => {
     const [searchParams] = useSearchParams()
     const redirectTo = searchParams.get('redirectTo')
 
     return (
         <div>
-            <Form
-                onSubmit={(values) => {
-                    login.mutate(values)
-                }}
-                schema={loginInputSchema}
+            <p className="mb-4 text-center text-sm text-gray-600">
+                <Trans>
+                    You will be redirected to our secure sign-in page.
+                </Trans>
+            </p>
+            <a
+                href={loginUrl(redirectTo)}
+                className="flex w-full justify-center rounded-md bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-500"
             >
-                {({ register, formState }) => (
-                    <>
-                        <Input
-                            type="email"
-                            label={t`Email Address`}
-                            error={formState.errors['email']}
-                            registration={register('email')}
-                        />
-                        <Input
-                            type="password"
-                            label={t`Password`}
-                            error={formState.errors['password']}
-                            registration={register('password')}
-                        />
-                        <div>
-                            <Button
-                                isLoading={login.isPending}
-                                type="submit"
-                                className="w-full"
-                            >
-                                <Trans>Log in</Trans>
-                            </Button>
-                        </div>
-                    </>
-                )}
-            </Form>
+                <Trans>Continue to sign in</Trans>
+            </a>
             <div className="mt-2 flex items-center justify-end">
                 <div className="text-sm">
                     <Link
