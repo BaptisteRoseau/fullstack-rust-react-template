@@ -138,7 +138,7 @@ impl From<ExtractorError> for ApiErrorResponse {
             ExtractorError::Unexpected(_) => ApiErrorResponse::unexpected(),
             ExtractorError::InvalidHeaderCharacters(_) => ApiErrorResponse::new(
                 ApiErrorId::HeaderInvalidAsciiCharacters,
-                "Your authentication token has expired. Please log back in.",
+                "A Header contains invalid Ascii characters. Remove them to continue.",
                 StatusCode::BAD_REQUEST,
             ),
         }
