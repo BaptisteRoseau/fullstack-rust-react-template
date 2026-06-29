@@ -10,6 +10,21 @@
 - [ ] Install and use cargo nextest
 
 - [ ] Fix garage
+
+## AI infra & Frontend
+
+- [ ] Cleanup the react-structure.md file
+    - [ ] Adapt to target architecture
+    - [ ] Split into skills
+    - [ ] Mention the skills in the AGENTS.md and README.md
+    - [ ] Merge frontend/docs into it
+
+- [ ] Make a skill to use `plop` and adapt [frontend/generators/component] to match the target template
+- [ ] Tell existing skills to use `plop`
+
+
+## Backend
+
 - [ ] Refine error handling to have client-facing and internal errors
     - [ ] Avoid creating new boxes every time we convert an error ?
     - [ ] Find a way to factorize openapi specs for error responses
@@ -30,12 +45,12 @@
 
 - [ ] Avoir un docker compose up qui fonctionne:
     - [x] DB
-    - [X] Prometheus
-    - [X] Grafana
-    - [X] Backend
-    - [X] Metrics endpoint
-    - [X] Frontend
-    - [X] Fix bun run dev
+    - [x] Prometheus
+    - [x] Grafana
+    - [x] Backend
+    - [x] Metrics endpoint
+    - [x] Frontend
+    - [x] Fix bun run dev
     - [ ] Simple echo API with a simple button (somehow like a TOOD app)
     - [ ] CRUD files s3
 
@@ -49,7 +64,7 @@
 5. [ ] Add CRUD macros to the models
 6. [x] Create a Database trait
 7. [ ] Implement CRUD handler in Database trait
-8. [X] Make a script to generate SQLx static file for offline sqlx compilation
+8. [x] Make a script to generate SQLx static file for offline sqlx compilation
 9. [ ] Change license to non-commercial
 
 ### Database Layer
@@ -60,9 +75,9 @@
 - [x] Generate backend Rust database models for the User
 - [ ] Make your own dyn-compatible CRUD macro (fork <https://docs.rs/sqlx-crud/latest/sqlx_crud/traits/trait.Schema.html>)
 - [x] Use a script to generate the database models: <https://github.com/jayy-lmao/sql-gen?tab=readme-ov-file>
-- [X] Set up a database with two users: read_write and read_only
-- [X] Create the first sqlx migration with a table containing the users
-    - [X] Move the created_at/updated_at function to the first migration
+- [x] Set up a database with two users: read_write and read_only
+- [x] Create the first sqlx migration with a table containing the users
+    - [x] Move the created_at/updated_at function to the first migration
 - [ ] Generate backend Rust database models for the User
 - [ ] CRUD macro (see something like <https://docs.rs/sqlx-crud/latest/sqlx_crud/traits/trait.Schema.html>)
 - [ ] Use a script to generate the database models: <https://github.com/jayy-lmao/sql-gen?tab=readme-ov-file>
@@ -75,15 +90,15 @@
 - [ ] Use axum-tower-session and axum-login for session management ?
 - [ ] Use a Protobuf schema to generate Rust models and Typescript structures
 - [ ] Add CORS middleware
-- [X] Add compression middleware
-- [X] Add tracing middleware (set sensitive headers before)
-- [X] Add timeout middleware
-- [X] Add Swagger UI & openapi.json
-- [X] Add rate limiter middleware
+- [x] Add compression middleware
+- [x] Add tracing middleware (set sensitive headers before)
+- [x] Add timeout middleware
+- [x] Add Swagger UI & openapi.json
+- [ ] Add rate limiter middleware
 - [ ] Aggregate middlewares cleanly
 - [ ] Convert `app_core` models to API models and vice-versa
-- [X] Add error handling middleware & global error conversion
-- [X] Trace errors & normalize error response
+- [x] Add error handling middleware & global error conversion
+- [x] Trace errors & normalize error response
 - [ ] Support both REST & gRCP from the same handler (split with `/rest/` and `/grpc/` in the URL)
 
 ### Testing, CI/CD, Docker and scripts
@@ -92,7 +107,7 @@
 - [ ] Fix all docker-compose files, services & interaction
 - [ ] Fix scripts for test execution, audit & licenses
 - [ ] Add formatting checker script
-- [X] Add sqlx JSON schema generation from migration scripts and blank container
+- [x] Add sqlx JSON schema generation from migration scripts and blank container
 - [ ] Add sqlx JSON schema checker (current vs expected from migrations)
 - [ ] Add protobuf models generation (front & back)
 - [ ] Add generated models checker (expected vs actual)
@@ -162,7 +177,7 @@
 
 ### Extras
 
-- [ ] Add a management CLI binary 
+- [ ] Add a management CLI binary
 - [ ] Loki docker plugin to expose docker logs to Grafana
 - [ ] Pre-built Grafana dashboards
 - [ ] Kubernetes manifests
