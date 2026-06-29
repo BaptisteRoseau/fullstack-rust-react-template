@@ -10,7 +10,7 @@ export const localeLabels: Record<Locale, string> = {
 }
 
 export async function loadLocale(locale: Locale): Promise<void> {
-    const { messages } = await import(`./locales/${locale}/messages`)
+    const { messages } = await import(`./locales/${locale}/messages.po`)
     i18n.load(locale, messages)
     i18n.activate(locale)
 }

@@ -1,3 +1,4 @@
+import { I18nProvider } from '@lingui/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import * as React from 'react'
@@ -7,6 +8,7 @@ import { HelmetProvider } from 'react-helmet-async'
 import { MainErrorFallback } from '@/components/errors/main'
 import { Notifications } from '@/components/ui/notifications'
 import { Spinner } from '@/components/ui/spinner'
+import { i18n } from '@/i18n'
 import { AuthLoader } from '@/lib/auth'
 import { queryConfig } from '@/lib/react-query'
 
@@ -30,23 +32,25 @@ export const AppProvider = ({ children }: AppProviderProps) => {
                 </div>
             }
         >
-            <ErrorBoundary FallbackComponent={MainErrorFallback}>
-                <HelmetProvider>
-                    <QueryClientProvider client={queryClient}>
-                        {import.meta.env.DEV && <ReactQueryDevtools />}
-                        <Notifications />
-                        <AuthLoader
-                            renderLoading={() => (
-                                <div className="flex h-screen w-screen items-center justify-center">
-                                    <Spinner size="xl" />
-                                </div>
-                            )}
-                        >
-                            {children}
-                        </AuthLoader>
-                    </QueryClientProvider>
-                </HelmetProvider>
-            </ErrorBoundary>
+            <I18nProvider i18n={i18n}>
+                <ErrorBoundary FallbackComponent={MainErrorFallback}>
+                    <HelmetProvider>
+                        <QueryClientProvider client={queryClient}>
+                            {import.meta.env.DEV && <ReactQueryDevtools />}
+                            <Notifications />
+                            <AuthLoader
+                                renderLoading={() => (
+                                    <div className="flex h-screen w-screen items-center justify-center">
+                                        <Spinner size="xl" />
+                                    </div>
+                                )}
+                            >
+                                {children}
+                            </AuthLoader>
+                        </QueryClientProvider>
+                    </HelmetProvider>
+                </ErrorBoundary>
+            </I18nProvider>
         </React.Suspense>
     )
 }

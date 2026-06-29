@@ -69,7 +69,9 @@ export const CommentsList = ({ discussionId }: CommentsListProps) => {
                                         <span className="text-xs font-bold">
                                             <Trans>
                                                 {' '}
-                                                by {comment.author.firstName}{' '}
+                                                by {
+                                                    comment.author.firstName
+                                                }{' '}
                                                 {comment.author.lastName}
                                             </Trans>
                                         </span>

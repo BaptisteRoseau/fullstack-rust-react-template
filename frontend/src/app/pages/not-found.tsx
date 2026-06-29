@@ -10,7 +10,9 @@ const NotFoundRoute = () => {
                 <Trans>404 - Not Found</Trans>
             </h1>
             <p>
-                <Trans>Sorry, the page you are looking for does not exist.</Trans>
+                <Trans>
+                    Sorry, the page you are looking for does not exist.
+                </Trans>
             </p>
             <Link to={paths.home.getHref()} replace>
                 <Trans>Go to Home</Trans>

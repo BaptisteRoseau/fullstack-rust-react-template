@@ -72,7 +72,6 @@ const DiscussionRoute = () => {
                     >
                         <Comments discussionId={discussionId} />
                     </ErrorBoundary>
-
                 </div>
             </ContentLayout>
         </>
