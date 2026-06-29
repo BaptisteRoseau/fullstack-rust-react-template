@@ -16,6 +16,10 @@ pub enum AuthenticatorError {
     JwtError(#[from] JwtError),
     #[error("Invalid Realm: {0}")]
     InvalidRealm(String),
+    #[error("OIDC error: {0}")]
+    Oidc(String),
+    #[error("Invalid or expired login state")]
+    InvalidState,
     #[error("{0}")]
     Message(String),
 }

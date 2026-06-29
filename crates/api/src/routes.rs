@@ -43,6 +43,10 @@ use crate::{
             __path_create_api_key, __path_delete_api_key, __path_get_api_key,
             create_api_key, delete_api_key, get_api_key,
         },
+        auth::endpoints::{
+            __path_callback, __path_login, __path_logout, __path_me, __path_refresh,
+            callback, login, logout, me, refresh,
+        },
         ping::endpoints::{__path_ping, ping},
         storage::endpoints::{
             __path_delete_stored_file, __path_download, __path_upload,
@@ -66,7 +70,7 @@ use tower::ServiceBuilder;
 use tower_http::{
     CompressionLevel,
     compression::CompressionLayer,
-    cors::CorsLayer,
+    cors::{AllowHeaders, AllowMethods, AllowOrigin, CorsLayer},
     decompression::RequestDecompressionLayer,
     normalize_path::NormalizePathLayer,
     request_id::{PropagateRequestIdLayer, SetRequestIdLayer},
@@ -90,13 +94,21 @@ use utoipa_swagger_ui::SwaggerUi;
 fn api_router() -> OpenApiRouter<AppState> {
     OpenApiRouter::<AppState>::new().routes(routes!(
         ping,
+        get_user,
+        // Object storage
         upload,
         download,
         delete_stored_file,
-        get_user,
+        // API Key
         create_api_key,
         get_api_key,
-        delete_api_key
+        delete_api_key,
+        // Authentication
+        login,
+        callback,
+        refresh,
+        logout,
+        me,
     ))
 }
 
@@ -122,7 +134,11 @@ pub fn openapi() -> OpenApi {
 /// Public routes that qre exposed to the world
 pub fn public_routes(config: &Config, state: AppState) -> Router {
     let (api_routes, openapi) = api_router().split_for_parts();
-    let api_routes = api_routes.merge(swagger(config, openapi));
+    // The whole API (typed endpoints + auth BFF) lives under `/api`, matching the
+    // frontend's `VITE_APP_API_URL`. Swagger keeps its own absolute path at the root.
+    let routes = Router::new()
+        .nest("/api", api_routes)
+        .merge(swagger(config, openapi));
 
     let middleware = ServiceBuilder::new()
         // Avoid logging these headers content
@@ -135,9 +151,9 @@ pub fn public_routes(config: &Config, state: AppState) -> Router {
         // Echo the request id back to the client in the response headers
         .layer(PropagateRequestIdLayer::x_request_id())
         .layer(SetSensitiveResponseHeadersLayer::new(once(AUTHORIZATION)))
-        // Authorize OPTIONS requests for CORS and automatically set up headers
-        //TODO: Set this up based on what is actually available
-        .layer(CorsLayer::permissive())
+        // Reflect the frontend origin and allow credentials so the browser sends and
+        // accepts the httpOnly auth cookies (a wildcard origin is rejected with creds).
+        .layer(cors_layer(config))
         .layer(NormalizePathLayer::trim_trailing_slash())
         .layer(CompressionLayer::new().quality(CompressionLevel::Best))
         .layer(RequestDecompressionLayer::new())
@@ -149,7 +165,29 @@ pub fn public_routes(config: &Config, state: AppState) -> Router {
         // any other middleware runs.
         .layer(rate_limiter_layer(config));
 
-    api_routes.layer(middleware).with_state(state)
+    routes.layer(middleware).with_state(state)
+}
+
+/// CORS layer reflecting the configured frontend origin and allowing credentials,
+/// which is required for the browser to send/accept the httpOnly auth cookies.
+fn cors_layer(config: &Config) -> CorsLayer {
+    let origin = config
+        .oidc
+        .frontend_url
+        .trim_end_matches('/')
+        .parse::<axum::http::HeaderValue>();
+
+    let mut cors = CorsLayer::new()
+        .allow_methods(AllowMethods::mirror_request())
+        .allow_headers(AllowHeaders::mirror_request())
+        .allow_credentials(true);
+
+    cors = match origin {
+        Ok(origin) => cors.allow_origin(origin),
+        Err(_) => cors.allow_origin(AllowOrigin::mirror_request()),
+    };
+
+    cors
 }
 
 /// Swagger UI and OpenAPI routes layer.

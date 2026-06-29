@@ -45,6 +45,16 @@ pub struct AuthenticatorConfig {
     pub audiences: Vec<String>,
 }
 
+#[derive(Debug, Clone)]
+pub struct OidcConfig {
+    pub issuer_url: String,
+    pub client_id: String,
+    pub client_secret: String,
+    pub redirect_url: String,
+    pub frontend_url: String,
+    pub cookie_secure: bool,
+}
+
 type ServerBindingConfig = BindingConfig;
 
 #[derive(Debug, Clone)]
@@ -79,6 +89,7 @@ pub struct Config {
     pub prometheus: Option<PrometheusConfig>,
     pub swagger: Option<SwaggerConfig>,
     pub authenticator: AuthenticatorConfig,
+    pub oidc: OidcConfig,
 }
 
 impl Config {
@@ -150,6 +161,14 @@ impl TryFrom<CliConfig> for Config {
                     .map(str::to_string)
                     .collect(),
             },
+            oidc: OidcConfig {
+                issuer_url: value.oidc_issuer_url,
+                client_id: value.oidc_client_id,
+                client_secret: value.oidc_client_secret,
+                redirect_url: value.oidc_redirect_url,
+                frontend_url: value.frontend_url,
+                cookie_secure: value.cookie_secure,
+            },
         })
     }
 }
@@ -212,6 +231,12 @@ mod test {
                 authenticator_provider_url: DEFAULT_AUTHENTICATOR_PROVIDER_URL
                     .to_string(),
                 authenticator_audiences: DEFAULT_AUTHENTICATOR_AUDIENCES.to_string(),
+                oidc_issuer_url: DEFAULT_OIDC_ISSUER_URL.to_string(),
+                oidc_client_id: DEFAULT_OIDC_CLIENT_ID.to_string(),
+                oidc_client_secret: DEFAULT_OIDC_CLIENT_SECRET.to_string(),
+                oidc_redirect_url: DEFAULT_OIDC_REDIRECT_URL.to_string(),
+                frontend_url: DEFAULT_FRONTEND_URL.to_string(),
+                cookie_secure: DEFAULT_COOKIE_SECURE,
             }
         }
     }

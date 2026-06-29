@@ -1,6 +1,7 @@
 use std::net::SocketAddr;
 use std::sync::Arc;
 
+use authenticator::OidcClient;
 use authenticator::backends::Keycloak;
 use cache::backends::redis::Redis;
 use tokio::sync::RwLock;
@@ -44,11 +45,16 @@ pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
         Keycloak::try_new(config, Arc::clone(&cache), Arc::clone(&database)).await?;
     info!("Initialized Authenticator");
 
+    info!("Initializing OAuth client...");
+    let oauth = OidcClient::try_new(config, Arc::clone(&cache))?;
+    info!("Initialized OAuth client");
+
     let state = AppState::new(
         database,
         storage,
         cache,
         Arc::new(RwLock::new(authenticator)),
+        Arc::new(oauth),
     );
 
     /* ===========================

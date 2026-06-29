@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use authenticator::Authenticator;
+use authenticator::{Authenticator, OidcClient};
 use axum::extract::FromRef;
 use cache::Cache;
 use database::Database;
@@ -13,6 +13,7 @@ pub struct AppState {
     pub storage: Arc<RwLock<dyn Storage>>,
     pub cache: Arc<RwLock<dyn Cache>>,
     pub authenticator: Arc<RwLock<dyn Authenticator>>,
+    pub oauth: Arc<OidcClient>,
 }
 
 impl AppState {
@@ -21,12 +22,14 @@ impl AppState {
         storage: Arc<RwLock<dyn Storage>>,
         cache: Arc<RwLock<dyn Cache>>,
         authenticator: Arc<RwLock<dyn Authenticator>>,
+        oauth: Arc<OidcClient>,
     ) -> Self {
         Self {
             database,
             storage,
             cache,
             authenticator,
+            oauth,
         }
     }
 }
@@ -52,5 +55,11 @@ impl FromRef<AppState> for Arc<RwLock<dyn Cache>> {
 impl FromRef<AppState> for Arc<RwLock<dyn Authenticator>> {
     fn from_ref(app_state: &AppState) -> Self {
         app_state.authenticator.clone()
+    }
+}
+
+impl FromRef<AppState> for Arc<OidcClient> {
+    fn from_ref(app_state: &AppState) -> Self {
+        app_state.oauth.clone()
     }
 }

@@ -70,6 +70,16 @@ impl ApiErrorResponse {
         )
     }
 
+    /// Template for an expired authentication token (triggers a silent refresh
+    /// on the frontend).
+    fn token_expired() -> Self {
+        Self::new(
+            ApiErrorId::TokenExpired,
+            "Your authentication token has expired. Please log back in.",
+            StatusCode::UNAUTHORIZED,
+        )
+    }
+
     /// Template for not found responses
     fn not_found() -> Self {
         Self::new(ApiErrorId::NotFound, "Not found.", StatusCode::NOT_FOUND)
@@ -167,11 +177,7 @@ impl From<jsonwebtoken::errors::Error> for ApiErrorResponse {
             | JwtErrorKind::InvalidSubject
             | JwtErrorKind::InvalidIssuer
             | JwtErrorKind::InvalidSignature => ApiErrorResponse::forbidden(),
-            JwtErrorKind::ExpiredSignature => ApiErrorResponse::new(
-                ApiErrorId::TokenExpired,
-                "Your authentication token has expired. Please log back in.",
-                StatusCode::UNAUTHORIZED,
-            ),
+            JwtErrorKind::ExpiredSignature => ApiErrorResponse::token_expired(),
             _ => ApiErrorResponse::unexpected(),
         }
     }
@@ -182,6 +188,10 @@ impl From<Box<AuthenticatorError>> for ApiErrorResponse {
         match *val {
             AuthenticatorError::InvalidSignature
             | AuthenticatorError::AuthenticationFailure => Self::forbidden(),
+            // An expired token must surface as 401 TokenExpired so the frontend can
+            // refresh it transparently, not as a 500.
+            AuthenticatorError::Expired => Self::token_expired(),
+            AuthenticatorError::JwtError(e) => e.into(),
             _ => ApiErrorResponse::unexpected(),
         }
     }

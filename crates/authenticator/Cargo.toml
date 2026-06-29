@@ -8,7 +8,7 @@ logging = { path = "../logging" }
 config = { path = "../config" }
 database = { path = "../database" }
 cache = { path = "../cache" }
-reqwest = { version = "0", features = ["json"] }
+reqwest = { version = "0.12", features = ["json"] }
 jsonwebtoken = { version = "10", features = ["aws_lc_rs"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -17,6 +17,7 @@ async-trait = "0"
 uuid = "1"
 tokio = "1"
 sha2 = "0"
+oauth2 = { version = "5", default-features = false, features = ["reqwest", "rustls-tls"] }
 
 [dev-dependencies]
 chrono = "0.4.45"

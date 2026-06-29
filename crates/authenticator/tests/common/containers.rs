@@ -144,6 +144,14 @@ fn test_config(provider_url: String) -> Config {
             user: String::new(),
             password: String::new(),
         },
+        oidc: config::OidcConfig {
+            issuer_url: String::new(),
+            client_id: String::new(),
+            client_secret: String::new(),
+            redirect_url: String::new(),
+            frontend_url: String::new(),
+            cookie_secure: false,
+        },
         redis: RedisConfig { url: String::new() },
         postgres: PostgresConfig {
             host: String::new(),

@@ -148,6 +148,33 @@ pub(crate) struct CliConfig {
     /// Comma-separated list of accepted JWT audiences
     #[arg(long, env, default_value_t = DEFAULT_AUTHENTICATOR_AUDIENCES.to_string())]
     pub(crate) authenticator_audiences: String,
+
+    /* ===============
+    OIDC (OAuth Backend-for-Frontend)
+    ================ */
+    /// OIDC issuer base URL (e.g. http://localhost:8090/realms/app)
+    #[arg(long, env, default_value_t = DEFAULT_OIDC_ISSUER_URL.to_string())]
+    pub(crate) oidc_issuer_url: String,
+
+    /// OIDC confidential client id used by the backend
+    #[arg(long, env, default_value_t = DEFAULT_OIDC_CLIENT_ID.to_string())]
+    pub(crate) oidc_client_id: String,
+
+    /// OIDC confidential client secret
+    #[arg(long, env, default_value_t = DEFAULT_OIDC_CLIENT_SECRET.to_string())]
+    pub(crate) oidc_client_secret: String,
+
+    /// OAuth redirect URL pointing back to the backend callback endpoint
+    #[arg(long, env, default_value_t = DEFAULT_OIDC_REDIRECT_URL.to_string())]
+    pub(crate) oidc_redirect_url: String,
+
+    /// Frontend base URL to redirect the browser to after login
+    #[arg(long, env, default_value_t = DEFAULT_FRONTEND_URL.to_string())]
+    pub(crate) frontend_url: String,
+
+    /// Whether auth cookies should set the Secure attribute (enable in production/HTTPS)
+    #[arg(long, env, default_value_t = DEFAULT_COOKIE_SECURE)]
+    pub(crate) cookie_secure: bool,
 }
 
 impl CliConfig {
