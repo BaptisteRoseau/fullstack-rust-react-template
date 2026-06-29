@@ -135,6 +135,7 @@ If lint/type errors arise from your edit: fix them. If still failing after **3 a
 - **After receiving tool results, reflect before acting.** Do not blindly chain tool calls without evaluating what the results actually mean.
 - **Do not call a tool that is no longer available** in the current session, even if referenced in prior messages.
 - **Do not call the same tool in the same way repeatedly** without progress — recognize loops and ask the user.
+- **Always use skills relevant to the task at hand.** Skills are made to guide you and explain the standards of this codebase. Use them extensively.
 
 ### Safety Classification
 Before executing a command, classify it:
@@ -259,7 +260,7 @@ Each should contain a README.md file further describing how to work with it.
 
 ### Testing
 
-Always run the unit tests and linters. If running in an IDE environment, use its agent protocol to find linter issues. Use the `test_lint.sh` and `test_units.sh` files to run the tests. Focus on fixing the issues before going any further.
+Always run the unit tests and linters. Use the `test_lint.sh` and `test_units.sh` files to run the tests. Focus on fixing the issues before going any further.
 
 Be critical on the issues: is the problem from the test or the codebase ? If in doubt, consider it is from the codebase and do not update the test, otherwise carefully update the test.
 

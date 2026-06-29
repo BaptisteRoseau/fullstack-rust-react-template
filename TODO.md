@@ -7,6 +7,8 @@
     - [ ] Store JWT as httponly cookie in the frontend
     - [ ] Automagically refresh JWT in the frontend when getting a logged out error from the backend
 
+- [ ] Make common trait and objects Mock (config, cache, etc...)
+
 - [ ] Install and use cargo nextest
 
 - [ ] Fix garage
@@ -31,6 +33,7 @@
     - [ ] Create endpoint-specific error response schemas
 - [ ] Add the file name to the upload/download endpoint using the file metadata (currently downloading a blob)
 - [ ] Maybe use the s3 client directly instead of `Storage` since its interface is so good
+- [ ] Standardize API tests
 
 - [ ] Nix & k3s infra
 
