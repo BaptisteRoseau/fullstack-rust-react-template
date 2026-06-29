@@ -92,24 +92,23 @@ use utoipa_swagger_ui::SwaggerUi;
 /// can be called without any running service (database, cache, storage, ...).
 /// It is the single source of truth shared by [`public_routes`] and [`openapi`].
 fn api_router() -> OpenApiRouter<AppState> {
-    OpenApiRouter::<AppState>::new().routes(routes!(
-        ping,
-        get_user,
+    OpenApiRouter::<AppState>::new()
+        .routes(routes!(ping))
+        .routes(routes!(get_user))
         // Object storage
-        upload,
-        download,
-        delete_stored_file,
+        .routes(routes!(upload))
+        .routes(routes!(download))
+        .routes(routes!(delete_stored_file))
         // API Key
-        create_api_key,
-        get_api_key,
-        delete_api_key,
+        .routes(routes!(create_api_key))
+        .routes(routes!(get_api_key))
+        .routes(routes!(delete_api_key))
         // Authentication
-        login,
-        callback,
-        refresh,
-        logout,
-        me,
-    ))
+        .routes(routes!(login))
+        .routes(routes!(callback))
+        .routes(routes!(refresh))
+        .routes(routes!(logout))
+        .routes(routes!(me))
 }
 
 /// Metadata advertised in the generated OpenAPI document.
