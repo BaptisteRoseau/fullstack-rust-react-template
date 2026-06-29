@@ -10,7 +10,9 @@ services:
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
-    command: start-dev # Use 'start' for production with proper hostname/certs
+    # `--import-realm` provisions the `app` realm (self-service registration + the
+    # `webapp` confidential client) from the mounted import directory on first boot.
+    command: start-dev --import-realm # Use 'start' for production with proper hostname/certs
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres_keycloak:5432/keycloak
@@ -29,7 +31,7 @@ services:
     ports:
       - "8090:8080"
     volumes:
-      - ../keycloak/import:/opt/keycloak/data/import:ro
+      - ./keycloak/import:/opt/keycloak/data/import:ro
     depends_on:
       - postgres_keycloak
 
@@ -42,4 +44,3 @@ services:
 
 volumes:
   postgres_keycloak:
-  keycloak:
