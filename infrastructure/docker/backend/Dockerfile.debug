@@ -15,7 +15,6 @@ VOLUME [ "/src" ]
 EXPOSE 9876
 
 ENTRYPOINT [ "cargo", "watch", "--why", "--delay", "1.5", \
-    "-x", "'build -p backend'", \
+    "-x", "'run --bin backend --debug'", \
     "--watch", "./Cargo.toml", \
-    "--watch", "crates", \
-    "--", "cargo", "run", "--bin", "backend" ]
+    "--watch", "crates" ]

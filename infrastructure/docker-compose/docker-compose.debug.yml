@@ -23,8 +23,6 @@ services:
       PORT: 9876
       PROMETHEUS_IP: 0.0.0.0
       PROMETHEUS_PORT: 9100
-      SWAGGER_IP: 0.0.0.0
-      SWAGGER_PORT: 7070
       SWAGGER_UI_PATH: "/v1/docs/swagger-ui"
       SWAGGER_OPENAPI_PATH: "/v1/docs/openapi.json"
       DEBUG: true

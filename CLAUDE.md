@@ -270,13 +270,21 @@ In the assert!, always add a string to display the value of the variables to hel
 Whenever you work in a directory, read the README.md in this directory and the one in all its parent directories if they exists.
 They contain information about how the code should be handled as well as helpful guidelines.
 
+For example, when editing or reading `crates/authenticator/tests/common/containers.rs`, read the following files if they exist and you did not already read them:
+
+- `crates/authenticator/tests/common/README.md`
+- `crates/authenticator/tests/README.md`
+- `crates/authenticator/README.md`
+- `crates/README.md`
+- `./README.md`
+
 If you need Rust crate documentation, instead of using `crates.io` prefer using:
 
 ```bash
 curl file://<absolute path to current project>/target/doc/<the crate you're looking for>/index.html
 ```
 
-If hitting a 404, run `cargo doc` to build the documentaion pages.
+If hitting a 404, run `cargo doc` to build the documentation pages.
 If still hitting a 404 fallback to `crates.io`.
 Pipe bash commands to convert the HTML to text to reduce token usage and only get useful text.
 
@@ -288,3 +296,4 @@ All the services required to run the application can be launched using `docker c
 
 - Backend: `cargo run -p backend`
 - Frontend: `cd frontend; bun run dev`
+- Infrastructure: `docker compose up -d`

@@ -36,7 +36,7 @@ pub enum ApiError {
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> axum::response::Response {
-        let error_trace = format!("{:?}", &self);
+        let error_trace = format!("{:?}", self);
         let api_error: ApiErrorResponse = self.into();
         log_error_trace(api_error.status_code, error_trace);
         api_error.into_response()
