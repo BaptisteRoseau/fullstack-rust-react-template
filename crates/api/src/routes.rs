@@ -81,7 +81,7 @@ use tower_http::{
     timeout::TimeoutLayer,
     trace::TraceLayer,
 };
-use utoipa::openapi::{InfoBuilder, OpenApi};
+use utoipa::openapi::{InfoBuilder, OpenApi, Server};
 use utoipa_axum::{router::OpenApiRouter, routes};
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -127,9 +127,11 @@ fn api_info() -> utoipa::openapi::Info {
 /// Requires no running service, so it can be serialized offline (e.g. to
 /// generate the frontend API types).
 pub fn openapi() -> OpenApi {
+    let server = Server::new("/api");
     let (_, mut openapi) = api_router().split_for_parts();
     openapi.info = api_info();
     openapi.tags = Some(api_tags());
+    openapi.servers = Some(vec![server]);
     openapi
 }
 

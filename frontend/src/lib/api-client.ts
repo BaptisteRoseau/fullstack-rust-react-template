@@ -28,7 +28,7 @@ let refreshPromise: Promise<unknown> | null = null
 
 function refreshSession() {
     if (!refreshPromise) {
-        refreshPromise = api.post('/auth/refresh').finally(() => {
+        refreshPromise = api.post('/api/auth/refresh').finally(() => {
             refreshPromise = null
         })
     }
@@ -46,7 +46,7 @@ api.interceptors.response.use(
         const status = error.response?.status
         const url = config?.url ?? ''
         const isAuthFlow =
-            url.includes('/auth/refresh') || url.includes('/auth/login')
+            url.includes('/api/auth/refresh') || url.includes('/api/auth/login')
 
         // On an expired/invalid access token, silently refresh once and replay the
         // original request. The httpOnly refresh cookie is sent automatically.

@@ -11,4 +11,4 @@ cargo clippy
 
 # Frontend
 cd frontend
-bunx eslint -c eslint.config.js --stats src
+bunx eslint -c eslint.config.cjs --stats src

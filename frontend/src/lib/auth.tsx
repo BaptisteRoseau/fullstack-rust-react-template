@@ -14,11 +14,11 @@ import { api } from './api-client'
 
 const getUser = async (): Promise<User> => {
     // The response interceptor already unwraps to the HTTP body, which is the user.
-    return api.get('/auth/me')
+    return api.get('/api/auth/me')
 }
 
 const logout = (): Promise<void> => {
-    return api.post('/auth/logout')
+    return api.post('/api/auth/logout')
 }
 
 // Entry-point of the BFF flow. The backend redirects the browser to Keycloak's
@@ -28,10 +28,9 @@ const authEntrypoint = (
     redirectTo?: string | null,
 ) => {
     const params = new URLSearchParams()
-    if (screen === 'register') params.set('screen', 'register')
     if (redirectTo) params.set('redirect', redirectTo)
     const query = params.toString()
-    return `${env.API_URL}/auth/login${query ? `?${query}` : ''}`
+    return `${env.API_URL}/auth/${screen}${query ? `?${query}` : ''}`
 }
 
 export const loginUrl = (redirectTo?: string | null) =>
