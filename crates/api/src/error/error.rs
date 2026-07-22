@@ -17,6 +17,8 @@ use crate::{error::ApiErrorResponse, extractors::error::ExtractorError};
 /// The error message will be logged but not sent in the server response.
 #[derive(Debug, thiserror::Error)]
 pub enum ApiError {
+    #[error("Unauthorized")]
+    Unauthorized,
     #[error("Not found: {0}")]
     NotFound(String),
     #[error("Hardware Error: {0}")]

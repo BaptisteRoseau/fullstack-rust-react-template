@@ -73,7 +73,7 @@ pub(crate) async fn get_user(
     uuid: Path<Uuid>,
     opt_user: Option<UserToken>,
     State(state): State<AppState>,
-) -> Result<impl IntoResponse, ApiError> {
+) -> Result<Json<GetUserResponse>, ApiError> {
     todo!()
 }
 ```
@@ -81,7 +81,7 @@ pub(crate) async fn get_user(
 Make sure to:
 
 - Return a `Result<Json<TheCorrespondingResponseModel>, ApiError>`
-- Document the API using a docstring, this will be used to generate user documentation.
+- Document the API using a docstring, this will be used to generate user documentation so b eexhaustive
 - Document the parameters and responses
 - Use the correct HTTP method
 - Use `State(state): State<AppState>` when accessing the state is required

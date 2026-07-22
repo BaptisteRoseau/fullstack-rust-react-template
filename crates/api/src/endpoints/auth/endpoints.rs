@@ -79,18 +79,18 @@ pub(crate) async fn callback(
 pub(crate) async fn refresh(
     State(oauth): State<Arc<OidcClient>>,
     jar: CookieJar,
-) -> (CookieJar, StatusCode) {
+) -> Result<(CookieJar, StatusCode), ApiError> {
     let Some(refresh_token) = jar.get(REFRESH_COOKIE).map(|c| c.value().to_string())
     else {
-        return (jar, StatusCode::UNAUTHORIZED);
+        return Err(ApiError::Unauthorized);
     };
 
     match oauth.refresh(refresh_token).await {
-        Ok(tokens) => (
+        Ok(tokens) => Ok((
             set_token_cookies(jar, &tokens, oauth.cookie_secure()),
             StatusCode::OK,
-        ),
-        Err(_) => (clear_token_cookies(jar), StatusCode::UNAUTHORIZED),
+        )),
+        Err(_) => Err(ApiError::Unauthorized),
     }
 }
 
@@ -105,11 +105,11 @@ pub(crate) async fn refresh(
 pub(crate) async fn logout(
     State(oauth): State<Arc<OidcClient>>,
     jar: CookieJar,
-) -> (CookieJar, StatusCode) {
+) -> Result<(CookieJar, StatusCode), ApiError> {
     if let Some(refresh_token) = jar.get(REFRESH_COOKIE).map(|c| c.value().to_string()) {
         let _ = oauth.logout(refresh_token).await;
     }
-    (clear_token_cookies(jar), StatusCode::NO_CONTENT)
+    Ok((clear_token_cookies(jar), StatusCode::NO_CONTENT))
 }
 
 /// Return the current user's profile from Keycloak's userinfo endpoint.

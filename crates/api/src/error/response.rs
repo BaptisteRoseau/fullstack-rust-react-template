@@ -126,6 +126,7 @@ Errors should be converted using a `match` arm as follows:
 impl From<ApiError> for ApiErrorResponse {
     fn from(val: ApiError) -> Self {
         match val {
+            ApiError::Unauthorized => ApiErrorResponse::unauthorized(),
             ApiError::NotFound(_) => ApiErrorResponse::not_found(),
             ApiError::IoError(_) => ApiErrorResponse::unexpected(),
             ApiError::CoreError(e) => e.into(),

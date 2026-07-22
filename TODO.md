@@ -20,6 +20,7 @@
     are are we gonna log their debug info ?
     Maybe another `ApiErrorRepresentation`, intermediate between the `ApiErrorResponse` and `ApiError` ?
 - [ ] Include dev debug errors in the response in debug mode (release should not even have the debug field in the response (#[debug_assertion] ?))
+- [ ] Add an utoipa model for the rate limiter
 
 ## AI infra & Frontend
 
