@@ -41,18 +41,12 @@ services:
 
   mailhog:
     image: mailhog/mailhog:latest
-    ports:
-      - "1025:1025" # SMTP server
-      - "8025:8025" # Web UI
-    networks:
-      keycloak:
-
-  mailhog:
-    image: mailhog/mailhog:latest
     container_name: mailhog
     ports:
-      - "1025:1025" # SMTP server port
-      - "8030:8025" # Web UI port
+      - "1025:1025" # SMTP server
+      - "8030:8025" # Web UI
+    networks:
+      keycloak:
 
 volumes:
   postgres_keycloak:
