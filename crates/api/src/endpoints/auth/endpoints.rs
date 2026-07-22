@@ -21,13 +21,13 @@ use crate::{
     models::UserToken,
 };
 
-/// Start the login (or registration) flow by redirecting the browser to Keycloak.
+/// Start the login (or registration) flow by redirecting the browser to the OIDC provider.
 #[utoipa::path(
     get,
     path = "/auth/login",
     params(GetLoginParams),
     responses(
-        (status = SEE_OTHER, description = "Redirect to the Keycloak login or registration page."),
+        (status = SEE_OTHER, description = "Redirect to the login or registration page."),
     ),
 )]
 pub(crate) async fn login(
@@ -94,7 +94,7 @@ pub(crate) async fn refresh(
     }
 }
 
-/// Revoke the session at Keycloak and clear the auth cookies.
+/// Revoke the session at the OIDC provider and clear the auth cookies.
 #[utoipa::path(
     post,
     path = "/auth/logout",
@@ -112,7 +112,7 @@ pub(crate) async fn logout(
     Ok((clear_token_cookies(jar), StatusCode::NO_CONTENT))
 }
 
-/// Return the current user's profile from Keycloak's userinfo endpoint.
+/// Return the current user's profile from the OIDC provider's userinfo endpoint.
 #[utoipa::path(
     get,
     path = "/auth/me",

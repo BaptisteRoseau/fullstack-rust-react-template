@@ -3,14 +3,14 @@ use uuid::Uuid;
 
 pub struct UserToken {
     pub id: Uuid,
-    pub realm: String,
+    pub _realm: String,
 }
 
 impl From<AuthUserToken> for UserToken {
     fn from(value: AuthUserToken) -> Self {
         Self {
             id: value.id,
-            realm: value.realm,
+            _realm: value.realm,
         }
     }
 }
