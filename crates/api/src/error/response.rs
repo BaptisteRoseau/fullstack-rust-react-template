@@ -132,7 +132,7 @@ impl From<ApiError> for ApiErrorResponse {
             ApiError::CoreError(e) => e.into(),
             ApiError::ExtractorError(e) => e.into(),
             ApiError::StorageError(_) => ApiErrorResponse::unexpected(),
-            ApiError::TooManyRequests => ApiErrorResponse::too_many_requests(),
+            ApiError::TooManyRequests(_) => ApiErrorResponse::too_many_requests(),
             ApiError::Unexpected(e) => e.into(),
             ApiError::AuthenticatorError(e) => e.into(),
         }
@@ -200,7 +200,10 @@ impl From<Box<AuthenticatorError>> for ApiErrorResponse {
 impl From<GovernorError> for ApiError {
     fn from(val: GovernorError) -> Self {
         match val {
-            GovernorError::TooManyRequests { .. } => ApiError::TooManyRequests,
+            GovernorError::TooManyRequests {
+                wait_time,
+                headers: _,
+            } => ApiError::TooManyRequests(wait_time),
             other => ApiError::Unexpected(other.into()),
         }
     }
