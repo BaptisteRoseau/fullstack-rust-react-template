@@ -15,6 +15,11 @@ use crate::{
     models::UserToken,
 };
 
+crate::endpoints::macros::declare_tag!(
+    "API Key",
+    "Create, inspect and revoke API keys."
+);
+
 fn parse_permissions(raw: &[String]) -> Vec<rbac::Permissions> {
     raw.iter()
         .filter_map(|s| serde_json::from_value(serde_json::Value::String(s.clone())).ok())
@@ -26,6 +31,7 @@ fn parse_permissions(raw: &[String]) -> Vec<rbac::Permissions> {
 #[utoipa::path(
     post,
     path = "/api-key",
+    tag = TAG,
     request_body = CreateApiKeyRequest,
     responses(
         (status = CREATED, body = CreateApiKeyResponse, description = "API key created."),
@@ -55,6 +61,7 @@ pub(crate) async fn create_api_key(
 #[utoipa::path(
     get,
     path = "/api-key/{id}",
+    tag = TAG,
     params(("id" = Uuid, Path, description = "API key ID")),
     responses(
         (status = OK, body = GetApiKeyResponse, description = "API key metadata."),
@@ -89,6 +96,7 @@ pub(crate) async fn get_api_key(
 #[utoipa::path(
     delete,
     path = "/api-key/{id}",
+    tag = TAG,
     params(("id" = Uuid, Path, description = "API key ID")),
     responses(
         (status = NO_CONTENT, description = "API key deleted."),

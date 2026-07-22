@@ -21,10 +21,16 @@ use crate::{
     models::UserToken,
 };
 
+crate::endpoints::macros::declare_tag!(
+    "Authentication",
+    "Login, registration, token refresh and logout via OIDC."
+);
+
 /// Start the login flow by redirecting the browser to the OIDC provider.
 #[utoipa::path(
     get,
     path = "/auth/login",
+    tag = TAG,
     params(GetLoginParams),
     responses(
         (status = SEE_OTHER, description = "Redirect to the login page."),
@@ -44,6 +50,7 @@ pub(crate) async fn login(
 #[utoipa::path(
     get,
     path = "/auth/register",
+    tag = TAG,
     params(GetLoginParams),
     responses(
         (status = SEE_OTHER, description = "Redirect to the login or registration page."),
@@ -63,6 +70,7 @@ pub(crate) async fn register(
 #[utoipa::path(
     get,
     path = "/auth/callback",
+    tag = TAG,
     params(GetCallbackParams),
     responses(
         (status = SEE_OTHER, description = "Tokens stored in httpOnly cookies; redirect to the frontend."),
@@ -88,6 +96,7 @@ pub(crate) async fn callback(
 #[utoipa::path(
     post,
     path = "/auth/refresh",
+    tag = TAG,
     responses(
         (status = OK, description = "Access token refreshed; cookies updated."),
         (status = UNAUTHORIZED, description = "No valid refresh token; the user must log in again."),
@@ -115,6 +124,7 @@ pub(crate) async fn refresh(
 #[utoipa::path(
     post,
     path = "/auth/logout",
+    tag = TAG,
     responses(
         (status = NO_CONTENT, description = "Session revoked and cookies cleared."),
     ),
@@ -133,6 +143,7 @@ pub(crate) async fn logout(
 #[utoipa::path(
     get,
     path = "/auth/me",
+    tag = TAG,
     responses(
         (status = OK, body = GetMeResponse, description = "The authenticated user's profile."),
         (status = UNAUTHORIZED, body = ApiErrorResponse, description = "Not authenticated."),

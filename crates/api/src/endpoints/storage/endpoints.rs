@@ -13,10 +13,16 @@ use crate::endpoints::storage::models::DeleteRemoveResponse;
 use crate::error::{ApiError, ApiErrorResponse};
 use crate::models::UserToken;
 
+crate::endpoints::macros::declare_tag!(
+    "Storage",
+    "Upload, download and delete stored files."
+);
+
 /// Upload a file to storage.
 #[utoipa::path(
     put,
     path = "/storage/upload/{file}",
+    tag = TAG,
     request_body(content = String, content_type = "application/octet-stream", description = "The raw file content"),
     params(
         ("file" = String, Path, description = "The file path/name to store"),
@@ -50,6 +56,7 @@ pub(crate) async fn upload(
 #[utoipa::path(
     get,
     path = "/storage/download/{file}",
+    tag = TAG,
     params(
         ("file" = String, Path, description = "The file path/name to retrieve"),
     ),
@@ -84,6 +91,7 @@ pub(crate) async fn download(
 #[utoipa::path(
     delete,
     path = "/storage/delete/{file}",
+    tag = TAG,
     params(
         ("file" = String, Path, description = "The file path/name to delete"),
     ),

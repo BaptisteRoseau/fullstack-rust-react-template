@@ -41,18 +41,19 @@ use crate::{
     endpoints::{
         api_key::endpoints::{
             __path_create_api_key, __path_delete_api_key, __path_get_api_key,
-            create_api_key, delete_api_key, get_api_key,
+            create_api_key, delete_api_key, get_api_key, tag as api_key_tag,
         },
         auth::endpoints::{
             __path_callback, __path_login, __path_logout, __path_me, __path_refresh,
             __path_register, callback, login, logout, me, refresh, register,
+            tag as auth_tag,
         },
-        ping::endpoints::{__path_ping, ping},
+        ping::endpoints::{__path_ping, ping, tag as ping_tag},
         storage::endpoints::{
             __path_delete_stored_file, __path_download, __path_upload,
-            delete_stored_file, download, upload,
+            delete_stored_file, download, tag as storage_tag, upload,
         },
-        user::endpoints::{__path_get_user, get_user},
+        user::endpoints::{__path_get_user, get_user, tag as user_tag},
     },
     middlewares::rate_limiter::rate_limiter_layer,
     observability::{MakeRequestUuidV7, make_request_span},
@@ -128,17 +129,30 @@ fn api_info() -> utoipa::openapi::Info {
 pub fn openapi() -> OpenApi {
     let (_, mut openapi) = api_router().split_for_parts();
     openapi.info = api_info();
+    openapi.tags = Some(api_tags());
     openapi
+}
+
+/// Swagger categories, in display order. Each entry's name and description live
+/// next to the endpoints it groups (see `endpoints::macros::declare_tag`).
+fn api_tags() -> Vec<utoipa::openapi::Tag> {
+    vec![
+        auth_tag(),
+        user_tag(),
+        storage_tag(),
+        api_key_tag(),
+        ping_tag(),
+    ]
 }
 
 /// Public routes that qre exposed to the world
 pub fn public_routes(config: &Config, state: AppState) -> Router {
-    let (api_routes, openapi) = api_router().split_for_parts();
+    let (api_routes, _) = api_router().split_for_parts();
     // The whole API (typed endpoints + auth BFF) lives under `/api`, matching the
     // frontend's `VITE_APP_API_URL`. Swagger keeps its own absolute path at the root.
     let routes = Router::new()
         .nest("/api", api_routes)
-        .merge(swagger(config, openapi));
+        .merge(swagger(config, openapi()));
 
     // Middlewares are executed from the last layer defined here to the first
     let middleware = ServiceBuilder::new()
