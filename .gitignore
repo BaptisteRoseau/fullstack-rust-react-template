@@ -40,3 +40,7 @@ packages/
 .env
 *.pnp
 *.pnp.js
+
+
+# MCP and AI tools
+.serena
