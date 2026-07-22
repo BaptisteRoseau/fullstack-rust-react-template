@@ -28,9 +28,9 @@ with `admin` / `admin`.
 | Setting | Value | Why |
 |---------|-------|-----|
 | `registrationAllowed` | `true` | Enables the self-service registration page. |
-| `verifyEmail` | `false` | New users are active immediately, so the flow works without an SMTP server. |
-| `accessTokenLifespan` | `60` (seconds) | Short-lived tokens, to exercise the silent refresh. |
-| `sslRequired` | `none` | Dev only — do not use in production. |
+| `verifyEmail` | `true` | New users must confirm their address; the mail is caught by Mailhog (http://localhost:8025), so no real SMTP server is needed. |
+| `accessTokenLifespan` | `300` (seconds) | Short-lived tokens, to exercise the silent refresh. |
+| `sslRequired` | `external` | Dev only — allows plain HTTP on localhost. |
 
 ### Clients
 
@@ -79,3 +79,8 @@ and `family_name` for display.
 > Re-importing: `--import-realm` only imports a realm that does not already exist. To re-apply
 > a changed realm JSON in development, remove the Keycloak database volume
 > (`postgres_keycloak`) and recreate the containers.
+>
+> Beware when refreshing this file from an admin-console export: a partial export silently
+> drops the `clients` section, which leaves the realm without `webapp` and `backend` and
+> breaks the whole login flow. Always check that both clients are still present after
+> re-exporting.
