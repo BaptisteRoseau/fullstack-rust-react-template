@@ -39,6 +39,20 @@ services:
     environment:
       DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DATABASE}?sslmode=disable"
 
+  redis:
+    image: redis:7-alpine
+    container_name: app_redis
+    networks:
+      - net
+    ports:
+      - "${REDIS_PORT}:6379"
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   garage:
     image: dxflrs/garage:v2.3.0
     container_name: s3
