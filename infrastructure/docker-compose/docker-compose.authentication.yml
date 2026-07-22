@@ -20,10 +20,8 @@ services:
       KC_DB_URL: jdbc:postgresql://postgres_keycloak:5432/keycloak
       KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: password
-      KEYCLOAK_BOOTSTRAP_ADMIN: admin
-      KEYCLOAK_BOOTSTRAP_ADMIN_PASSWORD: admin
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
       KC_HOSTNAME_STRICT: false
@@ -33,7 +31,7 @@ services:
     ports:
       - "8090:8080"
     volumes:
-      - ./keycloak/import:/opt/keycloak/data/import:ro
+      - ../keycloak/import:/opt/keycloak/data/import:ro
     depends_on:
       - postgres_keycloak
     networks:
