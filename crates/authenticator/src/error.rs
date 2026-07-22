@@ -18,6 +18,10 @@ pub enum AuthenticatorError {
     InvalidRealm(String),
     #[error("OIDC error: {0}")]
     Oidc(String),
+    /// The provider rejected the token: it was revoked (logout elsewhere,
+    /// admin-terminated session) or is otherwise no longer accepted.
+    #[error("The OIDC provider rejected the token")]
+    OidcRejected,
     #[error("Invalid or expired login state")]
     InvalidState,
     #[error("{0}")]

@@ -191,6 +191,12 @@ impl From<Box<AuthenticatorError>> for ApiErrorResponse {
             // An expired token must surface as 401 TokenExpired so the frontend can
             // refresh it transparently, not as a 500.
             AuthenticatorError::Expired => Self::token_expired(),
+            // The session was revoked provider-side (logout elsewhere): the caller must
+            // log in again, so answer 401 rather than a 500.
+            AuthenticatorError::OidcRejected => Self::unauthorized(),
+            // A forged, replayed or expired CSRF state on the callback: the caller must
+            // restart the login flow.
+            AuthenticatorError::InvalidState => Self::unauthorized(),
             AuthenticatorError::JwtError(e) => e.into(),
             _ => ApiErrorResponse::unexpected(),
         }

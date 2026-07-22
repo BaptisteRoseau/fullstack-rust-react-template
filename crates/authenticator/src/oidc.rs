@@ -227,11 +227,14 @@ impl OidcClient {
             .await
             .map_err(|e| oidc_err(format!("userinfo request failed: {e}")))?;
 
-        if !response.status().is_success() {
-            return Err(oidc_err(format!(
-                "userinfo returned status {}",
-                response.status()
-            )));
+        let status = response.status();
+        // The provider answers 401/403 for a revoked or otherwise refused token; that
+        // is a client-side auth failure, not an internal error.
+        if matches!(status.as_u16(), 401 | 403) {
+            return Err(Box::new(AuthenticatorError::OidcRejected));
+        }
+        if !status.is_success() {
+            return Err(oidc_err(format!("userinfo returned status {status}")));
         }
 
         response
