@@ -27,7 +27,7 @@ type LoginBody = {
 }
 
 export const authHandlers = [
-    http.post(`${env.API_URL}/auth/register`, async ({ request }) => {
+    http.post(`${env.API_URL}/api/auth/register`, async ({ request }) => {
         await networkDelay()
         try {
             const userObject = (await request.json()) as RegisterBody
@@ -110,7 +110,7 @@ export const authHandlers = [
         }
     }),
 
-    http.post(`${env.API_URL}/auth/login`, async ({ request }) => {
+    http.post(`${env.API_URL}/api/auth/login`, async ({ request }) => {
         await networkDelay()
 
         try {
@@ -134,7 +134,7 @@ export const authHandlers = [
         }
     }),
 
-    http.post(`${env.API_URL}/auth/logout`, async () => {
+    http.post(`${env.API_URL}/api/auth/logout`, async () => {
         await networkDelay()
 
         // todo: remove once tests in Github Actions are fixed
@@ -152,13 +152,13 @@ export const authHandlers = [
 
     // The real backend silently refreshes via an httpOnly cookie; the mock has no
     // refresh token, so it always reports "logged out".
-    http.post(`${env.API_URL}/auth/refresh`, async () => {
+    http.post(`${env.API_URL}/api/auth/refresh`, async () => {
         await networkDelay()
 
         return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }),
 
-    http.get(`${env.API_URL}/auth/me`, async ({ cookies }) => {
+    http.get(`${env.API_URL}/api/auth/me`, async ({ cookies }) => {
         await networkDelay()
 
         try {

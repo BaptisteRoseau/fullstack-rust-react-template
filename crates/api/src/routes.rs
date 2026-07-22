@@ -156,34 +156,53 @@ pub fn public_routes(config: &Config, state: AppState) -> Router {
         .nest("/api", api_routes)
         .merge(swagger(config, openapi()));
 
-    // Middlewares are executed from the last layer defined here to the first
+    with_middlewares(routes, config).with_state(state)
+}
+
+/// Wraps `routes` in the production middleware stack.
+///
+/// Extracted from [`public_routes`] so the exact layer ordering can be exercised
+/// by tests without standing up an [`AppState`]: a test that hand-rolls its own
+/// stack proves nothing about the one that ships.
+pub(crate) fn with_middlewares<S>(routes: Router<S>, config: &Config) -> Router<S>
+where
+    S: Clone + Send + Sync + 'static,
+{
+    // `ServiceBuilder` wraps outside-in: the first layer declared here is the
+    // outermost one, so a request traverses them top to bottom and the response
+    // travels back up bottom to top. Order is load-bearing below.
     let middleware = ServiceBuilder::new()
-        // Avoid logging there headers in responses
-        .layer(SetSensitiveResponseHeadersLayer::new(once(AUTHORIZATION)))
-        // Scope every event of the request under a span carrying the request_id
-        .layer(TraceLayer::new_for_http().make_span_with(make_request_span))
-        // Reuse an inbound x-request-id or mint a fresh UUID v7. Must run before
-        // the trace layer so the span can read the id from the request headers.
+        // Outermost, so no later layer can log the request's Authorization header
+        .layer(SetSensitiveRequestHeadersLayer::new(once(AUTHORIZATION)))
+        // Reuse an inbound x-request-id or mint a fresh UUID v7. Must wrap the trace
+        // layer so the span can read the id from the request headers.
         .layer(SetRequestIdLayer::x_request_id(MakeRequestUuidV7))
         // Echo the request id back to the client in the response headers
         .layer(PropagateRequestIdLayer::x_request_id())
+        // Scope every event of the request under a span carrying the request_id
+        .layer(TraceLayer::new_for_http().make_span_with(make_request_span))
+        // Inside the trace layer, so responses are scrubbed before it sees them
+        .layer(SetSensitiveResponseHeadersLayer::new(once(AUTHORIZATION)))
         // Reflect the frontend origin and allow credentials so the browser sends and
         // accepts the httpOnly auth cookies (a wildcard origin is rejected with creds).
+        // Wraps the rate limiter so even a 429 carries the CORS headers the browser
+        // needs to read it.
         .layer(cors_layer(config))
         .layer(NormalizePathLayer::trim_trailing_slash())
-        .layer(CompressionLayer::new().quality(CompressionLevel::Best))
-        .layer(RequestDecompressionLayer::new())
+        // Bounds everything below it, decompression included
         .layer(TimeoutLayer::with_status_code(
             StatusCode::REQUEST_TIMEOUT,
             Duration::from_secs(config.api.timeout_sec.into()),
         ))
-        // Applied as the outermost layer so rate-limited clients are rejected before
-        // any other middleware runs.
-        .layer(rate_limiter_layer(config))
-        // Avoid logging these headers content in requests
-        .layer(SetSensitiveRequestHeadersLayer::new(once(AUTHORIZATION)));
+        .layer(RequestDecompressionLayer::new())
+        .layer(CompressionLayer::new().quality(CompressionLevel::Best))
+        // Innermost: the governor layer only accepts a service answering a plain
+        // `axum::response::Response`, which the compression layers above rewrap.
+        // It still rejects abusive callers before the router picks a handler, and
+        // its 429 travels back out through the CORS and tracing layers.
+        .layer(rate_limiter_layer(config));
 
-    routes.layer(middleware).with_state(state)
+    routes.layer(middleware)
 }
 
 /// CORS layer reflecting the configured frontend origin and allowing credentials,

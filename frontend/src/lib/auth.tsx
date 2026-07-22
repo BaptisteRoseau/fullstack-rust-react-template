@@ -1,3 +1,4 @@
+import { isAxiosError } from 'axios'
 import { configureAuth } from 'react-query-auth'
 import { Navigate, useLocation } from 'react-router'
 
@@ -12,9 +13,20 @@ import { api } from './api-client'
 // Code + PKCE flow and stores the tokens in httpOnly cookies. The frontend never
 // sees the tokens; it only reads the current user and triggers logout.
 
-const getUser = async (): Promise<User> => {
-    // The response interceptor already unwraps to the HTTP body, which is the user.
-    return api.get('/api/auth/me')
+const getUser = async (): Promise<User | null> => {
+    try {
+        // The response interceptor already unwraps to the HTTP body, which is the user.
+        return await api.get('/api/auth/me')
+    } catch (error) {
+        // Being logged out is a normal state, not a failure: resolve to "no user"
+        // so the app renders its public view. The interceptor has already tried a
+        // silent token refresh by the time a 401 reaches us. Any other failure is
+        // genuine and stays an error (the interceptor toasts it).
+        if (isAxiosError(error) && error.response?.status === 401) {
+            return null
+        }
+        throw error
+    }
 }
 
 const logout = (): Promise<void> => {
@@ -30,7 +42,7 @@ const authEntrypoint = (
     const params = new URLSearchParams()
     if (redirectTo) params.set('redirect', redirectTo)
     const query = params.toString()
-    return `${env.API_URL}/auth/${screen}${query ? `?${query}` : ''}`
+    return `${env.API_URL}/api/auth/${screen}${query ? `?${query}` : ''}`
 }
 
 export const loginUrl = (redirectTo?: string | null) =>

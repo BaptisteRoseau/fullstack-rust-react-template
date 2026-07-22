@@ -49,17 +49,21 @@ pub(crate) fn make_request_span<B>(request: &Request<B>) -> Span {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::routes::with_middlewares;
     use axum::Router;
     use axum::body::Body;
+    use axum::extract::ConnectInfo;
     use axum::http::{HeaderMap, StatusCode};
     use axum::routing::get;
+    use config::{
+        ApiConfig, AuthenticatorConfig, BindingConfig, Config, OidcConfig,
+        PostgresConfig, RedisConfig, S3Config,
+    };
     use std::collections::HashMap;
+    use std::net::{IpAddr, Ipv4Addr, SocketAddr};
     use std::sync::{Arc, Mutex};
     use std::time::Duration;
-    use tower::ServiceBuilder;
     use tower::ServiceExt;
-    use tower_http::request_id::{PropagateRequestIdLayer, SetRequestIdLayer};
-    use tower_http::trace::TraceLayer;
     use tracing::field::{Field, Visit};
     use tracing_subscriber::layer::{Context, Layer};
     use tracing_subscriber::prelude::*;
@@ -163,13 +167,75 @@ mod tests {
         StatusCode::OK
     }
 
+    /// A configuration carrying only what the middleware stack reads. The rate
+    /// limit is generous enough never to reject the requests these tests send.
+    fn test_config() -> Config {
+        Config {
+            debug: false,
+            log_json: false,
+            api: ApiConfig {
+                timeout_sec: 30,
+                rate_limiter_refresh_per_second: 1,
+                rate_limiter_burst_size: 1_000,
+            },
+            server: BindingConfig {
+                ip: IpAddr::V4(Ipv4Addr::LOCALHOST),
+                port: 8080,
+            },
+            s3: S3Config {
+                url: String::new(),
+                user: String::new(),
+                password: String::new(),
+            },
+            redis: RedisConfig { url: String::new() },
+            postgres: PostgresConfig {
+                host: String::new(),
+                port: 5432,
+                database: String::new(),
+                user: String::new(),
+                password: String::new(),
+            },
+            prometheus: None,
+            swagger: None,
+            authenticator: AuthenticatorConfig {
+                provider_url: String::new(),
+                audiences: Vec::new(),
+            },
+            oidc: OidcConfig {
+                issuer_url: String::new(),
+                client_id: String::new(),
+                client_secret: String::new(),
+                redirect_url: String::new(),
+                frontend_url: "http://localhost:5173".to_owned(),
+                cookie_secure: false,
+            },
+        }
+    }
+
+    /// The very middleware stack `public_routes` ships, wrapped around a probe
+    /// handler. Hand-rolling the layer order here would defeat the purpose: the
+    /// production ordering bug this guards against was invisible to a test that
+    /// built its own stack.
     fn test_app() -> Router {
-        Router::new().route("/", get(handler)).layer(
-            ServiceBuilder::new()
-                .layer(SetRequestIdLayer::x_request_id(MakeRequestUuidV7))
-                .layer(TraceLayer::new_for_http().make_span_with(make_request_span))
-                .layer(PropagateRequestIdLayer::x_request_id()),
-        )
+        with_middlewares(Router::new().route("/", get(handler)), &test_config())
+    }
+
+    /// Builds a request the production stack can serve. The rate limiter keys on
+    /// the peer address, which only a real connection would otherwise provide.
+    fn request(request_id: Option<&str>, nonce: &str) -> axum::http::Request<Body> {
+        let mut builder = axum::http::Request::builder()
+            .uri("/")
+            .header(NONCE_HEADER, nonce);
+        if let Some(request_id) = request_id {
+            builder = builder.header(REQUEST_ID_HEADER, request_id);
+        }
+
+        let mut request = builder.body(Body::empty()).unwrap();
+        request.extensions_mut().insert(ConnectInfo(SocketAddr::new(
+            IpAddr::V4(Ipv4Addr::LOCALHOST),
+            4242,
+        )));
+        request
     }
 
     #[tokio::test]
@@ -186,14 +252,7 @@ mod tests {
         let requests = ids.iter().cloned().map(|id| {
             let app = app.clone();
             async move {
-                let request = axum::http::Request::builder()
-                    .uri("/")
-                    .header(REQUEST_ID_HEADER, &id)
-                    .header(NONCE_HEADER, &id)
-                    .body(Body::empty())
-                    .unwrap();
-
-                let response = app.oneshot(request).await.unwrap();
+                let response = app.oneshot(request(Some(&id), &id)).await.unwrap();
 
                 let echoed = response
                     .headers()
@@ -219,6 +278,51 @@ mod tests {
                  but the captured mapping was {seen:?}"
             );
         }
+    }
+
+    /// Guards the layer ordering itself: when the request-id layer is applied
+    /// after the trace layer, `make_request_span` finds no `x-request-id` on the
+    /// request and every log line degrades to `request_id=unknown`.
+    #[tokio::test]
+    async fn a_generated_request_id_reaches_the_span() {
+        let seen = Arc::new(Mutex::new(HashMap::<String, String>::new()));
+        let subscriber = tracing_subscriber::registry().with(CaptureLayer {
+            seen: Arc::clone(&seen),
+        });
+        let _guard = tracing::subscriber::set_default(subscriber);
+
+        let nonce = "no-inbound-request-id";
+        let response = test_app()
+            .oneshot(request(None, nonce))
+            .await
+            .expect("the middleware stack must serve the request");
+
+        let echoed = response
+            .headers()
+            .get(REQUEST_ID_HEADER)
+            .and_then(|value| value.to_str().ok())
+            .map(str::to_owned);
+        assert!(
+            echoed.is_some(),
+            "the stack must mint and echo an x-request-id, got {echoed:?}"
+        );
+
+        let seen = seen.lock().unwrap();
+        let logged = seen.get(nonce).cloned();
+        assert_eq!(
+            logged, echoed,
+            "the span must carry the very id echoed to the caller, logged {logged:?} vs echoed {echoed:?}"
+        );
+
+        let logged = logged.unwrap_or_default();
+        assert_ne!(
+            logged, "unknown",
+            "the span must carry a real request id, not the `unknown` fallback; captured mapping was {seen:?}"
+        );
+        assert!(
+            Uuid::parse_str(&logged).is_ok(),
+            "a minted request id must be a UUID, got {logged:?}"
+        );
     }
 
     /// Drives every future concurrently to completion without pulling in an

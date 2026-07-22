@@ -44,6 +44,12 @@ export const AppProvider = ({ children }: AppProviderProps) => {
                                         <Spinner size="xl" />
                                     </div>
                                 )}
+                                // Resolving the current user must never take the
+                                // whole app down. On failure we render the public
+                                // view, exactly as for an anonymous visitor; the
+                                // api client has already reported the error as a
+                                // notification.
+                                renderError={() => <>{children}</>}
                             >
                                 {children}
                             </AuthLoader>
