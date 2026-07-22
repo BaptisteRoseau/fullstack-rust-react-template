@@ -2,6 +2,7 @@ use app_core::error::CoreError;
 use authenticator::error::AuthenticatorError;
 use axum::{http::StatusCode, response::IntoResponse};
 use std::fmt::Debug;
+use tower_governor::GovernorError;
 
 use storage::error::StorageError;
 
@@ -33,6 +34,22 @@ pub enum ApiError {
     #[error("Unexpected Error")]
     Unexpected(#[from] anyhow::Error),
 }
+
+impl From<GovernorError> for ApiError {
+    fn from(val: GovernorError) -> Self {
+        match val {
+            GovernorError::TooManyRequests {
+                wait_time,
+                headers: _,
+            } => ApiError::TooManyRequests(wait_time),
+            other => ApiError::Unexpected(other.into()),
+        }
+    }
+}
+
+/* =======================================================================================
+* API RESPONSE CONVERSION & ERROR LOGGING
+======================================================================================= */
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> axum::response::Response {

@@ -5,7 +5,6 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use jsonwebtoken::errors::ErrorKind as JwtErrorKind;
 use serde::Serialize;
-use tower_governor::errors::GovernorError;
 use utoipa::ToSchema;
 
 /// An enum representing and API error.
@@ -193,18 +192,6 @@ impl From<Box<AuthenticatorError>> for ApiErrorResponse {
             AuthenticatorError::Expired => Self::token_expired(),
             AuthenticatorError::JwtError(e) => e.into(),
             _ => ApiErrorResponse::unexpected(),
-        }
-    }
-}
-
-impl From<GovernorError> for ApiError {
-    fn from(val: GovernorError) -> Self {
-        match val {
-            GovernorError::TooManyRequests {
-                wait_time,
-                headers: _,
-            } => ApiError::TooManyRequests(wait_time),
-            other => ApiError::Unexpected(other.into()),
         }
     }
 }
