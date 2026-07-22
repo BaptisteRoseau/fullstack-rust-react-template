@@ -21,24 +21,41 @@ use crate::{
     models::UserToken,
 };
 
-/// Start the login (or registration) flow by redirecting the browser to the OIDC provider.
+/// Start the login flow by redirecting the browser to the OIDC provider.
 #[utoipa::path(
     get,
     path = "/auth/login",
     params(GetLoginParams),
     responses(
-        (status = SEE_OTHER, description = "Redirect to the login or registration page."),
+        (status = SEE_OTHER, description = "Redirect to the login page."),
     ),
 )]
 pub(crate) async fn login(
     State(oauth): State<Arc<OidcClient>>,
     Query(params): Query<GetLoginParams>,
 ) -> Result<Redirect, ApiError> {
-    let screen = match params.screen.as_deref() {
-        Some("register") => LoginScreen::Register,
-        _ => LoginScreen::Login,
-    };
-    let url = oauth.authorize_url(screen, params.redirect).await?;
+    let url = oauth
+        .authorize_url(LoginScreen::Login, params.redirect)
+        .await?;
+    Ok(Redirect::to(&url))
+}
+
+/// Start the registration flow by redirecting the browser to the OIDC provider.
+#[utoipa::path(
+    get,
+    path = "/auth/register",
+    params(GetLoginParams),
+    responses(
+        (status = SEE_OTHER, description = "Redirect to the login or registration page."),
+    ),
+)]
+pub(crate) async fn register(
+    State(oauth): State<Arc<OidcClient>>,
+    Query(params): Query<GetLoginParams>,
+) -> Result<Redirect, ApiError> {
+    let url = oauth
+        .authorize_url(LoginScreen::Register, params.redirect)
+        .await?;
     Ok(Redirect::to(&url))
 }
 

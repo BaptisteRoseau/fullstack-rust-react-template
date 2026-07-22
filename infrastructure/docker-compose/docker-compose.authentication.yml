@@ -7,6 +7,8 @@ services:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: password
+    networks:
+      keycloak:
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
@@ -34,6 +36,16 @@ services:
       - ./keycloak/import:/opt/keycloak/data/import:ro
     depends_on:
       - postgres_keycloak
+    networks:
+      keycloak:
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "1025:1025" # SMTP server
+      - "8025:8025" # Web UI
+    networks:
+      keycloak:
 
   mailhog:
     image: mailhog/mailhog:latest
@@ -44,3 +56,6 @@ services:
 
 volumes:
   postgres_keycloak:
+
+networks:
+  keycloak:

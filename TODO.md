@@ -102,6 +102,8 @@
 - [x] Add tracing middleware (set sensitive headers before)
 - [x] Add timeout middleware
 - [x] Add Swagger UI & openapi.json
+    - [ ] Add categories in the Swagger UI (Auth, Storage...)
+    - [ ] Add auth support and auth documentation in the swagger UI
 - [ ] Add rate limiter middleware
 - [ ] Aggregate middlewares cleanly
 - [ ] Convert `app_core` models to API models and vice-versa

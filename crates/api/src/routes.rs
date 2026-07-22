@@ -45,7 +45,7 @@ use crate::{
         },
         auth::endpoints::{
             __path_callback, __path_login, __path_logout, __path_me, __path_refresh,
-            callback, login, logout, me, refresh,
+            __path_register, callback, login, logout, me, refresh, register,
         },
         ping::endpoints::{__path_ping, ping},
         storage::endpoints::{
@@ -105,6 +105,7 @@ fn api_router() -> OpenApiRouter<AppState> {
         .routes(routes!(delete_api_key))
         // Authentication
         .routes(routes!(login))
+        .routes(routes!(register))
         .routes(routes!(callback))
         .routes(routes!(refresh))
         .routes(routes!(logout))
@@ -139,17 +140,17 @@ pub fn public_routes(config: &Config, state: AppState) -> Router {
         .nest("/api", api_routes)
         .merge(swagger(config, openapi));
 
+    // Middlewares are executed from the last layer defined here to the first
     let middleware = ServiceBuilder::new()
-        // Avoid logging these headers content
-        .layer(SetSensitiveRequestHeadersLayer::new(once(AUTHORIZATION)))
+        // Avoid logging there headers in responses
+        .layer(SetSensitiveResponseHeadersLayer::new(once(AUTHORIZATION)))
+        // Scope every event of the request under a span carrying the request_id
+        .layer(TraceLayer::new_for_http().make_span_with(make_request_span))
         // Reuse an inbound x-request-id or mint a fresh UUID v7. Must run before
         // the trace layer so the span can read the id from the request headers.
         .layer(SetRequestIdLayer::x_request_id(MakeRequestUuidV7))
-        // Scope every event of the request under a span carrying the request_id
-        .layer(TraceLayer::new_for_http().make_span_with(make_request_span))
         // Echo the request id back to the client in the response headers
         .layer(PropagateRequestIdLayer::x_request_id())
-        .layer(SetSensitiveResponseHeadersLayer::new(once(AUTHORIZATION)))
         // Reflect the frontend origin and allow credentials so the browser sends and
         // accepts the httpOnly auth cookies (a wildcard origin is rejected with creds).
         .layer(cors_layer(config))
@@ -162,7 +163,9 @@ pub fn public_routes(config: &Config, state: AppState) -> Router {
         ))
         // Applied as the outermost layer so rate-limited clients are rejected before
         // any other middleware runs.
-        .layer(rate_limiter_layer(config));
+        .layer(rate_limiter_layer(config))
+        // Avoid logging these headers content in requests
+        .layer(SetSensitiveRequestHeadersLayer::new(once(AUTHORIZATION)));
 
     routes.layer(middleware).with_state(state)
 }

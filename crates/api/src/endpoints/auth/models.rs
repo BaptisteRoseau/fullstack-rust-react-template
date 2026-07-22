@@ -6,8 +6,6 @@ use utoipa::{IntoParams, ToResponse, ToSchema};
 #[derive(Debug, Deserialize, ToSchema, IntoParams)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct GetLoginParams {
-    /// Which Keycloak page to land on: "login" (default) or "register".
-    pub screen: Option<String>,
     /// Same-origin path to return to after a successful login.
     pub redirect: Option<String>,
 }
