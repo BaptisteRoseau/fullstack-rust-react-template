@@ -10,8 +10,16 @@
 - [ ] Make common trait and objects Mock (config, cache, etc...)
 
 - [ ] Install and use cargo nextest
-
 - [ ] Fix garage
+
+## Error management
+
+- [ ] API Error -> find an architecture where the errors are always logged
+    currently, only `ApiError` are logged, and conversion into `ApiErrorResponse` bypass
+    this. However, converting into `ApiError` for everything could be a pain and
+    are are we gonna log their debug info ?
+    Maybe another `ApiErrorRepresentation`, intermediate between the `ApiErrorResponse` and `ApiError` ?
+- [ ] Include dev debug errors in the response in debug mode (release should not even have the debug field in the response (#[debug_assertion] ?))
 
 ## AI infra & Frontend
 
@@ -91,6 +99,7 @@
 
 - [X] Set a request ID for logging purposes
 - [ ] Use axum-tower-session and axum-login for session management ?
+    - [ ] Search their compatibility with OIDC providers like keycloak
 - [ ] Use a Protobuf schema to generate Rust models and Typescript structures
 - [ ] Add CORS middleware
 - [x] Add compression middleware

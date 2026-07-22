@@ -9,8 +9,8 @@ use tower_governor::errors::GovernorError;
 use utoipa::ToSchema;
 
 /// An enum representing and API error.
-// TODO: Serde uppercanse
 #[derive(Serialize, ToSchema)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub(crate) enum ApiErrorId {
     Unexpected,
     Unauthorized,
