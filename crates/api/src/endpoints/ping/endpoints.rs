@@ -1,4 +1,4 @@
-crate::endpoints::macros::declare_tag!("Ping", "Service health checks.");
+crate::endpoints::macros::declare_tag!("Health Check", "Service health checks.");
 
 /// Health Check of the API
 #[utoipa::path(
