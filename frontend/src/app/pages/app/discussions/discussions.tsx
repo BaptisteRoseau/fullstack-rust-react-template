@@ -1,4 +1,4 @@
-import { t } from '@lingui/macro'
+import { t } from '@lingui/core/macro'
 import { QueryClient, useQueryClient } from '@tanstack/react-query'
 import { LoaderFunctionArgs } from 'react-router'
 

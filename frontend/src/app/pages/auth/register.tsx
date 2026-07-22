@@ -1,4 +1,4 @@
-import { t } from '@lingui/macro'
+import { t } from '@lingui/core/macro'
 
 import { AuthLayout } from '@/components/layouts/auth-layout'
 import { RegisterForm } from '@/features/auth/components/register-form'

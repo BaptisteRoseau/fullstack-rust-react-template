@@ -1,4 +1,5 @@
-import { t, Trans } from '@lingui/macro'
+import { t } from '@lingui/core/macro'
+import { Trans } from '@lingui/react/macro'
 import { Home, PanelLeft, Folder, Users, User2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { NavLink, useNavigate, useNavigation } from 'react-router'

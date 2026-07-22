@@ -1,4 +1,4 @@
-import { Trans } from '@lingui/macro'
+import { Trans } from '@lingui/react/macro'
 
 import { MDPreview } from '@/components/ui/md-preview'
 import { Spinner } from '@/components/ui/spinner'

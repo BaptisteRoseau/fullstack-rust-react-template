@@ -1,4 +1,4 @@
-import { Trans } from '@lingui/macro'
+import { Trans } from '@lingui/react/macro'
 import { Link, useSearchParams } from 'react-router'
 
 import { paths } from '@/config/paths'

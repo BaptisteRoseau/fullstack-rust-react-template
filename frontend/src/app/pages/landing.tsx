@@ -1,4 +1,5 @@
-import { t, Trans } from '@lingui/macro'
+import { t } from '@lingui/core/macro'
+import { Trans } from '@lingui/react/macro'
 import { useNavigate } from 'react-router'
 
 import logo from '@/assets/logo.svg'

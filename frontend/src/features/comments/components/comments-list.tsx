@@ -1,4 +1,4 @@
-import { Trans } from '@lingui/macro'
+import { Trans } from '@lingui/react/macro'
 import { ArchiveX } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'

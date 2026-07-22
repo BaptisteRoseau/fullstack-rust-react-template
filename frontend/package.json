@@ -24,7 +24,6 @@
     "dependencies": {
         "@hookform/resolvers": "^5",
         "@lingui/core": "^5",
-        "@lingui/macro": "^5",
         "@lingui/react": "5",
         "@ngneat/falso": "^8",
         "@radix-ui/react-dialog": "^1",
