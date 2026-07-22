@@ -2,7 +2,7 @@
 
 - [ ] Implement authentication
     - [ ] Fetch JWT from the frontend from Keycloak
-    - [X] Decode it in the backend from the authenticator
+    - [x] Decode it in the backend from the authenticator
     - [ ] Use "Authorization: " and fallback to "Bearer: " header in the extractor
     - [ ] Store JWT as httponly cookie in the frontend
     - [ ] Automagically refresh JWT in the frontend when getting a logged out error from the backend
@@ -14,11 +14,6 @@
 
 ## Error management
 
-- [ ] API Error -> find an architecture where the errors are always logged
-    currently, only `ApiError` are logged, and conversion into `ApiErrorResponse` bypass
-    this. However, converting into `ApiError` for everything could be a pain and
-    are are we gonna log their debug info ?
-    Maybe another `ApiErrorRepresentation`, intermediate between the `ApiErrorResponse` and `ApiError` ?
 - [ ] Include dev debug errors in the response in debug mode (release should not even have the debug field in the response (#[debug_assertion] ?))
 - [ ] Add an utoipa model for the rate limiter
 
@@ -32,7 +27,6 @@
 
 - [ ] Make a skill to use `plop` and adapt [frontend/generators/component] to match the target template
 - [ ] Tell existing skills to use `plop`
-
 
 ## Backend
 
@@ -98,7 +92,8 @@
 
 ### API Layer
 
-- [X] Set a request ID for logging purposes
+- [x] Set a request ID for logging purposes
+- [ ] Use slugs instead of IDs whenever possible
 - [ ] Use axum-tower-session and axum-login for session management ?
     - [ ] Search their compatibility with OIDC providers like keycloak
 - [ ] Use a Protobuf schema to generate Rust models and Typescript structures
@@ -129,13 +124,16 @@
 - [ ] Integrate everything into GitLab CI
 - [ ] Integrate everything into GitHub CI
 - [ ] Automatically build containers
-- [ ] Add Mailhog for local development
+- [ ] Fuzz-testing from the OpenAPI spec
+- [ ] Build documentation using redocly
+- [x] Add Mailhog for local development
 - [ ] Add unit & integration tests using testcontainers when necessary
 - [ ] Use transaction/rollback in setUp/tearDown for tests
 
 ### Security
 
 - [ ] Hasicorp Vault integration to store & rotate secrets
+- [ ] Harden Keycloak realms
 
 ### Frontend
 
@@ -144,14 +142,14 @@
 
 ### Core and authentication - API
 
-- [ ] Select authentication service (Supabase ? Keycloak ?)
-- [ ] Use tower-auth middleware
+- [x] Select authentication service (Keycloak)
+- [ ] Use tower-auth middleware ?
 - [ ] Use JWT & auto-rotate
 
 ### User Management & Information Update (back & front)
 
 - [ ] User Dashboard
-- [ ] API to update user information
+- [ ] API to update user information (/me, not /user/id)
 
 ### Storage layer
 
@@ -177,6 +175,7 @@
 ### Invoices & Payment User information and update
 
 - [ ] Invoice template & builder
+- [ ] European invoice API integration
 - [ ] IPN notification handler
 - [ ] Invoice upon instant payment
 - [ ] Send invoices by mail automatically
@@ -185,16 +184,19 @@
 ### Documentation
 
 - [ ] README.md in every directory explaining best practices of said directory
+- [ ] Skills for everything that is satisfying enough long-term
+    - [ ] Endpoint writing
+    - [ ] Config entries
 - [ ] `doc/` for developer documentation
 - [ ] CLAUDE.md and other LLM templates
 
 ### Extras
 
-- [ ] Add a management CLI binary
+- [ ] Add a management CLI binary -> bound to `api_core` handlers
 - [ ] Loki docker plugin to expose docker logs to Grafana
 - [ ] Pre-built Grafana dashboards
 - [ ] Kubernetes manifests
 - [ ] Nix flake (Docker & Prometheus & Kubernetes)
 - [ ] Hasicorp Vault for certificates/keys/passwords ?
-- [ ] Postgres MCP server using read-only user for IDE & Grafana (if possible)
-- [ ] Admin Dashboard ?
+- [ ] Agent intergration (MCP Gateway ?) read-only for every service (Backend, Postgres)
+- [ ] Admin Dashboard ? -> Requires SSR to "display X only if user Y can"
