@@ -53,24 +53,22 @@ services:
       timeout: 3s
       retries: 5
 
-  garage:
-    image: dxflrs/garage:v2.3.0
-    container_name: s3
+  seaweedfs:
+    image: chrislusf/seaweedfs:latest
+    container_name: seaweedfs
     ports:
-      - "${S3_PORT}:3900"
-      - "3902:3902"
-      - "${S3_ADMIN_PORT}:3903"
+      - "${S3_PORT}:8333" # S3 Gateway API
+      - "${S3_ADMIN_PORT}:9333" # Master Server UI
+      - "${S3_BROWSER_PORT}:8888" # Filer Server UI
     volumes:
-      - ../garage/garage.toml:/etc/garage.toml:ro
-      - garage_meta:/tmp/meta
-      - garage_data:/tmp/data
-    command: ["/garage", "server"]
-    restart: on-failure
+      - seaweedfs_data:/data
+    # The 'server' command starts all essential services together.
+    # '-s3' enables the S3-compatible gateway.
+    command: "server -s3 -dir=/data -ip.bind=0.0.0.0"
 
 networks:
   net:
 
 volumes:
   postgres:
-  garage_meta:
-  garage_data:
+  seaweedfs_data:

@@ -8,7 +8,7 @@ use axum::{
 };
 use axum_extra::extract::cookie::CookieJar;
 use jsonwebtoken::errors::ErrorKind as JwtErrorKind;
-use tracing::debug;
+use tracing::{Span, debug};
 
 /// Name of the httpOnly cookie holding the access token (set by the auth BFF).
 const ACCESS_COOKIE: &str = "access_token";
@@ -117,7 +117,9 @@ where
                 .await
                 .map_err(credential_error)?;
         }
-        Ok(Some(user.into()))
+        let user: UserToken = user.into();
+        Span::current().record("user_id", tracing::field::display(user.id));
+        Ok(Some(user))
     }
 }
 

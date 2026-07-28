@@ -79,8 +79,9 @@ use tower_http::{
         SetSensitiveRequestHeadersLayer, SetSensitiveResponseHeadersLayer,
     },
     timeout::TimeoutLayer,
-    trace::TraceLayer,
+    trace::{DefaultOnRequest, DefaultOnResponse, TraceLayer},
 };
+use tracing::Level;
 use utoipa::openapi::{InfoBuilder, OpenApi, Server};
 use utoipa_axum::{router::OpenApiRouter, routes};
 use utoipa_swagger_ui::SwaggerUi;
@@ -179,8 +180,13 @@ where
         .layer(SetRequestIdLayer::x_request_id(MakeRequestUuidV7))
         // Echo the request id back to the client in the response headers
         .layer(PropagateRequestIdLayer::x_request_id())
-        // Scope every event of the request under a span carrying the request_id
-        .layer(TraceLayer::new_for_http().make_span_with(make_request_span))
+        // Scope every event of the request under a span carrying the request_id and log request/response.
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(make_request_span)
+                .on_request(DefaultOnRequest::new().level(Level::INFO))
+                .on_response(DefaultOnResponse::new().level(Level::INFO)),
+        )
         // Inside the trace layer, so responses are scrubbed before it sees them
         .layer(SetSensitiveResponseHeadersLayer::new(once(AUTHORIZATION)))
         // Reflect the frontend origin and allow credentials so the browser sends and
