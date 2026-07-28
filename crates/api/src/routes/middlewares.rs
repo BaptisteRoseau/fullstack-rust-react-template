@@ -71,8 +71,12 @@ where
 }
 
 /// Type of the tracing layer built by [`logging_layer`].
-type LoggingLayer =
-    TraceLayer<HttpMakeClassifier, fn(&Request<Body>) -> Span, DefaultOnRequest, DefaultOnResponse>;
+type LoggingLayer = TraceLayer<
+    HttpMakeClassifier,
+    fn(&Request<Body>) -> Span,
+    DefaultOnRequest,
+    DefaultOnResponse,
+>;
 
 /// Tracing layer that scopes every request/response log under the span built by
 /// [`make_request_span`] (carrying the `request_id`, method and path).
