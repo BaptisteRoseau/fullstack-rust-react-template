@@ -52,7 +52,7 @@ pub(crate) fn make_request_span<B>(request: &Request<B>) -> Span {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::routes::with_middlewares;
+    use super::super::middlewares::with_middlewares;
     use axum::Router;
     use axum::body::Body;
     use axum::extract::ConnectInfo;
