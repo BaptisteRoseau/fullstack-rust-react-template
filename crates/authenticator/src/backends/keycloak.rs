@@ -148,8 +148,8 @@ impl Authenticator for Keycloak {
 mod tests {
     use super::*;
     use cache::error::CacheError;
-    use database::error::DatabaseError;
-    use database::models::{ApiKey, User, UserPatch};
+    use database::models::ApiKey;
+    use database::testing::MockDatabase;
     use serde_json::Value;
     use std::collections::HashMap;
     use tokio::sync::Mutex;
@@ -213,65 +213,6 @@ mod tests {
                 store.remove(*key);
             }
             Ok(())
-        }
-    }
-
-    /// Database mock that only resolves `read_api_key_by_hash` from a fixed map.
-    #[derive(Default)]
-    struct MockDatabase {
-        api_keys_by_hash: HashMap<String, ApiKey>,
-    }
-
-    #[async_trait]
-    impl Database for MockDatabase {
-        async fn read_api_key_by_hash(
-            &self,
-            hash: &str,
-        ) -> Result<ApiKey, Box<DatabaseError>> {
-            self.api_keys_by_hash
-                .get(hash)
-                .cloned()
-                .ok_or_else(|| Box::new(DatabaseError::NotFound(hash.to_string())))
-        }
-
-        async fn create_user(
-            &mut self,
-            _patch: UserPatch,
-        ) -> Result<User, Box<DatabaseError>> {
-            unimplemented!("not exercised by authenticator tests")
-        }
-        async fn update_user(
-            &mut self,
-            _patch: UserPatch,
-        ) -> Result<User, Box<DatabaseError>> {
-            unimplemented!("not exercised by authenticator tests")
-        }
-        async fn read_user(&self, _uuid: Uuid) -> Result<User, Box<DatabaseError>> {
-            unimplemented!("not exercised by authenticator tests")
-        }
-        async fn delete_user(&mut self, _uuid: Uuid) -> Result<bool, Box<DatabaseError>> {
-            unimplemented!("not exercised by authenticator tests")
-        }
-        async fn create_api_key(
-            &mut self,
-            _owner: Uuid,
-            _name: String,
-            _hash: String,
-            _permissions: Value,
-        ) -> Result<ApiKey, Box<DatabaseError>> {
-            unimplemented!("not exercised by authenticator tests")
-        }
-        async fn read_api_key_by_id(
-            &self,
-            _id: Uuid,
-        ) -> Result<ApiKey, Box<DatabaseError>> {
-            unimplemented!("not exercised by authenticator tests")
-        }
-        async fn delete_api_key(
-            &mut self,
-            _id: Uuid,
-        ) -> Result<bool, Box<DatabaseError>> {
-            unimplemented!("not exercised by authenticator tests")
         }
     }
 
@@ -405,8 +346,10 @@ mod tests {
         api_keys_by_hash.insert(hashed.clone(), make_api_key(&hashed, owner));
 
         let cache: Arc<RwLock<dyn Cache>> = Arc::new(RwLock::new(MockCache::default()));
-        let database: Arc<RwLock<dyn Database>> =
-            Arc::new(RwLock::new(MockDatabase { api_keys_by_hash }));
+        let database: Arc<RwLock<dyn Database>> = Arc::new(RwLock::new(MockDatabase {
+            api_keys_by_hash,
+            ..Default::default()
+        }));
         let keycloak = make_keycloak(cache, database);
 
         let user_token = keycloak

@@ -6,3 +6,5 @@ pub use crate::database::Database;
 pub mod backends;
 pub mod error;
 pub mod models;
+#[cfg(feature = "test-utils")]
+pub mod testing;

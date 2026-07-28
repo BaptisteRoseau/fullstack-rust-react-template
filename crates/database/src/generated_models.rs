@@ -12,6 +12,7 @@ pub struct ApiKey {
 #[derive(Debug, Clone, sqlx::FromRow, database_crud_derive::Crud)]
 pub struct User {
     pub id: uuid::Uuid,
+    pub username: String,
     pub last_name: String,
     pub first_name: String,
     pub email: String,

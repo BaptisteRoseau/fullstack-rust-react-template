@@ -188,6 +188,58 @@ impl Database for Postgres {
         Ok(q.execute(&self.pool).await?.rows_affected() == 1)
     }
 
+    async fn register(
+        &mut self,
+        id: Uuid,
+        username: String,
+        first_name: String,
+        last_name: String,
+        email: String,
+    ) -> Result<User, Box<DatabaseError>> {
+        let existing = sqlx::query_as::<_, User>("SELECT * FROM users WHERE id = $1")
+            .bind(id)
+            .fetch_optional(&self.pool)
+            .await?;
+
+        let user =
+            match existing {
+                None => {
+                    sqlx::query_as::<_, User>(
+                        "INSERT INTO users (id, username, first_name, last_name, email) \
+                     VALUES ($1, $2, $3, $4, $5) RETURNING *",
+                    )
+                    .bind(id)
+                    .bind(username)
+                    .bind(first_name)
+                    .bind(last_name)
+                    .bind(email)
+                    .fetch_one(&self.pool)
+                    .await?
+                }
+                Some(current)
+                    if current.username == username
+                        && current.first_name == first_name
+                        && current.last_name == last_name
+                        && current.email == email =>
+                {
+                    current
+                }
+                Some(_) => sqlx::query_as::<_, User>(
+                    "UPDATE users SET username = $1, first_name = $2, last_name = $3, \
+                     email = $4 WHERE id = $5 RETURNING *",
+                )
+                .bind(username)
+                .bind(first_name)
+                .bind(last_name)
+                .bind(email)
+                .bind(id)
+                .fetch_one(&self.pool)
+                .await?,
+            };
+
+        Ok(user)
+    }
+
     async fn create_api_key(
         &mut self,
         owner: Uuid,

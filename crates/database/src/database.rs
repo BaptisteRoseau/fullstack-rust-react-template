@@ -14,6 +14,18 @@ pub trait Database: Send + Sync {
     async fn read_user(&self, uuid: Uuid) -> Result<User, Box<DatabaseError>>;
     async fn delete_user(&mut self, uuid: Uuid) -> Result<bool, Box<DatabaseError>>;
 
+    /// Registers a user from OIDC identity claims: creates the row if `id` is
+    /// unknown, otherwise updates it if any field drifted from the identity
+    /// provider's current values.
+    async fn register(
+        &mut self,
+        id: Uuid,
+        username: String,
+        first_name: String,
+        last_name: String,
+        email: String,
+    ) -> Result<User, Box<DatabaseError>>;
+
     async fn create_api_key(
         &mut self,
         owner: Uuid,

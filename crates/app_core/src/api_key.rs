@@ -52,18 +52,26 @@ mod tests {
         Database,
         error::DatabaseError,
         models::{ApiKey as DbApiKey, User, UserPatch},
+        testing::MockDatabase as SharedMockDatabase,
     };
     use uuid::Uuid;
 
     use super::create_api_key;
 
+    /// Wraps the shared in-memory [`SharedMockDatabase`] but rigs
+    /// `create_api_key` to fail with a forced hash collision on the first
+    /// call: the real hash is randomly generated per attempt, so a generic
+    /// map-backed mock can't reproduce a collision deterministically. This
+    /// exercises `create_api_key`'s retry loop specifically, not storage.
     struct MockDatabase {
+        inner: SharedMockDatabase,
         calls: Arc<Mutex<u32>>,
     }
 
     impl MockDatabase {
         fn new() -> Self {
             Self {
+                inner: SharedMockDatabase::default(),
                 calls: Arc::new(Mutex::new(0)),
             }
         }
@@ -73,39 +81,48 @@ mod tests {
     impl Database for MockDatabase {
         async fn create_user(
             &mut self,
-            _patch: UserPatch,
+            patch: UserPatch,
         ) -> Result<User, Box<DatabaseError>> {
-            unimplemented!()
+            self.inner.create_user(patch).await
         }
         async fn update_user(
             &mut self,
-            _patch: UserPatch,
+            patch: UserPatch,
         ) -> Result<User, Box<DatabaseError>> {
-            unimplemented!()
+            self.inner.update_user(patch).await
         }
-        async fn read_user(&self, _uuid: Uuid) -> Result<User, Box<DatabaseError>> {
-            unimplemented!()
+        async fn read_user(&self, uuid: Uuid) -> Result<User, Box<DatabaseError>> {
+            self.inner.read_user(uuid).await
         }
-        async fn delete_user(&mut self, _uuid: Uuid) -> Result<bool, Box<DatabaseError>> {
-            unimplemented!()
+        async fn delete_user(&mut self, uuid: Uuid) -> Result<bool, Box<DatabaseError>> {
+            self.inner.delete_user(uuid).await
+        }
+        async fn register(
+            &mut self,
+            id: Uuid,
+            username: String,
+            first_name: String,
+            last_name: String,
+            email: String,
+        ) -> Result<User, Box<DatabaseError>> {
+            self.inner
+                .register(id, username, first_name, last_name, email)
+                .await
         }
         async fn read_api_key_by_id(
             &self,
-            _id: Uuid,
+            id: Uuid,
         ) -> Result<DbApiKey, Box<DatabaseError>> {
-            unimplemented!()
+            self.inner.read_api_key_by_id(id).await
         }
         async fn read_api_key_by_hash(
             &self,
-            _hash: &str,
+            hash: &str,
         ) -> Result<DbApiKey, Box<DatabaseError>> {
-            unimplemented!()
+            self.inner.read_api_key_by_hash(hash).await
         }
-        async fn delete_api_key(
-            &mut self,
-            _id: Uuid,
-        ) -> Result<bool, Box<DatabaseError>> {
-            unimplemented!()
+        async fn delete_api_key(&mut self, id: Uuid) -> Result<bool, Box<DatabaseError>> {
+            self.inner.delete_api_key(id).await
         }
 
         async fn create_api_key(

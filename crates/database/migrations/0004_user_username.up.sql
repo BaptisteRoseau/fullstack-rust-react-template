@@ -1,0 +1,3 @@
+ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(128) UNIQUE NOT NULL;
+
+CREATE INDEX IF NOT EXISTS idx__users__username ON users (username);

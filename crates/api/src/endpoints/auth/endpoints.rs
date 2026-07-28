@@ -13,6 +13,8 @@ use axum::{
     response::{Json, Redirect},
 };
 use axum_extra::extract::cookie::{Cookie, CookieJar, SameSite};
+use tokio::sync::RwLock;
+use uuid::Uuid;
 
 use super::models::{GetCallbackParams, GetLoginParams, GetMeResponse};
 use crate::{
@@ -78,6 +80,7 @@ pub(crate) async fn register(
 )]
 pub(crate) async fn callback(
     State(oauth): State<Arc<OidcClient>>,
+    State(database): State<Arc<RwLock<dyn database::Database>>>,
     jar: CookieJar,
     Query(params): Query<GetCallbackParams>,
 ) -> Result<(CookieJar, Redirect), ApiError> {
@@ -87,6 +90,10 @@ pub(crate) async fn callback(
     };
 
     let (tokens, redirect) = oauth.exchange_code(code, state).await?;
+
+    let info = oauth.userinfo(&tokens.access_token).await?;
+    register_user(&info, &database).await?;
+
     let jar = set_token_cookies(jar, &tokens, oauth.cookie_secure());
     let target = frontend_target(oauth.frontend_url(), redirect.as_deref());
     Ok((jar, Redirect::to(&target)))
@@ -169,6 +176,35 @@ pub(crate) async fn me(
 
 const ACCESS_COOKIE: &str = "access_token";
 const REFRESH_COOKIE: &str = "refresh_token";
+
+/// Creates or syncs the local user row from Keycloak's userinfo claims.
+async fn register_user(
+    info: &serde_json::Value,
+    database: &Arc<RwLock<dyn database::Database>>,
+) -> Result<(), ApiError> {
+    let claim = |key: &str| {
+        info.get(key)
+            .and_then(serde_json::Value::as_str)
+            .unwrap_or_default()
+            .to_string()
+    };
+
+    let id = Uuid::parse_str(&claim("sub"))
+        .map_err(|e| ApiError::Unexpected(anyhow::anyhow!("invalid sub claim: {e}")))?;
+
+    let mut db = database.write().await;
+    app_core::user::register(
+        &mut *db,
+        id,
+        claim("preferred_username"),
+        claim("given_name"),
+        claim("family_name"),
+        claim("email"),
+    )
+    .await?;
+
+    Ok(())
+}
 
 /// Builds an httpOnly session cookie carrying a token.
 fn token_cookie(name: &'static str, value: String, secure: bool) -> Cookie<'static> {
