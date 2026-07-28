@@ -82,9 +82,25 @@ use tower_http::{
     trace::{DefaultOnRequest, DefaultOnResponse, TraceLayer},
 };
 use tracing::Level;
-use utoipa::openapi::{InfoBuilder, OpenApi, Server};
+use utoipa::openapi::{
+    InfoBuilder, OpenApi, Server,
+    security::{ApiKey, ApiKeyValue, SecurityRequirement, SecurityScheme},
+};
 use utoipa_axum::{router::OpenApiRouter, routes};
 use utoipa_swagger_ui::SwaggerUi;
+
+/// Name of the httpOnly cookie holding the JWT access token (set by the auth BFF).
+///
+/// Duplicated from `extractors::user::ACCESS_COOKIE`, which is private to its module;
+/// kept in sync manually, matching the existing duplication of the same constant in
+/// `endpoints::auth::endpoints`.
+const ACCESS_TOKEN_COOKIE: &str = "access_token";
+
+/// Security scheme name for the JWT carried in the [`ACCESS_TOKEN_COOKIE`] cookie.
+const JWT_COOKIE_SECURITY: &str = "jwtCookie";
+
+/// Security scheme name for the API key carried in the `Authorization` header.
+const API_KEY_SECURITY: &str = "apiKey";
 
 // Bookmark this: https://docs.rs/axum/latest/axum/routing/struct.Router.html
 
@@ -133,7 +149,38 @@ pub fn openapi() -> OpenApi {
     openapi.info = api_info();
     openapi.tags = Some(api_tags());
     openapi.servers = Some(vec![server]);
+    add_security(&mut openapi);
     openapi
+}
+
+/// Declares the two ways a caller may authenticate, and requires either of them
+/// (not both) on every operation.
+///
+/// - A JWT issued by the OIDC provider, sent as the `access_token` cookie set by
+///   the auth BFF (`Cookie: access_token=<jwt>`).
+/// - An API key sent bare in the `Authorization` header (`Authorization: <api_key>`).
+///   The extractor also tolerates an optional `Bearer ` prefix on this header.
+fn add_security(openapi: &mut OpenApi) {
+    let components = openapi.components.get_or_insert_with(Default::default);
+    components.add_security_scheme(
+        JWT_COOKIE_SECURITY,
+        SecurityScheme::ApiKey(ApiKey::Cookie(ApiKeyValue::with_description(
+            ACCESS_TOKEN_COOKIE,
+            "JWT access token issued by the OIDC provider, set as an httpOnly cookie by the auth BFF.",
+        ))),
+    );
+    components.add_security_scheme(
+        API_KEY_SECURITY,
+        SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::with_description(
+            "Authorization",
+            "API key sent in the Authorization header.",
+        ))),
+    );
+
+    openapi.security = Some(vec![
+        SecurityRequirement::new(JWT_COOKIE_SECURITY, Vec::<String>::new()),
+        SecurityRequirement::new(API_KEY_SECURITY, Vec::<String>::new()),
+    ]);
 }
 
 /// Swagger categories, in display order. Each entry's name and description live
