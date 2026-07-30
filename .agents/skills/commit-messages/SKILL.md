@@ -44,6 +44,7 @@ Generate consistent, informative commit messages following the Conventional Comm
 | `build` | Build system changes | `build: update webpack config` |
 | `ci` | CI configuration | `ci: add GitHub Actions workflow` |
 | `chore` | Maintenance tasks | `chore(deps): update dependencies` |
+| `ai` |AI agent related | `ai(skill): add the ai type in commit-messages` |
 | `revert` | Revert previous commit | `revert: feat(auth): add OAuth2` |
 
 ### Scope
@@ -85,12 +86,13 @@ in search queries. Configurable via FUZZY_THRESHOLD env var.
 
 ### Bug fix with issue reference
 ```
-fix(cart): prevent duplicate items on rapid clicks
+fix(cart): prevent duplicate items on rapid clicks (#234 !64)
 
 Add debounce to add-to-cart button and check for existing
 items before insertion.
 
-Fixes #234
+Closes #234
+Merge Request !64
 ```
 
 ### Breaking change
@@ -115,12 +117,3 @@ refactor(auth): consolidate authentication logic
 
 This prepares for the upcoming OAuth2 integration.
 ```
-
-## Output
-
-When generating a commit message:
-
-1. Show the staged changes summary
-2. Propose the commit message
-3. Explain the type/scope choice if non-obvious
-4. Ask if the user wants to proceed or modify
