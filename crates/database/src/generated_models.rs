@@ -16,7 +16,7 @@ pub struct User {
     pub last_name: String,
     pub first_name: String,
     pub email: String,
-    pub permissions: Option<String>,
+    pub permissions: serde_json::Value,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }

@@ -68,7 +68,7 @@ impl Database for MockDatabase {
             first_name: first_name.clone(),
             last_name: last_name.clone(),
             email: email.clone(),
-            permissions: None,
+            permissions: serde_json::Value::Array(Vec::new()),
             created_at: now,
             updated_at: now,
         });
