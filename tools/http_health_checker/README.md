@@ -10,6 +10,18 @@ This health checker should:
 - Be compiled
 - Be statically linked
 
+## Keeping it thin
+
+Size is the point of this crate, so `main` stays exactly as it is: one match on one
+request, no helper functions, no error type, no logging, and `minreq` as its only
+dependency. Do not factor anything out of it — there is nothing here big enough to be
+worth a name, and every addition shows up in the image of every container that ships it.
+
+Tests therefore live in `tests/`, not in `src/main.rs`. They start an axum server on an
+ephemeral port and run the **compiled binary** against it (`CARGO_BIN_EXE_*`), so what
+they check is the exit code a container's `HEALTHCHECK` actually sees, and they need no
+internet. `axum` and `tokio` are dev-dependencies and never reach the release binary.
+
 ## How To Build
 
 First you need to install Rust and Cargo. Then run the following commands. Notice that your target may be different:
