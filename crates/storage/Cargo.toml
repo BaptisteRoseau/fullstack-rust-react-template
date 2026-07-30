@@ -2,6 +2,9 @@
 name = "storage"
 version = "0.1.0"
 edition = "2024"
+# Every test binary is declared below; without this cargo would also pick up
+# `tests/trait_tests.rs`, which is the shared suite and not a target of its own.
+autotests = false
 
 [dependencies]
 logging = { path = "../logging" }
@@ -22,5 +25,5 @@ uuid = { version = "1", features = ["v4"] }
 
 [[test]]
 name = "s3"
-path = "tests/common/mod.rs"
+path = "tests/backends/s3.rs"
 harness = false

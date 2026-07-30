@@ -1,3 +1,5 @@
+//! Runs the `Database` trait suite against the `Postgres` backend.
+
 use std::sync::Arc;
 
 use database::backends::Postgres;
@@ -6,31 +8,14 @@ use test_trait::{Runtime, TestSuite, Trial};
 use testcontainers::{ContainerAsync, ImageExt, runners::AsyncRunner};
 use testcontainers_modules::postgres::Postgres as PgImage;
 
-/// Pure-SQL implementation of uuidv7() for use in tests.
-/// The production image provides this via an extension; here we install
-/// a compatible pure-SQL version so the migrations can run unmodified.
-const UUIDV7_INIT_SQL: &str = r#"
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-CREATE OR REPLACE FUNCTION uuidv7() RETURNS uuid AS $$
-  -- UUIDv7: 48-bit unix_ms | 4-bit version(7) | 12-bit seq | 2-bit variant | 62-bit random
-  SELECT encode(
-    overlay(
-      overlay(
-        gen_random_bytes(16)
-        placing substring(int8send((extract(epoch from clock_timestamp())*1000)::bigint) from 3)
-        from 1 for 6
-      )
-      placing '\x7000'::bytea  -- version nibble = 7, clear lower 4 bits of byte 6
-      from 7 for 2
-    ),
-    'hex'
-  )::uuid
-$$ LANGUAGE SQL;
-"#;
+#[path = "../trait_tests.rs"]
+mod trait_tests;
 
-pub struct PostgresFixture {
+test_trait::test_trait_main!(PostgresFixture);
+
+struct PostgresFixture {
     _container: ContainerAsync<PgImage>,
-    pub connection_string: String,
+    connection_string: String,
 }
 
 impl TestSuite for PostgresFixture {
@@ -38,11 +23,8 @@ impl TestSuite for PostgresFixture {
         Self::start_container().await
     }
 
-    /// Every trial gets its own `Postgres`: the suite mutates it (its write
-    /// methods take `&mut self`), and a shared instance would make parallel
-    /// trials trip over each other's `&mut` borrow.
     fn trials(self: Arc<Self>, rt: Arc<Runtime>) -> Vec<Trial> {
-        super::database::suite::trials(rt, move || {
+        trait_tests::suite::trials(rt, move || {
             let fixture = self.clone();
             async move { fixture.make_postgres().await }
         })
@@ -75,9 +57,28 @@ impl PostgresFixture {
         }
     }
 
-    pub async fn make_postgres(&self) -> Postgres {
+    async fn make_postgres(&self) -> Postgres {
         Postgres::try_from_url(&self.connection_string)
             .await
             .expect("failed to create Postgres client")
     }
 }
+
+const UUIDV7_INIT_SQL: &str = r#"
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE OR REPLACE FUNCTION uuidv7() RETURNS uuid AS $$
+  -- UUIDv7: 48-bit unix_ms | 4-bit version(7) | 12-bit seq | 2-bit variant | 62-bit random
+  SELECT encode(
+    overlay(
+      overlay(
+        gen_random_bytes(16)
+        placing substring(int8send((extract(epoch from clock_timestamp())*1000)::bigint) from 3)
+        from 1 for 6
+      )
+      placing '\x7000'::bytea  -- version nibble = 7, clear lower 4 bits of byte 6
+      from 7 for 2
+    ),
+    'hex'
+  )::uuid
+$$ LANGUAGE SQL;
+"#;

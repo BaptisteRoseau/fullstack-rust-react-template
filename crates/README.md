@@ -37,10 +37,10 @@ mycrate
 │   ├── error.rs
 │   └── lib.rs
 └── tests
-    └── common
-        ├── cache.rs       # the trait test suite
-        ├── containers.rs  # the testcontainers fixture
-        └── mod.rs         # the test binary's entry point
+    ├── backends
+    │   ├── some_backend.rs  # fixture + test binary, one file per backend
+    │   └── mock.rs          # the in-memory double, same shape
+    └── trait_tests.rs       # the trait test suite, shared by every backend
 ```
 
 The crate exposes a public trait that is `Send + Sync`, this is the one that will be used in `app_core` and `api` crates.

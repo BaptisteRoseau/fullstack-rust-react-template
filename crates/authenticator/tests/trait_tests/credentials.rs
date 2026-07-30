@@ -3,8 +3,8 @@ use uuid::Uuid;
 use authenticator::Authenticator;
 use test_trait::{test_trait, test_trait_suite};
 
-use super::containers::{CREDENTIALS_REALM, CREDENTIALS_USER_ID};
 use super::provider::ProviderAgent;
+use super::{CREDENTIALS_REALM, CREDENTIALS_USER_ID};
 
 /// Credential validation half of the Authenticator suite.
 ///

@@ -4,14 +4,14 @@ use authenticator::error::AuthenticatorError;
 use authenticator::{AuthSession, Authenticator, LoginScreen};
 use test_trait::{test_trait, test_trait_suite};
 
-use super::containers::{
+use super::provider::ProviderAgent;
+use super::{
     BFF_CLIENT_ID, BFF_EMAIL, BFF_FAMILY_NAME, BFF_GIVEN_NAME, BFF_REALM, BFF_USER_ID,
     BFF_USERNAME,
 };
-use super::provider::ProviderAgent;
 
 /// Backend-for-Frontend half of the Authenticator suite: the Authorization Code +
-/// PKCE flow. See `authenticator.rs` for the conventions every test here follows.
+/// PKCE flow. See `credentials.rs` for the conventions every test here follows.
 #[test_trait_suite]
 pub mod suite {
     use super::*;

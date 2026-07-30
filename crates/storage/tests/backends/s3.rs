@@ -1,3 +1,5 @@
+//! Runs the `Storage` trait suite against the `S3` backend, served by Garage.
+
 use std::sync::Arc;
 
 use testcontainers::core::ContainerPort::Tcp;
@@ -7,25 +9,16 @@ use testcontainers::{ContainerAsync, GenericImage, ImageExt, runners::AsyncRunne
 use storage::backends::S3;
 use test_trait::{Runtime, TestSuite, Trial};
 
-pub const TEST_BUCKET: &str = "test-bucket";
+#[path = "../trait_tests.rs"]
+mod trait_tests;
 
-const GARAGE_IMAGE: &str = "dxflrs/garage";
-const GARAGE_TAG: &str = "v2.3.0";
-const GARAGE_S3_PORT: u16 = 3900;
-const GARAGE_KEY_NAME: &str = "test-key";
+test_trait::test_trait_main!(GarageFixture);
 
-/// Garage server configuration copied into the test container.
-///
-/// A test fixture, not a deployment manifest: Garage is no longer part of the
-/// infrastructure, it only backs these tests as an S3-compatible server. The
-/// `s3_region` matters — Garage enforces it in request signatures.
-const GARAGE_CONFIG: &str = include_str!("../assets/garage.toml");
-
-pub struct GarageFixture {
+struct GarageFixture {
     container: ContainerAsync<GenericImage>,
-    pub endpoint: String,
-    pub access_key: String,
-    pub secret_key: String,
+    endpoint: String,
+    access_key: String,
+    secret_key: String,
 }
 
 impl TestSuite for GarageFixture {
@@ -35,10 +28,8 @@ impl TestSuite for GarageFixture {
         fixture
     }
 
-    /// A fresh client per trial: connecting is cheap, and the suite's paths are
-    /// namespaced per test anyway.
     fn trials(self: Arc<Self>, rt: Arc<Runtime>) -> Vec<Trial> {
-        super::storage::suite::trials(rt, move || {
+        trait_tests::suite::trials(rt, move || {
             let fixture = self.clone();
             async move {
                 S3::try_new(
@@ -69,31 +60,8 @@ impl GarageFixture {
             .await
             .expect("failed to get garage S3 port");
 
-        // Unlike MinIO, Garage serves no data until a cluster layout is assigned.
-        let node_id = exec_stdout(&container, &["/garage", "node", "id", "-q"]).await;
-        let node_id = node_id
-            .split('@')
-            .next()
-            .expect("empty garage node id")
-            .trim();
-        exec(
-            &container,
-            &[
-                "/garage", "layout", "assign", "-z", "dc1", "-c", "1G", node_id,
-            ],
-        )
-        .await;
-        exec(
-            &container,
-            &["/garage", "layout", "apply", "--version", "1"],
-        )
-        .await;
-
-        // Garage keys are not user/password pairs: create one and read back its
-        // generated access key id and secret.
-        let key_output =
-            exec_stdout(&container, &["/garage", "key", "create", GARAGE_KEY_NAME]).await;
-        let (access_key, secret_key) = parse_key_credentials(&key_output);
+        assign_cluster_layout(&container).await;
+        let (access_key, secret_key) = create_key(&container).await;
 
         Self {
             container,
@@ -103,7 +71,7 @@ impl GarageFixture {
         }
     }
 
-    pub async fn create_bucket(&self, name: &str) {
+    async fn create_bucket(&self, name: &str) {
         exec(&self.container, &["/garage", "bucket", "create", name]).await;
         exec(
             &self.container,
@@ -123,12 +91,43 @@ impl GarageFixture {
     }
 }
 
-/// Runs a command inside the container, discarding its output.
+const TEST_BUCKET: &str = "test-bucket";
+
+const GARAGE_IMAGE: &str = "dxflrs/garage";
+const GARAGE_TAG: &str = "v2.3.0";
+const GARAGE_S3_PORT: u16 = 3900;
+const GARAGE_KEY_NAME: &str = "test-key";
+
+const GARAGE_CONFIG: &str = include_str!("../assets/garage.toml");
+
+async fn assign_cluster_layout(container: &ContainerAsync<GenericImage>) {
+    let node_id = exec_stdout(container, &["/garage", "node", "id", "-q"]).await;
+    let node_id = node_id
+        .split('@')
+        .next()
+        .expect("empty garage node id")
+        .trim();
+
+    exec(
+        container,
+        &[
+            "/garage", "layout", "assign", "-z", "dc1", "-c", "1G", node_id,
+        ],
+    )
+    .await;
+    exec(container, &["/garage", "layout", "apply", "--version", "1"]).await;
+}
+
+async fn create_key(container: &ContainerAsync<GenericImage>) -> (String, String) {
+    let output =
+        exec_stdout(container, &["/garage", "key", "create", GARAGE_KEY_NAME]).await;
+    parse_key_credentials(&output)
+}
+
 async fn exec(container: &ContainerAsync<GenericImage>, cmd: &[&str]) {
     let _ = exec_stdout(container, cmd).await;
 }
 
-/// Runs a command inside the container and returns its captured stdout.
 async fn exec_stdout(container: &ContainerAsync<GenericImage>, cmd: &[&str]) -> String {
     let mut result = container
         .exec(ExecCommand::new(cmd.iter().map(|s| s.to_string())))
@@ -141,7 +140,6 @@ async fn exec_stdout(container: &ContainerAsync<GenericImage>, cmd: &[&str]) -> 
     String::from_utf8_lossy(&stdout).into_owned()
 }
 
-/// Extracts the access key id and secret from `garage key create` output.
 fn parse_key_credentials(output: &str) -> (String, String) {
     let mut access_key = None;
     let mut secret_key = None;

@@ -2,6 +2,9 @@
 name = "database"
 version = "0.1.0"
 edition = "2024"
+# Every test binary is declared below; without this cargo would also pick up
+# `tests/trait_tests.rs`, which is the shared suite and not a target of its own.
+autotests = false
 
 [dependencies]
 database_crud_derive = { path = "../database_crud_derive" }
@@ -31,12 +34,12 @@ uuid = { version = "1", features = ["v4", "fast-rng"] }
 
 [[test]]
 name = "postgres"
-path = "tests/common/mod.rs"
+path = "tests/backends/postgres.rs"
 harness = false
 
 [[test]]
 name = "mock"
-path = "tests/mock.rs"
+path = "tests/backends/mock.rs"
 harness = false
 # `MockDatabase` is feature-gated out of the plain lib build, and an integration
 # test links this crate the way a downstream consumer does. So this binary only

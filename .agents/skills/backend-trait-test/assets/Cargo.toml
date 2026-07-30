@@ -1,0 +1,37 @@
+// Merge into `crates/<mycrate>/Cargo.toml`. One [[test]] stanza per file in
+// tests/backends/. Delete these two lines.
+
+[package]
+name = "mycrate"
+version = "0.1.0"
+edition = "2024"
+# Every test binary is declared below; without this cargo would also pick up
+# `tests/trait_tests.rs`, which is the shared suite and not a target of its own.
+autotests = false
+
+[features]
+# In-memory `MyTrait` test double (`mycrate::testing::MockMyTrait`), for
+# downstream crates' tests. Enable via [dev-dependencies]. Only needed when the
+# in-memory implementation is not shippable as a real backend.
+test-utils = []
+
+[dev-dependencies]
+test_trait = { path = "../test_trait" }
+testcontainers = "0.24"
+testcontainers-modules = { version = "0.12", features = ["redis"] } # if it has the service
+uuid = { version = "1", features = ["v4"] }
+
+[[test]]
+name = "some_backend"                      # what `--test some_backend` refers to
+path = "tests/backends/some_backend.rs"    # not auto-discovered, so say where it is
+harness = false
+
+[[test]]
+name = "mock"
+path = "tests/backends/mock.rs"
+harness = false
+# The double is feature-gated out of the plain lib build, and an integration test
+# links this crate the way a downstream consumer does. Never add a self
+# dev-dependency (`mycrate = { path = "." }`) instead: it leaves stale artifacts
+# that fail the next build with `colliding StableCrateId`.
+required-features = ["test-utils"]

@@ -1,3 +1,5 @@
+//! Runs the `Cache` trait suite against the `Redis` backend.
+
 use std::sync::Arc;
 
 use cache::backends::redis::Redis as RedisBackend;
@@ -5,9 +7,14 @@ use test_trait::{Runtime, TestSuite, Trial};
 use testcontainers::{ContainerAsync, runners::AsyncRunner};
 use testcontainers_modules::redis::{REDIS_PORT, Redis};
 
-pub struct RedisFixture {
+#[path = "../trait_tests.rs"]
+mod trait_tests;
+
+test_trait::test_trait_main!(RedisFixture);
+
+struct RedisFixture {
     _container: ContainerAsync<Redis>,
-    pub url: String,
+    url: String,
 }
 
 impl TestSuite for RedisFixture {
@@ -23,10 +30,8 @@ impl TestSuite for RedisFixture {
         }
     }
 
-    /// A fresh client per trial: connecting is cheap, and the suite's keys are
-    /// namespaced per test anyway.
     fn trials(self: Arc<Self>, rt: Arc<Runtime>) -> Vec<Trial> {
-        super::cache::suite::trials(rt, move || {
+        trait_tests::suite::trials(rt, move || {
             let fixture = self.clone();
             async move {
                 RedisBackend::new(&fixture.url, None, Some("test".to_string()))

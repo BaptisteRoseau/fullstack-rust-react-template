@@ -10,4 +10,5 @@ Two backends implement the `Cache` trait:
   survives a restart, so it suits single-process deployments and tests that want a
   working cache rather than a stub.
 
-Both are held to the same contract by the trait suite in `tests/common/cache.rs`.
+Both are held to the same contract by the trait suite in `tests/trait_tests.rs`, one
+test binary per backend under `tests/backends/`.
