@@ -7,3 +7,10 @@ authors = ["Baptiste Roseau"]
 
 [dependencies]
 minreq = { version = "2.8", features = ["https"] }
+
+# Test-only: the tests serve their own endpoints rather than reaching the
+# internet. None of this reaches the release binary, which keeps `minreq` as its
+# single dependency.
+[dev-dependencies]
+axum = { version = "0", default-features = false, features = ["http1", "tokio"] }
+tokio = { version = "1", features = ["rt", "net"] }
