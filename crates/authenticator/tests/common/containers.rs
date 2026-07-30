@@ -7,7 +7,7 @@ use tokio::sync::RwLock;
 
 use authenticator::backends::Keycloak;
 use cache::Cache;
-use cache::testing::MockCache;
+use cache::backends::hash_map::HashMapCache;
 use config::Config;
 use database::Database;
 use database::testing::MockDatabase;
@@ -146,7 +146,8 @@ impl KeycloakFixture {
         client_id: &str,
         client_secret: &str,
     ) -> Keycloak {
-        let cache: Arc<RwLock<dyn Cache>> = Arc::new(RwLock::new(MockCache::default()));
+        let cache: Arc<RwLock<dyn Cache>> =
+            Arc::new(RwLock::new(HashMapCache::default()));
         let database: Arc<RwLock<dyn Database>> =
             Arc::new(RwLock::new(MockDatabase::default()));
 

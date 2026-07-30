@@ -7,7 +7,9 @@ cd "$GIT_ROOT"
 # TODO: CSpell & Typos & Markdownlint
 
 # Backend
-cargo clippy
+# --all-targets --all-features so tests and the feature-gated doubles are linted
+# too, not just the default lib build.
+cargo clippy --workspace --all-targets --all-features
 
 # Frontend
 cd frontend

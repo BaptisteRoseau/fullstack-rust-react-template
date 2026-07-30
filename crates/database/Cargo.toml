@@ -33,3 +33,14 @@ uuid = { version = "1", features = ["v4", "fast-rng"] }
 name = "postgres"
 path = "tests/common/mod.rs"
 harness = false
+
+[[test]]
+name = "mock"
+path = "tests/mock.rs"
+harness = false
+# `MockDatabase` is feature-gated out of the plain lib build, and an integration
+# test links this crate the way a downstream consumer does. So this binary only
+# builds under `--all-features` (or `--features test-utils`), which is what
+# `scripts/test_units.sh` and `scripts/test_lint.sh` pass; a bare
+# `cargo test -p database` silently skips it.
+required-features = ["test-utils"]

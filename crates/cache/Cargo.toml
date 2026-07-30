@@ -13,19 +13,21 @@ serde = "1"
 serde_json = "1"
 tokio = { version = "1", features = ["rt"] }
 
-[features]
-# In-memory `Cache` test double (`cache::testing::MockCache`), for downstream
-# crates' tests. Enable via [dev-dependencies].
-test-utils = []
-
 [dev-dependencies]
 test_trait = { path = "../test_trait" }
 testcontainers = "0.24"
 testcontainers-modules = { version = "0.12", features = ["redis"] }
 serde = { version = "1", features = ["derive"] }
+# `macros` for `#[tokio::test]`, `time` for the expiry tests' sleep.
+tokio = { version = "1", features = ["rt", "macros", "time"] }
 uuid = { version = "1", features = ["v4"] }
 
 [[test]]
 name = "redis"
 path = "tests/common/mod.rs"
+harness = false
+
+[[test]]
+name = "hash_map"
+path = "tests/hash_map.rs"
 harness = false

@@ -68,18 +68,22 @@ Every assertion carries a message interpolating the actual values. A bare `asser
 
 ## 3. Shared test doubles
 
-Unit tests need in-memory implementations of the *other* crates' traits. Do not hand-roll one per test module — that is how a repo ends up with three subtly different `MockCache`s. Each crate ships its own double behind a `test-utils` feature:
+Unit tests need in-memory implementations of the *other* crates' traits. Do not hand-roll one per test module — that is how a repo ends up with three subtly different `MockCache`s.
+
+First ask whether the in-memory version is a *double* at all. `cache::backends::hash_map::HashMapCache` started as one, but a `HashMap` behind a mutex is a perfectly good single-process cache, so it is an ordinary backend: no feature gate, no `testing` module, and downstream tests just use it. Prefer that whenever the in-memory implementation is something you would ship.
+
+What is left over — an implementation that only makes sense in a test, because parts of it are `unimplemented!()` or rigged to fail — ships behind a `test-utils` feature:
 
 ```toml
-# crates/cache/Cargo.toml
+# crates/database/Cargo.toml
 [features]
-# In-memory `Cache` test double (`cache::testing::MockCache`), for downstream
-# crates' tests. Enable via [dev-dependencies].
+# In-memory `Database` test double (`database::testing::MockDatabase`), for
+# downstream crates' tests. Enable via [dev-dependencies].
 test-utils = []
 ```
 
 ```rust
-// crates/cache/src/lib.rs
+// crates/database/src/lib.rs
 #[cfg(feature = "test-utils")]
 pub mod testing;
 ```
@@ -88,12 +92,23 @@ Consumers opt in from `[dev-dependencies]` only, so it never reaches a release b
 
 ```toml
 [dev-dependencies]
-cache    = { path = "../cache",    features = ["test-utils"] }
 database = { path = "../database", features = ["test-utils"] }
 config   = { path = "../config",   features = ["test-utils"] }
 ```
 
-Available today: `cache::testing::MockCache`, `database::testing::MockDatabase`, `config::testing::test_config()`. Prefer extending one of these over writing a local stub.
+Available today: `database::testing::MockDatabase` and `config::testing::test_config()` behind the feature, `cache::backends::hash_map::HashMapCache` as a plain backend. Prefer extending one of these over writing a local stub.
+
+Either way the in-memory implementation runs the trait suite like any other backend — see §7. For a gated one that means the crate's *own* test binary needs the feature too, and an integration test links the crate the way any consumer does. Say so with `required-features` rather than a self dev-dependency (`database = { path = "." }`) — the self-dependency works but changes the graph shape, and in this workspace it has repeatedly left stale artifacts that fail the next build with `colliding StableCrateId` or `crate X required to be available in rlib format`:
+
+```toml
+[[test]]
+name = "mock"
+path = "tests/mock.rs"
+harness = false
+required-features = ["test-utils"]
+```
+
+The cost is that a bare `cargo test -p database` silently skips that binary. `scripts/test_units.sh` and `scripts/test_lint.sh` pass `--all-features` for exactly this reason; run them, or `cargo test -p database --all-features`, before believing a double is green.
 
 `config::testing::test_config()` matters more than it looks: it returns a fully populated `Config` with inert values, so a test overrides only the two or three fields it cares about. Hand-rolled `Config` literals have to be edited every time the struct gains a field.
 
@@ -174,7 +189,7 @@ The fixture also builds the backend under test, wiring in the shared doubles for
 /// The cache is a working in-memory one because the login flow round-trips its
 /// state through it; the database only has to report "not found".
 pub async fn authenticator(&self) -> Keycloak {
-    let cache: Arc<RwLock<dyn Cache>> = Arc::new(RwLock::new(MockCache::default()));
+    let cache: Arc<RwLock<dyn Cache>> = Arc::new(RwLock::new(HashMapCache::default()));
     let database: Arc<RwLock<dyn Database>> = Arc::new(RwLock::new(MockDatabase::default()));
     Keycloak::try_new(&self.config(), cache, database)
         .await
@@ -234,7 +249,7 @@ This is worth being absolute about because breaking it costs nothing up front an
 
 So when a test seems to need something the trait cannot express, the answer is almost never a concrete type. Either the trait is missing a method the production code also wants, or the need belongs behind a test-side trait the fixture implements (§6), or it is not a trait test at all and belongs in a unit test next to the backend.
 
-Because the suite only knows the trait, a backend needing no service at all reuses it unchanged — `tests/in_memory.rs` builds the in-memory backend, skips the fixture, and calls the same generated `trials`.
+Because the suite only knows the trait, a backend needing no service at all reuses it unchanged — `crates/cache/tests/hash_map.rs` and `crates/database/tests/mock.rs` are second `[[test]]` binaries whose fixture starts nothing, `#[path]`-include the same suite file, and call the same generated `trials`. Every in-memory implementation gets one, doubles included: a double nobody holds to the contract is a double whose users are testing behaviour no real backend has.
 
 All trials share one container and run in parallel, so **every test derives its own keys** — `Uuid::new_v4()` in the path, the bucket key, the username, the email. Two tests sharing a row or a blob will pass alone and fail together.
 
@@ -367,8 +382,8 @@ Read the closest one before writing a new suite.
 
 | Crate | Trait | Backend | Container | Notable for |
 |---|---|---|---|---|
-| `crates/cache` | `Cache` | `Redis` | `testcontainers-modules` redis | The smallest complete example — start here |
-| `crates/database` | `Database` | `Postgres` | `testcontainers-modules` postgres, migrations run in the fixture | A `&mut impl` subject; schema-dependent tests |
+| `crates/cache` | `Cache` | `Redis`, `HashMapCache` | `testcontainers-modules` redis | The smallest complete example — start here; two binaries, one containerless |
+| `crates/database` | `Database` | `Postgres`, `MockDatabase` | `testcontainers-modules` postgres, migrations run in the fixture | A `&mut impl` subject; schema-dependent tests; the double held to the same contract |
 | `crates/storage` | `Storage` | `S3` | Garage via `GenericImage`, provisioned with `ExecCommand` | Post-start provisioning inside `start()`, binary fixtures |
 | `crates/authenticator` | `Authenticator` | `Keycloak` | Keycloak via `GenericImage`, two realms imported | `trials_shared`, two suite modules, a context parameter, the `ProviderAgent` pattern |
 
@@ -381,9 +396,11 @@ The macros themselves live in `crates/test_trait` (the `TestSuite` trait and re-
 ```bash
 cargo fmt -p mycrate
 cargo clippy -p mycrate --all-targets --all-features
-cargo test -p mycrate --lib          # unit tests, must be instant
-cargo test -p mycrate                # + the container suite; needs Docker running
+cargo test -p mycrate --lib                  # unit tests, must be instant
+cargo test -p mycrate --all-features         # + every suite; needs Docker running
 ```
+
+`--all-features` is not optional: without it a binary carrying `required-features` is skipped, and cargo says nothing about it.
 
 Filter a single trial by name while iterating — libtest-mimic accepts the same arguments as the normal harness:
 

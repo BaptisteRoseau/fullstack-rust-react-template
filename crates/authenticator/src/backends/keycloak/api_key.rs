@@ -85,7 +85,7 @@ pub(super) fn hex_sha256(input: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use cache::testing::MockCache;
+    use cache::backends::hash_map::HashMapCache;
     use database::models::ApiKey;
     use database::testing::MockDatabase;
     use std::collections::HashMap;
@@ -128,7 +128,8 @@ mod tests {
 
     #[tokio::test]
     async fn set_cache_then_try_get_cache_round_trips() {
-        let cache: Arc<RwLock<dyn Cache>> = Arc::new(RwLock::new(MockCache::default()));
+        let cache: Arc<RwLock<dyn Cache>> =
+            Arc::new(RwLock::new(HashMapCache::default()));
         let database: Arc<RwLock<dyn Database>> =
             Arc::new(RwLock::new(MockDatabase::default()));
         let validator = make_validator(cache, database);
@@ -164,7 +165,8 @@ mod tests {
 
     #[tokio::test]
     async fn try_get_cache_returns_none_on_miss() {
-        let cache: Arc<RwLock<dyn Cache>> = Arc::new(RwLock::new(MockCache::default()));
+        let cache: Arc<RwLock<dyn Cache>> =
+            Arc::new(RwLock::new(HashMapCache::default()));
         let database: Arc<RwLock<dyn Database>> =
             Arc::new(RwLock::new(MockDatabase::default()));
         let validator = make_validator(cache, database);
@@ -184,7 +186,8 @@ mod tests {
         let mut api_keys_by_hash = HashMap::new();
         api_keys_by_hash.insert(hashed.clone(), make_api_key(&hashed, owner));
 
-        let cache: Arc<RwLock<dyn Cache>> = Arc::new(RwLock::new(MockCache::default()));
+        let cache: Arc<RwLock<dyn Cache>> =
+            Arc::new(RwLock::new(HashMapCache::default()));
         let database: Arc<RwLock<dyn Database>> = Arc::new(RwLock::new(MockDatabase {
             api_keys_by_hash,
             ..Default::default()
@@ -223,7 +226,8 @@ mod tests {
         let hashed = hex_sha256(token);
         let owner = Uuid::new_v4();
 
-        let cache: Arc<RwLock<dyn Cache>> = Arc::new(RwLock::new(MockCache::default()));
+        let cache: Arc<RwLock<dyn Cache>> =
+            Arc::new(RwLock::new(HashMapCache::default()));
         // Empty database: a cache miss would surface as AuthenticationFailure.
         let database: Arc<RwLock<dyn Database>> =
             Arc::new(RwLock::new(MockDatabase::default()));
@@ -252,7 +256,8 @@ mod tests {
 
     #[tokio::test]
     async fn validate_api_key_fails_when_unknown() {
-        let cache: Arc<RwLock<dyn Cache>> = Arc::new(RwLock::new(MockCache::default()));
+        let cache: Arc<RwLock<dyn Cache>> =
+            Arc::new(RwLock::new(HashMapCache::default()));
         let database: Arc<RwLock<dyn Database>> =
             Arc::new(RwLock::new(MockDatabase::default()));
         let validator = make_validator(cache, database);

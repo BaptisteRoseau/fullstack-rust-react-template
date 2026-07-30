@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::time::Duration;
 
 use cache::Cache;
 // use serde::{Deserialize, Serialize};
@@ -98,6 +99,28 @@ pub mod suite {
             "expected Some(\"ephemeral\") before expiry, got {value:?}"
         );
         let _ = cache.delete(&key).await;
+    }
+
+    /// The only trial that sleeps. `timeout_s` is in seconds, so there is no
+    /// shorter way to watch an entry age out, and a backend that accepts the
+    /// timeout without honouring it is otherwise indistinguishable from one that
+    /// does.
+    #[test_trait]
+    async fn set_with_timeout_expires(cache: &impl Cache) {
+        let key = unique_key("expiry");
+        let input = json!("ephemeral");
+        cache
+            .set(&key, &input, Some(1))
+            .await
+            .expect("set with timeout failed");
+
+        tokio::time::sleep(Duration::from_millis(1500)).await;
+
+        let value = cache.get(&key).await.expect("get failed");
+        assert!(
+            value.is_none(),
+            "expected None once the 1s timeout elapsed, got {value:?}"
+        );
     }
 
     #[test_trait]

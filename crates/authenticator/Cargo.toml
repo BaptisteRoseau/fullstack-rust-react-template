@@ -20,7 +20,6 @@ oauth2 = { version = "5", default-features = false, features = ["reqwest", "rust
 
 [dev-dependencies]
 database = { path = "../database", features = ["test-utils"] }
-cache = { path = "../cache", features = ["test-utils"] }
 config = { path = "../config", features = ["test-utils"] }
 test_trait = { path = "../test_trait" }
 chrono = "0.4.45"
