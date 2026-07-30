@@ -1,3 +1,4 @@
+use crate::endpoints::auth::cookies::ACCESS_COOKIE;
 use crate::models::UserToken;
 use crate::{AppState, error::ApiError, extractors::error::ExtractorError};
 use authenticator::error::AuthenticatorError;
@@ -9,9 +10,6 @@ use axum::{
 use axum_extra::extract::cookie::CookieJar;
 use jsonwebtoken::errors::ErrorKind as JwtErrorKind;
 use tracing::{Span, debug};
-
-/// Name of the httpOnly cookie holding the access token (set by the auth BFF).
-const ACCESS_COOKIE: &str = "access_token";
 
 /// Extracts the bearer/API-key token from the `Authorization` header, falling back
 /// to the `access_token` cookie set by the OAuth Backend-for-Frontend.
@@ -36,9 +34,7 @@ fn extract_token(headers: &HeaderMap) -> Result<Option<String>, ExtractorError> 
 /// to silently refresh rather than to log the user out.
 fn keeps_own_status(error: &AuthenticatorError) -> bool {
     match error {
-        AuthenticatorError::NoJwk
-        | AuthenticatorError::RequestError(_)
-        | AuthenticatorError::Expired => true,
+        AuthenticatorError::NoJwk | AuthenticatorError::RequestError(_) => true,
         AuthenticatorError::JwtError(jwt_error) => {
             matches!(jwt_error.kind(), JwtErrorKind::ExpiredSignature)
         }
@@ -142,7 +138,6 @@ mod tests {
             AuthenticatorError::Message("No matching key found in JWKS".into()),
             AuthenticatorError::Message("No 'kid' in token header".into()),
             AuthenticatorError::InvalidRealm("http://provider/realms/other".into()),
-            AuthenticatorError::InvalidSignature,
             AuthenticatorError::AuthenticationFailure,
         ];
 
@@ -173,11 +168,15 @@ mod tests {
 
     #[test]
     fn expired_token_keeps_its_own_unauthorized() {
-        let status = status_for(AuthenticatorError::Expired);
+        let jwt_error = jsonwebtoken::errors::Error::from(
+            jsonwebtoken::errors::ErrorKind::ExpiredSignature,
+        );
+        let kind = format!("{:?}", jwt_error.kind());
+        let status = status_for(AuthenticatorError::JwtError(jwt_error));
         assert_eq!(
             status,
             StatusCode::UNAUTHORIZED,
-            "an expired token must answer 401 so the frontend refreshes, got {status}"
+            "an expired token must answer 401 so the frontend refreshes, got {status} for kind {kind}"
         );
     }
 

@@ -15,10 +15,7 @@ use crate::{
     models::UserToken,
 };
 
-crate::endpoints::macros::declare_tag!(
-    "API Key",
-    "Create, inspect and revoke API keys."
-);
+crate::endpoints::macros::declare_tag!("API Key", "Create, inspect and revoke API keys.");
 
 fn parse_permissions(raw: &[String]) -> Vec<rbac::Permissions> {
     raw.iter()

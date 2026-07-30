@@ -1,7 +1,6 @@
 use std::net::SocketAddr;
 use std::sync::Arc;
 
-use authenticator::OidcClient;
 use authenticator::backends::Keycloak;
 use cache::backends::redis::Redis;
 use tokio::sync::RwLock;
@@ -18,8 +17,9 @@ use tokio::net::{TcpListener, ToSocketAddrs};
 use tokio::task::JoinHandle;
 use tracing::{info, warn};
 
-pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
+pub(crate) async fn run(config: Config) -> Result<(), anyhow::Error> {
     logging::init_logger(config.debug, config.log_json);
+    let config = Arc::new(config);
 
     /* ===========================
     * APP STATE
@@ -27,34 +27,30 @@ pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
 
     info!("Initializing Database...");
     let database: Arc<RwLock<dyn database::Database>> =
-        Arc::new(RwLock::new(Postgres::try_from(config).await?));
+        Arc::new(RwLock::new(Postgres::try_from(&config).await?));
     info!("Initialized Database");
 
     info!("Initializing Storage...");
     let storage: Arc<RwLock<dyn storage::Storage>> =
-        Arc::new(RwLock::new(S3::try_from(config)?));
+        Arc::new(RwLock::new(S3::try_from(config.as_ref())?));
     info!("Initialized Storage");
 
     info!("Initializing Cache...");
     let cache: Arc<RwLock<dyn cache::Cache>> =
-        Arc::new(RwLock::new(Redis::try_from(config)?));
+        Arc::new(RwLock::new(Redis::try_from(config.as_ref())?));
     info!("Initialized Cache");
 
     info!("Initializing Authenticator...");
     let authenticator =
-        Keycloak::try_new(config, Arc::clone(&cache), Arc::clone(&database)).await?;
+        Keycloak::try_new(&config, Arc::clone(&cache), Arc::clone(&database)).await?;
     info!("Initialized Authenticator");
-
-    info!("Initializing OAuth client...");
-    let oauth = OidcClient::try_new(config, Arc::clone(&cache))?;
-    info!("Initialized OAuth client");
 
     let state = AppState::new(
         database,
         storage,
         cache,
         Arc::new(RwLock::new(authenticator)),
-        Arc::new(oauth),
+        Arc::clone(&config),
     );
 
     /* ===========================
@@ -65,7 +61,7 @@ pub(crate) async fn run(config: &Config) -> Result<(), anyhow::Error> {
 
     // PUBLIC ROUTES
     info!("Initializing public API router...");
-    let mut public_routes = public_routes(config, state);
+    let mut public_routes = public_routes(&config, state);
 
     // PROMETHEUS
     if let Some(prometheus_config) = &config.prometheus {

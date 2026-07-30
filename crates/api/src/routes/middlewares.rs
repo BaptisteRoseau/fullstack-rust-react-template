@@ -91,7 +91,7 @@ fn logging_layer() -> LoggingLayer {
 /// which is required for the browser to send/accept the httpOnly auth cookies.
 fn cors_layer(config: &Config) -> CorsLayer {
     let origin = config
-        .oidc
+        .api
         .frontend_url
         .trim_end_matches('/')
         .parse::<axum::http::HeaderValue>();

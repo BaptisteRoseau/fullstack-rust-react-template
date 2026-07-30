@@ -11,8 +11,14 @@ fn main() {
 
     let rt = Arc::new(tokio::runtime::Runtime::new().unwrap());
     let fixture = Arc::new(rt.block_on(KeycloakFixture::start()));
+    let (credentials, bff) = rt.block_on(async {
+        (
+            Arc::new(fixture.credentials_authenticator().await),
+            Arc::new(fixture.bff_authenticator().await),
+        )
+    });
 
-    let tests = authenticator_trait_tests!(fixture.clone(), rt.clone());
+    let tests = authenticator_trait_tests!(credentials, bff, fixture.clone(), rt.clone());
 
     let conclusion = libtest_mimic::run(&args, tests);
 

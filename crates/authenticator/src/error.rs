@@ -4,10 +4,6 @@ use jsonwebtoken::errors::Error as JwtError;
 pub enum AuthenticatorError {
     #[error("No JWK sent from the Auth provider")]
     NoJwk,
-    #[error("The token has expired")]
-    Expired,
-    #[error("The token signature is invalid")]
-    InvalidSignature,
     #[error("Cannot read authentication server")]
     RequestError(#[from] reqwest::Error),
     #[error("The user's authentication failed")]
@@ -44,4 +40,10 @@ impl From<&str> for Box<AuthenticatorError> {
     fn from(value: &str) -> Self {
         Box::new(AuthenticatorError::Message(value.to_string()))
     }
+}
+
+/// Wraps a message into a boxed [`AuthenticatorError::Oidc`], matching the
+/// error type used throughout the crate.
+pub(crate) fn oidc_error(message: impl Into<String>) -> Box<AuthenticatorError> {
+    Box::new(AuthenticatorError::Oidc(message.into()))
 }

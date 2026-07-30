@@ -9,29 +9,36 @@ The backend plays two roles:
 All OAuth logic lives in the **`authenticator`** crate. The **`api`** crate stays thin: it
 extracts input, sets/clears cookies, routes, and converts errors.
 
-## OAuth logic — `authenticator` crate
+## Authentication logic — `authenticator` crate
 
-[`crates/authenticator/src/oidc.rs`](../../crates/authenticator/src/oidc.rs) defines
-`OidcClient`, built on the [`oauth2`](https://docs.rs/oauth2) v5 crate.
+Both roles sit behind a single trait,
+[`Authenticator`](../../crates/authenticator/src/authenticator.rs), implemented by one
+backend, [`backends::Keycloak`](../../crates/authenticator/src/backends/keycloak/). The
+OAuth half is built on the [`oauth2`](https://docs.rs/oauth2) v5 crate. `AppState` holds it
+as `Arc<RwLock<dyn Authenticator>>`, like every other service the API depends on.
 
 | Method | Responsibility |
 |--------|----------------|
-| `authorize_url(screen, redirect)` | Generate a PKCE challenge + CSRF state, store `{verifier, redirect}` in the shared cache keyed by the state, and return the Keycloak authorize URL. For `LoginScreen::Register`, the path is rewritten to Keycloak's `/registrations` endpoint. |
-| `exchange_code(code, state)` | Look up and delete the cached state, exchange the code (with the PKCE verifier) at the token endpoint, and return the tokens plus the stored post-login redirect. |
-| `refresh(refresh_token)` | Exchange a refresh token for a fresh token set. |
+| `validate(token)` | Resolve the caller's credential. A JWT is checked RS256 against the realm's JWKS with audience validation, yielding `sub` and the realm from `iss`; anything without dots is looked up as an API key. |
+| `authorize_url(screen, redirect)` | Generate a PKCE challenge + CSRF state, store `{verifier, redirect}` in the shared cache keyed by the state, and return the Keycloak authorize URL. For `LoginScreen::Register`, the path is swapped for Keycloak's `/registrations` endpoint. |
+| `exchange_code(code, state)` | Look up and delete the cached state, exchange the code (with the PKCE verifier) at the token endpoint, and return an `AuthSession` — the tokens plus the stored post-login redirect. |
+| `refresh_tokens(refresh_token)` | Exchange a refresh token for a fresh token set. |
+| `userinfo(access_token)` | Fetch the OIDC userinfo claims for `/auth/me`, typed as `UserInfo`. |
 | `logout(refresh_token)` | Revoke the session at Keycloak's end-session endpoint. |
-| `userinfo(access_token)` | Fetch the OIDC userinfo claims for `/auth/me`. |
 
 Notes:
 
+- Every provider endpoint — JWKS, authorize, token, logout, userinfo — is derived from the
+  configured issuer URL by `Endpoints::from_issuer`, so the resource-server half and the
+  BFF half cannot point at different realms.
 - The PKCE verifier and CSRF state are persisted in **Redis** (the shared `Cache`) under
   `oidc_state:{state}` with a 600s TTL. This bridges `/auth/login` and `/auth/callback` and
-  doubles as CSRF protection — the callback only proceeds if the state matches.
+  doubles as CSRF protection — the callback only proceeds if the state matches, and the
+  entry is consumed so it cannot be replayed.
 - The HTTP client comes from `oauth2::reqwest` (the crate's pinned reqwest) so it satisfies
   the `AsyncHttpClient` bound; `redirect::Policy::none()` is set as the crate requires.
-- JWT validation itself remains in
-  [`crates/authenticator/src/backends/keycloak.rs`](../../crates/authenticator/src/backends/keycloak.rs):
-  RS256 signature check against JWKS + audience validation, extracting `sub` and `iss`.
+- The JWKS is fetched once at construction; a key rotation at the provider breaks validation
+  until the backend restarts.
 
 ## HTTP endpoints — `api` crate
 
@@ -89,7 +96,8 @@ is rejected by browsers on credentialed (cookie) requests.
 
 ## Wiring
 
-`OidcClient` is constructed in
+The `Keycloak` backend is constructed in
 [`crates/binaries/backend/src/program.rs`](../../crates/binaries/backend/src/program.rs) and
-held in `AppState` alongside the existing authenticator. See
+held in `AppState` as `Arc<RwLock<dyn Authenticator>>`, next to the shared `Arc<Config>` the
+handlers read the cookie and redirect policy from. See
 [configuration.md](./configuration.md) for the settings it reads.

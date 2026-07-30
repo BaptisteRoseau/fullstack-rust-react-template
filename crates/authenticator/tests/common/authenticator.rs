@@ -2,55 +2,174 @@ use uuid::Uuid;
 
 use authenticator::Authenticator;
 
-use super::containers::{KeycloakFixture, REALM, USER_ID};
+use super::containers::{CREDENTIALS_REALM, CREDENTIALS_USER_ID};
+use super::provider::ProviderAgent;
 
 // When adding a new test here:
 // - helpers are regular private functions
-// - tests signature is `pub async fn assert_<my test>(fixture: &KeycloakFixture)`
+// - tests signature is `pub async fn assert_<my test>(authenticator: &impl Authenticator)`,
+//   plus `&impl ProviderAgent` when the test needs a credential or a browser login
+// - credential tests live here, Backend-for-Frontend tests live in `oidc.rs`
 // - new tests should be added in the `authenticator_trait_tests` macro
 
 /// Set of integration tests for the Authenticator trait, backed by a live
 /// Keycloak container. Returns a `Vec<Trial>` for use with `libtest-mimic`.
 /// The caller must have `mod common;` declared beforehand.
+///
+/// Two authenticators are driven because the trait spans two provider roles that
+/// need differently configured realms: `$credentials` validates tokens minted by
+/// a public client's direct access grant, `$bff` runs the Authorization Code +
+/// PKCE flow of a confidential client. Both are shared across trials rather than
+/// rebuilt per test: the backend is stateless, its cache entries are keyed by the
+/// random CSRF state, and rebuilding would re-fetch the JWKS every time.
 macro_rules! authenticator_trait_tests {
-    ($fixture:expr, $rt:expr) => {{
+    ($credentials:expr, $bff:expr, $agent:expr, $rt:expr) => {{
         use common::authenticator::*;
+        use common::oidc::*;
         use libtest_mimic::Trial;
         use std::sync::Arc;
 
         let rt: Arc<tokio::runtime::Runtime> = $rt;
-        let fixture: Arc<KeycloakFixture> = $fixture;
+        let credentials = $credentials;
+        let bff = $bff;
+        let agent = $agent;
 
         vec![
+            /* Credentials: JWT and API-key validation. */
             {
                 let rt = rt.clone();
-                let fixture = fixture.clone();
-                Trial::test("validates_valid_jwt", move || {
-                    rt.block_on(assert_validates_valid_jwt(&fixture));
+                let authenticator = credentials.clone();
+                let agent = agent.clone();
+                Trial::test("validates_issued_jwt", move || {
+                    rt.block_on(assert_validates_issued_jwt(&*authenticator, &*agent));
                     Ok(())
                 })
             },
             {
                 let rt = rt.clone();
-                let fixture = fixture.clone();
+                let authenticator = credentials.clone();
                 Trial::test("rejects_garbage_jwt", move || {
-                    rt.block_on(assert_rejects_garbage_jwt(&fixture));
+                    rt.block_on(assert_rejects_garbage_jwt(&*authenticator));
                     Ok(())
                 })
             },
             {
                 let rt = rt.clone();
-                let fixture = fixture.clone();
+                let authenticator = credentials.clone();
+                let agent = agent.clone();
                 Trial::test("rejects_tampered_jwt", move || {
-                    rt.block_on(assert_rejects_tampered_jwt(&fixture));
+                    rt.block_on(assert_rejects_tampered_jwt(&*authenticator, &*agent));
                     Ok(())
                 })
             },
             {
                 let rt = rt.clone();
-                let fixture = fixture.clone();
+                let authenticator = credentials.clone();
                 Trial::test("rejects_unknown_api_key", move || {
-                    rt.block_on(assert_rejects_unknown_api_key(&fixture));
+                    rt.block_on(assert_rejects_unknown_api_key(&*authenticator));
+                    Ok(())
+                })
+            },
+            /* Backend-for-Frontend: the Authorization Code + PKCE flow. */
+            {
+                let rt = rt.clone();
+                let authenticator = bff.clone();
+                Trial::test("authorize_url_targets_the_login_screen", move || {
+                    rt.block_on(assert_authorize_url_targets_the_login_screen(
+                        &*authenticator,
+                    ));
+                    Ok(())
+                })
+            },
+            {
+                let rt = rt.clone();
+                let authenticator = bff.clone();
+                Trial::test("authorize_url_targets_the_registration_screen", move || {
+                    rt.block_on(assert_authorize_url_targets_the_registration_screen(
+                        &*authenticator,
+                    ));
+                    Ok(())
+                })
+            },
+            {
+                let rt = rt.clone();
+                let authenticator = bff.clone();
+                let agent = agent.clone();
+                Trial::test("exchange_code_returns_tokens_and_redirect", move || {
+                    rt.block_on(assert_exchange_code_returns_tokens_and_redirect(
+                        &*authenticator,
+                        &*agent,
+                    ));
+                    Ok(())
+                })
+            },
+            {
+                let rt = rt.clone();
+                let authenticator = bff.clone();
+                let agent = agent.clone();
+                Trial::test("exchange_code_issues_a_token_that_validates", move || {
+                    rt.block_on(assert_exchange_code_issues_a_token_that_validates(
+                        &*authenticator,
+                        &*agent,
+                    ));
+                    Ok(())
+                })
+            },
+            {
+                let rt = rt.clone();
+                let authenticator = bff.clone();
+                Trial::test("exchange_code_rejects_an_unknown_state", move || {
+                    rt.block_on(assert_exchange_code_rejects_an_unknown_state(
+                        &*authenticator,
+                    ));
+                    Ok(())
+                })
+            },
+            {
+                let rt = rt.clone();
+                let authenticator = bff.clone();
+                let agent = agent.clone();
+                Trial::test("exchange_code_rejects_a_replayed_state", move || {
+                    rt.block_on(assert_exchange_code_rejects_a_replayed_state(
+                        &*authenticator,
+                        &*agent,
+                    ));
+                    Ok(())
+                })
+            },
+            {
+                let rt = rt.clone();
+                let authenticator = bff.clone();
+                let agent = agent.clone();
+                Trial::test("userinfo_returns_the_identity_claims", move || {
+                    rt.block_on(assert_userinfo_returns_the_identity_claims(
+                        &*authenticator,
+                        &*agent,
+                    ));
+                    Ok(())
+                })
+            },
+            {
+                let rt = rt.clone();
+                let authenticator = bff.clone();
+                let agent = agent.clone();
+                Trial::test("refresh_tokens_issues_a_new_pair", move || {
+                    rt.block_on(assert_refresh_tokens_issues_a_new_pair(
+                        &*authenticator,
+                        &*agent,
+                    ));
+                    Ok(())
+                })
+            },
+            {
+                let rt = rt.clone();
+                let authenticator = bff.clone();
+                let agent = agent.clone();
+                Trial::test("logout_revokes_the_session", move || {
+                    rt.block_on(assert_logout_revokes_the_session(
+                        &*authenticator,
+                        &*agent,
+                    ));
                     Ok(())
                 })
             },
@@ -58,22 +177,24 @@ macro_rules! authenticator_trait_tests {
     }};
 }
 
-pub async fn assert_validates_valid_jwt(fixture: &KeycloakFixture) {
-    let authenticator = fixture.authenticator().await;
-    let token = fixture.fetch_token().await;
+pub async fn assert_validates_issued_jwt(
+    authenticator: &impl Authenticator,
+    agent: &impl ProviderAgent,
+) {
+    let token = agent.issue_token().await;
 
     let user = authenticator
         .validate(&token)
         .await
-        .expect("a freshly issued keycloak token should be accepted");
+        .expect("a freshly issued provider token should be accepted");
 
     assert_eq!(
-        user.realm, REALM,
-        "realm should be parsed from the iss claim: got={}, want={REALM}",
+        user.realm, CREDENTIALS_REALM,
+        "realm should be parsed from the iss claim: got={}, want={CREDENTIALS_REALM}",
         user.realm
     );
-    let want_id =
-        Uuid::parse_str(USER_ID).expect("USER_ID constant must be a valid uuid");
+    let want_id = Uuid::parse_str(CREDENTIALS_USER_ID)
+        .expect("CREDENTIALS_USER_ID must be a valid uuid");
     assert_eq!(
         user.id, want_id,
         "user id should match the sub claim: got={}, want={want_id}",
@@ -81,9 +202,7 @@ pub async fn assert_validates_valid_jwt(fixture: &KeycloakFixture) {
     );
 }
 
-pub async fn assert_rejects_garbage_jwt(fixture: &KeycloakFixture) {
-    let authenticator = fixture.authenticator().await;
-
+pub async fn assert_rejects_garbage_jwt(authenticator: &impl Authenticator) {
     let result = authenticator.validate("aaaa.bbbb.cccc").await;
     assert!(
         result.is_err(),
@@ -91,10 +210,11 @@ pub async fn assert_rejects_garbage_jwt(fixture: &KeycloakFixture) {
     );
 }
 
-pub async fn assert_rejects_tampered_jwt(fixture: &KeycloakFixture) {
-    let authenticator = fixture.authenticator().await;
-    let token = fixture.fetch_token().await;
-    let tampered = tamper_signature(&token);
+pub async fn assert_rejects_tampered_jwt(
+    authenticator: &impl Authenticator,
+    agent: &impl ProviderAgent,
+) {
+    let tampered = tamper_signature(&agent.issue_token().await);
 
     let result = authenticator.validate(&tampered).await;
     assert!(
@@ -103,10 +223,8 @@ pub async fn assert_rejects_tampered_jwt(fixture: &KeycloakFixture) {
     );
 }
 
-pub async fn assert_rejects_unknown_api_key(fixture: &KeycloakFixture) {
-    let authenticator = fixture.authenticator().await;
-
-    // No dots => treated as an API key; the no-op database reports it missing.
+pub async fn assert_rejects_unknown_api_key(authenticator: &impl Authenticator) {
+    // No dots => treated as an API key; the empty database reports it missing.
     let result = authenticator.validate("plain-api-key-without-dots").await;
     assert!(
         result.is_err(),

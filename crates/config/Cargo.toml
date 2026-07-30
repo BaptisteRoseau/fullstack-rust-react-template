@@ -9,3 +9,7 @@ tracing = "0"
 serde = { version = "1", features = ["derive"] }
 serde_yaml = "*"
 thiserror = "2"
+
+[features]
+# Ready-made `Config` for downstream crates' tests. Enable via [dev-dependencies].
+test-utils = []

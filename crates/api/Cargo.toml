@@ -56,5 +56,6 @@ tower_governor = { version = "0.8.0", features = ["axum"] }
 axum-extra = { version = "0.10", features = ["cookie"] }
 
 [dev-dependencies]
+config = { path = "../config", features = ["test-utils"] }
 tower = { version = "0.5", features = ["util"] }
 tracing-subscriber = "0.3.23"

@@ -1,7 +1,7 @@
-use serde::{Deserialize, Serialize};
 use compressor::parameters::{
-    Compression, ImageCompression, ImageConversion, CompressionParameters,
+    Compression, CompressionParameters, ImageCompression, ImageConversion,
 };
+use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToResponse, ToSchema};
 
 /// Query parameters for file upload, controlling compression and image processing.

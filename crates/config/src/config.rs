@@ -10,6 +10,10 @@ pub struct ApiConfig {
     pub timeout_sec: u16,
     pub rate_limiter_refresh_per_second: u64,
     pub rate_limiter_burst_size: u32,
+    /// Frontend origin: post-login redirect target and the allowed CORS origin.
+    pub frontend_url: String,
+    /// Whether auth cookies carry the `Secure` attribute (enable behind HTTPS).
+    pub cookie_secure: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -41,18 +45,16 @@ pub struct RedisConfig {
 
 #[derive(Debug, Clone)]
 pub struct AuthenticatorConfig {
-    pub provider_url: String,
-    pub audiences: Vec<String>,
-}
-
-#[derive(Debug, Clone)]
-pub struct OidcConfig {
+    /// Realm base URL, e.g. `http://localhost:8090/realms/app`. Every provider
+    /// endpoint (JWKS, authorize, token, logout, userinfo) is derived from it.
     pub issuer_url: String,
+    /// Audiences the access token must carry.
+    pub audiences: Vec<String>,
+    /// Confidential client used by the Backend-for-Frontend.
     pub client_id: String,
     pub client_secret: String,
+    /// Backend callback URL registered as a redirect URI on the client.
     pub redirect_url: String,
-    pub frontend_url: String,
-    pub cookie_secure: bool,
 }
 
 type ServerBindingConfig = BindingConfig;
@@ -89,7 +91,6 @@ pub struct Config {
     pub prometheus: Option<PrometheusConfig>,
     pub swagger: Option<SwaggerConfig>,
     pub authenticator: AuthenticatorConfig,
-    pub oidc: OidcConfig,
 }
 
 impl Config {
@@ -130,6 +131,8 @@ impl TryFrom<CliConfig> for Config {
                 timeout_sec: value.api_timeout_sec,
                 rate_limiter_refresh_per_second: value.rate_limiter_refresh_per_second,
                 rate_limiter_burst_size: value.rate_limiter_burst_size,
+                frontend_url: value.frontend_url,
+                cookie_secure: value.cookie_secure,
             },
             server: ServerBindingConfig {
                 ip: value.ip,
@@ -153,21 +156,16 @@ impl TryFrom<CliConfig> for Config {
             prometheus,
             swagger,
             authenticator: AuthenticatorConfig {
-                provider_url: value.authenticator_provider_url,
+                issuer_url: value.authenticator_issuer_url,
                 audiences: value
                     .authenticator_audiences
                     .split(',')
                     .filter(|s| !s.is_empty())
                     .map(str::to_string)
                     .collect(),
-            },
-            oidc: OidcConfig {
-                issuer_url: value.oidc_issuer_url,
-                client_id: value.oidc_client_id,
-                client_secret: value.oidc_client_secret,
-                redirect_url: value.oidc_redirect_url,
-                frontend_url: value.frontend_url,
-                cookie_secure: value.cookie_secure,
+                client_id: value.authenticator_client_id,
+                client_secret: value.authenticator_client_secret,
+                redirect_url: value.authenticator_redirect_url,
             },
         })
     }
@@ -228,13 +226,13 @@ mod test {
                 swagger_ui_path: DEFAULT_SWAGGER_UI_PATH.to_string(),
                 swagger_openapi_path: DEFAULT_OPENAPI_PATH.to_string(),
                 no_swagger: false,
-                authenticator_provider_url: DEFAULT_AUTHENTICATOR_PROVIDER_URL
-                    .to_string(),
                 authenticator_audiences: DEFAULT_AUTHENTICATOR_AUDIENCES.to_string(),
-                oidc_issuer_url: DEFAULT_OIDC_ISSUER_URL.to_string(),
-                oidc_client_id: DEFAULT_OIDC_CLIENT_ID.to_string(),
-                oidc_client_secret: DEFAULT_OIDC_CLIENT_SECRET.to_string(),
-                oidc_redirect_url: DEFAULT_OIDC_REDIRECT_URL.to_string(),
+                authenticator_issuer_url: DEFAULT_AUTHENTICATOR_ISSUER_URL.to_string(),
+                authenticator_client_id: DEFAULT_AUTHENTICATOR_CLIENT_ID.to_string(),
+                authenticator_client_secret: DEFAULT_AUTHENTICATOR_CLIENT_SECRET
+                    .to_string(),
+                authenticator_redirect_url: DEFAULT_AUTHENTICATOR_REDIRECT_URL
+                    .to_string(),
                 frontend_url: DEFAULT_FRONTEND_URL.to_string(),
                 cookie_secure: DEFAULT_COOKIE_SECURE,
             }

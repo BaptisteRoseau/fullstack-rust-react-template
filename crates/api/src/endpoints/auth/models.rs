@@ -1,5 +1,5 @@
+use authenticator::UserInfo;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use utoipa::{IntoParams, ToResponse, ToSchema};
 
 /// Query parameters for starting the login or registration flow.
@@ -36,19 +36,12 @@ pub(crate) struct GetMeResponse {
 
 impl GetMeResponse {
     /// Maps OIDC userinfo claims onto the user profile shape.
-    pub(crate) fn from_userinfo(info: &Value) -> Self {
-        let claim = |key: &str| {
-            info.get(key)
-                .and_then(Value::as_str)
-                .unwrap_or_default()
-                .to_string()
-        };
-
+    pub(crate) fn from_userinfo(info: &UserInfo) -> Self {
         Self {
-            id: claim("sub"),
-            first_name: claim("given_name"),
-            last_name: claim("family_name"),
-            email: claim("email"),
+            id: info.sub.to_string(),
+            first_name: info.given_name.clone(),
+            last_name: info.family_name.clone(),
+            email: info.email.clone(),
             role: "USER".to_string(),
             team_id: String::new(),
             bio: String::new(),

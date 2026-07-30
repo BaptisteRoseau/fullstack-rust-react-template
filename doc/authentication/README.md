@@ -22,7 +22,7 @@ short-lived and refreshed transparently when they expire.
 |------|----------|
 | [overview.md](./overview.md) | The end-to-end flow and sequence diagram. Start here. |
 | [keycloak.md](./keycloak.md) | Realm, clients, and how the realm is bootstrapped. |
-| [backend.md](./backend.md) | The Rust side: `OidcClient`, the `/auth/*` endpoints, cookies, the extractor, error mapping. |
+| [backend.md](./backend.md) | The Rust side: the `Authenticator` trait, the `/auth/*` endpoints, cookies, the extractor, error mapping. |
 | [frontend.md](./frontend.md) | The React side: redirect-based login, `useUser`, and the refresh-and-retry interceptor. |
 | [configuration.md](./configuration.md) | Every environment variable / setting, backend and frontend. |
 | [manual-testing.md](./manual-testing.md) | Run the flow end to end and obtain a raw JWT for `curl`. |

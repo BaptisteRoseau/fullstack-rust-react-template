@@ -51,17 +51,14 @@ pub(crate) fn make_request_span<B>(request: &Request<B>) -> Span {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::super::middlewares::with_middlewares;
+    use super::*;
     use axum::Router;
     use axum::body::Body;
     use axum::extract::ConnectInfo;
     use axum::http::{HeaderMap, StatusCode};
     use axum::routing::get;
-    use config::{
-        ApiConfig, AuthenticatorConfig, BindingConfig, Config, OidcConfig,
-        PostgresConfig, RedisConfig, S3Config,
-    };
+    use config::Config;
     use std::collections::HashMap;
     use std::net::{IpAddr, Ipv4Addr, SocketAddr};
     use std::sync::{Arc, Mutex};
@@ -173,46 +170,13 @@ mod tests {
     /// A configuration carrying only what the middleware stack reads. The rate
     /// limit is generous enough never to reject the requests these tests send.
     fn test_config() -> Config {
-        Config {
-            debug: false,
-            log_json: false,
-            api: ApiConfig {
-                timeout_sec: 30,
-                rate_limiter_refresh_per_second: 1,
-                rate_limiter_burst_size: 1_000,
-            },
-            server: BindingConfig {
-                ip: IpAddr::V4(Ipv4Addr::LOCALHOST),
-                port: 8080,
-            },
-            s3: S3Config {
-                url: String::new(),
-                user: String::new(),
-                password: String::new(),
-            },
-            redis: RedisConfig { url: String::new() },
-            postgres: PostgresConfig {
-                host: String::new(),
-                port: 5432,
-                database: String::new(),
-                user: String::new(),
-                password: String::new(),
-            },
-            prometheus: None,
-            swagger: None,
-            authenticator: AuthenticatorConfig {
-                provider_url: String::new(),
-                audiences: Vec::new(),
-            },
-            oidc: OidcConfig {
-                issuer_url: String::new(),
-                client_id: String::new(),
-                client_secret: String::new(),
-                redirect_url: String::new(),
-                frontend_url: "http://localhost:5173".to_owned(),
-                cookie_secure: false,
-            },
-        }
+        let mut config = config::testing::test_config();
+        config.api.timeout_sec = 30;
+        // Generous enough that the rate limiter never rejects the requests these tests send.
+        config.api.rate_limiter_burst_size = 1_000;
+        config.api.frontend_url = "http://localhost:5173".to_owned();
+        config.server.port = 8080;
+        config
     }
 
     /// The very middleware stack `public_routes` ships, wrapped around a probe

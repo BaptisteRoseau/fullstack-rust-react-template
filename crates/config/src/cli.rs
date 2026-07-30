@@ -59,6 +59,14 @@ pub(crate) struct CliConfig {
     #[arg(long, env, default_value_t = DEFAULT_RATE_LIMITER_BURST_SIZE)]
     pub(crate) rate_limiter_burst_size: u32,
 
+    /// Frontend base URL to redirect the browser to after login
+    #[arg(long, env, default_value_t = DEFAULT_FRONTEND_URL.to_string())]
+    pub(crate) frontend_url: String,
+
+    /// Whether auth cookies should set the Secure attribute (enable in production/HTTPS)
+    #[arg(long, env, default_value_t = DEFAULT_COOKIE_SECURE)]
+    pub(crate) cookie_secure: bool,
+
     /* ===============
     DATABASE
     ================ */
@@ -139,42 +147,29 @@ pub(crate) struct CliConfig {
     pub(crate) no_swagger: bool,
 
     /* ===============
-    AUTHENTICATOR
+    AUTHENTICATOR (JWT/API-key validation + OAuth Backend-for-Frontend, both driven
+    by the same Keycloak realm)
     ================ */
-    /// JWKS provider URL (e.g. http://localhost:8090/realms/master/protocol/openid-connect/certs)
-    #[arg(long, env, default_value_t = DEFAULT_AUTHENTICATOR_PROVIDER_URL.to_string())]
-    pub(crate) authenticator_provider_url: String,
-
     /// Comma-separated list of accepted JWT audiences
     #[arg(long, env, default_value_t = DEFAULT_AUTHENTICATOR_AUDIENCES.to_string())]
     pub(crate) authenticator_audiences: String,
 
-    /* ===============
-    OIDC (OAuth Backend-for-Frontend)
-    ================ */
-    /// OIDC issuer base URL (e.g. http://localhost:8090/realms/app)
-    #[arg(long, env, default_value_t = DEFAULT_OIDC_ISSUER_URL.to_string())]
-    pub(crate) oidc_issuer_url: String,
+    /// Authenticator issuer base URL (e.g. http://localhost:8090/realms/app). Every
+    /// provider endpoint (JWKS, authorize, token, logout, userinfo) is derived from it.
+    #[arg(long, env, default_value_t = DEFAULT_AUTHENTICATOR_ISSUER_URL.to_string())]
+    pub(crate) authenticator_issuer_url: String,
 
-    /// OIDC confidential client id used by the backend
-    #[arg(long, env, default_value_t = DEFAULT_OIDC_CLIENT_ID.to_string())]
-    pub(crate) oidc_client_id: String,
+    /// Authenticator confidential client id used by the backend
+    #[arg(long, env, default_value_t = DEFAULT_AUTHENTICATOR_CLIENT_ID.to_string())]
+    pub(crate) authenticator_client_id: String,
 
-    /// OIDC confidential client secret
-    #[arg(long, env, default_value_t = DEFAULT_OIDC_CLIENT_SECRET.to_string())]
-    pub(crate) oidc_client_secret: String,
+    /// Authenticator confidential client secret
+    #[arg(long, env, default_value_t = DEFAULT_AUTHENTICATOR_CLIENT_SECRET.to_string())]
+    pub(crate) authenticator_client_secret: String,
 
     /// OAuth redirect URL pointing back to the backend callback endpoint
-    #[arg(long, env, default_value_t = DEFAULT_OIDC_REDIRECT_URL.to_string())]
-    pub(crate) oidc_redirect_url: String,
-
-    /// Frontend base URL to redirect the browser to after login
-    #[arg(long, env, default_value_t = DEFAULT_FRONTEND_URL.to_string())]
-    pub(crate) frontend_url: String,
-
-    /// Whether auth cookies should set the Secure attribute (enable in production/HTTPS)
-    #[arg(long, env, default_value_t = DEFAULT_COOKIE_SECURE)]
-    pub(crate) cookie_secure: bool,
+    #[arg(long, env, default_value_t = DEFAULT_AUTHENTICATOR_REDIRECT_URL.to_string())]
+    pub(crate) authenticator_redirect_url: String,
 }
 
 impl CliConfig {

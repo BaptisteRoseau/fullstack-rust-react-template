@@ -29,17 +29,17 @@ pub(crate) const DEFAULT_RATE_LIMITER_BURST_SIZE: u32 = 100;
 
 pub(crate) const DEFAULT_CONFIG_FILE_PATH: &str = ".config.yaml";
 
-// Keycloak default JWKS endpoint (from docker-compose.authentication.yml: port 8090 → 8080)
-pub(crate) const DEFAULT_AUTHENTICATOR_PROVIDER_URL: &str =
-    "http://localhost:8090/realms/app/protocol/openid-connect/certs";
 pub(crate) const DEFAULT_AUTHENTICATOR_AUDIENCES: &str = "backend";
 
-// OIDC / OAuth Backend-for-Frontend (Authorization Code + PKCE against Keycloak).
-pub(crate) const DEFAULT_OIDC_ISSUER_URL: &str = "http://localhost:8090/realms/app";
-pub(crate) const DEFAULT_OIDC_CLIENT_ID: &str = "webapp";
+// Authenticator: JWT/API-key validation + OAuth Backend-for-Frontend (Authorization
+// Code + PKCE), both derived from the same Keycloak realm (from
+// docker-compose.authentication.yml: port 8090 → 8080).
+pub(crate) const DEFAULT_AUTHENTICATOR_ISSUER_URL: &str =
+    "http://localhost:8090/realms/app";
+pub(crate) const DEFAULT_AUTHENTICATOR_CLIENT_ID: &str = "webapp";
 // Dev-only secret; matches the `webapp` client in the imported realm. Override in production.
-pub(crate) const DEFAULT_OIDC_CLIENT_SECRET: &str = "webapp-secret";
-pub(crate) const DEFAULT_OIDC_REDIRECT_URL: &str =
+pub(crate) const DEFAULT_AUTHENTICATOR_CLIENT_SECRET: &str = "webapp-secret";
+pub(crate) const DEFAULT_AUTHENTICATOR_REDIRECT_URL: &str =
     "http://localhost:8080/api/auth/callback";
 pub(crate) const DEFAULT_FRONTEND_URL: &str = "http://localhost:3000";
 pub(crate) const DEFAULT_COOKIE_SECURE: bool = false;
