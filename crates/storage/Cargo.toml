@@ -16,9 +16,8 @@ reqx = ">=0.1.27, <0.1.29"
 thiserror = "2"
 
 [dev-dependencies]
-libtest-mimic = "0.8"
+test_utils = { path = "../test_utils" }
 testcontainers = "0.24"
-tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 uuid = { version = "1", features = ["v4"] }
 
 [[test]]

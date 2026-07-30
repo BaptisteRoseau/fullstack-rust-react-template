@@ -1,0 +1,13 @@
+error: a #[trait_test] must be `async`: the collector awaits it
+ --> tests/fixtures/fail_not_async.rs:9:8
+  |
+9 |     fn blocking(subject: &u8) {
+  |        ^^^^^^^^
+
+warning: unused import: `trait_test`
+ --> tests/fixtures/fail_not_async.rs:2:25
+  |
+2 | use test_utils_derive::{trait_test, trait_test_suite};
+  |                         ^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default

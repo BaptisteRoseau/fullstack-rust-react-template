@@ -11,6 +11,7 @@ use cache::testing::MockCache;
 use config::Config;
 use database::Database;
 use database::testing::MockDatabase;
+use test_utils::{Runtime, TestSuite, Trial};
 
 const KEYCLOAK_IMAGE: &str = "quay.io/keycloak/keycloak";
 /// Pinned: the login-form scraping in `common::provider` reads Keycloak's HTML,
@@ -63,8 +64,30 @@ pub struct KeycloakFixture {
     pub base_url: String,
 }
 
+impl TestSuite for KeycloakFixture {
+    async fn start() -> Self {
+        Self::start_container().await
+    }
+
+    /// Both suites share their authenticator: building one re-fetches the realm's
+    /// JWKS, and the login state they cache is keyed by a random CSRF value, so
+    /// parallel trials cannot collide.
+    fn trials(self: Arc<Self>, rt: Arc<Runtime>) -> Vec<Trial> {
+        let credentials = Arc::new(rt.block_on(self.credentials_authenticator()));
+        let bff = Arc::new(rt.block_on(self.bff_authenticator()));
+
+        let mut trials = super::authenticator::suite::trials_shared(
+            Arc::clone(&rt),
+            credentials,
+            Arc::clone(&self),
+        );
+        trials.extend(super::oidc::suite::trials_shared(rt, bff, self));
+        trials
+    }
+}
+
 impl KeycloakFixture {
-    pub async fn start() -> Self {
+    async fn start_container() -> Self {
         let container = GenericImage::new(KEYCLOAK_IMAGE, KEYCLOAK_TAG)
             .with_exposed_port(Tcp(KEYCLOAK_PORT))
             .with_wait_for(WaitFor::message_on_stdout("started in"))

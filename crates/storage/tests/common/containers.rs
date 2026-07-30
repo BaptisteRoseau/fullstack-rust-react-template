@@ -1,6 +1,11 @@
+use std::sync::Arc;
+
 use testcontainers::core::ContainerPort::Tcp;
 use testcontainers::core::{ExecCommand, WaitFor};
 use testcontainers::{ContainerAsync, GenericImage, ImageExt, runners::AsyncRunner};
+
+use storage::backends::S3;
+use test_utils::{Runtime, TestSuite, Trial};
 
 pub const TEST_BUCKET: &str = "test-bucket";
 
@@ -23,8 +28,33 @@ pub struct GarageFixture {
     pub secret_key: String,
 }
 
+impl TestSuite for GarageFixture {
+    async fn start() -> Self {
+        let fixture = Self::start_container().await;
+        fixture.create_bucket(TEST_BUCKET).await;
+        fixture
+    }
+
+    /// A fresh client per trial: connecting is cheap, and the suite's paths are
+    /// namespaced per test anyway.
+    fn trials(self: Arc<Self>, rt: Arc<Runtime>) -> Vec<Trial> {
+        super::storage::suite::trials(rt, move || {
+            let fixture = self.clone();
+            async move {
+                S3::try_new(
+                    &fixture.endpoint,
+                    TEST_BUCKET,
+                    &fixture.access_key,
+                    &fixture.secret_key,
+                )
+                .expect("failed to create S3 client")
+            }
+        })
+    }
+}
+
 impl GarageFixture {
-    pub async fn start() -> Self {
+    async fn start_container() -> Self {
         let container = GenericImage::new(GARAGE_IMAGE, GARAGE_TAG)
             .with_exposed_port(Tcp(GARAGE_S3_PORT))
             .with_wait_for(WaitFor::message_on_stderr("S3 API server listening"))

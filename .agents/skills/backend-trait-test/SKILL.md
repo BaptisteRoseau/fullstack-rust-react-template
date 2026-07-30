@@ -191,27 +191,34 @@ Say *why* each double is the shape it is. A no-op cache that returns `None` from
 
 ## 5. The trait suite — `tests/common/<trait>.rs`
 
-Two things live here: `assert_*` functions typed against the **trait**, and a macro assembling them into trials.
-
-Signature convention — `pub async fn assert_<behaviour>(subject: &impl MyTrait)`. Typing these against the concrete backend is the mistake to avoid: it compiles, but the suite silently stops being reusable, which was its whole purpose.
+A suite is a module of `async fn`s typed against the **trait**, marked `#[trait_test]`, inside a module marked `#[trait_test_suite]`. The module attribute reads the markers and generates the collector, so **each test is named in exactly one place** — its own signature.
 
 ```rust
-// When adding a new test here:
-// - helpers are regular private functions
-// - tests signature is `pub async fn assert_<my test>(storage: &impl Storage)`
-// - new tests should be added in the `storage_trait_tests` macro
+use test_utils::{trait_test, trait_test_suite};
 
-pub async fn assert_save_overwrite(storage: &impl Storage) {
-    let path = unique_path();
-    let params = no_compression();
+/// Integration tests for the Storage trait, run against every backend.
+///
+/// When adding a test here:
+/// - mark it `#[trait_test]` and take the subject as `&impl Storage`; the function
+///   name becomes the test name, and that is the only place it is written
+/// - helpers are unmarked functions, left alone by the macro
+#[trait_test_suite]
+pub mod suite {
+    use super::*;
 
-    storage.save(&path, b"version-1", &params).await.expect("first save failed");
-    storage.save(&path, b"version-2", &params).await.expect("second save failed");
+    #[trait_test]
+    async fn save_overwrite(storage: &impl Storage) {
+        let path = unique_path();
+        let params = no_compression();
 
-    let loaded = storage.load(&path).await.expect("load failed");
-    assert_eq!(loaded, b"version-2", "the second save should win, got={loaded:?}");
+        storage.save(&path, b"version-1", &params).await.expect("first save failed");
+        storage.save(&path, b"version-2", &params).await.expect("second save failed");
 
-    let _ = storage.delete(&path).await;
+        let loaded = storage.load(&path).await.expect("load failed");
+        assert_eq!(loaded, b"version-2", "the second save should win, got={loaded:?}");
+
+        let _ = storage.delete(&path).await;
+    }
 }
 
 /// Generate a unique test path to avoid blob collisions between parallel tests.
@@ -220,52 +227,43 @@ fn unique_path() -> PathBuf {
 }
 ```
 
+Typing the subject against the concrete backend is the mistake to avoid: it compiles, but the suite silently stops being reusable, which was its whole purpose. Because the suite only knows the trait, a backend needing no service at all reuses it unchanged — `tests/in_memory.rs` builds the in-memory backend, skips the fixture, and calls the same generated `trials`.
+
 All trials share one container and run in parallel, so **every test derives its own keys** — `Uuid::new_v4()` in the path, the bucket key, the username, the email. Two tests sharing a row or a blob will pass alone and fail together.
 
-The macro returns `Vec<Trial>`:
+### What the marker is for
 
-```rust
-/// Set of integration tests for the Storage trait.
-/// Returns a `Vec<Trial>` for use with `libtest-mimic`.
-/// The caller must have `mod common;` declared beforehand.
-macro_rules! storage_trait_tests {
-    ($builder:expr, $rt:expr) => {{
-        use common::storage::*;
-        use libtest_mimic::Trial;
-        use std::sync::Arc;
+`#[trait_test]` distinguishes tests from **async helpers**. `crates/authenticator/tests/common/oidc.rs` has an `async fn log_in(…)` that every flow test calls; without a marker the macro would have to guess, and a naming convention would do it less explicitly. A marker outside a suite module is a compile error rather than a test that quietly never runs.
 
-        let rt: Arc<tokio::runtime::Runtime> = $rt;
-        let builder = Arc::new($builder);
+### What gets generated
 
-        vec![
-            {
-                let rt = rt.clone();
-                let builder = builder.clone();
-                Trial::test("save_overwrite", move || {
-                    rt.block_on(assert_save_overwrite(&builder()));
-                    Ok(())
-                })
-            },
-            // one block per assert_* function
-        ]
-    }};
-}
-```
+Two entry points, both returning `Vec<Trial>`:
 
-Write the blocks out longhand. A nested `macro_rules!` inside the macro body looks tempting to cut the repetition, but the outer macro captures the inner `$name`/`$expr` fragments and it will not compile.
+| Function | Subject | Use it when |
+|---|---|---|
+| `trials(rt, build)` | freshly built per trial | the default — each test wants a clean backend |
+| `trials_shared(rt, subject)` | one `Arc`, all trials | construction is expensive and the backend is stateless |
 
-**Builder closure or one shared instance?** Take a builder (`$builder()` per trial) when each test wants a clean backend — that is the default, and what `storage`, `cache` and `database` do. Share a single `Arc<Backend>` when the backend is stateless and construction is expensive: `authenticator` shares one because building it re-fetches the JWKS, and its cache entries are keyed by a random CSRF state so parallel trials cannot collide. Either way, say which and why in a comment.
+`trials_shared` is only generated when every test takes its subject by shared reference, since `&mut` and by-value cannot come out of an `Arc`. `authenticator` uses it because building the backend re-fetches the JWKS and its cache entries are keyed by a random CSRF state, so parallel trials cannot collide.
 
-Because the suite only knows the trait, a backend that needs no service at all reuses it unchanged — `tests/in_memory.rs` would build the in-memory backend, skip the fixture entirely, and expand the same macro. That is the return on typing the assertions against `&impl MyTrait`.
+The macro reads each test's first parameter and emits the matching call, so all these work without configuration:
 
-`tests/common/mod.rs` wires it up — `#[macro_use]` goes on the module defining the macro, declared after the modules it references:
+| First parameter | Generated call |
+|---|---|
+| `s: &impl Storage` | `f(&subject)` |
+| `db: &mut impl Database` | `f(&mut subject)` |
+| `mut db: Postgres` | `f(subject)` |
+| any of the above under `trials_shared` | `f(&*subject)` |
+
+Every test in a suite must agree on the subject type — one suite drives one backend, and the macro says so if they diverge.
+
+`tests/common/mod.rs` is now plain module declarations, no `#[macro_use]`:
 
 ```rust
 pub mod containers;
 pub mod oidc;
 pub mod provider;
-#[macro_use]
-pub mod authenticator;
+pub mod storage;
 ```
 
 ---
@@ -289,71 +287,65 @@ pub trait ProviderAgent {
     async fn issue_token(&self) -> String;
 }
 
-pub async fn assert_exchange_code_returns_tokens(
+#[trait_test]
+async fn exchange_code_returns_tokens(
     authenticator: &impl Authenticator,
     agent: &impl ProviderAgent,
 ) { /* ... */ }
 ```
 
-A second backend supplies its own agent and the whole suite runs against it unchanged. See `crates/authenticator/tests/common/provider.rs`.
+A test may declare this as a **second parameter**; when any test in a module does, the generated entry points take a matching `context: Arc<C>` and hand it to the tests that asked for it. A second backend supplies its own agent and the whole suite runs against it unchanged. See `crates/authenticator/tests/common/provider.rs`.
 
 ---
 
 ## 7. The test binary — `tests/<backend>.rs`
 
-`harness = false` means this is a real `fn main()`, not `#[test]` functions. That is what lets one container serve every trial.
+`harness = false` means this is a real `fn main()`, not `#[test]` functions. That is what lets one container serve every trial, and `trait_test_main!` writes it:
 
 ```rust
-#[macro_use]
 mod common;
 
-use std::sync::Arc;
+test_utils::trait_test_main!(common::containers::GarageFixture);
+```
 
-use common::containers::{GarageFixture, TEST_BUCKET};
-use libtest_mimic::Arguments;
-use storage::backends::S3;
+It expands to the runtime, the fixture startup, `libtest_mimic::run`, and the teardown — including dropping the fixture inside `rt.enter()`. That drop is not ceremony: `ContainerAsync::Drop` spawns async cleanup, and outside the runtime that cleanup silently cannot run, leaking containers onto the developer's machine. It lives in the macro now so nobody has to remember it.
 
-fn main() {
-    let args = Arguments::from_args();
+The fixture supplies the two things the macro cannot know, via `test_utils::TestSuite`:
 
-    let rt = Arc::new(tokio::runtime::Runtime::new().unwrap());
-    let fixture = Arc::new(rt.block_on(async {
-        let f = GarageFixture::start().await;
-        f.create_bucket(TEST_BUCKET).await;
-        f
-    }));
+```rust
+#[async_trait]
+impl TestSuite for GarageFixture {
+    async fn start() -> Self {
+        let fixture = Self::start_container().await;
+        fixture.create_bucket(TEST_BUCKET).await;
+        fixture
+    }
 
-    let make_storage = {
-        let fixture = fixture.clone();
-        move || S3::try_new(&fixture.endpoint, TEST_BUCKET, &fixture.access_key, &fixture.secret_key)
-            .expect("failed to create S3 client")
-    };
-
-    let tests = storage_trait_tests!(make_storage, rt.clone());
-
-    let conclusion = libtest_mimic::run(&args, tests);
-
-    // Drop fixture inside the tokio runtime context so ContainerAsync::Drop
-    // can run its async cleanup.
-    let _guard = rt.enter();
-    drop(fixture);
-    drop(_guard);
-    drop(rt);
-
-    conclusion.exit();
+    /// A fresh client per trial: connecting is cheap and the suite namespaces its
+    /// own paths, so there is nothing to gain from sharing one.
+    fn trials(self: Arc<Self>, rt: Arc<Runtime>) -> Vec<Trial> {
+        super::storage::suite::trials(rt, move || {
+            let fixture = self.clone();
+            async move {
+                S3::try_new(&fixture.endpoint, TEST_BUCKET, &fixture.access_key, &fixture.secret_key)
+                    .expect("failed to create S3 client")
+            }
+        })
+    }
 }
 ```
 
-That drop dance is not ceremony. `ContainerAsync::Drop` spawns async cleanup; drop it outside the runtime and you leak containers on the developer's machine.
+`trials()` stays hand-written because that is where the real per-backend decisions live — builder versus shared subject, and which suites run. `authenticator` shows why generating it would be a straitjacket: it runs two suite modules against two differently-configured authenticators and concatenates them.
+
+The builder is always async; a backend that constructs synchronously wraps it in `async move { … }`, which keeps one code path through the macro.
 
 Register the binary in `Cargo.toml`, one stanza per backend:
 
 ```toml
 [dev-dependencies]
-libtest-mimic = "0.8"
+test_utils = { path = "../test_utils" }
 testcontainers = "0.24"
 testcontainers-modules = { version = "0.12", features = ["redis"] }  # if applicable
-tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 uuid = { version = "1", features = ["v4"] }
 
 [[test]]
@@ -372,9 +364,11 @@ Read the closest one before writing a new suite.
 | Crate | Trait | Backend | Container | Notable for |
 |---|---|---|---|---|
 | `crates/cache` | `Cache` | `Redis` | `testcontainers-modules` redis | The smallest complete example — start here |
-| `crates/database` | `Database` | `Postgres` | `testcontainers-modules` postgres, migrations run in the fixture | Schema-dependent tests, unique rows per trial |
-| `crates/storage` | `Storage` | `S3` | Garage via `GenericImage`, provisioned with `ExecCommand` | Builder-per-test, post-start provisioning, binary fixtures |
-| `crates/authenticator` | `Authenticator` | `Keycloak` | Keycloak via `GenericImage`, two realms imported | Shared instance, split suite files, the `ProviderAgent` pattern |
+| `crates/database` | `Database` | `Postgres` | `testcontainers-modules` postgres, migrations run in the fixture | A concrete, owned `&mut` subject; schema-dependent tests |
+| `crates/storage` | `Storage` | `S3` | Garage via `GenericImage`, provisioned with `ExecCommand` | Post-start provisioning inside `start()`, binary fixtures |
+| `crates/authenticator` | `Authenticator` | `Keycloak` | Keycloak via `GenericImage`, two realms imported | `trials_shared`, two suite modules, a context parameter, the `ProviderAgent` pattern |
+
+The macros themselves live in `crates/test_utils` (the `TestSuite` trait and re-exports) and `crates/test_utils_derive` (the proc-macro). Their `tests/fixtures/*.rs` pin the error message for every way of writing a suite that would collect nothing.
 
 ---
 

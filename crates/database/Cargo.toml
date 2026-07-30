@@ -23,10 +23,9 @@ tracing = { version = "0", features = ["async-await"] }
 test-utils = []
 
 [dev-dependencies]
-libtest-mimic = "0.8"
-tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
-testcontainers = "0"
-testcontainers-modules = { version = "0", features = ["postgres"] }
+test_utils = { path = "../test_utils" }
+testcontainers = "0.24"
+testcontainers-modules = { version = "0.12", features = ["postgres"] }
 serde_json = "1"
 uuid = { version = "1", features = ["v4", "fast-rng"] }
 

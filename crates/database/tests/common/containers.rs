@@ -1,5 +1,8 @@
+use std::sync::Arc;
+
 use database::backends::Postgres;
 use sqlx::PgPool;
+use test_utils::{Runtime, TestSuite, Trial};
 use testcontainers::{ContainerAsync, ImageExt, runners::AsyncRunner};
 use testcontainers_modules::postgres::Postgres as PgImage;
 
@@ -30,8 +33,24 @@ pub struct PostgresFixture {
     pub connection_string: String,
 }
 
+impl TestSuite for PostgresFixture {
+    async fn start() -> Self {
+        Self::start_container().await
+    }
+
+    /// Every trial gets its own `Postgres`: the suite mutates it (its write
+    /// methods take `&mut self`), and a shared instance would make parallel
+    /// trials trip over each other's `&mut` borrow.
+    fn trials(self: Arc<Self>, rt: Arc<Runtime>) -> Vec<Trial> {
+        super::database::suite::trials(rt, move || {
+            let fixture = self.clone();
+            async move { fixture.make_postgres().await }
+        })
+    }
+}
+
 impl PostgresFixture {
-    pub async fn start() -> Self {
+    async fn start_container() -> Self {
         let container = PgImage::default()
             .with_init_sql(UUIDV7_INIT_SQL.as_bytes().to_vec())
             .with_env_var("LANG", "en_US.utf8")

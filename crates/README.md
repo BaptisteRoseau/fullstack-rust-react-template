@@ -62,13 +62,19 @@ The tech stack used in the backend is:
 - Clap for CLI interface
 - utoipa for the openapi.json and swagger UI
 
-## Tesing
+## Testing
 
-Tests are split into unit tests and integration tests. Unit tests are standalone tests on small pieces of code, wheread integration tests excpect to interract with and environment like a database or an API.
+Tests are split into unit tests and integration tests. Unit tests are standalone tests on small pieces of code, whereas integration tests expect to interact with an environment like a database or an API.
 
-We make a difference between those as follows, and use the `testcontainers` library to run integration tests in parallel.
+The dividing question is not "is it slow?" but **"would a mock make this test tautological?"** If the behaviour under test lives in Postgres or Keycloak, the test needs Postgres or Keycloak. Those use the `testcontainers` library and run in parallel against one shared container.
 
-TODO: The tutorial on integration test vs unit test cfg!
+An integration test suite is written once **against the trait** and run against every backend implementing it. `crates/test_utils` provides the scaffolding:
+
+- `#[trait_test_suite]` on a module of `#[trait_test]` functions generates the trial collector, so each test is named only once — in its own signature.
+- `trait_test_main!(MyFixture)` writes the `harness = false` binary's `fn main()`.
+- Fixtures implement `test_utils::TestSuite` to say how the environment starts and which suites run against which subjects.
+
+`crates/cache/tests` is the smallest complete example. The `backend-trait-test` skill documents the conventions and the reasons behind them.
 
 ## Errors
 

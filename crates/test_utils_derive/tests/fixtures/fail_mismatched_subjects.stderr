@@ -1,0 +1,13 @@
+error: every #[trait_test] in a suite must take the same subject type, but this one differs from `takes_a_byte`
+  --> tests/fixtures/fail_mismatched_subjects.rs:14:14
+   |
+14 |     async fn takes_a_string(subject: &String) {
+   |              ^^^^^^^^^^^^^^
+
+warning: unused import: `trait_test`
+ --> tests/fixtures/fail_mismatched_subjects.rs:2:25
+  |
+2 | use test_utils_derive::{trait_test, trait_test_suite};
+  |                         ^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default

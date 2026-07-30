@@ -1,0 +1,13 @@
+error[E0658]: file modules in proc macro input are unstable
+ --> tests/fixtures/fail_file_module.rs:5:1
+  |
+5 | mod suite;
+  | ^^^^^^^^^^
+  |
+  = note: see issue #54727 <https://github.com/rust-lang/rust/issues/54727> for more information
+
+error: #[trait_test_suite] needs the module body to read its tests: write `mod suite { … }`, not `mod suite;`
+ --> tests/fixtures/fail_file_module.rs:5:1
+  |
+5 | mod suite;
+  | ^^^^^^^^^^
