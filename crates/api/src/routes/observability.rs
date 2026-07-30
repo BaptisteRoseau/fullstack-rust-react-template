@@ -49,6 +49,10 @@ pub(crate) fn make_request_span<B>(request: &Request<B>) -> Span {
     )
 }
 
+/* =======================================================================================
+* TESTS
+======================================================================================= */
+
 #[cfg(test)]
 mod tests {
     use super::super::middlewares::with_middlewares;
