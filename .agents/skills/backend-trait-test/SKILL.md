@@ -251,7 +251,7 @@ The macro reads each test's first parameter and emits the matching call, so all 
 |---|---|
 | `s: &impl Storage` | `f(&subject)` |
 | `db: &mut impl Database` | `f(&mut subject)` |
-| `mut db: Postgres` | `f(subject)` |
+| `db: MyBackend` (a concrete type) | `f(subject)` |
 | any of the above under `trials_shared` | `f(&*subject)` |
 
 Every test in a suite must agree on the subject type — one suite drives one backend, and the macro says so if they diverge.
@@ -360,7 +360,7 @@ Read the closest one before writing a new suite.
 | Crate | Trait | Backend | Container | Notable for |
 |---|---|---|---|---|
 | `crates/cache` | `Cache` | `Redis` | `testcontainers-modules` redis | The smallest complete example — start here |
-| `crates/database` | `Database` | `Postgres` | `testcontainers-modules` postgres, migrations run in the fixture | A concrete, owned `&mut` subject; schema-dependent tests |
+| `crates/database` | `Database` | `Postgres` | `testcontainers-modules` postgres, migrations run in the fixture | A `&mut impl` subject; schema-dependent tests |
 | `crates/storage` | `Storage` | `S3` | Garage via `GenericImage`, provisioned with `ExecCommand` | Post-start provisioning inside `start()`, binary fixtures |
 | `crates/authenticator` | `Authenticator` | `Keycloak` | Keycloak via `GenericImage`, two realms imported | `trials_shared`, two suite modules, a context parameter, the `ProviderAgent` pattern |
 

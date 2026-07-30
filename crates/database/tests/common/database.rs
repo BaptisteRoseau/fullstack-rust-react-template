@@ -1,12 +1,11 @@
 use database::Database;
-use database::backends::Postgres;
 use test_trait::{test_trait, test_trait_suite};
 use uuid::Uuid;
 
 /// Integration tests for the Database trait, run against every backend.
 ///
 /// When adding a test here:
-/// - mark it `#[test_trait]` and take the subject as `mut db: Postgres`; the
+/// - mark it `#[test_trait]` and take the subject as `&mut impl Database`; the
 ///   function name becomes the test name, and that is the only place it is written
 /// - helpers are regular functions, left alone by the macro
 #[test_trait_suite]
@@ -14,8 +13,8 @@ pub mod suite {
     use super::*;
 
     #[test_trait]
-    async fn create_api_key(mut db: Postgres) {
-        let owner = create_test_user(&db).await;
+    async fn create_api_key(db: &mut impl Database) {
+        let owner = create_test_user(db).await;
         let perms = serde_json::json!(["UploadFile"]);
         let key = db
             .create_api_key(owner, "my-key".into(), "abc123hash".into(), perms)
@@ -33,8 +32,8 @@ pub mod suite {
     }
 
     #[test_trait]
-    async fn read_api_key_by_hash(mut db: Postgres) {
-        let owner = create_test_user(&db).await;
+    async fn read_api_key_by_hash(db: &mut impl Database) {
+        let owner = create_test_user(db).await;
         let hash = format!("readhash-{}", Uuid::new_v4());
         db.create_api_key(
             owner,
@@ -60,8 +59,8 @@ pub mod suite {
     }
 
     #[test_trait]
-    async fn delete_api_key(mut db: Postgres) {
-        let owner = create_test_user(&db).await;
+    async fn delete_api_key(db: &mut impl Database) {
+        let owner = create_test_user(db).await;
         let hash = format!("delhash-{}", Uuid::new_v4());
         let key = db
             .create_api_key(owner, "del-key".into(), hash.clone(), serde_json::json!([]))
@@ -79,7 +78,7 @@ pub mod suite {
     }
 
     #[test_trait]
-    async fn delete_api_key_nonexistent(mut db: Postgres) {
+    async fn delete_api_key_nonexistent(db: &mut impl Database) {
         let result = db.delete_api_key(Uuid::new_v4()).await;
         match result {
             Ok(false) => {}
@@ -89,23 +88,19 @@ pub mod suite {
     }
 }
 
-/// Insert a minimal user row directly via sqlx and return its id.
-/// Uses a unique username and email per call: both are UNIQUE NOT NULL, so
-/// sharing them would make parallel tests collide.
-async fn create_test_user(db: &Postgres) -> Uuid {
+/// Creates a user to own the keys under test and returns its id.
+///
+/// Goes through `register` rather than raw SQL so the suite stays expressible in
+/// terms of the trait alone. Uses a unique id, username and email per call: the
+/// latter two are UNIQUE NOT NULL, so sharing them would make parallel trials
+/// collide.
+async fn create_test_user(db: &mut impl Database) -> Uuid {
     let id = Uuid::new_v4();
     let username = format!("testuser-{id}");
     let email = format!("{username}@example.com");
-    sqlx::query_scalar::<_, Uuid>(
-        "INSERT INTO users (id, last_name, first_name, username, email) \
-         VALUES ($1, $2, $3, $4, $5) RETURNING id",
-    )
-    .bind(id)
-    .bind("Test")
-    .bind("User")
-    .bind(username)
-    .bind(email)
-    .fetch_one(db.pool())
-    .await
-    .expect("failed to create test user")
+
+    db.register(id, username, "Test".into(), "User".into(), email)
+        .await
+        .expect("failed to create test user")
+        .id
 }
