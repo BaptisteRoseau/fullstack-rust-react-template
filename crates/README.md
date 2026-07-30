@@ -37,11 +37,10 @@ mycrate
 │   ├── error.rs
 │   └── lib.rs
 └── tests
-    ├── common
-    │   ├── cache.rs
-    │   ├── containers.rs
-    │   └── mod.rs
-    └── some_backend.rs
+    └── common
+        ├── cache.rs       # the trait test suite
+        ├── containers.rs  # the testcontainers fixture
+        └── mod.rs         # the test binary's entry point
 ```
 
 The crate exposes a public trait that is `Send + Sync`, this is the one that will be used in `app_core` and `api` crates.
@@ -68,11 +67,11 @@ Tests are split into unit tests and integration tests. Unit tests are standalone
 
 The dividing question is not "is it slow?" but **"would a mock make this test tautological?"** If the behaviour under test lives in Postgres or Keycloak, the test needs Postgres or Keycloak. Those use the `testcontainers` library and run in parallel against one shared container.
 
-An integration test suite is written once **against the trait** and run against every backend implementing it. `crates/test_utils` provides the scaffolding:
+An integration test suite is written once **against the trait** and run against every backend implementing it. `crates/test_trait` provides the scaffolding:
 
-- `#[trait_test_suite]` on a module of `#[trait_test]` functions generates the trial collector, so each test is named only once — in its own signature.
-- `trait_test_main!(MyFixture)` writes the `harness = false` binary's `fn main()`.
-- Fixtures implement `test_utils::TestSuite` to say how the environment starts and which suites run against which subjects.
+- `#[test_trait_suite]` on a module of `#[test_trait]` functions generates the trial collector, so each test is named only once — in its own signature.
+- `test_trait_main!(MyFixture)` writes the `harness = false` binary's `fn main()`.
+- Fixtures implement `test_trait::TestSuite` to say how the environment starts and which suites run against which subjects.
 
 `crates/cache/tests` is the smallest complete example. The `backend-trait-test` skill documents the conventions and the reasons behind them.
 

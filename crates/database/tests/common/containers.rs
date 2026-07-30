@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use database::backends::Postgres;
 use sqlx::PgPool;
-use test_utils::{Runtime, TestSuite, Trial};
+use test_trait::{Runtime, TestSuite, Trial};
 use testcontainers::{ContainerAsync, ImageExt, runners::AsyncRunner};
 use testcontainers_modules::postgres::Postgres as PgImage;
 

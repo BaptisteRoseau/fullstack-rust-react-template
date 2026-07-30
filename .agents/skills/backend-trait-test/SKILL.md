@@ -28,11 +28,10 @@ mycrate
 └── tests
     ├── README.md
     ├── assets/           # fixtures the tests need, owned by THIS crate
-    ├── common
-    │   ├── mod.rs
-    │   ├── containers.rs # the testcontainers fixture
-    │   └── mycrate.rs    # the trait test suite + the macro
-    └── some_backend.rs   # one test binary per backend
+    └── common
+        ├── mod.rs        # the test binary's entry point
+        ├── containers.rs # the testcontainers fixture
+        └── mycrate.rs    # the trait test suite
 ```
 
 The trait is `Send + Sync` so it can live in `AppState` as `Arc<RwLock<dyn MyTrait>>`. Keep methods `&self` unless a method genuinely mutates — a single `&mut self` method forces every caller through a write lock.
@@ -191,22 +190,22 @@ Say *why* each double is the shape it is. A no-op cache that returns `None` from
 
 ## 5. The trait suite — `tests/common/<trait>.rs`
 
-A suite is a module of `async fn`s typed against the **trait**, marked `#[trait_test]`, inside a module marked `#[trait_test_suite]`. The module attribute reads the markers and generates the collector, so **each test is named in exactly one place** — its own signature.
+A suite is a module of `async fn`s typed against the **trait**, marked `#[test_trait]`, inside a module marked `#[test_trait_suite]`. The module attribute reads the markers and generates the collector, so **each test is named in exactly one place** — its own signature.
 
 ```rust
-use test_utils::{trait_test, trait_test_suite};
+use test_trait::{test_trait, test_trait_suite};
 
 /// Integration tests for the Storage trait, run against every backend.
 ///
 /// When adding a test here:
-/// - mark it `#[trait_test]` and take the subject as `&impl Storage`; the function
+/// - mark it `#[test_trait]` and take the subject as `&impl Storage`; the function
 ///   name becomes the test name, and that is the only place it is written
 /// - helpers are unmarked functions, left alone by the macro
-#[trait_test_suite]
+#[test_trait_suite]
 pub mod suite {
     use super::*;
 
-    #[trait_test]
+    #[test_trait]
     async fn save_overwrite(storage: &impl Storage) {
         let path = unique_path();
         let params = no_compression();
@@ -233,7 +232,7 @@ All trials share one container and run in parallel, so **every test derives its 
 
 ### What the marker is for
 
-`#[trait_test]` distinguishes tests from **async helpers**. `crates/authenticator/tests/common/oidc.rs` has an `async fn log_in(…)` that every flow test calls; without a marker the macro would have to guess, and a naming convention would do it less explicitly. A marker outside a suite module is a compile error rather than a test that quietly never runs.
+`#[test_trait]` distinguishes tests from **async helpers**. `crates/authenticator/tests/common/oidc.rs` has an `async fn log_in(…)` that every flow test calls; without a marker the macro would have to guess, and a naming convention would do it less explicitly. A marker outside a suite module is a compile error rather than a test that quietly never runs.
 
 ### What gets generated
 
@@ -257,14 +256,7 @@ The macro reads each test's first parameter and emits the matching call, so all 
 
 Every test in a suite must agree on the subject type — one suite drives one backend, and the macro says so if they diverge.
 
-`tests/common/mod.rs` is now plain module declarations, no `#[macro_use]`:
-
-```rust
-pub mod containers;
-pub mod oidc;
-pub mod provider;
-pub mod storage;
-```
+`tests/common/mod.rs` declares the modules and is itself the binary's entry point — see the next section.
 
 ---
 
@@ -287,7 +279,7 @@ pub trait ProviderAgent {
     async fn issue_token(&self) -> String;
 }
 
-#[trait_test]
+#[test_trait]
 async fn exchange_code_returns_tokens(
     authenticator: &impl Authenticator,
     agent: &impl ProviderAgent,
@@ -298,19 +290,22 @@ A test may declare this as a **second parameter**; when any test in a module doe
 
 ---
 
-## 7. The test binary — `tests/<backend>.rs`
+## 7. The test binary — `tests/common/mod.rs`
 
-`harness = false` means this is a real `fn main()`, not `#[test]` functions. That is what lets one container serve every trial, and `trait_test_main!` writes it:
+`harness = false` means this is a real `fn main()`, not `#[test]` functions. That is what lets one container serve every trial, and `test_trait_main!` writes it. Since that leaves nothing else to say, the module file that declares the suite *is* the binary — there is no separate `tests/<backend>.rs` holding a single line:
 
 ```rust
-mod common;
+mod containers;
+mod storage;
 
-test_utils::trait_test_main!(common::containers::GarageFixture);
+test_trait::test_trait_main!(containers::GarageFixture);
 ```
+
+Cargo only auto-discovers `tests/*.rs`, so the target is declared explicitly with a `path` (see the manifest below). The target name is what `--test` takes: `cargo test -p storage --test s3`.
 
 It expands to the runtime, the fixture startup, `libtest_mimic::run`, and the teardown — including dropping the fixture inside `rt.enter()`. That drop is not ceremony: `ContainerAsync::Drop` spawns async cleanup, and outside the runtime that cleanup silently cannot run, leaking containers onto the developer's machine. It lives in the macro now so nobody has to remember it.
 
-The fixture supplies the two things the macro cannot know, via `test_utils::TestSuite`:
+The fixture supplies the two things the macro cannot know, via `test_trait::TestSuite`:
 
 ```rust
 #[async_trait]
@@ -343,13 +338,14 @@ Register the binary in `Cargo.toml`, one stanza per backend:
 
 ```toml
 [dev-dependencies]
-test_utils = { path = "../test_utils" }
+test_trait = { path = "../test_trait" }
 testcontainers = "0.24"
 testcontainers-modules = { version = "0.12", features = ["redis"] }  # if applicable
 uuid = { version = "1", features = ["v4"] }
 
 [[test]]
-name = "s3"          # matches tests/s3.rs
+name = "s3"                     # what `--test s3` refers to
+path = "tests/common/mod.rs"    # not auto-discovered, so say where it is
 harness = false
 ```
 
@@ -368,7 +364,7 @@ Read the closest one before writing a new suite.
 | `crates/storage` | `Storage` | `S3` | Garage via `GenericImage`, provisioned with `ExecCommand` | Post-start provisioning inside `start()`, binary fixtures |
 | `crates/authenticator` | `Authenticator` | `Keycloak` | Keycloak via `GenericImage`, two realms imported | `trials_shared`, two suite modules, a context parameter, the `ProviderAgent` pattern |
 
-The macros themselves live in `crates/test_utils` (the `TestSuite` trait and re-exports) and `crates/test_utils_derive` (the proc-macro). Their `tests/fixtures/*.rs` pin the error message for every way of writing a suite that would collect nothing.
+The macros themselves live in `crates/test_trait` (the `TestSuite` trait and re-exports) and `crates/test_trait_derive` (the proc-macro). Their `tests/fixtures/*.rs` pin the error message for every way of writing a suite that would collect nothing.
 
 ---
 

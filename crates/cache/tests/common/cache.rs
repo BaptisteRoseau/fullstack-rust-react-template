@@ -3,19 +3,19 @@ use std::collections::HashMap;
 use cache::Cache;
 // use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use test_utils::{trait_test, trait_test_suite};
+use test_trait::{test_trait, test_trait_suite};
 
 /// Integration tests for the Cache trait, run against every backend.
 ///
 /// When adding a test here:
-/// - mark it `#[trait_test]` and take the subject as `&impl Cache`; the function
+/// - mark it `#[test_trait]` and take the subject as `&impl Cache`; the function
 ///   name becomes the test name, and that is the only place it is written
 /// - helpers are regular functions, left alone by the macro
-#[trait_test_suite]
+#[test_trait_suite]
 pub mod suite {
     use super::*;
 
-    #[trait_test]
+    #[test_trait]
     async fn set_and_get(cache: &impl Cache) {
         let key = unique_key("set_and_get");
         let input = json!("hello");
@@ -29,7 +29,7 @@ pub mod suite {
         let _ = cache.delete(&key).await;
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn get_nonexistent(cache: &impl Cache) {
         let key = unique_key("nonexistent");
         let value = cache.get(&key).await.expect("get failed");
@@ -39,7 +39,7 @@ pub mod suite {
         );
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn overwrite(cache: &impl Cache) {
         let key = unique_key("overwrite");
         let input1 = json!("v1");
@@ -61,7 +61,7 @@ pub mod suite {
         let _ = cache.delete(&key).await;
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn delete(cache: &impl Cache) {
         let key = unique_key("delete");
         cache
@@ -73,7 +73,7 @@ pub mod suite {
         assert!(value.is_none(), "expected None after delete, got {value:?}");
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn delete_nonexistent(cache: &impl Cache) {
         let key = unique_key("delete_nonexistent");
         let result = cache.delete(&key).await;
@@ -83,7 +83,7 @@ pub mod suite {
         );
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn set_with_timeout(cache: &impl Cache) {
         let key = unique_key("timeout");
         let input = json!("ephemeral");
@@ -100,7 +100,7 @@ pub mod suite {
         let _ = cache.delete(&key).await;
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn set_many_and_get_many(cache: &impl Cache) {
         let prefix = unique_key("many");
         let k1 = format!("{prefix}:a");
@@ -142,7 +142,7 @@ pub mod suite {
         let _ = cache.delete_many(&keys).await;
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn get_many_nonexistent(cache: &impl Cache) {
         let prefix = unique_key("many");
         let k1 = format!("{prefix}:a");
@@ -153,7 +153,7 @@ pub mod suite {
         assert_eq!(result.len(), 0);
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn delete_many(cache: &impl Cache) {
         let prefix = unique_key("delete_many");
         let k1 = format!("{prefix}:a");
@@ -195,7 +195,7 @@ pub mod suite {
     //     field2: u32
     // }
     //
-    // #[trait_test]
+    // #[test_trait]
     // async fn set_and_get_serde_struct(cache: &impl Cache) {
     //     let ukey = unique_key("set_and_get");
     //     let key = SerdeStruct{ field1: ukey, field2: 42 };

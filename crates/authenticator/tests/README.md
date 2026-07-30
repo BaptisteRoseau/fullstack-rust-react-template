@@ -3,8 +3,8 @@
 Contains
 
 - a Keycloak testcontainer to be reused for the tests, implementing
-  `test_utils::TestSuite` (`common/containers.rs`)
-- two `#[trait_test_suite]` modules for the Authenticator trait, reusable for any
+  `test_trait::TestSuite` (`common/containers.rs`)
+- two `#[test_trait_suite]` modules for the Authenticator trait, reusable for any
   backend (`common/authenticator.rs` for credential validation, `common/oidc.rs` for
   the Backend-for-Frontend flow)
 - the provider-side actor the suites drive (`common/provider.rs`)

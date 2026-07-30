@@ -1,7 +1,7 @@
 //! A suite with no marked test collects nothing and would run silently.
-use test_utils_derive::trait_test_suite;
+use test_trait_derive::test_trait_suite;
 
-#[trait_test_suite]
+#[test_trait_suite]
 mod suite {
     pub async fn looks_like_a_test(subject: &u8) {
         let _ = subject;

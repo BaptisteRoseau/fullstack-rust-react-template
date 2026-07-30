@@ -5,7 +5,7 @@ use testcontainers::core::{ExecCommand, WaitFor};
 use testcontainers::{ContainerAsync, GenericImage, ImageExt, runners::AsyncRunner};
 
 use storage::backends::S3;
-use test_utils::{Runtime, TestSuite, Trial};
+use test_trait::{Runtime, TestSuite, Trial};
 
 pub const TEST_BUCKET: &str = "test-bucket";
 

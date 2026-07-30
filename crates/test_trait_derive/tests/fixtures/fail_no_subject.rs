@@ -1,11 +1,11 @@
 //! Without a subject there is nothing to run the test against.
-use test_utils_derive::{trait_test, trait_test_suite};
+use test_trait_derive::{test_trait, test_trait_suite};
 
-#[trait_test_suite]
+#[test_trait_suite]
 mod suite {
     use super::*;
 
-    #[trait_test]
+    #[test_trait]
     async fn takes_nothing() {}
 }
 

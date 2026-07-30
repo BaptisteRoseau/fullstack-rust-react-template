@@ -1,4 +1,4 @@
-error: #[trait_test] only has meaning inside a #[trait_test_suite] module; without one the test is never collected
+error: #[test_trait] only has meaning inside a #[test_trait_suite] module; without one the test is never collected
  --> tests/fixtures/fail_orphan_marker.rs:5:10
   |
 5 | async fn never_collected(subject: &u8) {

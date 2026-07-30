@@ -13,8 +13,8 @@ members = [
   "crates/database_crud_derive",
   "crates/logging",
   "crates/storage",
-  "crates/test_utils",
-  "crates/test_utils_derive",
+  "crates/test_trait",
+  "crates/test_trait_derive",
   "tools/http_health_checker", "crates/rbac", "crates/models",
   "tools/openapi_generator",
 ]

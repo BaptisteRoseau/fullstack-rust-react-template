@@ -1,7 +1,7 @@
 use uuid::Uuid;
 
 use authenticator::Authenticator;
-use test_utils::{trait_test, trait_test_suite};
+use test_trait::{test_trait, test_trait_suite};
 
 use super::containers::{CREDENTIALS_REALM, CREDENTIALS_USER_ID};
 use super::provider::ProviderAgent;
@@ -9,17 +9,17 @@ use super::provider::ProviderAgent;
 /// Credential validation half of the Authenticator suite.
 ///
 /// When adding a test here:
-/// - mark it `#[trait_test]`; the function name becomes the test name, and that is
+/// - mark it `#[test_trait]`; the function name becomes the test name, and that is
 ///   the only place it is written
 /// - take the subject as `&impl Authenticator`, plus `&impl ProviderAgent` when the
 ///   test needs a credential or a browser login
 /// - helpers are unmarked functions, left alone by the macro
 /// - Backend-for-Frontend tests live in `oidc.rs`
-#[trait_test_suite]
+#[test_trait_suite]
 pub mod suite {
     use super::*;
 
-    #[trait_test]
+    #[test_trait]
     async fn validates_issued_jwt(
         authenticator: &impl Authenticator,
         agent: &impl ProviderAgent,
@@ -45,7 +45,7 @@ pub mod suite {
         );
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn rejects_garbage_jwt(authenticator: &impl Authenticator) {
         let result = authenticator.validate("aaaa.bbbb.cccc").await;
         assert!(
@@ -54,7 +54,7 @@ pub mod suite {
         );
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn rejects_tampered_jwt(
         authenticator: &impl Authenticator,
         agent: &impl ProviderAgent,
@@ -68,7 +68,7 @@ pub mod suite {
         );
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn rejects_unknown_api_key(authenticator: &impl Authenticator) {
         // No dots => treated as an API key; the empty database reports it missing.
         let result = authenticator.validate("plain-api-key-without-dots").await;

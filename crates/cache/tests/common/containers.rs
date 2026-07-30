@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use cache::backends::redis::Redis as RedisBackend;
-use test_utils::{Runtime, TestSuite, Trial};
+use test_trait::{Runtime, TestSuite, Trial};
 use testcontainers::{ContainerAsync, runners::AsyncRunner};
 use testcontainers_modules::redis::{REDIS_PORT, Redis};
 

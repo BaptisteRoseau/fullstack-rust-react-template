@@ -11,7 +11,7 @@ use cache::testing::MockCache;
 use config::Config;
 use database::Database;
 use database::testing::MockDatabase;
-use test_utils::{Runtime, TestSuite, Trial};
+use test_trait::{Runtime, TestSuite, Trial};
 
 const KEYCLOAK_IMAGE: &str = "quay.io/keycloak/keycloak";
 /// Pinned: the login-form scraping in `common::provider` reads Keycloak's HTML,

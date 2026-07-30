@@ -1,5 +1,5 @@
 [package]
-name = "test_utils_derive"
+name = "test_trait_derive"
 version = "0.1.0"
 edition = "2024"
 

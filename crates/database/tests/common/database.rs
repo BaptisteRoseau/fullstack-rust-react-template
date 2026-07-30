@@ -1,19 +1,19 @@
 use database::Database;
 use database::backends::Postgres;
-use test_utils::{trait_test, trait_test_suite};
+use test_trait::{test_trait, test_trait_suite};
 use uuid::Uuid;
 
 /// Integration tests for the Database trait, run against every backend.
 ///
 /// When adding a test here:
-/// - mark it `#[trait_test]` and take the subject as `mut db: Postgres`; the
+/// - mark it `#[test_trait]` and take the subject as `mut db: Postgres`; the
 ///   function name becomes the test name, and that is the only place it is written
 /// - helpers are regular functions, left alone by the macro
-#[trait_test_suite]
+#[test_trait_suite]
 pub mod suite {
     use super::*;
 
-    #[trait_test]
+    #[test_trait]
     async fn create_api_key(mut db: Postgres) {
         let owner = create_test_user(&db).await;
         let perms = serde_json::json!(["UploadFile"]);
@@ -32,7 +32,7 @@ pub mod suite {
         );
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn read_api_key_by_hash(mut db: Postgres) {
         let owner = create_test_user(&db).await;
         let hash = format!("readhash-{}", Uuid::new_v4());
@@ -59,7 +59,7 @@ pub mod suite {
         );
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn delete_api_key(mut db: Postgres) {
         let owner = create_test_user(&db).await;
         let hash = format!("delhash-{}", Uuid::new_v4());
@@ -78,7 +78,7 @@ pub mod suite {
         );
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn delete_api_key_nonexistent(mut db: Postgres) {
         let result = db.delete_api_key(Uuid::new_v4()).await;
         match result {

@@ -4,29 +4,29 @@ use uuid::Uuid;
 
 use compressor::parameters::CompressionParameters;
 use storage::Storage;
-use test_utils::{trait_test, trait_test_suite};
+use test_trait::{test_trait, test_trait_suite};
 
 /// Integration tests for the Storage trait, run against every backend.
 ///
 /// When adding a test here:
-/// - mark it `#[trait_test]` and take the subject as `&impl Storage`; the function
+/// - mark it `#[test_trait]` and take the subject as `&impl Storage`; the function
 ///   name becomes the test name, and that is the only place it is written
 /// - helpers are regular functions, left alone by the macro
-#[trait_test_suite]
+#[test_trait_suite]
 pub mod suite {
     use super::*;
 
-    #[trait_test]
+    #[test_trait]
     async fn save_and_load_compressed(storage: &impl Storage) {
         save_and_load_idempotent(storage, with_compression(), &unique_path()).await;
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn save_and_load(storage: &impl Storage) {
         save_and_load_idempotent(storage, no_compression(), &unique_path()).await;
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn save_overwrite(storage: &impl Storage) {
         let path = unique_path();
         let params = no_compression();
@@ -46,13 +46,13 @@ pub mod suite {
         let _ = storage.delete(&path).await;
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn load_nonexistent(storage: &impl Storage) {
         let result = storage.load(&unique_path()).await;
         assert!(result.is_err(), "loading a nonexistent file should fail");
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn delete_nonexistent(storage: &impl Storage) {
         let result = storage.delete(&unique_path()).await;
         assert!(
@@ -61,7 +61,7 @@ pub mod suite {
         );
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn delete(storage: &impl Storage) {
         let path = unique_path();
         let params = no_compression();

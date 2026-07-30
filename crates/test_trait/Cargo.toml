@@ -1,10 +1,10 @@
 [package]
-name = "test_utils"
+name = "test_trait"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-test_utils_derive = { path = "../test_utils_derive" }
+test_trait_derive = { path = "../test_trait_derive" }
 async-trait = "0"
 libtest-mimic = "0.8.2"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }

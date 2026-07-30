@@ -16,10 +16,11 @@ reqx = ">=0.1.27, <0.1.29"
 thiserror = "2"
 
 [dev-dependencies]
-test_utils = { path = "../test_utils" }
+test_trait = { path = "../test_trait" }
 testcontainers = "0.24"
 uuid = { version = "1", features = ["v4"] }
 
 [[test]]
 name = "s3"
+path = "tests/common/mod.rs"
 harness = false

@@ -2,7 +2,7 @@ use uuid::Uuid;
 
 use authenticator::error::AuthenticatorError;
 use authenticator::{AuthSession, Authenticator, LoginScreen};
-use test_utils::{trait_test, trait_test_suite};
+use test_trait::{test_trait, test_trait_suite};
 
 use super::containers::{
     BFF_CLIENT_ID, BFF_EMAIL, BFF_FAMILY_NAME, BFF_GIVEN_NAME, BFF_REALM, BFF_USER_ID,
@@ -12,14 +12,14 @@ use super::provider::ProviderAgent;
 
 /// Backend-for-Frontend half of the Authenticator suite: the Authorization Code +
 /// PKCE flow. See `authenticator.rs` for the conventions every test here follows.
-#[trait_test_suite]
+#[test_trait_suite]
 pub mod suite {
     use super::*;
 
     /// Where the user asked to land once the login completes.
     const POST_LOGIN_REDIRECT: &str = "/app/dashboard";
 
-    #[trait_test]
+    #[test_trait]
     async fn authorize_url_targets_the_login_screen(authenticator: &impl Authenticator) {
         let url = authenticator
             .authorize_url(LoginScreen::Login, Some(POST_LOGIN_REDIRECT))
@@ -41,7 +41,7 @@ pub mod suite {
         }
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn authorize_url_targets_the_registration_screen(
         authenticator: &impl Authenticator,
     ) {
@@ -64,7 +64,7 @@ pub mod suite {
         }
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn exchange_code_returns_tokens_and_redirect(
         authenticator: &impl Authenticator,
         agent: &impl ProviderAgent,
@@ -89,7 +89,7 @@ pub mod suite {
         );
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn exchange_code_issues_a_token_that_validates(
         authenticator: &impl Authenticator,
         agent: &impl ProviderAgent,
@@ -115,7 +115,7 @@ pub mod suite {
         );
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn exchange_code_rejects_an_unknown_state(authenticator: &impl Authenticator) {
         let result = authenticator
             .exchange_code("an-authorization-code", "a-state-that-was-never-issued")
@@ -131,7 +131,7 @@ pub mod suite {
         );
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn exchange_code_rejects_a_replayed_state(
         authenticator: &impl Authenticator,
         agent: &impl ProviderAgent,
@@ -158,7 +158,7 @@ pub mod suite {
         );
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn userinfo_returns_the_identity_claims(
         authenticator: &impl Authenticator,
         agent: &impl ProviderAgent,
@@ -199,7 +199,7 @@ pub mod suite {
         );
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn refresh_tokens_issues_a_new_pair(
         authenticator: &impl Authenticator,
         agent: &impl ProviderAgent,
@@ -226,7 +226,7 @@ pub mod suite {
         );
     }
 
-    #[trait_test]
+    #[test_trait]
     async fn logout_revokes_the_session(
         authenticator: &impl Authenticator,
         agent: &impl ProviderAgent,

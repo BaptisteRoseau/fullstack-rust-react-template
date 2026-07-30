@@ -19,7 +19,7 @@ tokio = { version = "1", features = ["rt"] }
 test-utils = []
 
 [dev-dependencies]
-test_utils = { path = "../test_utils" }
+test_trait = { path = "../test_trait" }
 testcontainers = "0.24"
 testcontainers-modules = { version = "0.12", features = ["redis"] }
 serde = { version = "1", features = ["derive"] }
@@ -27,4 +27,5 @@ uuid = { version = "1", features = ["v4"] }
 
 [[test]]
 name = "redis"
+path = "tests/common/mod.rs"
 harness = false

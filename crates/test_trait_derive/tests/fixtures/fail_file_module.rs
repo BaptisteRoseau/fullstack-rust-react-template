@@ -1,7 +1,7 @@
 //! The macro needs the module body to read its tests.
-use test_utils_derive::trait_test_suite;
+use test_trait_derive::test_trait_suite;
 
-#[trait_test_suite]
+#[test_trait_suite]
 mod suite;
 
 fn main() {}
