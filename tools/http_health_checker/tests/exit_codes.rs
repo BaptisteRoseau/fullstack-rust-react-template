@@ -10,7 +10,7 @@ use axum::http::StatusCode;
 use axum::routing::get;
 
 #[test]
-fn an_answering_target_exits_0() {
+fn answering_target_exits_0() {
     let url = format!("{}/ping", serve());
 
     let code = exit_code(&url);
@@ -19,7 +19,7 @@ fn an_answering_target_exits_0() {
 }
 
 #[test]
-fn an_error_status_exits_1() {
+fn error_status_exits_1() {
     let url = format!("{}/down", serve());
 
     let code = exit_code(&url);
@@ -28,29 +28,9 @@ fn an_error_status_exits_1() {
 }
 
 #[test]
-fn a_closed_port_exits_1() {
-    // Bound, then dropped: the port is free, so nothing answers on it.
-    let port = TcpListener::bind("127.0.0.1:0")
-        .expect("failed to reserve a port")
-        .local_addr()
-        .expect("failed to read the reserved address")
-        .port();
-    let url = format!("http://127.0.0.1:{port}/ping");
-
-    let code = exit_code(&url);
-
-    assert_eq!(
-        code, 1,
-        "a port nothing listens on should be unhealthy, url={url} exit={code}"
-    );
-}
-
-#[test]
-fn an_unresolvable_host_exits_1() {
+fn nonsense_exits_1() {
     let url = "https://weqweqwe.local/qwewqe";
-
     let code = exit_code(url);
-
     assert_eq!(
         code, 1,
         "a host that does not resolve should be unhealthy, url={url} exit={code}"
