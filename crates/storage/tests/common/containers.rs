@@ -9,11 +9,12 @@ const GARAGE_TAG: &str = "v2.3.0";
 const GARAGE_S3_PORT: u16 = 3900;
 const GARAGE_KEY_NAME: &str = "test-key";
 
-/// Garage server configuration used by the test container.
+/// Garage server configuration copied into the test container.
 ///
-/// Reuses the deployment manifest so the test backend matches production
-/// (notably the `s3_region`, which Garage enforces in request signatures).
-const GARAGE_CONFIG: &str = include_str!("../../../../infrastructure/garage/garage.toml");
+/// A test fixture, not a deployment manifest: Garage is no longer part of the
+/// infrastructure, it only backs these tests as an S3-compatible server. The
+/// `s3_region` matters — Garage enforces it in request signatures.
+const GARAGE_CONFIG: &str = include_str!("../assets/garage.toml");
 
 pub struct GarageFixture {
     container: ContainerAsync<GenericImage>,

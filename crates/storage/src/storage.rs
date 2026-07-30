@@ -2,7 +2,7 @@ use std::path::Path;
 
 use async_trait::async_trait;
 
-use crate::{error::StorageError};
+use crate::error::StorageError;
 use compressor::parameters::CompressionParameters;
 
 #[async_trait]

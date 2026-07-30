@@ -1,6 +1,6 @@
+use flate2::Compression;
 use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;
-use flate2::Compression;
 use std::io::{self, Cursor, Read, Write};
 
 use crate::parameters::Compression as CompressionParameters;

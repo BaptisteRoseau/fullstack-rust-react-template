@@ -2,8 +2,8 @@ use std::path::{Path, PathBuf};
 
 use uuid::Uuid;
 
-use storage::Storage;
 use compressor::parameters::CompressionParameters;
+use storage::Storage;
 
 // When adding a new test here:
 // - helpers are regular private functions

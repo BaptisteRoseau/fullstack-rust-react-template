@@ -54,16 +54,20 @@ macro_rules! database_trait_tests {
 }
 
 /// Insert a minimal user row directly via sqlx and return its id.
-/// Uses a unique email per call to avoid conflicts between parallel tests.
+/// Uses a unique username and email per call: both are UNIQUE NOT NULL, so
+/// sharing them would make parallel tests collide.
 async fn create_test_user(db: &Postgres) -> Uuid {
     let id = Uuid::new_v4();
-    let email = format!("testuser-{}@example.com", id);
+    let username = format!("testuser-{id}");
+    let email = format!("{username}@example.com");
     sqlx::query_scalar::<_, Uuid>(
-        "INSERT INTO users (id, last_name, first_name, email) VALUES ($1, $2, $3, $4) RETURNING id",
+        "INSERT INTO users (id, last_name, first_name, username, email) \
+         VALUES ($1, $2, $3, $4, $5) RETURNING id",
     )
     .bind(id)
     .bind("Test")
     .bind("User")
+    .bind(username)
     .bind(email)
     .fetch_one(db.pool())
     .await
