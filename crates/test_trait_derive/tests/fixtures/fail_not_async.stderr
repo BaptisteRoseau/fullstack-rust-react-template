@@ -1,8 +1,8 @@
 error: a #[test_trait] must be `async`: the collector awaits it
- --> tests/fixtures/fail_not_async.rs:9:8
-  |
-9 |     fn blocking(subject: &u8) {
-  |        ^^^^^^^^
+  --> tests/fixtures/fail_not_async.rs:11:8
+   |
+11 |     fn blocking(subject: &impl Subject) {
+   |        ^^^^^^^^
 
 warning: unused import: `test_trait`
  --> tests/fixtures/fail_not_async.rs:2:25

@@ -1,0 +1,13 @@
+error: a #[test_trait] takes the trait, not a backend: write `&impl Storage` rather than `&S3`. A concrete subject stops the suite being reusable across backends, which is its whole purpose
+  --> tests/fixtures/fail_concrete_subject.rs:11:40
+   |
+11 |     async fn takes_a_backend(subject: &MyBackend) {
+   |                                        ^^^^^^^^^
+
+warning: unused import: `test_trait`
+ --> tests/fixtures/fail_concrete_subject.rs:2:25
+  |
+2 | use test_trait_derive::{test_trait, test_trait_suite};
+  |                         ^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default

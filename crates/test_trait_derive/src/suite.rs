@@ -10,6 +10,9 @@ use syn::{
 
 const MARKER: &str = "test_trait";
 
+/// The trait a suite drives, as written in its tests' signatures.
+type Bounds = Punctuated<TypeParamBound, Token![+]>;
+
 /// `#[test_trait]` reached without having been collected.
 ///
 /// The enclosing module attribute rewrites every marker it collects to carry an
@@ -56,20 +59,20 @@ fn try_expand(input: TokenStream) -> Result<TokenStream> {
         }
     }
 
-    if tests.is_empty() {
+    let Some(first) = tests.first() else {
         return Err(Error::new_spanned(
             &module.ident,
             "no #[test_trait] in this module, so the suite would run nothing",
         ));
-    }
+    };
 
-    let subject = agree_on(&tests, |test| &test.subject, "subject")?;
-    let context = tests.iter().find_map(|test| test.context.as_ref());
-    if context.is_some() {
-        agree_on_context(&tests)?;
-    }
+    let subject = agree(&tests, "subject", |test| Some(&test.subject.bounds))?
+        .unwrap_or_else(|| first.subject.bounds.clone());
+    let context = agree(&tests, "context", |test| {
+        test.context.as_ref().map(|param| &param.bounds)
+    })?;
 
-    items.extend(generate(&tests, subject, context)?);
+    items.extend(generate(&tests, &subject, context.as_ref()));
     Ok(quote!(#module))
 }
 
@@ -85,19 +88,9 @@ enum Receiver {
     Owned,
 }
 
-/// What the parameter's type says the subject is.
-#[derive(Clone, PartialEq)]
-enum SubjectType {
-    /// `impl Trait`: the collector stays generic over the backend.
-    Generic(Punctuated<TypeParamBound, Token![+]>),
-    /// A named type: the collector is pinned to it.
-    Concrete(Type),
-}
-
-#[derive(Clone)]
 struct Param {
     receiver: Receiver,
-    subject: SubjectType,
+    bounds: Bounds,
 }
 
 struct TestFn {
@@ -112,7 +105,7 @@ impl TestFn {
 
         if function.sig.asyncness.is_none() {
             return Err(Error::new_spanned(
-                &function.sig.ident,
+                &ident,
                 "a #[test_trait] must be `async`: the collector awaits it",
             ));
         }
@@ -120,30 +113,26 @@ impl TestFn {
         let mut params = function.sig.inputs.iter();
         let Some(first) = params.next() else {
             return Err(Error::new_spanned(
-                &function.sig.ident,
+                &ident,
                 "a #[test_trait] takes the subject under test as its first parameter",
             ));
         };
         let subject = Param::parse(first)?;
 
-        let context = match params.next() {
-            Some(second) => {
-                let context = Param::parse(second)?;
-                if context.receiver != Receiver::Shared {
-                    return Err(Error::new_spanned(
-                        second,
-                        "the context parameter is shared between every test, \
-                         so it must be taken by shared reference",
-                    ));
-                }
-                Some(context)
-            }
-            None => None,
-        };
+        let context = params.next().map(Param::parse).transpose()?;
+        if let Some(context) = &context
+            && context.receiver != Receiver::Shared
+        {
+            return Err(Error::new_spanned(
+                &ident,
+                "the context is shared between every test, \
+                 so it must be taken by shared reference",
+            ));
+        }
 
         if params.next().is_some() {
             return Err(Error::new_spanned(
-                &function.sig.ident,
+                &ident,
                 "a #[test_trait] takes at most two parameters: the subject and a context",
             ));
         }
@@ -166,25 +155,31 @@ impl Param {
         };
 
         let (receiver, inner) = match &*typed.ty {
-            Type::Reference(reference) => {
-                let receiver = if reference.mutability.is_some() {
-                    Receiver::Mut
-                } else {
-                    Receiver::Shared
-                };
-                (receiver, &*reference.elem)
+            Type::Reference(reference) if reference.mutability.is_some() => {
+                (Receiver::Mut, &*reference.elem)
             }
+            Type::Reference(reference) => (Receiver::Shared, &*reference.elem),
             owned => (Receiver::Owned, owned),
         };
 
-        let subject = match inner {
-            Type::ImplTrait(impl_trait) => {
-                SubjectType::Generic(impl_trait.bounds.clone())
+        // A suite exists to run against any backend, so its signatures name the trait
+        // and nothing below it. A concrete type compiles and passes while quietly
+        // pinning the suite to one implementation — nothing surfaces the mistake until
+        // a second backend arrives and the "reusable" suite has to be rewritten.
+        let bounds = match inner {
+            Type::ImplTrait(impl_trait) => impl_trait.bounds.clone(),
+            Type::TraitObject(trait_object) => trait_object.bounds.clone(),
+            concrete => {
+                return Err(Error::new_spanned(
+                    concrete,
+                    "a #[test_trait] takes the trait, not a backend: write \
+                     `&impl Storage` rather than `&S3`. A concrete subject stops the \
+                     suite being reusable across backends, which is its whole purpose",
+                ));
             }
-            concrete => SubjectType::Concrete(concrete.clone()),
         };
 
-        Ok(Self { receiver, subject })
+        Ok(Self { receiver, bounds })
     }
 }
 
@@ -205,154 +200,95 @@ fn take_marker(attrs: &mut [Attribute]) -> bool {
     found
 }
 
-/// Every test in a suite drives the same backend, so their parameter types have to
-/// line up — the collector can only be generated for one of them.
-fn agree_on<'a>(
+/// One suite drives one trait, so every test declaring a subject — or a context —
+/// has to name the same one. Returns it, or `None` if no test declared it.
+fn agree<'a>(
     tests: &'a [TestFn],
-    extract: impl Fn(&'a TestFn) -> &'a Param,
     what: &str,
-) -> Result<&'a SubjectType> {
-    let first = extract(&tests[0]);
-    for test in &tests[1..] {
-        if extract(test).subject != first.subject {
-            return Err(Error::new_spanned(
-                &test.ident,
-                format!(
-                    "every #[test_trait] in a suite must take the same {what} type, \
-                     but this one differs from `{}`",
-                    tests[0].ident
-                ),
-            ));
-        }
-    }
-    Ok(&first.subject)
-}
-
-fn agree_on_context(tests: &[TestFn]) -> Result<()> {
-    let mut contexts = tests.iter().filter(|test| test.context.is_some());
-    let Some(first) = contexts.next() else {
-        return Ok(());
+    of: impl Fn(&'a TestFn) -> Option<&'a Bounds>,
+) -> Result<Option<Bounds>> {
+    let mut declared = tests.iter().filter_map(|test| Some((test, of(test)?)));
+    let Some((first, bounds)) = declared.next() else {
+        return Ok(None);
     };
-    let expected = &first.context.as_ref().expect("filtered").subject;
 
-    for test in contexts {
-        if &test.context.as_ref().expect("filtered").subject != expected {
+    for (test, other) in declared {
+        if other != bounds {
             return Err(Error::new_spanned(
                 &test.ident,
                 format!(
-                    "every #[test_trait] taking a context must take the same type, \
-                     but this one differs from `{}`",
+                    "every #[test_trait] taking a {what} must take the same one, \
+                     but this differs from `{}`",
                     first.ident
                 ),
             ));
         }
     }
-    Ok(())
+    Ok(Some(bounds.clone()))
 }
 
 /* =======================================================================================
  * CODE GENERATION
  * ===================================================================================== */
 
-/// A subject or context type rendered for the generated signature: either a fresh
-/// generic parameter carrying the `impl Trait` bounds, or the concrete type itself.
-struct Rendered {
-    /// `S` / `C`, or the concrete type.
-    ty: TokenStream,
-    /// The generic parameter declaration, if one was introduced.
-    generic: Option<TokenStream>,
+/// The signature fragments both collectors share.
+struct Shape {
+    /// `S: Storage, C: ProviderAgent + Send + Sync + 'static,`
+    generics: TokenStream,
+    context_param: TokenStream,
+    context_clone: TokenStream,
 }
 
-fn render(subject: &SubjectType, name: &str, extra: Option<TokenStream>) -> Rendered {
-    match subject {
-        SubjectType::Generic(bounds) => {
-            let ident = format_ident!("{name}");
-            let bounds = match &extra {
-                Some(extra) => quote!(#bounds + #extra),
-                None => quote!(#bounds),
-            };
-            Rendered {
-                ty: quote!(#ident),
-                generic: Some(quote!(#ident: #bounds)),
-            }
-        }
-        SubjectType::Concrete(ty) => Rendered {
-            ty: quote!(#ty),
-            generic: None,
+/// `subject_extra` is the bound the subject picks up from how the collector holds it:
+/// `trials_shared` keeps it in an `Arc` across threads, `trials` builds it in place.
+fn shape(
+    subject: &Bounds,
+    context: Option<&Bounds>,
+    subject_extra: Option<TokenStream>,
+) -> Shape {
+    let shared = quote!(Send + Sync + 'static);
+    let mut generics = vec![generic("S", subject, subject_extra)];
+    generics.extend(context.map(|context| generic("C", context, Some(shared))));
+
+    Shape {
+        generics: quote!(#(#generics,)*),
+        context_param: match context {
+            Some(_) => quote!(, context: ::std::sync::Arc<C>),
+            None => TokenStream::new(),
+        },
+        context_clone: match context {
+            Some(_) => quote!(let context = ::std::sync::Arc::clone(&context);),
+            None => TokenStream::new(),
         },
     }
 }
 
-fn generate(
-    tests: &[TestFn],
-    subject: &SubjectType,
-    context: Option<&Param>,
-) -> Result<Vec<Item>> {
-    let context = context.map(|param| &param.subject);
+fn generic(name: &str, bounds: &Bounds, extra: Option<TokenStream>) -> TokenStream {
+    let ident = format_ident!("{name}");
+    match extra {
+        Some(extra) => quote!(#ident: #bounds + #extra),
+        None => quote!(#ident: #bounds),
+    }
+}
 
+fn generate(tests: &[TestFn], subject: &Bounds, context: Option<&Bounds>) -> Vec<Item> {
     let mut items = vec![trials(tests, subject, context)];
+
+    // `&mut` and by-value subjects cannot come out of an `Arc`, so a suite that wants
+    // one of those can only be run against a freshly built subject.
     if tests
         .iter()
         .all(|test| test.subject.receiver == Receiver::Shared)
     {
         items.push(trials_shared(tests, subject, context));
     }
-    Ok(items)
-}
-
-/// The pieces a generated collector needs about its subject and context types.
-struct Shape {
-    generics: TokenStream,
-    subject_ty: TokenStream,
-    context_param: TokenStream,
-    context_clone: TokenStream,
-}
-
-/// Builds the signature fragments shared by both collectors. `subject_extra` is the
-/// bound the subject picks up from how the collector holds it — `trials_shared` keeps
-/// it in an `Arc` across threads, `trials` builds it inside the trial.
-fn shape(
-    subject: &SubjectType,
-    context: Option<&SubjectType>,
-    subject_extra: Option<TokenStream>,
-) -> Shape {
-    let shared = quote!(Send + Sync + 'static);
-    let subject = render(subject, "S", subject_extra);
-    let context = context.map(|context| render(context, "C", Some(shared)));
-
-    let mut generics: Vec<TokenStream> = Vec::new();
-    generics.extend(subject.generic);
-    generics.extend(context.as_ref().and_then(|context| context.generic.clone()));
-
-    let context_param = context
-        .as_ref()
-        .map(|context| {
-            let ty = &context.ty;
-            quote!(, context: ::std::sync::Arc<#ty>)
-        })
-        .unwrap_or_default();
-
-    Shape {
-        generics: quote!(#(#generics,)*),
-        subject_ty: subject.ty,
-        context_param,
-        context_clone: if context.is_some() {
-            quote!(let context = ::std::sync::Arc::clone(&context);)
-        } else {
-            TokenStream::new()
-        },
-    }
+    items
 }
 
 /// `trials(rt, build[, context])` — a fresh subject per trial.
-fn trials(
-    tests: &[TestFn],
-    subject: &SubjectType,
-    context: Option<&SubjectType>,
-) -> Item {
+fn trials(tests: &[TestFn], subject: &Bounds, context: Option<&Bounds>) -> Item {
     let Shape {
         generics,
-        subject_ty,
         context_param,
         context_clone,
     } = shape(subject, context, None);
@@ -398,7 +334,7 @@ fn trials(
         ) -> ::std::vec::Vec<::test_trait::Trial>
         where
             B: ::std::ops::Fn() -> F + ::std::marker::Send + ::std::marker::Sync + 'static,
-            F: ::std::future::Future<Output = #subject_ty>,
+            F: ::std::future::Future<Output = S>,
         {
             let build = ::std::sync::Arc::new(build);
             ::std::vec![#(#trials),*]
@@ -407,14 +343,9 @@ fn trials(
 }
 
 /// `trials_shared(rt, subject[, context])` — one subject for every trial.
-fn trials_shared(
-    tests: &[TestFn],
-    subject: &SubjectType,
-    context: Option<&SubjectType>,
-) -> Item {
+fn trials_shared(tests: &[TestFn], subject: &Bounds, context: Option<&Bounds>) -> Item {
     let Shape {
         generics,
-        subject_ty,
         context_param,
         context_clone,
     } = shape(subject, context, Some(quote!(Send + Sync + 'static)));
@@ -445,7 +376,7 @@ fn trials_shared(
         #[allow(dead_code)]
         pub fn trials_shared<#generics>(
             rt: ::std::sync::Arc<::test_trait::Runtime>,
-            subject: ::std::sync::Arc<#subject_ty>
+            subject: ::std::sync::Arc<S>
             #context_param
         ) -> ::std::vec::Vec<::test_trait::Trial> {
             ::std::vec![#(#trials),*]

@@ -1,5 +1,5 @@
 error: no #[test_trait] in this module, so the suite would run nothing
- --> tests/fixtures/fail_empty_suite.rs:5:5
+ --> tests/fixtures/fail_empty_suite.rs:7:5
   |
-5 | mod suite {
+7 | mod suite {
   |     ^^^^^

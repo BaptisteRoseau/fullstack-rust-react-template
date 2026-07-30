@@ -1,8 +1,8 @@
-error: every #[test_trait] in a suite must take the same subject type, but this one differs from `takes_a_byte`
-  --> tests/fixtures/fail_mismatched_subjects.rs:14:14
+error: every #[test_trait] taking a subject must take the same one, but this differs from `takes_an_alpha`
+  --> tests/fixtures/fail_mismatched_subjects.rs:17:14
    |
-14 |     async fn takes_a_string(subject: &String) {
-   |              ^^^^^^^^^^^^^^
+17 |     async fn takes_a_beta(subject: &impl Beta) {
+   |              ^^^^^^^^^^^^
 
 warning: unused import: `test_trait`
  --> tests/fixtures/fail_mismatched_subjects.rs:2:25

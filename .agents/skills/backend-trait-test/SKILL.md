@@ -226,7 +226,15 @@ fn unique_path() -> PathBuf {
 }
 ```
 
-Typing the subject against the concrete backend is the mistake to avoid: it compiles, but the suite silently stops being reusable, which was its whole purpose. Because the suite only knows the trait, a backend needing no service at all reuses it unchanged — `tests/in_memory.rs` builds the in-memory backend, skips the fixture, and calls the same generated `trials`.
+### The subject is always the trait, never a backend
+
+**A `#[test_trait]` must never name a concrete type.** Write `&impl Storage`, not `&S3`; `&mut impl Database`, not `mut db: Postgres`. `dyn Trait` and a generic parameter of the test's own (`fn t<D: Database>(db: &mut D)`) are equally fine — what matters is that the signature mentions the trait and nothing below it.
+
+This is worth being absolute about because breaking it costs nothing up front and everything later. A concrete subject compiles, passes, and reads almost identically; the suite just quietly stops being a trait suite. Nothing tells you until a second backend arrives and the "reusable" suite turns out to need rewriting — which is exactly what happened to `crates/database`, whose suite took `mut db: Postgres` and reached through `db.pool()` into raw SQL. It never needed to: `Database::register` already created the user its helper wanted.
+
+So when a test seems to need something the trait cannot express, the answer is almost never a concrete type. Either the trait is missing a method the production code also wants, or the need belongs behind a test-side trait the fixture implements (§6), or it is not a trait test at all and belongs in a unit test next to the backend.
+
+Because the suite only knows the trait, a backend needing no service at all reuses it unchanged — `tests/in_memory.rs` builds the in-memory backend, skips the fixture, and calls the same generated `trials`.
 
 All trials share one container and run in parallel, so **every test derives its own keys** — `Uuid::new_v4()` in the path, the bucket key, the username, the email. Two tests sharing a row or a blob will pass alone and fail together.
 
@@ -251,7 +259,7 @@ The macro reads each test's first parameter and emits the matching call, so all 
 |---|---|
 | `s: &impl Storage` | `f(&subject)` |
 | `db: &mut impl Database` | `f(&mut subject)` |
-| `db: MyBackend` (a concrete type) | `f(subject)` |
+| `db: impl Database` (owned) | `f(subject)` |
 | any of the above under `trials_shared` | `f(&*subject)` |
 
 Every test in a suite must agree on the subject type — one suite drives one backend, and the macro says so if they diverge.
