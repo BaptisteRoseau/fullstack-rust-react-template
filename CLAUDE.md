@@ -295,6 +295,6 @@ Do not invent APIs, when necessary, use the context7 MCP to access documentation
 
 All the services required to run the application can be launched using `docker compose up -d`.
 
-- Backend: `cargo run -p backend`
+- Backend: `source .env && cargo run -p backend`
 - Frontend: `cd frontend; bun run dev`
 - Infrastructure: `docker compose up -d`
