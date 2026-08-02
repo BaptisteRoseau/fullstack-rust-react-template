@@ -1,0 +1,8 @@
+[package]
+name = "monitoring"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+metrics = { version = "0" }
+metrics-exporter-prometheus = { version = "0", features = ["tokio"] }
