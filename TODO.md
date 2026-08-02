@@ -1,16 +1,16 @@
 # TODO
 
-- [ ] Implement authentication
-    - [ ] Fetch JWT from the frontend from Keycloak
-    - [x] Decode it in the backend from the authenticator
-    - [ ] Use "Authorization: " and fallback to "Bearer: " header in the extractor
-    - [ ] Store JWT as httponly cookie in the frontend
-    - [ ] Automagically refresh JWT in the frontend when getting a logged out error from the backend
+- [ ] SQL-based backend
+- [ ] Move tests to "_tests" directories, respecting the same tree but with "test_*" prefixes (do it once then ask Claude to dot it for the rest)
 
-- [ ] Make common trait and objects Mock (config, cache, etc...)
+- [ ] Dotfiles -> docker SBX with kits (Rust, uv, bun, node, cargo utils...)
+- [ ] Agents (implementer, reviewer, planner..)
 
-- [ ] Install and use cargo nextest
-- [ ] Fix garage
+- [ ] Objects for V1:
+    - [ ] Users
+    - [ ] Api Keys
+    - [ ] Invoices
+    - [ ] Files
 
 ## Error management
 
@@ -41,6 +41,7 @@
 - [ ] Nix & k3s infra
 
 - [ ] Cache uuid <-> username in Redis
+- [ ] use username as slug ?
 - [ ] Use testcontainers for `can_reach_google` test
 
 - [ ] Snippets/tool to make templates (extractors, db queries etc..)
