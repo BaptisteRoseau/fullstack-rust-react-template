@@ -18,6 +18,10 @@ s3 = { version = "0", features = ["checksums", "metrics"] }
 reqx = ">=0.1.27, <0.1.29"
 thiserror = "2"
 
+[features]
+# Each backend under `src/backends` is opt-in; enable the ones you need.
+s3 = []
+
 [dev-dependencies]
 test_trait = { path = "../test_trait" }
 testcontainers = "0.24"
@@ -27,3 +31,4 @@ uuid = { version = "1", features = ["v4"] }
 name = "s3"
 path = "tests/backends/s3.rs"
 harness = false
+required-features = ["s3"]

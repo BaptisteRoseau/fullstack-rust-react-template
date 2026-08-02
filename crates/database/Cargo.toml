@@ -21,6 +21,8 @@ thiserror = "2"
 tracing = { version = "0", features = ["async-await"] }
 
 [features]
+# Each backend under `src/backends` is opt-in; enable the ones you need.
+postgres = []
 # In-memory `Database` test double (`database::testing::MockDatabase`), for
 # downstream crates' unit/integration tests. Enable via [dev-dependencies].
 test-utils = []
@@ -36,6 +38,7 @@ uuid = { version = "1", features = ["v4", "fast-rng"] }
 name = "postgres"
 path = "tests/backends/postgres.rs"
 harness = false
+required-features = ["postgres"]
 
 [[test]]
 name = "mock"

@@ -17,6 +17,11 @@ serde_json = "1"
 tokio = { version = "1", features = ["rt"] }
 tracing = "0"
 
+[features]
+# Each backend under `src/backends` is opt-in; enable the ones you need.
+redis = []
+hash_map = []
+
 [dev-dependencies]
 test_trait = { path = "../test_trait" }
 testcontainers = "0.24"
@@ -30,8 +35,10 @@ uuid = { version = "1", features = ["v4"] }
 name = "redis"
 path = "tests/backends/redis.rs"
 harness = false
+required-features = ["redis"]
 
 [[test]]
 name = "hash_map"
 path = "tests/backends/hash_map.rs"
 harness = false
+required-features = ["hash_map"]
