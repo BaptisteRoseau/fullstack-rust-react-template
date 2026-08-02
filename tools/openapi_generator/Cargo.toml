@@ -7,3 +7,4 @@ authors = ["Baptiste Roseau"]
 
 [dependencies]
 api = { path = "../../crates/api" }
+config = { path = "../../crates/config" }

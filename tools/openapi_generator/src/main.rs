@@ -10,15 +10,18 @@
 use std::path::PathBuf;
 use std::process::ExitCode;
 
+use config::Config;
+
 const DEFAULT_OUTPUT: &str = "openapi.json";
 
 fn main() -> ExitCode {
+    let config = config::Config::parse().expect("Invalid config");
     let output = std::env::args()
         .nth(1)
         .map(PathBuf::from)
         .unwrap_or_else(|| PathBuf::from(DEFAULT_OUTPUT));
 
-    if let Err(error) = export(&output) {
+    if let Err(error) = export(&output, &config) {
         eprintln!("Failed to export the OpenAPI document: {error}");
         return ExitCode::FAILURE;
     }
@@ -27,8 +30,8 @@ fn main() -> ExitCode {
     ExitCode::SUCCESS
 }
 
-fn export(output: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
-    let json = api::routes::openapi().to_pretty_json()?;
+fn export(output: &PathBuf, config: &Config) -> Result<(), Box<dyn std::error::Error>> {
+    let json = api::routes::openapi(config).to_pretty_json()?;
 
     if let Some(parent) = output
         .parent()
