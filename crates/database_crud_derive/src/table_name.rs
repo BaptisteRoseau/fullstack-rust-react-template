@@ -5,26 +5,6 @@ pub fn derive_table_name(ident: &str) -> String {
     format!("{snake}s")
 }
 
-/* =======================================================================================
-* TESTS
-======================================================================================= */
-
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_simple() {
-        assert_eq!(derive_table_name("User"), "users");
-    }
-
-    #[test]
-    fn test_compound() {
-        assert_eq!(derive_table_name("UserProfile"), "user_profiles");
-    }
-
-    #[test]
-    fn test_single_word() {
-        assert_eq!(derive_table_name("Company"), "companys");
-    }
-}
+#[path = "_tests/test_table_name.rs"]
+mod tests;
