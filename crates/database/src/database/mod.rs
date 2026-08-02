@@ -1,4 +1,3 @@
-#[warn(clippy::module_inception)]
 mod api_key;
 mod database;
 mod user;

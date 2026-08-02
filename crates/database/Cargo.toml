@@ -6,6 +6,11 @@ edition = "2024"
 # `tests/trait_tests.rs`, which is the shared suite and not a target of its own.
 autotests = false
 
+[lints.clippy]
+# `database::database` (src/database/mod.rs) intentionally names the module
+# after the crate/directory to match the `Database` trait it defines.
+module_inception = "allow"
+
 [dependencies]
 database_crud_derive = { path = "../database_crud_derive" }
 logging = { path = "../logging" }
@@ -21,10 +26,7 @@ thiserror = "2"
 tracing = { version = "0", features = ["async-await"] }
 
 [features]
-# Each backend under `src/backends` is opt-in; enable the ones you need.
 postgres = []
-# In-memory `Database` test double (`database::testing::MockDatabase`), for
-# downstream crates' unit/integration tests. Enable via [dev-dependencies].
 test-utils = []
 
 [dev-dependencies]
@@ -44,9 +46,4 @@ required-features = ["postgres"]
 name = "mock"
 path = "tests/backends/mock.rs"
 harness = false
-# `MockDatabase` is feature-gated out of the plain lib build, and an integration
-# test links this crate the way a downstream consumer does. So this binary only
-# builds under `--all-features` (or `--features test-utils`), which is what
-# `scripts/test_units.sh` and `scripts/test_lint.sh` pass; a bare
-# `cargo test -p database` silently skips it.
 required-features = ["test-utils"]

@@ -21,13 +21,13 @@ pub mod suite {
             .await
             .expect("create_api_key failed");
 
-        assert_eq!(key.owner(), owner, "owner mismatch: got {}", key.owner());
-        assert_eq!(key.name(), "my-key", "name mismatch: got {}", key.name());
+        assert_eq!(key.owner, owner, "owner mismatch: got {}", key.owner);
+        assert_eq!(key.name, "my-key", "name mismatch: got {}", key.name);
         assert_eq!(
-            key.hash(),
+            key.hash,
             "abc123hash",
             "hash mismatch: got {}",
-            key.hash()
+            key.hash
         );
     }
 
@@ -49,12 +49,12 @@ pub mod suite {
             .await
             .expect("read_api_key_by_hash failed");
 
-        assert_eq!(found.hash(), hash, "hash mismatch: got {}", found.hash());
+        assert_eq!(found.hash, hash, "hash mismatch: got {}", found.hash);
         assert_eq!(
-            found.owner(),
+            found.owner,
             owner,
             "owner mismatch: got {}",
-            found.owner()
+            found.owner
         );
     }
 
@@ -67,7 +67,7 @@ pub mod suite {
             .await
             .expect("create failed");
 
-        let deleted = db.delete_api_key(key.id()).await.expect("delete failed");
+        let deleted = db.delete_api_key(key.id).await.expect("delete failed");
         assert!(deleted, "expected delete to return true, got false");
 
         let not_found = db.read_api_key_by_hash(&hash).await;

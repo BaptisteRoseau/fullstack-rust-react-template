@@ -43,7 +43,7 @@ impl ApiKeyValidator {
             .map_err(|_| AuthenticatorError::AuthenticationFailure)?;
 
         let user_token = UserToken {
-            id: api_key.owner(),
+            id: api_key.owner,
             realm: "api_key".to_string(),
         };
 
