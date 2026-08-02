@@ -1,13 +1,12 @@
 # TODO
 
-- [ ] SQL-based backend
+- [ ] SQL-based backend for Database
+    - [ ] Use as a Drop-in replacement for Postgres/SQlite/MyQSL.. -> Then use SQLite as the database exposed mock
 - [ ] Move tests to "_tests" directories, respecting the same tree but with "test_*" prefixes (do it once then ask Claude to dot it for the rest)
 - [ ] Use features to enable/disable backends for trait crates
 - [ ] Add a mention or a tag in the Rust crates to telle whether they are for testing/traits/utils
-- [ ] Use configuration-based OpenAPI info for crates/api/src/routes/openapi.rs
 - [ ] Make an MCP crate with Rust macros (similar to the API layer)
 
-- [ ] Dotfiles -> docker SBX with kits (Rust, uv, bun, node, cargo utils...)
 - [ ] Agents (implementer, reviewer, planner..)
 
 - [ ] Objects for V1:
@@ -20,6 +19,7 @@
 
 - [ ] Include dev debug errors in the response in debug mode (release should not even have the debug field in the response (#[debug_assertion] ?))
 - [ ] Add an utoipa model for the rate limiter
+- [ ] Add hooks on errors ?
 
 ## AI infra & Frontend
 
@@ -89,37 +89,38 @@
 - [x] Set up a database with two users: read_write and read_only
 - [x] Create the first sqlx migration with a table containing the users
     - [x] Move the created_at/updated_at function to the first migration
-- [ ] Generate backend Rust database models for the User
-- [ ] CRUD macro (see something like <https://docs.rs/sqlx-crud/latest/sqlx_crud/traits/trait.Schema.html>)
-- [ ] Use a script to generate the database models: <https://github.com/jayy-lmao/sql-gen?tab=readme-ov-file>
+- [X] Generate backend Rust database models for the User
+- [X] CRUD macro (see something like <https://docs.rs/sqlx-crud/latest/sqlx_crud/traits/trait.Schema.html>)
+- [X] Use a script to generate the database models: <https://github.com/jayy-lmao/sql-gen?tab=readme-ov-file>
 - The two previous milestones should allow you to make the database crate basic CRUD functionalities across all tables trivial, so that you can focus on the more interesting ones :D
-- [ ] Split database into multiple traits then use T1 + T2 + T3 .. to avoid having a giant one.
+- [X] Split database into multiple traits then use T1 + T2 + T3 .. to avoid having a giant one.
+- [ ] Atomic transactions support (transactions)
 
 ### API Layer
 
 - [x] Set a request ID for logging purposes
 - [ ] Use slugs instead of IDs whenever possible
-- [ ] Use axum-tower-session and axum-login for session management ?
-    - [ ] Search their compatibility with OIDC providers like keycloak
 - [ ] Use a Protobuf schema to generate Rust models and Typescript structures
-- [ ] Add CORS middleware
+- [ ] Implement an actual CORS middleware
 - [x] Add compression middleware
 - [x] Add tracing middleware (set sensitive headers before)
 - [x] Add timeout middleware
 - [x] Add Swagger UI & openapi.json
-    - [ ] Add categories in the Swagger UI (Auth, Storage...)
-    - [ ] Add auth support and auth documentation in the swagger UI
-- [ ] Add rate limiter middleware
-- [ ] Aggregate middlewares cleanly
+    - [X] Add categories in the Swagger UI (Auth, Storage...)
+    - [X] Add auth support and auth documentation in the swagger UI
+    - [ ] Fix the OIDC documentation (currently not usable)
+- [X] Add rate limiter middleware
+- [X] Aggregate middlewares cleanly
 - [ ] Convert `app_core` models to API models and vice-versa
 - [x] Add error handling middleware & global error conversion
 - [x] Trace errors & normalize error response
 - [ ] Support both REST & gRCP from the same handler (split with `/rest/` and `/grpc/` in the URL)
+- [ ] Add an MCP crate (similar to the API crate), merge it in the router
 
 ### Testing, CI/CD, Docker and scripts
 
 - [ ] Fix all docker images creation
-- [ ] Fix all docker-compose files, services & interaction
+- [X] Fix all docker-compose files, services & interaction
 - [ ] Fix scripts for test execution, audit & licenses
 - [ ] Add formatting checker script
 - [x] Add sqlx JSON schema generation from migration scripts and blank container
@@ -150,8 +151,7 @@
 ### Core and authentication - API
 
 - [x] Select authentication service (Keycloak)
-- [ ] Use tower-auth middleware ?
-- [ ] Use JWT & auto-rotate
+- [X] Use JWT & auto-rotate
 
 ### User Management & Information Update (back & front)
 
@@ -160,12 +160,11 @@
 
 ### Storage layer
 
-- [x] Select S3-compatible backend service (MinIO, but remember <https://garagehq.deuxfleurs.fr/>)
+- [x] Select S3-compatible backend service (Seaweedfs)
 - [ ] Write the trait
     - [ ] full fledge s3 API
     - [ ] Allow the selection of a bucket
     - [ ] Create fake IDs that can be serialized/deserialized easily (base64 ?)
-- [ ] Remove encryption since it will be handled by the storage service
 - [ ] Handle ownership and access
 - [ ] Write middleware that handles file metadata & compression
     - [ ] meta: filename, type, owner & access
@@ -192,18 +191,18 @@
 
 - [ ] README.md in every directory explaining best practices of said directory
 - [ ] Skills for everything that is satisfying enough long-term
-    - [ ] Endpoint writing
-    - [ ] Config entries
+    - [X] Endpoint writing
+    - [X] Config entries
 - [ ] `doc/` for developer documentation
-- [ ] CLAUDE.md and other LLM templates
+- [X] CLAUDE.md and other LLM templates
 
 ### Extras
 
 - [ ] Add a management CLI binary -> bound to `api_core` handlers
-- [ ] Loki docker plugin to expose docker logs to Grafana
+- [ ] Loki docker/k3s plugin to expose docker logs to Grafana
 - [ ] Pre-built Grafana dashboards
 - [ ] Kubernetes manifests
 - [ ] Nix flake (Docker & Prometheus & Kubernetes)
 - [ ] Hasicorp Vault for certificates/keys/passwords ?
-- [ ] Agent intergration (MCP Gateway ?) read-only for every service (Backend, Postgres)
+- [ ] Agent integration (MCP Gateway ?) read-only for every service (Backend, Postgres)
 - [ ] Admin Dashboard ? -> Requires SSR to "display X only if user Y can"
