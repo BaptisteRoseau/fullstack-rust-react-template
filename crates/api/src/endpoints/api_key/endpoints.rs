@@ -77,7 +77,7 @@ pub(crate) async fn get_api_key(
         .await
         .map_err(|_| ApiError::NotFound(id.to_string()))?;
 
-    if db_key.owner() != user.id {
+    if db_key.owner != user.id {
         return Err(ApiError::NotFound(id.to_string()));
     }
 
@@ -114,7 +114,7 @@ pub(crate) async fn delete_api_key(
             .map_err(|_| ApiError::NotFound(id.to_string()))?
     };
 
-    if db_key.owner() != user.id {
+    if db_key.owner != user.id {
         return Err(ApiError::NotFound(id.to_string()));
     }
 

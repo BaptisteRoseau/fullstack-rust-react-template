@@ -2,8 +2,8 @@
 
 - [ ] SQL-based backend for Database
     - [ ] Use as a Drop-in replacement for Postgres/SQlite/MyQSL.. -> Then use SQLite as the database exposed mock
-- [ ] Move tests to "_tests" directories, respecting the same tree but with "test_*" prefixes (do it once then ask Claude to dot it for the rest)
-- [ ] Use features to enable/disable backends for trait crates
+    - [ ] Use a Database mock to replace the @crates/app_core/src/api_key.rs tests
+
 - [ ] Add a mention or a tag in the Rust crates to telle whether they are for testing/traits/utils
 - [ ] Make an MCP crate with Rust macros (similar to the API layer)
 
