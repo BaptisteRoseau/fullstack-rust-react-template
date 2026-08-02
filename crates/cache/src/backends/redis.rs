@@ -5,6 +5,7 @@ use config::Config;
 use deadpool_redis::{Pool, Runtime, redis::cmd};
 use serde_json::Value;
 use tokio::task::JoinSet;
+use tracing::warn;
 
 use crate::{Cache, error::CacheError};
 
@@ -21,7 +22,10 @@ impl Redis {
         prefix: Option<String>,
     ) -> Result<Self, CacheError> {
         let cfg = deadpool_redis::Config::from_url(url);
-        let pool = cfg.create_pool(Some(Runtime::Tokio1))?;
+        let pool = cfg.create_pool(Some(Runtime::Tokio1)).map_err(|e| {
+            warn!("Could not connect to Redis yet: {e}");
+            e
+        })?;
         Ok(Self {
             pool,
             timeout_s,

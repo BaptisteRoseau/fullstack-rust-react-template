@@ -30,12 +30,10 @@ impl Postgres {
             config.postgres.database,
         );
         let pool = PgPoolOptions::new().max_connections(10).connect(&url).await;
-
         match pool {
             Ok(pool) => Ok(Self { pool }),
             Err(e) => {
                 warn!("Could not connect to database yet: {e}");
-                // Create pool without connecting (lazy)
                 let pool = PgPoolOptions::new()
                     .max_connections(10)
                     .connect_lazy(&url)?;
