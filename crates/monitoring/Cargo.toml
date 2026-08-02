@@ -5,4 +5,3 @@ edition = "2024"
 
 [dependencies]
 metrics = { version = "0" }
-metrics-exporter-prometheus = { version = "0", features = ["tokio"] }
