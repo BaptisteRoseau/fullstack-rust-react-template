@@ -43,6 +43,12 @@ updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
 
 Those fields are updated by default by Postgres so don't bother setting them manually.
 
+### Database trait
+
+The `Database` trait is split into per-entity traits (e.g. `DatabaseUser`, `DatabaseApiKey`) under [`src/database/`](./src/database/), one file each, since a single trait covering every entity would be too large to stay readable.
+
+`Database` itself is just `DatabaseApiKey + DatabaseUser + ...` with a blanket impl, so any backend implementing all the entity traits gets `Database` for free — no manual impl needed.
+
 ### Generate Models
 
 The [`generated_models.rs`](./src/generated_models.rs) file is generated using `sql-gen`. It contains structures used to convert data from Postgres to Rust and vice-versa.
