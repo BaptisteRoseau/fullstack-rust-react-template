@@ -3,7 +3,7 @@
 
 services:
   postgres:
-    image: app_postgres:latest
+    image: localhost/app_postgres:latest
     build:
       context: ../..
       dockerfile: infrastructure/docker/app_postgres/Dockerfile

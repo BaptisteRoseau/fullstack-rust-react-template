@@ -2,11 +2,11 @@ use super::observability::{MakeRequestUuidV7, make_request_span};
 use crate::middlewares::rate_limiter::rate_limiter_layer;
 use axum::Router;
 use axum::body::Body;
+use axum::http::HeaderName;
 use axum::http::Request;
 use axum::http::StatusCode;
-use axum::http::header::AUTHORIZATION;
+use axum::http::header::{AUTHORIZATION, COOKIE};
 use config::Config;
-use std::iter::once;
 use std::time::Duration;
 use tower::ServiceBuilder;
 use tower_http::{
@@ -24,6 +24,8 @@ use tower_http::{
 };
 use tracing::{Level, Span};
 
+const SENSITIVE_HEADERS: [HeaderName; 2] = [AUTHORIZATION, COOKIE];
+
 /// Wraps `routes` in the production middleware stack.
 ///
 /// Extracted from [`super::router::public_routes`] so the exact layer ordering can be
@@ -38,7 +40,8 @@ where
     // travels back up bottom to top. Order is load-bearing below.
     let middleware = ServiceBuilder::new()
         // Outermost, so no later layer can log the request's Authorization header
-        .layer(SetSensitiveRequestHeadersLayer::new(once(AUTHORIZATION)))
+        // See  https://docs.rs/tower-http/0.6.8/tower_http/sensitive_headers/index.html
+        .layer(SetSensitiveRequestHeadersLayer::new(SENSITIVE_HEADERS))
         // Reuse an inbound x-request-id or mint a fresh UUID v7. Must wrap the trace
         // layer so the span can read the id from the request headers.
         .layer(SetRequestIdLayer::x_request_id(MakeRequestUuidV7))
@@ -47,7 +50,7 @@ where
         // Scope every event of the request under a span carrying the request_id and log request/response.
         .layer(logging_layer())
         // Inside the trace layer, so responses are scrubbed before it sees them
-        .layer(SetSensitiveResponseHeadersLayer::new(once(AUTHORIZATION)))
+        .layer(SetSensitiveResponseHeadersLayer::new(SENSITIVE_HEADERS))
         // Reflect the frontend origin and allow credentials so the browser sends and
         // accepts the httpOnly auth cookies (a wildcard origin is rejected with creds).
         // Wraps the rate limiter so even a 429 carries the CORS headers the browser
