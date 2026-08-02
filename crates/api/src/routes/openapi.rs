@@ -4,23 +4,17 @@ use crate::endpoints::{
     ping::endpoints::tag as ping_tag, storage::endpoints::tag as storage_tag,
     user::endpoints::tag as user_tag,
 };
+use config::Config;
 use utoipa::openapi::{
     InfoBuilder, OpenApi, Server,
-    security::{ApiKey, ApiKeyValue, SecurityRequirement, SecurityScheme},
+    security::{ApiKey, ApiKeyValue, OpenIdConnect, SecurityRequirement, SecurityScheme},
 };
 
-/// Name of the httpOnly cookie holding the JWT access token (set by the auth BFF).
-///
-/// Duplicated from `extractors::user::ACCESS_COOKIE`, which is private to its module;
-/// kept in sync manually, matching the existing duplication of the same constant in
-/// `endpoints::auth::endpoints`.
-const ACCESS_TOKEN_COOKIE: &str = "access_token";
-
 /// Security scheme name for the JWT carried in the [`ACCESS_TOKEN_COOKIE`] cookie.
-const JWT_COOKIE_SECURITY: &str = "jwtCookie";
+const JWT_COOKIE_SECURITY: &str = "OIDC";
 
 /// Security scheme name for the API key carried in the `Authorization` header.
-const API_KEY_SECURITY: &str = "apiKey";
+const API_KEY_SECURITY: &str = "API Key";
 
 /// Metadata advertised in the generated OpenAPI document.
 pub(super) fn api_info() -> utoipa::openapi::Info {
@@ -35,13 +29,13 @@ pub(super) fn api_info() -> utoipa::openapi::Info {
 ///
 /// Requires no running service, so it can be serialized offline (e.g. to
 /// generate the frontend API types).
-pub fn openapi() -> OpenApi {
+pub fn openapi(config: &Config) -> OpenApi {
     let server = Server::new("/api");
     let (_, mut openapi) = api_router().split_for_parts();
     openapi.info = api_info();
     openapi.tags = Some(api_tags());
     openapi.servers = Some(vec![server]);
-    add_security(&mut openapi);
+    add_security(&mut openapi, config);
     openapi
 }
 
@@ -52,14 +46,13 @@ pub fn openapi() -> OpenApi {
 ///   the auth BFF (`Cookie: access_token=<jwt>`).
 /// - An API key sent bare in the `Authorization` header (`Authorization: <api_key>`).
 ///   The extractor also tolerates an optional `Bearer ` prefix on this header.
-fn add_security(openapi: &mut OpenApi) {
+fn add_security(openapi: &mut OpenApi, config: &Config) {
     let components = openapi.components.get_or_insert_with(Default::default);
     components.add_security_scheme(
         JWT_COOKIE_SECURITY,
-        SecurityScheme::ApiKey(ApiKey::Cookie(ApiKeyValue::with_description(
-            ACCESS_TOKEN_COOKIE,
-            "JWT access token issued by the OIDC provider, set as an httpOnly cookie by the auth BFF.",
-        ))),
+        SecurityScheme::OpenIdConnect(OpenIdConnect::new(
+            config.authenticator.issuer_url.clone(),
+        )),
     );
     components.add_security_scheme(
         API_KEY_SECURITY,

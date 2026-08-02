@@ -62,7 +62,7 @@ pub fn public_routes(config: &Config, state: AppState) -> Router {
     // frontend's `VITE_APP_API_URL`. Swagger keeps its own absolute path at the root.
     let routes = Router::new()
         .nest("/api", api_routes)
-        .merge(swagger(config, openapi()));
+        .merge(swagger(config, openapi(config)));
 
     with_middlewares(routes, config).with_state(state)
 }
