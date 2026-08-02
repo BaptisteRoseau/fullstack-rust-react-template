@@ -8,7 +8,7 @@ use uuid::Uuid;
 
 use crate::crud::{CrudError, CrudExecutor, CrudValue};
 #[warn(dead_code)]
-use crate::database::Database;
+use crate::database::{DatabaseApiKey, DatabaseUser};
 use crate::error::DatabaseError;
 use crate::models::{ApiKey, User, UserPatch};
 use config::Config;
@@ -164,7 +164,7 @@ impl CrudExecutor for Postgres {
 }
 
 #[async_trait]
-impl Database for Postgres {
+impl DatabaseUser for Postgres {
     async fn create_user(
         &mut self,
         patch: UserPatch,
@@ -237,7 +237,10 @@ impl Database for Postgres {
 
         Ok(user)
     }
+}
 
+#[async_trait]
+impl DatabaseApiKey for Postgres {
     async fn create_api_key(
         &mut self,
         owner: Uuid,

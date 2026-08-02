@@ -8,7 +8,7 @@ use std::collections::HashMap;
 use async_trait::async_trait;
 use uuid::Uuid;
 
-use crate::database::Database;
+use crate::database::{DatabaseApiKey, DatabaseUser};
 use crate::error::DatabaseError;
 use crate::models::{ApiKey, User, UserPatch};
 
@@ -27,7 +27,7 @@ pub struct MockDatabase {
 }
 
 #[async_trait]
-impl Database for MockDatabase {
+impl DatabaseUser for MockDatabase {
     async fn create_user(
         &mut self,
         _patch: UserPatch,
@@ -87,7 +87,10 @@ impl Database for MockDatabase {
 
         Ok(user.clone())
     }
+}
 
+#[async_trait]
+impl DatabaseApiKey for MockDatabase {
     async fn create_api_key(
         &mut self,
         owner: Uuid,

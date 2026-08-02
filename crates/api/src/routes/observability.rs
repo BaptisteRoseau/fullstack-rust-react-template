@@ -43,6 +43,7 @@ pub(crate) fn make_request_span<B>(request: &Request<B>) -> Span {
         request_id = %request_id,
         method = %request.method(),
         uri = %request.uri().path(),
+        api_version = super::openapi::api_version(),
         // Populated later by the `UserToken` extractor, once the request has been
         // authenticated; stays absent for anonymous requests.
         user_id = tracing::field::Empty,

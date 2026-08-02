@@ -5,6 +5,7 @@ use crate::endpoints::{
     user::endpoints::tag as user_tag,
 };
 use config::Config;
+use std::sync::OnceLock;
 use utoipa::openapi::{
     InfoBuilder, OpenApi, Server,
     security::{ApiKey, ApiKeyValue, OpenIdConnect, SecurityRequirement, SecurityScheme},
@@ -16,13 +17,59 @@ const JWT_COOKIE_SECURITY: &str = "OIDC";
 /// Security scheme name for the API key carried in the `Authorization` header.
 const API_KEY_SECURITY: &str = "API Key";
 
+/// The main name of the API displayed in the swagger
+const API_NAME: &str = "Backend";
+
 /// Metadata advertised in the generated OpenAPI document.
 pub(super) fn api_info() -> utoipa::openapi::Info {
     InfoBuilder::new()
-        .title(env!("CARGO_PKG_NAME"))
+        .title(API_NAME)
         .description(option_env!("CARGO_PKG_DESCRIPTION"))
-        .version(env!("CARGO_PKG_VERSION"))
+        .version(api_version())
         .build()
+}
+
+static CACHED_VERSION: OnceLock<String> = OnceLock::new();
+
+/// Returns the API version, computing it once and caching the result.
+///
+/// Resolution order:
+///   1. `API_VERSION` env var set at compile time
+///   2. current git tag (`git describe --tags --exact-match`)
+///   3. git short hash (`git rev-parse --short HEAD`)
+///   4. `CARGO_PKG_VERSION`
+pub(super) fn api_version() -> &'static str {
+    CACHED_VERSION.get_or_init(compute_version)
+}
+
+fn compute_version() -> String {
+    if let Some(version) = option_env!("API_VERSION") {
+        return version.into();
+    }
+
+    if let Ok(output) = std::process::Command::new("git")
+        .args(["describe", "--tags", "--exact-match"])
+        .output()
+        && output.status.success()
+    {
+        let tag = String::from_utf8_lossy(&output.stdout).trim().to_owned();
+        if !tag.is_empty() {
+            return tag;
+        }
+    }
+
+    if let Ok(output) = std::process::Command::new("git")
+        .args(["rev-parse", "--short", "HEAD"])
+        .output()
+        && output.status.success()
+    {
+        let hash = String::from_utf8_lossy(&output.stdout).trim().to_owned();
+        if !hash.is_empty() {
+            return hash;
+        }
+    }
+
+    env!("CARGO_PKG_VERSION").into()
 }
 
 /// Builds the OpenAPI document describing the public API.
