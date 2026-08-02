@@ -50,8 +50,9 @@ fn add_security(openapi: &mut OpenApi, config: &Config) {
     let components = openapi.components.get_or_insert_with(Default::default);
     components.add_security_scheme(
         JWT_COOKIE_SECURITY,
-        SecurityScheme::OpenIdConnect(OpenIdConnect::new(
+        SecurityScheme::OpenIdConnect(OpenIdConnect::with_description(
             config.authenticator.issuer_url.clone(),
+            "OIDC authentication provider.".to_string(),
         )),
     );
     components.add_security_scheme(
