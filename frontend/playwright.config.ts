@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
 const PORT = 3000
+const MOCK_API_PORT = 8080
 
 /**
  * Read environment variables from file.
@@ -47,10 +48,18 @@ export default defineConfig({
     ],
 
     /* Run your local dev server before starting the tests */
-    webServer: {
-        command: `bun run dev --port ${PORT}`,
-        timeout: 10 * 1000,
-        port: PORT,
-        reuseExistingServer: !process.env.CI,
-    },
+    webServer: [
+        {
+            command: `bun run dev --port ${PORT}`,
+            timeout: 10 * 1000,
+            port: PORT,
+            reuseExistingServer: !process.env.CI,
+        },
+        {
+            command: 'bun run run-mock-server',
+            timeout: 10 * 1000,
+            port: MOCK_API_PORT,
+            reuseExistingServer: !process.env.CI,
+        },
+    ],
 })

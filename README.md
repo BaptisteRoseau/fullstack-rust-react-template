@@ -26,12 +26,12 @@ Remaining work is tracked in [TODO.md](./TODO.md).
 
 ## Requirements
 
-| Requirement | Version | Used for |
-| --- | --- | --- |
-| Rust toolchain (`cargo`, `rustfmt`, `clippy`) | 1.97+, edition 2024 | Backend and tools |
-| Docker + Compose | 24+ | Infrastructure, integration tests (testcontainers) |
-| Bun | 1.22+ | Frontend package manager, dev server and tests |
-| Node.js | 20+ | Tooling that Bun shells out to |
+| Requirement                                   | Version             | Used for                                           |
+| --------------------------------------------- | ------------------- | -------------------------------------------------- |
+| Rust toolchain (`cargo`, `rustfmt`, `clippy`) | 1.97+, edition 2024 | Backend and tools                                  |
+| Docker + Compose                              | 24+                 | Infrastructure, integration tests (testcontainers) |
+| Bun                                           | 1.22+               | Frontend package manager, dev server and tests     |
+| Node.js                                       | 20+                 | Tooling that Bun shells out to                     |
 
 Optional, used by individual scripts: `cargo-llvm-cov` (coverage), `cargo-deny` (licenses and
 CVEs), `sqlx-cli` (migrations), `markdownlint`, `cspell`.
@@ -67,22 +67,22 @@ Useful local endpoints once the stack is up. Container ports come from `.env.dev
 remapped there — note that `GRAFANA_PORT` defaults to `3000` and therefore clashes with the Vite
 dev server if you run both:
 
-| Service | URL | Variable |
-| --- | --- | --- |
-| Frontend (Vite dev server) | <http://127.0.0.1:3000> | — |
+| Service                          | URL                     | Variable          |
+| -------------------------------- | ----------------------- | ----------------- |
+| Frontend (Vite dev server)       | <http://127.0.0.1:3000> | —                 |
 | Backend (`cargo run -p backend`) | <http://127.0.0.1:8080> | `--port` / `PORT` |
-| Frontend (container) | <http://127.0.0.1:8080> | `FRONTEND_PORT` |
-| Backend (container) | <http://127.0.0.1:9876> | `BACKEND_PORT` |
-| Swagger UI | <http://127.0.0.1:7070> | `SWAGGER_PORT` |
-| Homepage (index of all services) | <http://127.0.0.1:3002> | `HOMEPAGE_PORT` |
-| Grafana | <http://127.0.0.1:3000> | `GRAFANA_PORT` |
-| Prometheus | <http://127.0.0.1:9090> | `PROMETHEUS_PORT` |
-| pgAdmin | <http://127.0.0.1:3001> | `PGADMIN_PORT` |
-| Keycloak | <http://127.0.0.1:8090> | — |
-| MailHog (web UI) | <http://127.0.0.1:8030> | — |
-| SeaweedFS (S3 gateway) | <http://127.0.0.1:9000> | `S3_PORT` |
-| PostgreSQL | `127.0.0.1:5432` | `POSTGRES_PORT` |
-| Redis | `127.0.0.1:6379` | `REDIS_PORT` |
+| Frontend (container)             | <http://127.0.0.1:8080> | `FRONTEND_PORT`   |
+| Backend (container)              | <http://127.0.0.1:9876> | `BACKEND_PORT`    |
+| Swagger UI                       | <http://127.0.0.1:7070> | `SWAGGER_PORT`    |
+| Homepage (index of all services) | <http://127.0.0.1:3002> | `HOMEPAGE_PORT`   |
+| Grafana                          | <http://127.0.0.1:3000> | `GRAFANA_PORT`    |
+| Prometheus                       | <http://127.0.0.1:9090> | `PROMETHEUS_PORT` |
+| pgAdmin                          | <http://127.0.0.1:3001> | `PGADMIN_PORT`    |
+| Keycloak                         | <http://127.0.0.1:8090> | —                 |
+| MailHog (web UI)                 | <http://127.0.0.1:8030> | —                 |
+| SeaweedFS (S3 gateway)           | <http://127.0.0.1:9000> | `S3_PORT`         |
+| PostgreSQL                       | `127.0.0.1:5432`        | `POSTGRES_PORT`   |
+| Redis                            | `127.0.0.1:6379`        | `REDIS_PORT`      |
 
 ## Overview
 
@@ -129,53 +129,59 @@ working there, along with those of its parents.
 
 #### Backend
 
-| Tool | Role |
-| --- | --- |
-| Rust (edition 2024) | Backend language for everything server-side and the tools |
-| Axum + Tower | HTTP server, routing, middlewares, rate limiting |
-| Tokio | Async runtime |
-| SQLx | Compile-time checked SQL and database migrations |
-| Clap | CLI and environment-variable configuration |
-| utoipa + Swagger UI | OpenAPI document generation and interactive docs |
-| thiserror / anyhow | Typed errors per crate, application-level error context |
-| tracing | Structured, span-aware logging (compact or JSON) |
-| testcontainers | Integration tests against real Postgres and Keycloak instances |
+| Tool                | Role                                                           |
+| ------------------- | -------------------------------------------------------------- |
+| Rust (edition 2024) | Backend language for everything server-side and the tools      |
+| Axum + Tower        | HTTP server, routing, middlewares, rate limiting               |
+| Tokio               | Async runtime                                                  |
+| SQLx                | Compile-time checked SQL and database migrations               |
+| Clap                | CLI and environment-variable configuration                     |
+| utoipa + Swagger UI | OpenAPI document generation and interactive docs               |
+| thiserror / anyhow  | Typed errors per crate, application-level error context        |
+| tracing             | Structured, span-aware logging (compact or JSON)               |
+| testcontainers      | Integration tests against real Postgres and Keycloak instances |
 
 #### Frontend
 
-| Tool | Role |
-| --- | --- |
-| TypeScript | Frontend language, strict typing throughout |
-| React 19 | UI library |
-| React Router | Routing, lazy route registration and data loaders |
-| Vite | Dev server and production bundler |
-| Bun | Package manager and test/script runner |
-| TanStack Query | Server-state fetching, caching and mutations |
-| Zustand | Global client-side UI state (modals, notifications, theme) |
-| React Hook Form + Zod | Forms and schema validation, shared with API response parsing |
-| Tailwind CSS + Radix UI | Styling and accessible headless primitives (ShadCN pattern) |
-| Lingui | i18n message extraction and en/fr catalogs |
-| Vitest + Testing Library | Unit and integration tests |
-| MSW | API mocking for dev, tests and e2e |
-| Playwright | End-to-end tests |
-| Storybook | Component development and documentation |
-| ESLint + Prettier | Linting and formatting |
+| Tool                     | Role                                                          |
+| ------------------------ | ------------------------------------------------------------- |
+| TypeScript               | Frontend language, strict typing throughout                   |
+| React 19                 | UI library                                                    |
+| React Router             | Routing, lazy route registration and data loaders             |
+| Vite                     | Dev server and production bundler                             |
+| Bun                      | Package manager and test/script runner                        |
+| TanStack Query           | Server-state fetching, caching and mutations                  |
+| Zustand                  | Global client-side UI state (modals, notifications, theme)    |
+| React Hook Form + Zod    | Forms and schema validation, shared with API response parsing |
+| Tailwind CSS + Radix UI  | Styling and accessible headless primitives (ShadCN pattern)   |
+| Lingui                   | i18n message extraction and en/fr catalogs                    |
+| Vitest + Testing Library | Unit and integration tests                                    |
+| MSW                      | API mocking for dev, tests and e2e                            |
+| Playwright               | End-to-end tests                                              |
+| Storybook                | Component development and documentation                       |
+| ESLint + Prettier        | Linting and formatting                                        |
 
 #### Infrastructure
 
-| Tool | Role |
-| --- | --- |
-| Docker + Compose | Local environment and production images |
-| PostgreSQL | Primary datastore, with read-write and read-only roles |
-| Redis | Cache and short-lived shared state |
-| SeaweedFS | S3-compatible object storage for blobs and files |
-| Keycloak | Identity provider (OIDC, Authorization Code + PKCE) |
-| Prometheus + postgres_exporter | Metrics collection for the backend and the database |
-| Grafana | Dashboards over the Prometheus metrics |
-| pgAdmin | Database inspection during development |
-| MailHog | Captures outgoing mail in development |
-| Homepage | Index page linking to every local service |
+| Tool                           | Role                                                   |
+| ------------------------------ | ------------------------------------------------------ |
+| Docker + Compose               | Local environment and production images                |
+| PostgreSQL                     | Primary datastore, with read-write and read-only roles |
+| Redis                          | Cache and short-lived shared state                     |
+| SeaweedFS                      | S3-compatible object storage for blobs and files       |
+| Keycloak                       | Identity provider (OIDC, Authorization Code + PKCE)    |
+| Prometheus + postgres_exporter | Metrics collection for the backend and the database    |
+| Grafana                        | Dashboards over the Prometheus metrics                 |
+| pgAdmin                        | Database inspection during development                 |
+| MailHog                        | Captures outgoing mail in development                  |
+| Homepage                       | Index page linking to every local service              |
 
 ## License
 
-See [LICENSE](./LICENSE).
+This project is source-available under a [custom commercial license](../LICENSE).
+
+- **Free** for any company whose all-time revenue has not yet reached $20,000 USD (adjusted for inflation from 2026).
+- **Early license** available for a one-time fee of $5,000 USD before reaching that threshold.
+- **Commercial license** required once the threshold is crossed: one-time fee of max($5,000, 25% of all-time revenue) at the time of payment.
+
+Contact **broseau@gmail.com** to purchase a license.

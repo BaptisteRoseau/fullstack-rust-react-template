@@ -20,6 +20,7 @@
         "dbname",
         "deadpool",
         "distroless",
+        "Dockerfiles",
         "dotgraphs",
         "dpage",
         "EOSQL",
@@ -33,6 +34,7 @@
         "Iconify",
         "initdb",
         "jsonwebtoken",
+        "Lingui",
         "miniserve",
         "minreq",
         "myapptemplate",
@@ -48,6 +50,7 @@
         "pemfile",
         "pgadmin",
         "PGDATA",
+        "PKCE",
         "plpgsql",
         "prometheuscommunity",
         "psql",
@@ -80,4 +83,3 @@
         "zopfli"
     ]
 }
-
