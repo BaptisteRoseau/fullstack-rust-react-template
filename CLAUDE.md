@@ -282,7 +282,7 @@ For example, when editing or reading `crates/authenticator/tests/backends/keyclo
 If you need Rust crate documentation, instead of using `crates.io` prefer using:
 
 ```bash
-curl file://<absolute path to current project>/target/doc/<the crate you're looking for>/index.html
+curl "file://${CARGO_TARGET_DIR:-$PWD/target}/doc/<the crate you're looking for>/index.html"
 ```
 
 If hitting a 404, run `cargo doc` to build the documentation pages.
