@@ -1,0 +1,8 @@
+@use 'variables' as *;
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+    margin-top: $space-6;
+}

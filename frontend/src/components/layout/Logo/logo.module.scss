@@ -1,0 +1,26 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.logo {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2;
+    border-radius: $radius-sm;
+
+    @include focus-ring;
+}
+
+.mark {
+    flex-shrink: 0;
+    color: var(--color-primary);
+}
+
+.name {
+    display: none;
+    font-size: $font-size-lg;
+    font-weight: 600;
+
+    @include media-up($breakpoint-sm) {
+        display: inline;
+    }
+}

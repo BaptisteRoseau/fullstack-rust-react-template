@@ -1,0 +1,79 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: $space-2;
+    border: 1px solid transparent;
+    border-radius: $radius-md;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color $duration-fast ease;
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    @include focus-ring;
+}
+
+.primary {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+
+    &:hover:not(:disabled) {
+        background-color: var(--color-primary-hover);
+    }
+}
+
+.secondary {
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+    color: var(--color-text);
+
+    &:hover:not(:disabled) {
+        background-color: var(--color-surface-raised);
+    }
+}
+
+.ghost {
+    background-color: transparent;
+    color: var(--color-text);
+
+    &:hover:not(:disabled) {
+        background-color: var(--color-surface-raised);
+    }
+}
+
+.danger {
+    background-color: var(--color-danger);
+    color: var(--color-on-danger);
+
+    &:hover:not(:disabled) {
+        background-color: var(--color-danger-hover);
+    }
+}
+
+.sm {
+    padding: $space-1 $space-2;
+    font-size: $font-size-sm;
+}
+
+.md {
+    padding: $space-2 $space-3;
+    font-size: $font-size-base;
+}
+
+.lg {
+    padding: $space-3 $space-6;
+    font-size: $font-size-lg;
+}
+
+.icon {
+    padding: $space-2;
+    aspect-ratio: 1;
+}

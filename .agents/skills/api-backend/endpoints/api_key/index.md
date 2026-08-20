@@ -1,0 +1,3 @@
+- [Create a new API key. Returns the raw key once — it cannot be retrieved again.](./post-api-key.md)
+- [Get API key metadata by ID. Returns 404 if not owned by the caller.](./get-api-key-id.md)
+- [Delete an API key. Returns 404 if not owned by the caller.](./delete-api-key-id.md)

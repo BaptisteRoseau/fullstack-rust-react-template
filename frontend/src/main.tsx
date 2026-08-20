@@ -1,18 +1,24 @@
-import * as React from 'react'
+import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
-import './index.css'
-import { App } from './app'
-import { defaultLocale, loadLocale } from './i18n'
-import { enableMocking } from './testing/mocks'
+import { App } from './App'
+import './css/main.scss'
+import { loadLocale } from './i18n'
+import { storedLocale } from './stores/locale'
+import { useTheme } from './stores/theme'
+import { enableMocking } from './test-utils/enableMocking'
 
 const root = document.getElementById('root')
-if (!root) throw new Error('No root element found')
+if (!root) {
+    throw new Error('No root element found')
+}
 
-Promise.all([enableMocking(), loadLocale(defaultLocale)]).then(() => {
+useTheme.getState().setTheme(useTheme.getState().theme)
+
+void Promise.all([enableMocking(), loadLocale(storedLocale())]).then(() => {
     createRoot(root).render(
-        <React.StrictMode>
+        <StrictMode>
             <App />
-        </React.StrictMode>,
+        </StrictMode>,
     )
 })

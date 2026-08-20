@@ -1,0 +1,33 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.root {
+    width: 2.5rem;
+    height: 1.375rem;
+    padding: 0;
+    border: none;
+    border-radius: $radius-full;
+    background-color: var(--color-border);
+    cursor: pointer;
+    transition: background-color $duration-fast ease;
+
+    &[data-state='checked'] {
+        background-color: var(--color-primary);
+    }
+
+    @include focus-ring;
+}
+
+.thumb {
+    display: block;
+    width: 1.125rem;
+    height: 1.125rem;
+    border-radius: $radius-full;
+    background-color: #ffffff;
+    transform: translateX(2px);
+    transition: transform $duration-fast ease;
+
+    &[data-state='checked'] {
+        transform: translateX(1.25rem);
+    }
+}

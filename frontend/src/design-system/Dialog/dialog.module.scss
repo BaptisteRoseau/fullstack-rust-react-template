@@ -1,0 +1,37 @@
+@use 'variables' as *;
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background-color: var(--color-overlay);
+}
+
+.content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: min(32rem, calc(100vw - #{$space-8}));
+    padding: $space-6;
+    transform: translate(-50%, -50%);
+    border-radius: $radius-lg;
+    background-color: var(--color-surface);
+    box-shadow: 0 12px 32px rgb(0 0 0 / 25%);
+}
+
+.title {
+    font-size: $font-size-lg;
+    font-weight: 600;
+}
+
+.description {
+    margin-top: $space-2;
+    color: var(--color-text-muted);
+    font-size: $font-size-sm;
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: $space-2;
+    margin-top: $space-6;
+}

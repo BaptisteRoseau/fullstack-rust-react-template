@@ -1,6 +1,8 @@
 import { i18n } from '@lingui/core'
 
-export type Locale = 'en' | 'fr'
+export const locales = ['en', 'fr'] as const
+
+export type Locale = (typeof locales)[number]
 
 export const defaultLocale: Locale = 'en'
 

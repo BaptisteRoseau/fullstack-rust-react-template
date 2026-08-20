@@ -1,15 +1,14 @@
 /// <reference types="vite/client" />
 
+import path from 'node:path'
+
 import { transformAsync } from '@babel/core'
 import { lingui } from '@lingui/vite-plugin'
-import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import type { Plugin } from 'vite'
+import svgr from 'vite-plugin-svgr'
 import { defineConfig } from 'vitest/config'
-// import { defineConfig } from 'vite'
 
-// @vitejs/plugin-react v6 transforms JSX with oxc and ignores the `babel` option,
-// so the Lingui macros must be expanded by a dedicated pre-transform pass.
 function linguiMacro(): Plugin {
     return {
         name: 'lingui-macro',
@@ -46,9 +45,16 @@ function linguiMacro(): Plugin {
 
 export default defineConfig({
     base: './',
-    plugins: [linguiMacro(), react(), lingui(), tailwindcss()],
+    plugins: [linguiMacro(), react(), lingui(), svgr()],
     resolve: {
-        tsconfigPaths: true,
+        alias: { '@': path.resolve(__dirname, 'src') },
+    },
+    css: {
+        preprocessorOptions: {
+            scss: {
+                loadPaths: [path.resolve(__dirname, 'src/css')],
+            },
+        },
     },
     server: {
         port: 3000,
@@ -59,8 +65,9 @@ export default defineConfig({
     test: {
         globals: true,
         environment: 'jsdom',
-        setupFiles: './src/testing/setup-tests.ts',
+        setupFiles: './src/test-utils/setup-tests.ts',
         exclude: ['**/node_modules/**', '**/e2e/**'],
+        css: { modules: { classNameStrategy: 'non-scoped' } },
         coverage: {
             include: ['src/**'],
         },

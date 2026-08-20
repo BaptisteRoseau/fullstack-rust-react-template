@@ -1,0 +1,7 @@
+@use 'variables' as *;
+
+.select {
+    width: auto;
+    padding: $space-1 $space-2;
+    font-size: $font-size-sm;
+}

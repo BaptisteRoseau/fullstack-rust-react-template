@@ -1,0 +1,15 @@
+@use 'variables' as *;
+
+.avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: $radius-full;
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    font-size: $font-size-xs;
+    font-weight: 600;
+    user-select: none;
+}

@@ -1,0 +1,30 @@
+@use 'variables' as *;
+
+@mixin focus-ring {
+    &:focus-visible {
+        outline: 2px solid var(--color-primary);
+        outline-offset: 2px;
+    }
+}
+
+@mixin visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+@mixin media-up($breakpoint) {
+    @media (min-width: $breakpoint) {
+        @content;
+    }
+}
+
+@mixin content-container {
+    width: 100%;
+    max-width: $content-width;
+    margin: 0 auto;
+    padding: 0 $space-4;
+}

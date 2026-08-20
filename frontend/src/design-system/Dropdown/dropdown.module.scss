@@ -1,0 +1,37 @@
+@use 'variables' as *;
+
+.content {
+    min-width: 12rem;
+    padding: $space-1;
+    border: 1px solid var(--color-border);
+    border-radius: $radius-md;
+    background-color: var(--color-surface);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    padding: $space-2 $space-3;
+    border-radius: $radius-sm;
+    font-size: $font-size-sm;
+    cursor: pointer;
+    outline: none;
+
+    &[data-highlighted] {
+        background-color: var(--color-surface-raised);
+    }
+}
+
+.label {
+    padding: $space-2 $space-3;
+    color: var(--color-text-muted);
+    font-size: $font-size-xs;
+}
+
+.separator {
+    height: 1px;
+    margin: $space-1 0;
+    background-color: var(--color-border);
+}

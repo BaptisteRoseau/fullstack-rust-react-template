@@ -1,13 +1,19 @@
-import { t } from '@lingui/macro'
+import { useLingui } from '@lingui/react/macro'
 
-import { ContentLayout } from '@/components/layouts'
+import { Head } from '@/components/head/Head'
+import { ContentLayout } from '@/layouts/ContentLayout'
 
-const {{properCase name}}Route = () => {
+import styles from './{{kebabCase name}}.module.scss'
+
+export function {{pascalCase name}}() {
+    const { t } = useLingui()
+
     return (
-        <ContentLayout title={t`{{properCase name}}`}>
-            <div>{{properCase name}}</div>
-        </ContentLayout>
+        <>
+            <Head title={t`{{title}}`} />
+            <ContentLayout title={t`{{title}}`}>
+                <div className={styles.content} />
+            </ContentLayout>
+        </>
     )
 }
-
-export default {{properCase name}}Route

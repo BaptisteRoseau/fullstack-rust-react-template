@@ -1,0 +1,16 @@
+@use 'variables' as *;
+
+.layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: $space-6;
+    min-height: 100%;
+    padding: $space-6;
+}
+
+.card {
+    width: min(26rem, 100%);
+    text-align: center;
+}

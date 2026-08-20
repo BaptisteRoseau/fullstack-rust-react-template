@@ -1,15 +1,15 @@
-import { renderHook, act } from '@testing-library/react'
+import { act, renderHook } from '@testing-library/react'
 
-import { use{{properCase name}} } from '../use-{{kebabCase name}}'
+import { use{{pascalCase name}} } from './use{{pascalCase name}}'
 
-test('should toggle the state', () => {
-    const { result } = renderHook(() => use{{properCase name}}())
+it('resets to its initial value', () => {
+    const { result } = renderHook(() => use{{pascalCase name}}('initial'))
 
-    expect(result.current.state).toBe(false)
+    act(() => result.current.setValue('changed'))
+    act(() => result.current.reset())
 
-    act(() => {
-        result.current.toggle()
-    })
-
-    expect(result.current.state).toBe(true)
+    expect(
+        result.current.value,
+        `expected "initial", got "${result.current.value}"`,
+    ).toBe('initial')
 })

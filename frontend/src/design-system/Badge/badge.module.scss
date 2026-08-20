@@ -1,0 +1,31 @@
+@use 'variables' as *;
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 $space-2;
+    border: 1px solid var(--color-border);
+    border-radius: $radius-full;
+    font-size: $font-size-xs;
+    font-weight: 500;
+    line-height: 1.5rem;
+}
+
+.neutral {
+    color: var(--color-text-muted);
+}
+
+.success {
+    color: var(--color-success);
+    border-color: currentcolor;
+}
+
+.warning {
+    color: var(--color-warning);
+    border-color: currentcolor;
+}
+
+.danger {
+    color: var(--color-danger);
+    border-color: currentcolor;
+}

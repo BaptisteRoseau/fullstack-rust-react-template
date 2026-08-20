@@ -1,0 +1,8 @@
+@use 'variables' as *;
+
+.group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-4;
+    padding: $space-1 0;
+}

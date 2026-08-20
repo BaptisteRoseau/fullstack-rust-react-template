@@ -1,59 +1,69 @@
 # Authentication — Frontend
 
 The React app never handles tokens. It starts the login flow with a full-page redirect to the
-backend, reads the current user from `/auth/me`, and relies on the browser to attach the
+backend, reads the current user from `/api/auth/me`, and relies on the browser to attach the
 httpOnly cookies automatically.
 
 ## Auth module
 
-[`frontend/src/lib/auth.tsx`](../../frontend/src/lib/auth.tsx)
+Endpoint declarations: [`frontend/src/api/auth.ts`](../../frontend/src/api/auth.ts)
 
-- `useUser()` — React Query hook backed by `GET /auth/me`; `user.data` is the logged-in user
-  or `undefined`.
-- `useLogout()` — `POST /auth/logout`.
-- `loginUrl(redirectTo?)` / `registerUrl(redirectTo?)` — build the BFF entry-point URL
-  (`${API_URL}/auth/login`, with `?screen=register` for sign-up and `?redirect=` to return to
-  a route). Navigating the browser there starts the OAuth flow.
-- `ProtectedRoute` — redirects to the login route when there is no user.
+- `ME_ENDPOINT`, `LOGOUT_ENDPOINT`, `REFRESH_ENDPOINT` — the paths.
+- `authRedirectUrl(screen, redirectTo?)` — builds the BFF entry point
+  (`${API_URL}/api/auth/login` or `/api/auth/register`, with `?redirect=` to return to a route).
+  Navigating the browser there starts the OAuth flow.
+- `CurrentUser`, `UpdateProfileBody`, `fullName(user)`.
 
-Because login and registration are full-page redirects (the credential UI lives on Keycloak),
-the login/register **forms are plain links** rather than input forms:
+Service hooks: [`frontend/src/api/service/auth.ts`](../../frontend/src/api/service/auth.ts)
 
-- [`features/auth/components/login-form.tsx`](../../frontend/src/features/auth/components/login-form.tsx)
-  — "Continue to sign in".
-- [`features/auth/components/register-form.tsx`](../../frontend/src/features/auth/components/register-form.tsx)
-  — "Create an account".
+- `useCurrentUser()` — SWR hook backed by `GET /api/auth/me`. It uses a dedicated fetcher that
+  turns a `401` into `data: null` rather than an error, because being logged out is a normal state,
+  not a failure.
+- `useUpdateProfile()` — `PATCH /api/auth/me`.
+- `useLogout()` — `POST /api/auth/logout`.
 
-## Silent refresh — axios interceptor
+Route guard: [`frontend/src/components/ProtectedRoute`](../../frontend/src/components/ProtectedRoute)
+renders a spinner while the session resolves, then redirects to `/auth/login?redirect=<pathname>`
+when there is no user.
 
-[`frontend/src/lib/api-client.ts`](../../frontend/src/lib/api-client.ts)
+Because login and registration are full-page redirects (the credential UI lives on Keycloak), the
+login and register **pages are a single button**, not input forms:
 
-- Every request uses `withCredentials: true`, so the cookies are sent automatically.
-- A response interceptor handles `401`:
-  1. call `POST /auth/refresh` **once** (concurrent 401s share a single in-flight promise),
-  2. on success, **replay** the original request,
-  3. on failure, reject and let `ProtectedRoute` route the user out.
-- A per-request `_retry` flag prevents infinite loops, and `/auth/refresh` / `/auth/login` are
-  excluded from the retry logic.
-- `401` no longer raises an error toast — being logged out is an expected signal, surfaced via
-  routing rather than a notification.
+- [`pages/Login`](../../frontend/src/pages/Login) — "Continue to sign in".
+- [`pages/Register`](../../frontend/src/pages/Register) — "Continue to registration".
+
+## Silent refresh — the fetch wrapper
+
+[`frontend/src/api/client.ts`](../../frontend/src/api/client.ts)
+
+- Every request uses `credentials: 'include'`, so the cookies are sent automatically.
+- On a `401`, `apiFetch` calls `POST /api/auth/refresh` **once** (concurrent 401s share a single
+  in-flight promise) and replays the original request if the refresh succeeded.
+- `/api/auth/refresh` is excluded from the retry, which prevents an infinite loop.
+- A `401` raises no toast — being logged out is an expected signal, surfaced through routing.
 
 ```
-request ──▶ 401 ──▶ POST /auth/refresh ──┬─ 200 ─▶ replay original request ─▶ success
-                                          └─ 401 ─▶ reject ─▶ ProtectedRoute ─▶ login
+request ──▶ 401 ──▶ POST /api/auth/refresh ──┬─ ok  ─▶ replay original request ─▶ success
+                                              └─ 401 ─▶ throw ApiError ─▶ ProtectedRoute ─▶ login
 ```
 
 ## Configuration
 
-The frontend only needs to know the backend URL — no Keycloak settings, since the BFF hides
-them. See [configuration.md](./configuration.md).
+The frontend only needs the backend origin — no Keycloak settings, since the BFF hides them. See
+[configuration.md](./configuration.md).
 
-- `VITE_APP_API_URL` — e.g. `http://localhost:8080/api`.
-- `VITE_APP_ENABLE_API_MOCKING` — set to `false` to use the real backend; `true` uses MSW.
+- `VITE_APP_API_URL` — the bare origin, e.g. `http://localhost:8080`. Endpoint paths in `src/api/*`
+  already include the `/api` prefix.
+- `VITE_APP_ENABLE_API_MOCKING` — `false` to use the real backend, `true` to start the MSW browser
+  worker.
 
 ## Mocks and tests
 
-[`frontend/src/testing/mocks/handlers/auth.ts`](../../frontend/src/testing/mocks/handlers/auth.ts)
-mirrors the real contract so tests run without a backend: `/auth/me` returns the bare user (or
-`401` when logged out) and `/auth/refresh` reports "logged out". The mock flow is independent
-of Keycloak.
+[`frontend/src/test-utils/mocks/handlers/auth.ts`](../../frontend/src/test-utils/mocks/handlers/auth.ts)
+mirrors the real contract so tests run without a backend: `/api/auth/{login,register}` answer `303`
+with a `Set-Cookie` and a `Location` back into the app — the same shape as the real redirect — and
+`/api/auth/me` returns the user or `401`. The mock flow is independent of Keycloak.
+
+The MSW **browser** worker intercepts XHR but not full-page navigations, so the OIDC redirect is
+only mocked when the app points at the standalone mock server (`npm run run-mock-server`), which is
+what the Playwright suite does.

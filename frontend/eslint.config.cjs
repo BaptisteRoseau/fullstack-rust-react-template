@@ -19,9 +19,9 @@ const reactVersion = require('./node_modules/react/package.json').version
 
 const TS_FILES = ['**/*.ts', '**/*.tsx']
 const TEST_FILES = [
-    'src/**/__tests__/**/*.{ts,tsx}',
     'src/**/*.test.{ts,tsx}',
-    'src/testing/**/*.{ts,tsx}',
+    'src/test-utils/**/*.{ts,tsx}',
+    'src/**/__mocks__/**/*.{ts,tsx}',
 ]
 
 module.exports = [
@@ -30,23 +30,17 @@ module.exports = [
             'node_modules/**',
             'public/mockServiceWorker.js',
             'generators/**',
+            'src/i18n/locales/**',
         ],
     },
     js.configs.recommended,
-    // React recommended (flat config – uses ESLint v10 context API)
     { ...reactPlugin.configs.flat.recommended, files: TS_FILES },
-    // React hooks (flat config)
     { ...reactHooksPlugin.configs.flat.recommended, files: TS_FILES },
-    // jsx-a11y
     { ...jsxA11yPlugin.flatConfigs.recommended, files: TS_FILES },
-    // import plugin
     { ...importPlugin.flatConfigs.recommended, files: TS_FILES },
     { ...importPlugin.flatConfigs.typescript, files: TS_FILES },
-    // Testing library (test files only)
     { ...testingLibraryPlugin.configs['flat/react'], files: TEST_FILES },
-    // jest-dom (test files only)
     { ...jestDomPlugin.configs['flat/recommended'], files: TEST_FILES },
-    // Vitest (test files only) + vitest globals
     { ...vitestPlugin.configs.recommended, files: TEST_FILES },
     {
         files: TEST_FILES,
@@ -54,12 +48,10 @@ module.exports = [
             globals: vitestPlugin.environments.env.globals,
         },
     },
-    // TypeScript + custom rules
     {
         files: TS_FILES,
         plugins: {
             '@typescript-eslint': tsPlugin,
-            'check-file': checkFilePlugin,
             prettier: prettierPlugin,
         },
         languageOptions: {
@@ -76,60 +68,10 @@ module.exports = [
             'import/resolver': { typescript: {} },
         },
         rules: {
-            // TypeScript handles undefined references better than ESLint
             'no-undef': 'off',
-            // @typescript-eslint recommended rules
             ...tsPlugin.configs.recommended.rules,
-            // Disable formatting rules (prettier takes over)
             ...prettierConfig.rules,
             'prettier/prettier': ['error', {}, { usePrettierrc: true }],
-            // Import rules
-            'import/no-restricted-paths': [
-                'error',
-                {
-                    zones: [
-                        {
-                            target: './src/features/auth',
-                            from: './src/features',
-                            except: ['./auth'],
-                        },
-                        {
-                            target: './src/features/comments',
-                            from: './src/features',
-                            except: ['./comments'],
-                        },
-                        {
-                            target: './src/features/discussions',
-                            from: './src/features',
-                            except: ['./discussions'],
-                        },
-                        {
-                            target: './src/features/teams',
-                            from: './src/features',
-                            except: ['./teams'],
-                        },
-                        {
-                            target: './src/features/users',
-                            from: './src/features',
-                            except: ['./users'],
-                        },
-                        {
-                            target: './src/features',
-                            from: './src/app',
-                        },
-                        {
-                            target: [
-                                './src/components',
-                                './src/hooks',
-                                './src/lib',
-                                './src/types',
-                                './src/utils',
-                            ],
-                            from: ['./src/features', './src/app'],
-                        },
-                    ],
-                },
-            ],
             'import/no-cycle': 'error',
             'linebreak-style': ['error', 'unix'],
             'import/order': [
@@ -151,33 +93,81 @@ module.exports = [
             'import/default': 'off',
             'import/no-named-as-default-member': 'off',
             'import/no-named-as-default': 'off',
-            // React
             'react/prop-types': 'off',
             'react/react-in-jsx-scope': 'off',
-            // jsx-a11y
             'jsx-a11y/anchor-is-valid': 'off',
-            // TypeScript
             '@typescript-eslint/no-unused-vars': ['error'],
             '@typescript-eslint/explicit-function-return-type': ['off'],
             '@typescript-eslint/explicit-module-boundary-types': ['off'],
             '@typescript-eslint/no-empty-function': ['off'],
-            '@typescript-eslint/no-explicit-any': ['off'],
-            // File naming
-            'check-file/filename-naming-convention': [
+            '@typescript-eslint/no-explicit-any': ['error'],
+        },
+    },
+    {
+        files: ['e2e/**/*.ts', 'playwright.config.ts'],
+        rules: {
+            'react-hooks/rules-of-hooks': 'off',
+        },
+    },
+    {
+        files: ['src/design-system/**'],
+        rules: {
+            'no-restricted-imports': [
                 'error',
-                { '**/*.{ts,tsx}': 'KEBAB_CASE' },
-                { ignoreMiddleExtensions: true },
+                {
+                    patterns: [
+                        {
+                            group: [
+                                '@/api/*',
+                                '@/contexts/*',
+                                '@/components/*',
+                                '@/pages/*',
+                                '@/layouts/*',
+                            ],
+                            message:
+                                'The design system must stay domain-agnostic.',
+                        },
+                    ],
+                },
             ],
         },
     },
-    // Folder naming (non-test source files only)
     {
-        files: ['src/**/!(__tests__)/*'],
+        files: ['src/pages/*/**'],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                {
+                    patterns: [
+                        {
+                            group: ['@/pages/*/*'],
+                            message:
+                                'Pages must not import each other. Move shared code to src/components.',
+                        },
+                    ],
+                },
+            ],
+        },
+    },
+    {
+        files: ['src/**/*.{ts,tsx}'],
         plugins: { 'check-file': checkFilePlugin },
         rules: {
             'check-file/folder-naming-convention': [
                 'error',
-                { '**/*': 'KEBAB_CASE' },
+                {
+                    'src/pages/*/': 'PASCAL_CASE',
+                    'src/layouts/*/': 'PASCAL_CASE',
+                },
+            ],
+            'check-file/filename-naming-convention': [
+                'error',
+                {
+                    'src/{hooks,utils,types,router,stores,constants}/**/*.{ts,tsx}':
+                        'CAMEL_CASE',
+                    'src/api/**/*.{ts,tsx}': 'CAMEL_CASE',
+                },
+                { ignoreMiddleExtensions: true },
             ],
         },
     },

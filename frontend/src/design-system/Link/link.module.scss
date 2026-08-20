@@ -1,0 +1,20 @@
+@use 'mixins' as *;
+
+.link {
+    cursor: pointer;
+    border-radius: 2px;
+
+    &:hover {
+        text-decoration: underline;
+    }
+
+    @include focus-ring;
+}
+
+.default {
+    color: var(--color-primary);
+}
+
+.muted {
+    color: var(--color-text-muted);
+}

@@ -1,0 +1,21 @@
+@use 'variables' as *;
+
+.title {
+    font-size: $font-size-xl;
+}
+
+.description {
+    margin-top: $space-2;
+    color: var(--color-text-muted);
+    font-size: $font-size-sm;
+}
+
+.action {
+    width: 100%;
+    margin-top: $space-6;
+}
+
+.footer {
+    margin-top: $space-4;
+    font-size: $font-size-sm;
+}

@@ -1,0 +1,34 @@
+@use 'variables' as *;
+
+.facts {
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+}
+
+.fact {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: $space-2;
+    font-size: $font-size-sm;
+
+    dt {
+        color: var(--color-text-muted);
+    }
+
+    dd {
+        font-weight: 500;
+    }
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+}

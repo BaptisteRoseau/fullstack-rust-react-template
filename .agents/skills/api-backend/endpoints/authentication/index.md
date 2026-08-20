@@ -1,0 +1,6 @@
+- [OAuth callback: exchange the authorization code, set cookies, return to the app.](./get-auth-callback.md)
+- [Start the login flow by redirecting the browser to the OIDC provider.](./get-auth-login.md)
+- [Revoke the session at the OIDC provider and clear the auth cookies.](./post-auth-logout.md)
+- [Return the current user's profile from the OIDC provider's userinfo endpoint.](./get-auth-me.md)
+- [Silently refresh the access token using the refresh-token cookie.](./post-auth-refresh.md)
+- [Start the registration flow by redirecting the browser to the OIDC provider.](./get-auth-register.md)

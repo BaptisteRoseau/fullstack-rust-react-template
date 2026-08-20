@@ -1,0 +1,1 @@
+- [Health Check of the API](./get-ping.md)

@@ -1,0 +1,28 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2;
+    max-width: 12rem;
+    padding: $space-1 $space-2;
+    border: 1px solid transparent;
+    border-radius: $radius-full;
+    background-color: transparent;
+    cursor: pointer;
+
+    &:hover {
+        background-color: var(--color-surface-raised);
+    }
+
+    @include focus-ring;
+}
+
+.name {
+    overflow: hidden;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

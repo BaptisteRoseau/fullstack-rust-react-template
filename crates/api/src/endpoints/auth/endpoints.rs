@@ -24,7 +24,6 @@ use super::redirects::frontend_target;
 use crate::{
     error::{ApiError, ApiErrorResponse},
     extractors::error::ExtractorError,
-    models::UserToken,
 };
 
 crate::endpoints::macros::declare_tag!(
@@ -181,7 +180,6 @@ pub(crate) async fn logout(
     ),
 )]
 pub(crate) async fn me(
-    _user: UserToken,
     State(authenticator): State<Arc<RwLock<dyn Authenticator>>>,
     jar: CookieJar,
 ) -> Result<Json<GetMeResponse>, ApiError> {

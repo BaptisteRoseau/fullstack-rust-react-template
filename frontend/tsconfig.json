@@ -14,12 +14,12 @@
         "resolveJsonModule": true,
         "noEmit": true,
         "jsx": "react-jsx",
-        "types": ["vite/client", "vitest/globals"],
+        "types": ["vite/client", "vitest/globals", "vite-plugin-svgr/client"],
         "isolatedModules": true,
         "paths": {
             "@/*": ["./src/*"]
         }
     },
-    "include": ["src", ".storybook"],
+    "include": ["src", ".storybook", "mock-server.ts"],
     "exclude": ["node_modules"]
 }

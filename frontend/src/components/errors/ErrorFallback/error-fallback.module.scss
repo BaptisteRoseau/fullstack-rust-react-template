@@ -1,0 +1,16 @@
+@use 'variables' as *;
+
+.fallback {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: $space-4;
+    min-height: 100vh;
+    padding: $space-6;
+    text-align: center;
+}
+
+.message {
+    color: var(--color-text-muted);
+}

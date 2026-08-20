@@ -1,0 +1,25 @@
+import { renderHook, waitFor } from '@testing-library/react'
+import { http, HttpResponse } from 'msw'
+
+import { {{constantCase name}}_ENDPOINT } from '@/api/{{camelCase name}}'
+import { server } from '@/test-utils/server'
+import { SwrWrapper } from '@/test-utils/wrappers'
+
+import { use{{pascalCase name}}List } from './{{camelCase name}}'
+
+it('returns the list', async () => {
+    server.use(
+        http.get(`*${ {{~constantCase name}}_ENDPOINT}`, () => HttpResponse.json([])),
+    )
+
+    const { result } = renderHook(() => use{{pascalCase name}}List(), {
+        wrapper: SwrWrapper,
+    })
+
+    await waitFor(() =>
+        expect(
+            result.current.data,
+            `expected data, got error: ${result.current.error}`,
+        ).toBeDefined(),
+    )
+})

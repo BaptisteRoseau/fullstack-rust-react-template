@@ -1,0 +1,17 @@
+import { http, HttpResponse } from 'msw'
+
+import { {{constantCase name}}_ENDPOINT } from '@/api/{{camelCase name}}'
+
+import { endpoint, isAuthenticated, networkDelay } from '../utils'
+
+const UNAUTHORIZED = { id: 'UNAUTHORIZED', error: 'Not authenticated' }
+
+export const {{camelCase name}}Handlers = [
+    http.get(endpoint({{constantCase name}}_ENDPOINT), async ({ request }) => {
+        await networkDelay()
+        if (!isAuthenticated(request)) {
+            return HttpResponse.json(UNAUTHORIZED, { status: 401 })
+        }
+        return HttpResponse.json([])
+    }),
+]

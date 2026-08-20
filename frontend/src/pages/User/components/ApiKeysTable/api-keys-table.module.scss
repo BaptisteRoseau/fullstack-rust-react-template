@@ -1,0 +1,21 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.state {
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+.permissions {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: $space-1;
+}
+
+.actions {
+    text-align: right;
+}
+
+.visuallyHidden {
+    @include visually-hidden;
+}

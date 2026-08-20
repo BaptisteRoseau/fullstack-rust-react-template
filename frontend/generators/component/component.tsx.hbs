@@ -1,11 +1,9 @@
-import * as React from "react"; 
+import clsx from 'clsx'
 
-export type {{properCase name}}Props = {};
+import styles from './{{kebabCase name}}.module.scss'
 
-export const {{properCase name}} = (props: {{properCase name}}Props) => { 
-  return (
-    <div>
-      {{properCase name}}
-    </div>
-  ); 
-};
+export type {{pascalCase name}}Props = React.HTMLAttributes<HTMLDivElement>
+
+export function {{pascalCase name}}({ className, ...props }: {{pascalCase name}}Props) {
+    return <div className={clsx(styles.{{camelCase name}}, className)} {...props} />
+}

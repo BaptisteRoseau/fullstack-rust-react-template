@@ -1,62 +1,36 @@
-const path = require('path')
-const fs = require('fs')
+'use strict'
 
-const featuresDir = path.join(process.cwd(), 'src/features')
-const features = fs.readdirSync(featuresDir)
-
-/**
- * Scaffolds a single endpoint file under `src/features/<feature>/api/`:
- *  - query  -> `get-<noun>.ts`        (schema-less read + queryOptions + useQuery)
- *  - mutation -> `<verb>-<noun>.ts`   (Zod schema + fetcher + useMutation)
- *
- * Swap the `unknown` payload types for the real domain model from
- * `@/types/api.ts`, and add a matching MSW handler
- * (`.claude/skills/frontend-react-mocks`) or the call fails in dev/tests. See
- * `.claude/skills/frontend-react-api`.
- *
- * @type {import('plop').PlopGenerator}
- */
 module.exports = {
-    description: 'Feature API endpoint generator (query or mutation)',
+    description: 'An API domain: declaration, service, manual mock and test',
     prompts: [
+        { type: 'input', name: 'name', message: 'Domain name (camelCase, e.g. apiKeys):' },
+        { type: 'input', name: 'path', message: 'Endpoint path (e.g. /api/api-key):' },
+    ],
+    actions: [
         {
-            type: 'list',
-            name: 'feature',
-            message: 'Which feature does this endpoint belong to?',
-            choices: features,
+            type: 'add',
+            path: 'src/api/{{camelCase name}}.ts',
+            templateFile: 'generators/api/domain.ts.hbs',
         },
         {
-            type: 'list',
-            name: 'kind',
-            message: 'Read or write?',
-            choices: ['query', 'mutation'],
+            type: 'add',
+            path: 'src/api/service/{{camelCase name}}.ts',
+            templateFile: 'generators/api/service.ts.hbs',
         },
         {
-            type: 'input',
-            name: 'verb',
-            message: 'mutation verb (e.g. "create", "update", "delete")',
-            when: ({ kind }) => kind === 'mutation',
+            type: 'add',
+            path: 'src/api/service/__mocks__/{{camelCase name}}.ts',
+            templateFile: 'generators/api/mock.ts.hbs',
         },
         {
-            type: 'input',
-            name: 'noun',
-            message: 'resource noun (e.g. "teams")',
+            type: 'add',
+            path: 'src/api/service/{{camelCase name}}.test.ts',
+            templateFile: 'generators/api/service.test.ts.hbs',
+        },
+        {
+            type: 'add',
+            path: 'src/test-utils/mocks/handlers/{{camelCase name}}.ts',
+            templateFile: 'generators/api/handlers.ts.hbs',
         },
     ],
-    actions: (answers) => {
-        const isQuery = answers.kind === 'query'
-        const fileName = isQuery
-            ? 'get-{{kebabCase noun}}.ts'
-            : '{{kebabCase verb}}-{{kebabCase noun}}.ts'
-
-        return [
-            {
-                type: 'add',
-                path: 'src/features/{{feature}}/api/' + fileName,
-                templateFile: isQuery
-                    ? 'generators/api/query.ts.hbs'
-                    : 'generators/api/mutation.ts.hbs',
-            },
-        ]
-    },
 }

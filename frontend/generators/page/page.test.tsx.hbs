@@ -1,0 +1,14 @@
+import { screen } from '@testing-library/react'
+
+import { render } from '@/test-utils/render'
+
+import { {{pascalCase name}} } from './{{pascalCase name}}'
+
+it('renders its title', () => {
+    render(<{{pascalCase name}} />)
+
+    expect(
+        screen.getByRole('heading', { name: '{{title}}' }),
+        `expected the "{{title}}" heading, got: ${document.body.textContent}`,
+    ).toBeVisible()
+})

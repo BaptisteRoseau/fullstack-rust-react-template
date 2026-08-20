@@ -1,0 +1,37 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.nav {
+    display: flex;
+    flex-direction: row;
+    gap: $space-1;
+    align-self: start;
+
+    @include media-up($breakpoint-md) {
+        flex-direction: column;
+        position: sticky;
+        top: calc(#{$header-height} + #{$space-8});
+    }
+}
+
+.link {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    padding: $space-2 $space-3;
+    border-radius: $radius-md;
+    color: var(--color-text-muted);
+    font-size: $font-size-sm;
+    font-weight: 500;
+
+    &:hover {
+        background-color: var(--color-surface-raised);
+    }
+
+    @include focus-ring;
+}
+
+.active {
+    background-color: var(--color-surface-raised);
+    color: var(--color-text);
+}

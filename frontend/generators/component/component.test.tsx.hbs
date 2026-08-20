@@ -1,0 +1,12 @@
+import { render, screen } from '@testing-library/react'
+
+import { {{pascalCase name}} } from './{{pascalCase name}}'
+
+it('renders its children', () => {
+    render(<{{pascalCase name}}>content</{{pascalCase name}}>)
+
+    expect(
+        screen.getByText('content'),
+        `expected "content", got "${document.body.textContent}"`,
+    ).toBeVisible()
+})

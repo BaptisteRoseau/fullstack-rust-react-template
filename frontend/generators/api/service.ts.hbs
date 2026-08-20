@@ -1,0 +1,28 @@
+import useSWR from 'swr'
+
+import {
+    {{constantCase name}}_ENDPOINT,
+    {{camelCase name}}Endpoint,
+    type Create{{pascalCase name}}Body,
+    type {{pascalCase name}},
+} from '@/api/{{camelCase name}}'
+import { useApiAction } from '@/api/utils/useApiAction'
+
+export function use{{pascalCase name}}List() {
+    return useSWR<{{pascalCase name}}[]>({{constantCase name}}_ENDPOINT)
+}
+
+export function use{{pascalCase name}}(id: string | undefined) {
+    return useSWR<{{pascalCase name}}>(id ? {{camelCase name}}Endpoint(id) : null)
+}
+
+export function useCreate{{pascalCase name}}() {
+    return useApiAction<Create{{pascalCase name}}Body, {{pascalCase name}}>(
+        {{constantCase name}}_ENDPOINT,
+        'POST',
+    )
+}
+
+export function useDelete{{pascalCase name}}(id: string) {
+    return useApiAction<void, void>({{camelCase name}}Endpoint(id), 'DELETE')
+}

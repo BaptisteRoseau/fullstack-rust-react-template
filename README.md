@@ -17,8 +17,8 @@ What you get out of the box:
   every external dependency sits behind a trait with swappable backends.
 - Authentication against Keycloak using a Backend-for-Frontend flow (Authorization Code + PKCE,
   httpOnly cookies, the SPA never handles tokens) — see [doc/authentication](./doc/authentication).
-- A frontend following the [bulletproof-react](https://github.com/alan2207/bulletproof-react)
-  architecture, with routing, i18n, forms, RBAC, MSW mocks, Storybook and tests.
+- A layer-first React frontend (SWR, SCSS Modules, Radix UI) with routing, i18n, forms,
+  MSW mocks, Storybook and tests — see [frontend/docs/architecture](./frontend/docs/architecture).
 - Metrics, dashboards, structured logging, an OpenAPI document and Swagger UI.
 - Scripts for building, linting, unit tests, coverage, CVE and license checks, plus git hooks.
 
@@ -107,11 +107,11 @@ working there, along with those of its parents.
 │   ├── binaries/     # The only crates with a main.rs — notably `backend`
 │   ├── test_trait/   # Harness to run one test suite against every trait backend
 │   └── *_derive/     # Proc-macro crates backing database CRUD and the test harness
-├── frontend/         # React 19 + TypeScript SPA (bulletproof-react layout)
-│   ├── src/          # app/ pages, features/, components/, lib/, hooks/, i18n/
+├── frontend/         # React 19 + TypeScript SPA (layer-first layout)
+│   ├── src/          # api/, design-system/, components/, layouts/, pages/, router/
+│   ├── docs/         # architecture/ — the canonical frontend reference
 │   ├── e2e/          # Playwright end-to-end tests
-│   ├── __mocks__/    # MSW handlers and the in-memory mock database
-│   └── generators/   # Plop templates to scaffold components and features
+│   └── generators/   # Plop templates to scaffold components, pages and API domains
 ├── infrastructure/   # Everything needed to run the platform in containers
 │   ├── docker/       # Dockerfiles for the backend, frontend, Postgres, homepage
 │   ├── docker-compose/ # Compose fragments merged by the root docker-compose.yml
@@ -153,7 +153,7 @@ working there, along with those of its parents.
 | TanStack Query           | Server-state fetching, caching and mutations                  |
 | Zustand                  | Global client-side UI state (modals, notifications, theme)    |
 | React Hook Form + Zod    | Forms and schema validation, shared with API response parsing |
-| Tailwind CSS + Radix UI  | Styling and accessible headless primitives (ShadCN pattern)   |
+| Radix UI                 | Styling and accessible headless primitives (ShadCN pattern)   |
 | Lingui                   | i18n message extraction and en/fr catalogs                    |
 | Vitest + Testing Library | Unit and integration tests                                    |
 | MSW                      | API mocking for dev, tests and e2e                            |

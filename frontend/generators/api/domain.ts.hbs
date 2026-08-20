@@ -1,0 +1,10 @@
+export const {{constantCase name}}_ENDPOINT = '{{path}}'
+
+export const {{camelCase name}}Endpoint = (id: string) =>
+    `${ {{~constantCase name}}_ENDPOINT}/${id}`
+
+export type {{pascalCase name}} = {
+    id: string
+}
+
+export type Create{{pascalCase name}}Body = Omit<{{pascalCase name}}, 'id'>

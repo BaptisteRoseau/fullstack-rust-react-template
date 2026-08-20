@@ -1,0 +1,30 @@
+@use 'variables' as *;
+
+.layout {
+    display: flex;
+    flex-direction: column;
+    gap: $space-6;
+}
+
+.header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $space-4;
+}
+
+.title {
+    font-size: $font-size-xl;
+}
+
+.description {
+    margin-top: $space-1;
+    color: var(--color-text-muted);
+    font-size: $font-size-sm;
+}
+
+.actions {
+    display: flex;
+    gap: $space-2;
+}

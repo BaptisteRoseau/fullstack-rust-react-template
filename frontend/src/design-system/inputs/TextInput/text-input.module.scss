@@ -1,0 +1,26 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.input {
+    width: 100%;
+    padding: $space-2 $space-3;
+    border: 1px solid var(--color-border);
+    border-radius: $radius-md;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+
+    &::placeholder {
+        color: var(--color-text-muted);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    &[aria-invalid='true'] {
+        border-color: var(--color-danger);
+    }
+
+    @include focus-ring;
+}

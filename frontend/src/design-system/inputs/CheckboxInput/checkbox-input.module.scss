@@ -1,0 +1,19 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2;
+    cursor: pointer;
+    font-size: $font-size-sm;
+}
+
+.input {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--color-primary);
+    cursor: pointer;
+
+    @include focus-ring;
+}

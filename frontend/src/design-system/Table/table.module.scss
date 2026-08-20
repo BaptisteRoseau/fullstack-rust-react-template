@@ -1,0 +1,29 @@
+@use 'variables' as *;
+
+.wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: $radius-md;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $font-size-sm;
+}
+
+.header {
+    background-color: var(--color-surface-raised);
+    text-align: left;
+    color: var(--color-text-muted);
+}
+
+.row:not(:last-child) {
+    border-bottom: 1px solid var(--color-border);
+}
+
+.cell {
+    padding: $space-3 $space-4;
+    text-align: left;
+    vertical-align: middle;
+}

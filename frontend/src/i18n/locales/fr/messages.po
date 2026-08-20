@@ -1,13 +1,326 @@
 msgid ""
 msgstr ""
+"Language: fr\n"
+"MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"MIME-Version: 1.0\n"
-"Language: fr\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
+"Plural-Forms: \n"
+
+#. placeholder {0}: new Date().getFullYear()
+#: src/components/layout/AppFooter/AppFooter.tsx:15
+msgid "© {0} Fullstack Template"
+msgstr "© {0} Fullstack Template"
+
+#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx:38
+msgid "A real design system"
+msgstr "Un vrai design system"
+
+#: src/pages/Home/Home.tsx:20
+msgid "A Rust and React fullstack application template."
+msgstr "Un modèle d'application fullstack Rust et React."
+
+#: src/pages/Home/Home.tsx:27
+msgid "A Rust backend and a React frontend wired together with authentication, API keys and observability from the first commit."
+msgstr "Un backend Rust et un frontend React reliés dès le premier commit, avec authentification, clés d'API et observabilité."
+
+#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx:26
+msgid "A typed API layer"
+msgstr "Une couche API typée"
+
+#: src/components/layout/AppHeader/AppHeader.tsx:21
+msgid "Account"
+msgstr "Compte"
+
+#: src/pages/User/components/UserNav/UserNav.tsx:17
+msgid "Account sections"
+msgstr "Sections du compte"
+
+#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx:75
+msgid "Actions"
+msgstr "Actions"
+
+#: src/pages/Register/Register.tsx:41
+msgid "Already have an account?"
+msgstr "Vous avez déjà un compte ?"
+
+#: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx:27
+msgid "API key revoked"
+msgstr "Clé d'API révoquée"
+
+#: src/components/layout/UserMenu/UserMenu.tsx:57
+#: src/pages/User/components/UserNav/UserNav.tsx:24
+#: src/pages/User/sections/ApiKeys/ApiKeys.tsx:28
+msgid "API keys"
+msgstr "Clés d'API"
+
+#: src/components/layout/AppFooter/AppFooter.tsx:27
+msgid "API reference"
+msgstr "Référence de l'API"
+
+#: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx:41
+msgid "Applications using this key will stop working immediately."
+msgstr "Les applications utilisant cette clé cesseront de fonctionner immédiatement."
+
+#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx:14
+msgid "Authentication built in"
+msgstr "Authentification intégrée"
+
+#: src/pages/NotFound/NotFound.tsx:24
+msgid "Back to home"
+msgstr "Retour à l'accueil"
+
+#: src/pages/User/sections/Information/Information.tsx:104
+msgid "Bio"
+msgstr "Biographie"
+
+#: src/components/ConfirmationDialog/ConfirmationDialog.tsx:36
+#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:92
+msgid "Cancel"
+msgstr "Annuler"
+
+#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:77
+msgid "CI deploy key"
+msgstr "Clé de déploiement CI"
+
+#: src/components/notifications/Notification/Notification.tsx:29
+msgid "Close"
+msgstr "Fermer"
+
+#: src/pages/Register/Register.tsx:38
+msgid "Continue to registration"
+msgstr "Continuer vers l'inscription"
+
+#: src/pages/Login/Login.tsx:35
+msgid "Continue to sign in"
+msgstr "Continuer vers la connexion"
+
+#: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx:44
+msgid "Copied"
+msgstr "Copié"
+
+#: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx:44
+msgid "Copy"
+msgstr "Copier"
+
+#. placeholder {0}: apiKey.name
+#: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx:23
+msgid "Copy {0} now"
+msgstr "Copiez {0} maintenant"
+
+#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:54
+msgid "Could not create the API key"
+msgstr "Impossible de créer la clé d'API"
+
+#: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx:32
+msgid "Could not revoke the API key"
+msgstr "Impossible de révoquer la clé d'API"
+
+#: src/pages/User/sections/Information/Information.tsx:53
+msgid "Could not update the profile"
+msgstr "Impossible de mettre à jour le profil"
+
+#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:96
+msgid "Create key"
+msgstr "Créer la clé"
+
+#: src/pages/Register/Register.tsx:21
+msgid "Create your account"
+msgstr "Créez votre compte"
+
+#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx:71
+msgid "Created"
+msgstr "Créée le"
+
+#: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx:26
+msgid "Dismiss"
+msgstr "Masquer"
+
+#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx:41
+msgid "Domain-agnostic primitives on SCSS Modules and design tokens, every one of them in Storybook."
+msgstr "Des primitives indépendantes du domaine, en SCSS Modules et jetons de design, toutes présentes dans Storybook."
+
+#: src/pages/User/sections/Information/Information.tsx:68
+msgid "Email"
+msgstr "E-mail"
+
+#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx:29
+msgid "Endpoint declarations separated from the SWR hooks that call them, mocked end to end."
+msgstr "Des déclarations d'endpoints séparées des hooks SWR qui les appellent, simulées de bout en bout."
+
+#: src/pages/User/sections/Information/Information.tsx:102
+msgid "First name"
+msgstr "Prénom"
+
+#: src/components/layout/AppFooter/AppFooter.tsx:19
+msgid "Footer"
+msgstr "Pied de page"
+
+#: src/components/layout/AppHeader/AppHeader.tsx:20
+#: src/layouts/AuthLayout/AuthLayout.tsx:14
+#: src/pages/Home/Home.tsx:19
+msgid "Fullstack Template"
+msgstr "Fullstack Template"
+
+#: src/pages/Home/Home.tsx:44
+msgid "Get started"
+msgstr "Commencer"
+
+#: src/components/layout/AppFooter/AppFooter.tsx:24
+msgid "GitHub"
+msgstr "GitHub"
+
+#: src/pages/Home/Home.tsx:37
+msgid "Go to your account"
+msgstr "Accéder à votre compte"
+
+#: src/components/layout/UserMenu/UserMenu.tsx:51
+#: src/pages/User/components/UserNav/UserNav.tsx:20
+#: src/pages/User/sections/Information/Information.tsx:61
+msgid "Information"
+msgstr "Informations"
+
+#: src/pages/User/sections/ApiKeys/ApiKeys.tsx:29
+msgid "Keys authenticate machine access to the API. The secret is shown once."
+msgstr "Les clés authentifient les accès machine à l'API. Le secret n'est affiché qu'une fois."
+
+#: src/components/layout/LocaleSwitcher/LocaleSwitcher.tsx:17
+msgid "Language"
+msgstr "Langue"
+
+#: src/pages/User/sections/Information/Information.tsx:103
+msgid "Last name"
+msgstr "Nom"
+
+#: src/components/layout/AppHeader/AppHeader.tsx:23
+#: src/components/ProtectedRoute/ProtectedRoute.tsx:18
+#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx:39
+#: src/pages/User/sections/Information/Information.tsx:35
+msgid "Loading"
+msgstr "Chargement"
+
+#: src/components/layout/AppHeader/AppHeader.tsx:30
+#: src/pages/Home/Home.tsx:49
+#: src/pages/Login/Login.tsx:19
+#: src/pages/Login/Login.tsx:21
+#: src/pages/Register/Register.tsx:44
+msgid "Log in"
+msgstr "Se connecter"
+
+#: src/components/layout/UserMenu/UserMenu.tsx:62
+msgid "Log out"
+msgstr "Se déconnecter"
+
+#: src/pages/User/sections/Information/Information.tsx:82
+msgid "Member since"
+msgstr "Membre depuis"
+
+#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx:65
+#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:76
+msgid "Name"
+msgstr "Nom"
+
+#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:63
+msgid "New API key"
+msgstr "Nouvelle clé d'API"
+
+#: src/pages/User/sections/ApiKeys/ApiKeys.tsx:33
+msgid "New key"
+msgstr "Nouvelle clé"
+
+#: src/pages/Login/Login.tsx:38
+msgid "No account yet?"
+msgstr "Pas encore de compte ?"
+
+#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx:17
+msgid "OpenID Connect through the backend, with httpOnly cookies and silent token refresh."
+msgstr "OpenID Connect via le backend, avec des cookies httpOnly et un rafraîchissement de jeton silencieux."
+
+#: src/pages/NotFound/NotFound.tsx:15
+#: src/pages/NotFound/NotFound.tsx:17
+msgid "Page not found"
+msgstr "Page introuvable"
+
+#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx:68
+#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:81
+msgid "Permissions"
+msgstr "Permissions"
+
+#: src/pages/User/sections/Information/Information.tsx:48
+msgid "Profile updated"
+msgstr "Profil mis à jour"
+
+#: src/components/layout/AppHeader/AppHeader.tsx:35
+#: src/pages/Login/Login.tsx:41
+#: src/pages/Register/Register.tsx:19
+msgid "Register"
+msgstr "S'inscrire"
+
+#: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx:42
+msgid "Revoke"
+msgstr "Révoquer"
+
+#. placeholder {0}: apiKey.name
+#: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx:40
+#: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx:47
+msgid "Revoke {0}"
+msgstr "Révoquer {0}"
+
+#: src/pages/User/sections/Information/Information.tsx:74
+msgid "Role"
+msgstr "Rôle"
+
+#: src/pages/User/sections/Information/Information.tsx:107
+msgid "Save changes"
+msgstr "Enregistrer"
+
+#: src/pages/Home/Home.tsx:24
+msgid "Ship a fullstack app, not a toolchain"
+msgstr "Livrez une application fullstack, pas une chaîne d'outils"
+
+#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx:47
+msgid "The API keys could not be loaded."
+msgstr "Les clés d'API n'ont pas pu être chargées."
+
+#: src/pages/NotFound/NotFound.tsx:20
+msgid "The page you are looking for does not exist."
+msgstr "La page que vous cherchez n'existe pas."
+
+#: src/pages/User/sections/Information/Information.tsx:62
+msgid "The profile shared with the rest of the application."
+msgstr "Le profil partagé avec le reste de l'application."
+
+#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:64
+msgid "The secret is displayed once, right after creation."
+msgstr "Le secret est affiché une seule fois, juste après la création."
+
+#: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx:35
+msgid "This secret will not be shown again."
+msgstr "Ce secret ne sera plus affiché."
+
+#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:55
+#: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx:33
+#: src/pages/User/sections/Information/Information.tsx:54
+msgid "Unexpected error"
+msgstr "Erreur inattendue"
+
+#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx:55
+msgid "You have no API key yet."
+msgstr "Vous n'avez pas encore de clé d'API."
+
+#: src/pages/Register/Register.tsx:24
+msgid "You will be redirected to the identity provider to create your account."
+msgstr "Vous allez être redirigé vers le fournisseur d'identité pour créer votre compte."
+
+#: src/pages/Login/Login.tsx:24
+msgid "You will be redirected to the identity provider to sign in."
+msgstr "Vous allez être redirigé vers le fournisseur d'identité pour vous connecter."
+
+#: src/pages/User/User.tsx:14
+msgid "Your account"
+msgstr "Votre compte"

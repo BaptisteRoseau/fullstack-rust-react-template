@@ -1,60 +1,65 @@
-const path = require('path')
-const fs = require('fs')
+'use strict'
 
-const featuresDir = path.join(process.cwd(), 'src/features')
-const features = fs.readdirSync(featuresDir)
-
-/**
- *
- * @type {import('plop').PlopGenerator}
- */
 module.exports = {
-    description: 'Component Generator',
+    description: 'A design-system primitive or a shared component',
     prompts: [
+        {
+            type: 'list',
+            name: 'layer',
+            message: 'Which layer?',
+            choices: [
+                { name: 'design-system (domain-agnostic primitive)', value: 'design-system' },
+                { name: 'components (domain-aware, shared)', value: 'components' },
+            ],
+        },
+        {
+            type: 'input',
+            name: 'group',
+            message: 'Grouping folder (kebab-case, empty for none):',
+            default: '',
+        },
         {
             type: 'input',
             name: 'name',
-            message: 'component name',
-        },
-        {
-            type: 'list',
-            name: 'feature',
-            message: 'Which feature does this component belong to?',
-            choices: ['components', ...features],
-            when: () => features.length > 0,
-        },
-        {
-            type: 'input',
-            name: 'folder',
-            message: 'folder in components',
-            when: ({ feature }) => !feature || feature === 'components',
+            message: 'Component name (PascalCase):',
         },
     ],
-    actions: (answers) => {
-        const componentGeneratePath =
-            !answers.feature || answers.feature === 'components'
-                ? 'src/components/{{folder}}'
-                : 'src/features/{{feature}}/components'
-        return [
+    actions(answers) {
+        const base = answers.group
+            ? `src/${answers.layer}/${answers.group}/{{pascalCase name}}`
+            : `src/${answers.layer}/{{pascalCase name}}`
+
+        const actions = [
             {
                 type: 'add',
-                path: componentGeneratePath + '/{{kebabCase name}}/index.ts',
-                templateFile: 'generators/component/index.ts.hbs',
-            },
-            {
-                type: 'add',
-                path:
-                    componentGeneratePath +
-                    '/{{kebabCase name}}/{{kebabCase name}}.tsx',
+                path: `${base}/{{pascalCase name}}.tsx`,
                 templateFile: 'generators/component/component.tsx.hbs',
             },
             {
                 type: 'add',
-                path:
-                    componentGeneratePath +
-                    '/{{kebabCase name}}/{{kebabCase name}}.stories.tsx',
-                templateFile: 'generators/component/component.stories.tsx.hbs',
+                path: `${base}/{{kebabCase name}}.module.scss`,
+                templateFile: 'generators/component/component.module.scss.hbs',
+            },
+            {
+                type: 'add',
+                path: `${base}/{{pascalCase name}}.test.tsx`,
+                templateFile: 'generators/component/component.test.tsx.hbs',
+            },
+            {
+                type: 'add',
+                path: `${base}/index.ts`,
+                templateFile: 'generators/component/index.ts.hbs',
             },
         ]
+
+        if (answers.layer === 'design-system') {
+            actions.push({
+                type: 'add',
+                path: `${base}/{{pascalCase name}}.stories.tsx`,
+                templateFile: 'generators/component/component.stories.tsx.hbs',
+            })
+        }
+
+        return actions
     },
 }

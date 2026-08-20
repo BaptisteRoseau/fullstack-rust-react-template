@@ -1,21 +1,20 @@
 import * as z from 'zod'
 
-const createEnv = () => {
-    const EnvSchema = z.object({
-        API_URL: z.string(),
-        ENABLE_API_MOCKING: z
-            .string()
-            .refine((s) => s === 'true' || s === 'false')
-            .transform((s) => s === 'true')
-            .optional(),
-        APP_URL: z.string().optional().default('http://localhost:3000'),
-        APP_MOCK_API_PORT: z.string().optional().default('8080'),
-    })
+const EnvSchema = z.object({
+    API_URL: z.string(),
+    ENABLE_API_MOCKING: z
+        .string()
+        .refine((value) => value === 'true' || value === 'false')
+        .transform((value) => value === 'true')
+        .optional(),
+    APP_URL: z.string().optional().default('http://localhost:3000'),
+    APP_MOCK_API_PORT: z.string().optional().default('8081'),
+})
 
+function createEnv() {
     const envVars = Object.entries(import.meta.env).reduce<
         Record<string, string>
-    >((acc, curr) => {
-        const [key, value] = curr
+    >((acc, [key, value]) => {
         if (key.startsWith('VITE_APP_')) {
             acc[key.replace('VITE_APP_', '')] = value
         }
@@ -26,12 +25,11 @@ const createEnv = () => {
 
     if (!parsedEnv.success) {
         throw new Error(
-            `Invalid env provided.
-The following variables are missing or invalid:
-${Object.entries(parsedEnv.error.flatten().fieldErrors)
-    .map(([k, v]) => `- ${k}: ${v}`)
-    .join('\n')}
-`,
+            `Invalid env provided. The following variables are missing or invalid:\n${Object.entries(
+                z.flattenError(parsedEnv.error).fieldErrors,
+            )
+                .map(([key, value]) => `- ${key}: ${value}`)
+                .join('\n')}`,
         )
     }
 

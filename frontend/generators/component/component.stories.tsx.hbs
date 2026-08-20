@@ -1,15 +1,14 @@
-import { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite'
 
-import { {{ properCase name }} } from './{{ kebabCase name }}';
+import { {{pascalCase name}} } from './{{pascalCase name}}'
 
-const meta: Meta<typeof {{ properCase name }}> = {
-  component: {{ properCase name }},
-};
+const meta = {
+    title: 'Design System/{{pascalCase name}}',
+    component: {{pascalCase name}},
+} satisfies Meta<typeof {{pascalCase name}}>
 
-export default meta;
+export default meta
 
-type Story = StoryObj<typeof {{ properCase name }}>;
+type Story = StoryObj<typeof meta>
 
-export const Default: Story = {
-  args: {}
-};
+export const Default: Story = { args: { children: '{{pascalCase name}}' } }

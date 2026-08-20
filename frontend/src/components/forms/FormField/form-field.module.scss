@@ -1,0 +1,22 @@
+@use 'variables' as *;
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+}
+
+.label {
+    font-size: $font-size-sm;
+    font-weight: 500;
+}
+
+.description {
+    color: var(--color-text-muted);
+    font-size: $font-size-xs;
+}
+
+.error {
+    color: var(--color-danger);
+    font-size: $font-size-xs;
+}
