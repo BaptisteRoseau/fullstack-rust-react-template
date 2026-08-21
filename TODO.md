@@ -15,6 +15,10 @@
     - [ ] Invoices
     - [ ] Files
 
+- [ ] Un-flatten the backend crates (rename it "backend" again -> macros/services etc..)
+- [ ] See how to properly handle reactivity on the frontend (use container classes ? Add another optionnal .scss file and include it ? Use variables from the theme constants ?)
+
+
 ## Error management
 
 - [ ] Include dev debug errors in the response in debug mode (release should not even have the debug field in the response (#[debug_assertion] ?))
@@ -116,6 +120,9 @@
 - [x] Trace errors & normalize error response
 - [ ] Support both REST & gRCP from the same handler (split with `/rest/` and `/grpc/` in the URL)
 - [ ] Add an MCP crate (similar to the API crate), merge it in the router
+- [ ] Better health checks (see kube probes (startup/ready/alive))
+- [ ] Pagination
+- [ ] API routes standards (GET is always for multiple objects with pagination, POST/PUT/DELETE are for 1 item only with IDs or slugs, when to use ID vs when to use slug,  etc..)
 
 ### Testing, CI/CD, Docker and scripts
 
@@ -134,6 +141,7 @@
 - [ ] Automatically build containers
 - [ ] Fuzz-testing from the OpenAPI spec
 - [ ] Build documentation using redocly
+- [ ] Accessibility checks on the frontend
 - [x] Add Mailhog for local development
 - [ ] Add unit & integration tests using testcontainers when necessary
 - [ ] Use transaction/rollback in setUp/tearDown for tests
