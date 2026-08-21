@@ -31,8 +31,8 @@ impl Keycloak {
     ) -> Result<Self, Box<AuthenticatorError>> {
         let endpoints = Endpoints::from_issuer(&config.authenticator.issuer_url);
         let jwt =
-            JwtValidator::fetch(&endpoints.jwks, config.authenticator.audiences.clone())
-                .await?;
+            JwtValidator::new(&endpoints.jwks, config.authenticator.audiences.clone())
+                .await;
         let oidc =
             OidcFlow::try_new(&config.authenticator, &endpoints, Arc::clone(&cache))?;
         Ok(Self {
@@ -48,7 +48,7 @@ impl Authenticator for Keycloak {
     async fn validate(&self, token: &str) -> Result<UserToken, Box<AuthenticatorError>> {
         // Only a JWT contains dots; anything else is an API key.
         if token.contains('.') {
-            self.jwt.validate(token)
+            self.jwt.validate(token).await
         } else {
             self.api_keys.validate(token).await
         }

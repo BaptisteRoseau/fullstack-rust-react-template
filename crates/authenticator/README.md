@@ -46,8 +46,11 @@ Notes worth knowing before changing anything here:
 - **Every endpoint is derived from the issuer URL.** JWKS, authorize, token, logout and
   userinfo all come out of `Endpoints::from_issuer`, so they cannot drift onto different
   realms.
-- **The JWKS is fetched once**, when `Keycloak::try_new` runs. A key rotation at the
-  provider therefore breaks validation until the backend restarts.
+- **The JWKS is fetched once**, when `Keycloak::try_new` runs. A provider that is not up
+  yet is not fatal: the failure is logged as a warning and the next `validate` retries the
+  fetch, so the backend boots without Keycloak. A key rotation at the provider still
+  breaks validation until the backend restarts, since the keys are not re-fetched once
+  held.
 - **The login state lives in the shared cache**, under `oidc_state:{state}` with a 600s
   TTL. It carries the PKCE verifier and the post-login redirect, and doubles as CSRF
   protection: `exchange_code` deletes it, so a state cannot be replayed.

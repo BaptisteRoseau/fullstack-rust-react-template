@@ -47,3 +47,18 @@ impl From<&str> for Box<AuthenticatorError> {
 pub(crate) fn oidc_error(message: impl Into<String>) -> Box<AuthenticatorError> {
     Box::new(AuthenticatorError::Oidc(message.into()))
 }
+
+/// Renders an error together with its causes, `"outer: inner: root"`.
+///
+/// `reqwest::Error` displays as "error sending request for url (...)" and keeps
+/// the interesting part — refused connection, DNS failure, TLS error — in its
+/// source, so a bare `{e}` tells an operator nothing about what to fix.
+pub(crate) fn error_chain(error: &dyn std::error::Error) -> String {
+    let mut rendered = error.to_string();
+    let mut source = error.source();
+    while let Some(cause) = source {
+        rendered.push_str(&format!(": {cause}"));
+        source = cause.source();
+    }
+    rendered
+}

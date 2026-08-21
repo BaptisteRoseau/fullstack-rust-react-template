@@ -3,9 +3,11 @@
 use jsonwebtoken::jwk::JwkSet;
 use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode, decode_header};
 use serde::Deserialize;
+use tokio::sync::RwLock;
+use tracing::warn;
 use uuid::Uuid;
 
-use crate::error::AuthenticatorError;
+use crate::error::{AuthenticatorError, error_chain};
 use crate::models::UserToken;
 
 #[derive(Debug, Deserialize)]
@@ -22,36 +24,64 @@ fn realm_from_iss(iss: &str) -> Option<String> {
 
 /// RS256 validation of provider-issued access tokens against the realm's JWKS.
 pub(super) struct JwtValidator {
-    keys: JwkSet,
+    jwks_url: String,
     audiences: Vec<String>,
+    keys: RwLock<Option<JwkSet>>,
 }
 
 impl JwtValidator {
-    /// Fetches the realm's signing keys once, at construction. Every call to
-    /// [`Self::validate`] afterwards reuses these keys — the JWKS is never
-    /// re-fetched.
-    pub(super) async fn fetch(
-        jwks_url: &str,
-        audiences: Vec<String>,
-    ) -> Result<Self, Box<AuthenticatorError>> {
-        let keys: JwkSet = reqwest::get(jwks_url).await?.json().await?;
+    /// Fetches the realm's signing keys, tolerating a provider that is not up
+    /// yet: the failure is only warned about, and the next [`Self::validate`]
+    /// retries the fetch. Once the keys are in, they are reused as-is.
+    pub(super) async fn new(jwks_url: &str, audiences: Vec<String>) -> Self {
+        let validator = Self {
+            jwks_url: jwks_url.to_string(),
+            audiences,
+            keys: RwLock::new(None),
+        };
+        if let Err(e) = validator.refresh().await {
+            warn!(
+                "Could not reach the authentication server yet: {}",
+                error_chain(e.as_ref())
+            );
+        }
+        validator
+    }
+
+    async fn refresh(&self) -> Result<(), Box<AuthenticatorError>> {
+        let keys: JwkSet = reqwest::get(&self.jwks_url).await?.json().await?;
         if keys.keys.is_empty() {
             return Err(Box::new(AuthenticatorError::NoJwk));
         }
-        Ok(Self { keys, audiences })
+        *self.keys.write().await = Some(keys);
+        Ok(())
     }
 
-    pub(super) fn validate(
+    /// Returns the key matching `kid`, fetching the JWKS first if the provider
+    /// was still unreachable when the validator was built.
+    async fn decoding_key(
+        &self,
+        kid: &str,
+    ) -> Result<DecodingKey, Box<AuthenticatorError>> {
+        if self.keys.read().await.is_none() {
+            self.refresh().await?;
+        }
+        let keys = self.keys.read().await;
+        let jwk = keys
+            .as_ref()
+            .ok_or_else(|| Box::new(AuthenticatorError::NoJwk))?
+            .find(kid)
+            .ok_or("No matching key found in JWKS")?;
+        Ok(DecodingKey::from_jwk(jwk)?)
+    }
+
+    pub(super) async fn validate(
         &self,
         token: &str,
     ) -> Result<UserToken, Box<AuthenticatorError>> {
         let header = decode_header(token)?;
         let kid = header.kid.ok_or("No 'kid' in token header")?;
-        let jwk = self
-            .keys
-            .find(&kid)
-            .ok_or("No matching key found in JWKS")?;
-        let decoding_key = DecodingKey::from_jwk(jwk)?;
+        let decoding_key = self.decoding_key(&kid).await?;
 
         let mut validation = Validation::new(Algorithm::RS256);
         validation.set_audience(&self.audiences);
