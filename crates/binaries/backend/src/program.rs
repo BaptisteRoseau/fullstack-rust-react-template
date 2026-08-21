@@ -36,8 +36,11 @@ pub(crate) async fn run(config: Config) -> Result<(), anyhow::Error> {
     info!("Initialized Storage");
 
     info!("Initializing Cache...");
-    let cache: Arc<RwLock<dyn cache::Cache>> =
-        Arc::new(RwLock::new(Redis::try_from(config.as_ref())?));
+    let redis = Redis::try_from(config.as_ref())?;
+    if let Err(e) = redis.ping().await {
+        warn!("Could not connect to Redis yet: {e}");
+    }
+    let cache: Arc<RwLock<dyn cache::Cache>> = Arc::new(RwLock::new(redis));
     info!("Initialized Cache");
 
     info!("Initializing Authenticator...");

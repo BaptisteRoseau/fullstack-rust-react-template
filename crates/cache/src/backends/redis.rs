@@ -23,7 +23,7 @@ impl Redis {
     ) -> Result<Self, CacheError> {
         let cfg = deadpool_redis::Config::from_url(url);
         let pool = cfg.create_pool(Some(Runtime::Tokio1)).map_err(|e| {
-            warn!("Could not connect to Redis yet: {e}");
+            warn!("Invalid Redis URL: {e}");
             e
         })?;
         Ok(Self {
@@ -31,6 +31,13 @@ impl Redis {
             timeout_s,
             prefix,
         })
+    }
+
+    /// Probes the Redis server with a `PING`.
+    pub async fn ping(&self) -> Result<(), CacheError> {
+        let mut conn = self.pool.get().await?;
+        cmd("PING").query_async::<()>(&mut conn).await?;
+        Ok(())
     }
 
     fn prefixed_key(&self, key: &str) -> String {
