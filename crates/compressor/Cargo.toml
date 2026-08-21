@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+test_utils = { path = "../test_utils" }
 config = { path = "../config" }
 flate2 = "1"
 async-trait = "0"

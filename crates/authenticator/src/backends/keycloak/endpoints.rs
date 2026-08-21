@@ -36,6 +36,4 @@ impl Endpoints {
     }
 }
 
-#[cfg(test)]
-#[path = "_tests/test_endpoints.rs"]
-mod tests;
+test_utils::tests_file!("_tests/test_endpoints.rs");

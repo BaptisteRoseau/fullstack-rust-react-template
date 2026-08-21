@@ -192,6 +192,4 @@ pub(crate) fn extract_base_type_name(ty: &Type) -> String {
     String::new()
 }
 
-#[cfg(test)]
-#[path = "_tests/test_type_mapping.rs"]
-mod tests;
+test_utils::tests_file!("_tests/test_type_mapping.rs");

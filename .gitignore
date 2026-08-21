@@ -44,3 +44,4 @@ packages/
 
 # MCP and AI tools
 .serena
+.playwright-mcp/

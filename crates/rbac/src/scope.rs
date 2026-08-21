@@ -50,6 +50,4 @@ impl Scope {
     }
 }
 
-#[cfg(test)]
-#[path = "_tests/test_scope.rs"]
-mod tests;
+test_utils::tests_file!("_tests/test_scope.rs");

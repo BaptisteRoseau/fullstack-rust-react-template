@@ -66,6 +66,4 @@ impl JwtValidator {
     }
 }
 
-#[cfg(test)]
-#[path = "_tests/test_jwt.rs"]
-mod tests;
+test_utils::tests_file!("_tests/test_jwt.rs");

@@ -5,6 +5,4 @@ pub fn derive_table_name(ident: &str) -> String {
     format!("{snake}s")
 }
 
-#[cfg(test)]
-#[path = "_tests/test_table_name.rs"]
-mod tests;
+test_utils::tests_file!("_tests/test_table_name.rs");

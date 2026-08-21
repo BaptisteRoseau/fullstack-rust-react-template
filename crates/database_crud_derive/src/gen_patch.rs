@@ -212,6 +212,4 @@ fn extract_base_type_name(ty: &syn::Type) -> String {
     String::new()
 }
 
-#[cfg(test)]
-#[path = "_tests/test_gen_patch.rs"]
-mod tests;
+test_utils::tests_file!("_tests/test_gen_patch.rs");

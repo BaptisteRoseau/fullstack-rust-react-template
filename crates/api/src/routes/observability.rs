@@ -50,6 +50,4 @@ pub(crate) fn make_request_span<B>(request: &Request<B>) -> Span {
     )
 }
 
-#[cfg(test)]
-#[path = "_tests/test_observability.rs"]
-mod tests;
+test_utils::tests_file!("_tests/test_observability.rs");

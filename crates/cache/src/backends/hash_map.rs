@@ -174,6 +174,4 @@ impl Cache for HashMapCache {
     }
 }
 
-#[cfg(test)]
-#[path = "_tests/test_hash_map.rs"]
-mod tests;
+test_utils::tests_file!("_tests/test_hash_map.rs");

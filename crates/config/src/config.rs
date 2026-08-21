@@ -191,7 +191,7 @@ impl Config {
     }
 }
 
-#[cfg(test)]
-#[allow(clippy::field_reassign_with_default)]
-#[path = "_tests/test_config.rs"]
-mod tests;
+test_utils::tests_file!(
+    #[allow(clippy::field_reassign_with_default)]
+    "_tests/test_config.rs"
+);

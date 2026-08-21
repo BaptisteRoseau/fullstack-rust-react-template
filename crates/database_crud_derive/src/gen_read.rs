@@ -47,6 +47,4 @@ pub fn generate(model: &ModelInfo) -> TokenStream {
     quote! { #(#methods)* }
 }
 
-#[cfg(test)]
-#[path = "_tests/test_gen_read.rs"]
-mod tests;
+test_utils::tests_file!("_tests/test_gen_read.rs");

@@ -43,6 +43,4 @@ fn hex_sha256(input: &str) -> String {
         .collect()
 }
 
-// #[cfg(test)]
-// #[path = "_tests/test_api_key.rs"]
-// mod tests;
+// test_utils::tests_file!("_tests/test_api_key.rs");

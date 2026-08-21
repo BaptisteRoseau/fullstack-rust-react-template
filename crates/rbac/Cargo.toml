@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+test_utils = { path = "../test_utils" }
 uuid = { version = "1", features = ["fast-rng", "serde"] }
 serde = { version = "1", features = ["derive"] }
 

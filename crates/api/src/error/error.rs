@@ -77,6 +77,4 @@ fn log_error_trace(status_code: StatusCode, trace: String) {
     }
 }
 
-#[cfg(test)]
-#[path = "_tests/test_error.rs"]
-mod tests;
+test_utils::tests_file!("_tests/test_error.rs");

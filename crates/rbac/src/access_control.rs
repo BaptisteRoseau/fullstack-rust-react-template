@@ -68,6 +68,4 @@ impl AccessControl {
     }
 }
 
-#[cfg(test)]
-#[path = "_tests/test_access_control.rs"]
-mod tests;
+test_utils::tests_file!("_tests/test_access_control.rs");

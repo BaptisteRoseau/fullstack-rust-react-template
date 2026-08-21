@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+test_utils = { path = "../test_utils" }
 clap = { version = "4", features = ["derive", "env"] }
 tracing = "0"
 serde = { version = "1", features = ["derive"] }

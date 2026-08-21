@@ -86,6 +86,4 @@ pub(crate) fn extract_option_inner(ty: &Type) -> (bool, Option<Type>) {
     (false, None)
 }
 
-#[cfg(test)]
-#[path = "_tests/test_parse.rs"]
-mod tests;
+test_utils::tests_file!("_tests/test_parse.rs");

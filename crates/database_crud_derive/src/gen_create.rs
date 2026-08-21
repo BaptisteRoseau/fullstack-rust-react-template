@@ -51,6 +51,4 @@ pub fn generate(model: &ModelInfo) -> TokenStream {
     }
 }
 
-#[cfg(test)]
-#[path = "_tests/test_gen_create.rs"]
-mod tests;
+test_utils::tests_file!("_tests/test_gen_create.rs");

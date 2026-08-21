@@ -142,6 +142,4 @@ fn parameters_lossy() -> CSParameters {
     }
 }
 
-#[cfg(test)]
-#[path = "_tests/test_images.rs"]
-mod tests;
+test_utils::tests_file!("_tests/test_images.rs");

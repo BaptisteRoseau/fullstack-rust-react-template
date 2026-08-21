@@ -15,6 +15,7 @@ members = [
   "crates/storage",
   "crates/test_trait",
   "crates/test_trait_derive",
+  "crates/test_utils",
   "tools/http_health_checker", "crates/rbac", "crates/models",
   "tools/openapi_generator"
 ]

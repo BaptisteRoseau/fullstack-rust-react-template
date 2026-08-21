@@ -40,6 +40,4 @@ pub fn decompress_bytes(input: &[u8]) -> io::Result<Vec<u8>> {
     Ok(decompressed_data)
 }
 
-#[cfg(test)]
-#[path = "_tests/test_compressor.rs"]
-mod tests;
+test_utils::tests_file!("_tests/test_compressor.rs");

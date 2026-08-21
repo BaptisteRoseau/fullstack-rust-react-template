@@ -119,6 +119,4 @@ where
     }
 }
 
-#[cfg(test)]
-#[path = "_tests/test_user.rs"]
-mod tests;
+test_utils::tests_file!("_tests/test_user.rs");

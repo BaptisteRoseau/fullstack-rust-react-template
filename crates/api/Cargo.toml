@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 # Local crates
+test_utils = { path = "../test_utils" }
 logging = { path = "../logging" }
 config = { path = "../config" }
 app_core = { path = "../app_core" }
