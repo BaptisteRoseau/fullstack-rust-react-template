@@ -31,6 +31,7 @@ module.exports = [
             'node_modules/**',
             'public/mockServiceWorker.js',
             'generators/**',
+            'src/api/generated/**',
             'src/i18n/locales/**',
         ],
     },

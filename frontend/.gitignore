@@ -33,5 +33,9 @@ yarn-debug.log*
 yarn-error.log*
 
 
+# generated api sdk
+/.api-sdk-check-*
+openapi-ts-error-*.log
+
 # local
 mocked-db.json

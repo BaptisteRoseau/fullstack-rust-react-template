@@ -87,7 +87,7 @@ pub(crate) async fn list_api_keys(
     params(("id" = Uuid, Path, description = "API key ID")),
     responses(
         (status = OK, body = GetApiKeyResponse, description = "API key metadata."),
-        (status = NOT_FOUND, description = "Not found or not owned by caller."),
+        (status = NOT_FOUND, body = ApiErrorResponse, description = "Not found or not owned by caller."),
         (status = UNAUTHORIZED, body = ApiErrorResponse, description = "Not authenticated."),
     ),
 )]
@@ -122,7 +122,7 @@ pub(crate) async fn get_api_key(
     params(("id" = Uuid, Path, description = "API key ID")),
     responses(
         (status = NO_CONTENT, description = "API key deleted."),
-        (status = NOT_FOUND, description = "Not found or not owned by caller."),
+        (status = NOT_FOUND, body = ApiErrorResponse, description = "Not found or not owned by caller."),
         (status = UNAUTHORIZED, body = ApiErrorResponse, description = "Not authenticated."),
     ),
 )]
