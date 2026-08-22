@@ -4,7 +4,7 @@ Plop templates that scaffold a folder in the shape the architecture expects. Run
 `frontend/`:
 
 ```bash
-npm run generate
+bun run generate
 ```
 
 | Generator | Creates |
@@ -19,6 +19,6 @@ A generator only writes files. You still have to wire the result up:
 
 - a page needs its `PATHS` entry, its lazy route in `src/router/routes.tsx` and a nav link;
 - an api domain needs its handler registered in `src/test-utils/mocks/handlers/index.ts`;
-- any user-facing string needs a Lingui macro, then `npm run i18n:extract`.
+- any user-facing string needs a Lingui macro, then `bun run i18n:extract`.
 
 See `frontend/docs/architecture/` for the rules the templates follow.

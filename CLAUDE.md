@@ -106,7 +106,7 @@ For large feature requests, follow a three-phase flow: **Requirements → Design
 - **Conform to the existing codebase unconditionally.** Mimic formatting, naming, framework choices, typing patterns, and architectural conventions found in neighboring files. Do not impose personal defaults.
 - **When creating a new component**, study existing components first to understand conventions.
 - **When creating a new page or route**, always update the navigation structure so users can access it.
-- **No new dependencies without explicit user approval.** When you must add one, use the package manager (`npm install`, `pip install`, `cargo add`) — never manually edit dependency manifests.
+- **No new dependencies without explicit user approval.** When you must add one, use the package manager (`bun install`, `pip install`, `cargo add`) — never manually edit dependency manifests.
 - **No surprise cross-cutting changes.** If a change touches >3 files or multiple subsystems, show a short plan first.
 
 ### Code Quality

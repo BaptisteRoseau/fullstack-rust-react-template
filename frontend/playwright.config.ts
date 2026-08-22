@@ -30,14 +30,14 @@ export default defineConfig({
     ],
     webServer: [
         {
-            command: `npm run dev -- --port ${PORT}`,
+            command: `bun run dev -- --port ${PORT}`,
             env: mockEnv,
             timeout: 30 * 1000,
             port: PORT,
             reuseExistingServer: !process.env.CI,
         },
         {
-            command: 'npm run run-mock-server',
+            command: 'bun run run-mock-server',
             env: mockEnv,
             timeout: 30 * 1000,
             port: MOCK_API_PORT,

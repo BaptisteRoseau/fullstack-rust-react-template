@@ -4,7 +4,7 @@
     - [ ] Use as a Drop-in replacement for Postgres/SQlite/MyQSL.. -> Then use SQLite as the database exposed mock
     - [ ] Use a Database mock to replace the @crates/app_core/src/api_key.rs tests
 
-- [ ] Add a mention or a tag in the Rust crates to telle whether they are for testing/traits/utils
+- [ ] Add a mention or a tag in the Rust crates to tell whether they are for testing/traits/utils
 - [ ] Make an MCP crate with Rust macros (similar to the API layer)
 
 - [ ] Agents (implementer, reviewer, planner..)
@@ -66,7 +66,7 @@
     - [x] Metrics endpoint
     - [x] Frontend
     - [x] Fix bun run dev
-    - [ ] Simple echo API with a simple button (somehow like a TOOD app)
+    - [ ] Simple echo API with a simple button (somehow like a TODO app)
     - [ ] CRUD files s3
 
 - [ ] Generate `frontend/src/types/api.ts` from the openapi of the backend.

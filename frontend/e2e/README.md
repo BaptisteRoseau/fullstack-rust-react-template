@@ -1,7 +1,7 @@
 # End-to-end tests
 
 Playwright specs, one file per journey. `playwright.config.ts` starts the Vite dev server and the
-MSW-backed mock API (`npm run run-mock-server`) itself, so `npm run test:e2e` needs nothing running.
+MSW-backed mock API (`bun run run-mock-server`) itself, so `bun run test:e2e` needs nothing running.
 
 | Spec | Journey |
 |---|---|

@@ -108,7 +108,7 @@ Do not mix both for one subject.
 ## Running the mock backend
 
 ```bash
-npm run run-mock-server     # Express on VITE_APP_MOCK_API_PORT (8081 for e2e)
+bun run run-mock-server     # Express on VITE_APP_MOCK_API_PORT (8081 for e2e)
 ```
 
 Point the app at it with `VITE_APP_API_URL=http://localhost:8081` and

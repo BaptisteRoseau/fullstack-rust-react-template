@@ -65,5 +65,5 @@ with a `Set-Cookie` and a `Location` back into the app — the same shape as the
 `/api/auth/me` returns the user or `401`. The mock flow is independent of Keycloak.
 
 The MSW **browser** worker intercepts XHR but not full-page navigations, so the OIDC redirect is
-only mocked when the app points at the standalone mock server (`npm run run-mock-server`), which is
+only mocked when the app points at the standalone mock server (`bun run run-mock-server`), which is
 what the Playwright suite does.

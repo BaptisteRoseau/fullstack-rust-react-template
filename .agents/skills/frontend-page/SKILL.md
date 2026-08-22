@@ -18,7 +18,7 @@ main.tsx → Context.tsx → App.tsx → router → layout → page
 2. Create `src/pages/<PageName>/` with `<PageName>.tsx`, `<page-name>.module.scss` and `index.ts`.
 3. Register the lazy route in `src/router/routes.tsx`, under the right layout.
 4. Add a nav entry if the page is user-reachable.
-5. Wrap every user-facing string in a Lingui macro, then run `npm run i18n:extract` and translate.
+5. Wrap every user-facing string in a Lingui macro, then run `bun run i18n:extract` and translate.
 6. Write `<PageName>.test.tsx`.
 7. Add an e2e spec in `e2e/` if the page is part of a critical journey.
 

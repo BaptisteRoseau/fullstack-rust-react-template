@@ -107,13 +107,13 @@ Import through the `@/` alias (`@/design-system/Button`), never with `../../../`
 Run these from `frontend/`:
 
 ```bash
-npm run check-types
-npm run lint
-npm run test
-npm run build
-npm run test:e2e
-npm run storybook
-npm run i18n:check
+bun run check-types
+bun run lint
+bun run test
+bun run build
+bun run test:e2e
+bun run storybook
+bun run i18n:check
 ```
 
 ## Related skills

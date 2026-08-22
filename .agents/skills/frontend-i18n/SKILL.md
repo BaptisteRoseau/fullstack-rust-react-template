@@ -41,9 +41,9 @@ Interpolation works in both: `` t`Revoke ${apiKey.name}` `` and
 ## Workflow
 
 ```bash
-npm run i18n:extract    # scan sources → update en.po / fr.po
-npm run i18n:compile    # PO → runtime catalogs
-npm run i18n:check      # CI gate: extraction is clean and complete
+bun run i18n:extract    # scan sources → update en.po / fr.po
+bun run i18n:compile    # PO → runtime catalogs
+bun run i18n:check      # CI gate: extraction is clean and complete
 ```
 
 After adding any string: extract, **fill in the French translation**, then compile.

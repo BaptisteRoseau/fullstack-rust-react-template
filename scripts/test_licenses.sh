@@ -33,5 +33,5 @@ ALLOWED_LICENSES='
     UNLICENSED;
     Zlib;
 '
-echo 'Checking for bun/npm packages license compatibility...'
+echo 'Checking for bun packages license compatibility...'
 bun x license-checker --onlyAllow "$ALLOWED_LICENSES" >/dev/null

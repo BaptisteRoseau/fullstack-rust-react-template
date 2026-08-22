@@ -5,9 +5,9 @@ React SPA for the fullstack Rust/React template.
 ## Getting started
 
 ```bash
-npm install
+bun install
 cp .env.example .env
-npm run dev
+bun run dev
 ```
 
 The app serves on <http://localhost:3000> and talks to the backend at `VITE_APP_API_URL`
@@ -17,8 +17,8 @@ repository root).
 To run without a backend, start the mock API instead:
 
 ```bash
-npm run run-mock-server                 # Express + MSW handlers on port 8081
-VITE_APP_API_URL=http://localhost:8081 npm run dev
+bun run run-mock-server                 # Express + MSW handlers on port 8081
+VITE_APP_API_URL=http://localhost:8081 bun run dev
 ```
 
 ## Architecture
@@ -55,20 +55,20 @@ Agents: the same material is packaged as skills — `frontend-architecture`, `fr
 
 | Command | What it does |
 |---|---|
-| `npm run dev` | Vite dev server on port 3000 |
-| `npm run build` | Type-check then production build |
-| `npm run check-types` | `tsc --noEmit` |
-| `npm run lint` | ESLint over `src` and `e2e` |
-| `npm run format` | Prettier write |
-| `npm run test` | Vitest, single run |
-| `npm run test:watch` | Vitest, watch mode |
-| `npm run test:e2e` | Playwright; starts the dev and mock servers itself |
-| `npm run storybook` | Storybook on port 6006 |
-| `npm run run-mock-server` | Standalone MSW API server |
-| `npm run i18n:extract` | Scan sources into the PO catalogs |
-| `npm run i18n:compile` | Compile catalogs for the runtime |
-| `npm run i18n:check` | CI gate: extraction clean, every message translated |
-| `npm run generate` | Plop scaffolding — see [`generators/`](generators/README.md) |
+| `bun run dev` | Vite dev server on port 3000 |
+| `bun run build` | Type-check then production build |
+| `bun run check-types` | `tsc --noEmit` |
+| `bun run lint` | ESLint over `src` and `e2e` |
+| `bun run format` | Prettier write |
+| `bun run test` | Vitest, single run |
+| `bun run test:watch` | Vitest, watch mode |
+| `bun run test:e2e` | Playwright; starts the dev and mock servers itself |
+| `bun run storybook` | Storybook on port 6006 |
+| `bun run run-mock-server` | Standalone MSW API server |
+| `bun run i18n:extract` | Scan sources into the PO catalogs |
+| `bun run i18n:compile` | Compile catalogs for the runtime |
+| `bun run i18n:check` | CI gate: extraction clean, every message translated |
+| `bun run generate` | Plop scaffolding — see [`generators/`](generators/README.md) |
 
 ## Environment
 

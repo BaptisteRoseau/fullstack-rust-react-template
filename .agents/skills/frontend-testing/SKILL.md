@@ -13,9 +13,9 @@ description: How to write Vitest + Testing Library tests and Playwright e2e spec
 | End-to-end | Playwright | `e2e/` | `mock-server.ts` |
 
 ```bash
-npm run test          # vitest run
-npm run test:watch
-npm run test:e2e
+bun run test          # vitest run
+bun run test:watch
+bun run test:e2e
 ```
 
 ## Assertion style
@@ -141,6 +141,6 @@ Every design-system primitive has a story; the preview supplies i18n, a router a
 toolbar toggle. Pages do not get stories — they get tests.
 
 ```bash
-npm run storybook
-npm run storybook:build
+bun run storybook
+bun run storybook:build
 ```
