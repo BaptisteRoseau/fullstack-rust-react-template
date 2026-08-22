@@ -19,6 +19,8 @@
         "storybook": "storybook dev -p 6006",
         "storybook:build": "storybook build",
         "run-mock-server": "vite-node mock-server.ts | pino-pretty -c",
+        "seo:generate": "vite-node scripts/generate-seo-files.cli.ts",
+        "seo:check": "vitest run scripts/generate-seo-files.test.ts",
         "i18n:extract": "lingui extract --overwrite",
         "i18n:compile": "lingui compile",
         "i18n:check": "lingui extract --overwrite --clean && lingui compile --strict"

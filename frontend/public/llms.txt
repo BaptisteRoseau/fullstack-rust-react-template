@@ -1,0 +1,13 @@
+# Fullstack Template
+
+> A Rust and React fullstack application template.
+
+This is a client-rendered React single-page application with a Rust backend. Only the
+pages listed below are reachable without authentication; everything under /user requires
+a signed-in session.
+
+## Pages
+
+- [Home](http://localhost:3000/): Application landing page
+- [Sign in](http://localhost:3000/auth/login): Session login
+- [Register](http://localhost:3000/auth/register): Account creation

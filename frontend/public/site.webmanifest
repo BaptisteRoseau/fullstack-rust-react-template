@@ -1,0 +1,21 @@
+{
+    "id": "http://localhost:3000/",
+    "name": "Fullstack Template",
+    "short_name": "Fullstack Template",
+    "description": "A Rust and React fullstack application template.",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#2f6feb",
+    "icons": [
+        { "src": "/logo192.png", "sizes": "192x192", "type": "image/png" },
+        { "src": "/logo512.png", "sizes": "512x512", "type": "image/png" },
+        {
+            "src": "/logo512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}

@@ -9,6 +9,9 @@ import type { Plugin } from 'vite'
 import svgr from 'vite-plugin-svgr'
 import { defineConfig } from 'vitest/config'
 
+import { writeSeoFiles } from './scripts/generate-seo-files'
+import { seoConfig } from './seo.config'
+
 function linguiMacro(): Plugin {
     return {
         name: 'lingui-macro',
@@ -44,9 +47,30 @@ function linguiMacro(): Plugin {
     }
 }
 
+/**
+ * Overwrites the committed placeholder SEO files in the build output with ones
+ * carrying the configured origin (`SEO_SITE_URL`). Writing in `closeBundle`
+ * rather than `generateBundle` matters: Vite copies `public/` into `outDir`
+ * during the write phase, which would clobber emitted assets.
+ */
+function seoFiles(): Plugin {
+    let outDir = ''
+
+    return {
+        name: 'seo-files',
+        apply: 'build',
+        configResolved(config) {
+            outDir = path.resolve(config.root, config.build.outDir)
+        },
+        async closeBundle() {
+            await writeSeoFiles(outDir, seoConfig)
+        },
+    }
+}
+
 export default defineConfig({
     base: './',
-    plugins: [linguiMacro(), react(), lingui(), svgr()],
+    plugins: [linguiMacro(), react(), lingui(), svgr(), seoFiles()],
     resolve: {
         alias: { '@': path.resolve(__dirname, 'src') },
     },

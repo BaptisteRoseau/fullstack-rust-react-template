@@ -20,6 +20,12 @@
             "@/*": ["./src/*"]
         }
     },
-    "include": ["src", ".storybook", "mock-server.ts"],
+    "include": [
+        "src",
+        ".storybook",
+        "mock-server.ts",
+        "seo.config.ts",
+        "scripts"
+    ],
     "exclude": ["node_modules"]
 }
