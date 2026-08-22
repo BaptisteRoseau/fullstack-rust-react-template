@@ -18,6 +18,11 @@ bun run test:watch
 bun run test:e2e
 ```
 
+Do not create a test file next to a new component, page, API service or hook by hand — the Plop
+generator that scaffolds the folder writes it (`bun run generate <component|page|api|hook> …`, see
+the `frontend-architecture` skill). Fill in the generated file. Only e2e specs under `e2e/` are
+written from scratch.
+
 ## Assertion style
 
 Per the project standard, **every assertion carries a message showing the offending value**:

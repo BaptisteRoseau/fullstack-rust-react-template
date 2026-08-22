@@ -102,11 +102,41 @@ Import through the `@/` alias (`@/design-system/Button`), never with `../../../`
 | A component used by 2+ pages, domain-aware | `components/` |
 | A component with no domain knowledge | `design-system/` |
 
+## Scaffolding — never hand-write a new folder
+
+Every file shape described in these skills has a Plop generator in `frontend/generators/`. Run the
+generator, then fill in the generated files. Do not create the folder or copy an existing one by
+hand — the templates are the source of truth for the naming, the barrel and the test file.
+
+Run from `frontend/`:
+
+| You are adding… | Command |
+|---|---|
+| A design-system primitive | `bun run generate component design-system "" <ComponentName>` |
+| …inside a grouping folder | `bun run generate component design-system inputs <ComponentName>` |
+| A shared domain-aware component | `bun run generate component components <group-or-empty-string> <ComponentName>` |
+| A page | `bun run generate page <PageName> "<Page title>"` |
+| An API domain (declaration, service, mock, test, MSW handler) | `bun run generate api <domainName> <endpointPath>` |
+| A shared hook | `bun run generate hook <nameWithoutUsePrefix>` |
+| A Zustand store | `bun run generate store <storeName>` |
+
+Arguments are positional and answer the generator's prompts in order; pass `""` for an empty
+grouping folder. Omit the arguments (`bun run generate`) to be prompted interactively.
+
+A generator only writes files — you still wire the result up: a page needs its `PATHS` entry, its
+lazy route and a nav link; an API domain needs its handler registered in
+`src/test-utils/mocks/handlers/index.ts`; every user-facing string needs a Lingui macro and an
+extraction run.
+
+A page-local component (`pages/<Page>/components/<Name>/`) has no generator — copy the shape the
+`component` generator produces.
+
 ## Commands
 
 Run these from `frontend/`:
 
 ```bash
+bun run generate      # Plop scaffolding, see above
 bun run check-types
 bun run lint
 bun run test

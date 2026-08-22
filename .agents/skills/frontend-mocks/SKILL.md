@@ -23,6 +23,11 @@ and the standalone Express server for e2e. Write a handler once.
 
 ## Adding a handler
 
+For a **new domain**, the handler file already exists: `bun run generate api <domainName>
+<endpointPath>` writes `src/test-utils/mocks/handlers/<domain>.ts` along with the API layer (see
+the `frontend-api` skill). Fill that file in rather than creating one. For a new endpoint on an
+existing domain, add the resolver to the domain's handler array.
+
 ```ts
 import { http, HttpResponse } from 'msw'
 
@@ -44,7 +49,7 @@ export const apiKeyHandlers = [
 ]
 ```
 
-Then register it in `handlers/index.ts`.
+Then register it in `handlers/index.ts` — the generator does not touch the barrel.
 
 Rules:
 

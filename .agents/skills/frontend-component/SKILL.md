@@ -47,6 +47,18 @@ Grouping folders are kebab-case; component folders are PascalCase. Inside a comp
 identical to the design system's: `Component.tsx`, `Component.test.tsx`, optional
 `Component.stories.tsx`, `component.module.scss`, `index.ts`.
 
+Scaffold it rather than hand-writing or copy-pasting a sibling. From `frontend/`:
+
+```bash
+bun run generate component components <group> <ComponentName>
+# e.g. bun run generate component components layout AppHeader
+# no grouping folder:  bun run generate component components "" ProtectedRoute
+```
+
+The `components` layer argument is what keeps the story out — this layer only gets one when it
+renders without heavy mocking, so add it by hand in that case. Run `bun run generate` with no
+arguments to be prompted.
+
 ## A domain-aware component
 
 The point of this layer: it reaches for its own data. Handle loading and error before the happy

@@ -14,6 +14,19 @@ component cannot be told in a story without mocking an API, it belongs in `src/c
 
 ## Folder shape
 
+Generate it — the story, the stylesheet name and the barrel come out right for free. From
+`frontend/`:
+
+```bash
+bun run generate component design-system "" <ComponentName>
+# e.g. bun run generate component design-system "" Badge
+# inside a grouping folder: bun run generate component design-system inputs TextInput
+```
+
+The second argument is the grouping folder; pass `""` for none. Run `bun run generate` with no
+arguments to be prompted instead. Choosing the `design-system` layer is what adds the mandatory
+story to the generated folder.
+
 ```
 Badge/
 ├── Badge.tsx               # implementation

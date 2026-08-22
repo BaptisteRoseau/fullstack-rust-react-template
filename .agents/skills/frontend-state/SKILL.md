@@ -23,6 +23,15 @@ sharing state between a parent and a child (props), or state used by exactly one
 `src/stores/` currently holds `notifications`, `theme` and `locale` — that is roughly the whole
 legitimate population of this folder.
 
+Once the checks above say a store is really warranted, generate the file from `frontend/`:
+
+```bash
+bun run generate store <storeName>
+# e.g. bun run generate store notifications
+```
+
+That writes `src/stores/<storeName>.ts`; fill in the state and actions.
+
 ```ts
 import { nanoid } from 'nanoid'
 import { create } from 'zustand'
@@ -108,6 +117,8 @@ src/contexts/<name>/
 ├── types.ts
 └── index.ts
 ```
+
+Contexts have no generator — write these four files by hand.
 
 Use the typed factory in `@/utils/createContext` — it removes the `| undefined` dance and throws a
 real error when the provider is missing:

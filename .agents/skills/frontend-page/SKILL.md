@@ -15,7 +15,7 @@ main.tsx → Context.tsx → App.tsx → router → layout → page
 ## Checklist
 
 1. Add the path to `src/router/constants.ts`.
-2. Create `src/pages/<PageName>/` with `<PageName>.tsx`, `<page-name>.module.scss` and `index.ts`.
+2. Scaffold the folder with `bun run generate page <PageName> "<Page title>"` — see §4.
 3. Register the lazy route in `src/router/routes.tsx`, under the right layout.
 4. Add a nav entry if the page is user-reachable.
 5. Wrap every user-facing string in a Lingui macro, then run `bun run i18n:extract` and translate.
@@ -92,6 +92,19 @@ hydration warning on lazy roots.
 
 ## 4. Page folder
 
+Generate it, never hand-write it. From `frontend/`:
+
+```bash
+bun run generate page <PageName> "<Page title>"
+# e.g. bun run generate page ApiKeys "API keys"
+```
+
+That writes `src/pages/<PageName>/` with `<PageName>.tsx`, `<page-name>.module.scss`,
+`<PageName>.test.tsx` and `index.ts` — steps 5 and 7 of the checklist then fill in the generated
+component and test. Run it without arguments to be prompted.
+
+The folder then grows as the page does:
+
 ```
 pages/User/
 ├── User.tsx                # shell: left nav + <Outlet/>
@@ -112,6 +125,9 @@ Rules:
 
 - A page folder is **private**. Nothing outside it may import from its `components/`, `hooks/` or
   `sections/`. The `index.ts` is the only surface.
+- `components/` and `sections/` entries have no generator of their own — mirror the shape
+  `bun run generate component` produces (`Name.tsx`, `name.module.scss`, `Name.test.tsx`,
+  `index.ts`).
 - When a second page needs one of those parts, move it to `src/components/` in the same commit.
 - **No page imports another page** — ESLint enforces this.
 

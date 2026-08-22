@@ -21,6 +21,21 @@ src/api/
 └── utils/useApiAction.ts   # generic POST/PUT/PATCH/DELETE hook
 ```
 
+## 0. Scaffold the domain
+
+The five files below are generated, not hand-written. From `frontend/`:
+
+```bash
+bun run generate api <domainName> <endpointPath>
+# e.g. bun run generate api apiKeys /api/api-key
+```
+
+That writes `src/api/<domain>.ts`, `src/api/service/<domain>.ts`,
+`src/api/service/__mocks__/<domain>.ts`, `src/api/service/<domain>.test.ts` and
+`src/test-utils/mocks/handlers/<domain>.ts`. Run it without arguments to be prompted. The steps
+below describe how to fill each generated file in — for an existing domain, skip to the file you
+are editing.
+
 ## 1. Declare the endpoint
 
 `src/api/<domain>.ts` — constants and types only. Importing it must never trigger a request.
@@ -111,8 +126,8 @@ mutate((key) => typeof key === 'string' && key.startsWith(API_KEYS_ENDPOINT))
 
 ## 4. Add the manual mock
 
-`src/api/service/__mocks__/<domain>.ts` — **every** exported hook must be mocked, or importers
-crash on an undefined function.
+`src/api/service/__mocks__/<domain>.ts` (generated in step 0) — **every** exported hook must be
+mocked, or importers crash on an undefined function.
 
 ```ts
 import { vi } from 'vitest'
@@ -156,7 +171,9 @@ it('returns the api keys of the caller', async () => {
 
 `SwrWrapper` provides a fresh cache and `dedupingInterval: 0` so results never leak between cases.
 
-Also add the MSW handler that backs dev and e2e — see the `frontend-mocks` skill.
+The generator also created the MSW handler that backs dev and e2e,
+`src/test-utils/mocks/handlers/<domain>.ts` — fill it in and register it in `handlers/index.ts`.
+See the `frontend-mocks` skill.
 
 ## Authentication
 

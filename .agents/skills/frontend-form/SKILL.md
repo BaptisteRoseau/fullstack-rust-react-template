@@ -79,6 +79,14 @@ async function handleSubmit(values: z.infer<typeof profileSchema>) {
 
 ## Adding a field component
 
+Generate the folder first — a field is a shared component under the `forms/fields` grouping. From
+`frontend/`:
+
+```bash
+bun run generate component components forms/fields <Name>Field
+# e.g. bun run generate component components forms/fields TextAreaField
+```
+
 Every field builds on `FormField`, which owns the label, the description, the error message and the
 `aria-describedby`/`aria-invalid` wiring — so accessibility is handled once.
 
