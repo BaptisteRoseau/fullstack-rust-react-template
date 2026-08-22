@@ -5,6 +5,7 @@ const tsPlugin = require('@typescript-eslint/eslint-plugin')
 const tsParser = require('@typescript-eslint/parser')
 const vitestPlugin = require('@vitest/eslint-plugin')
 const checkFilePlugin = require('eslint-plugin-check-file')
+const cssModulesPlugin = require('eslint-plugin-css-modules')
 const prettierConfig = require('eslint-config-prettier')
 const importPlugin = require('eslint-plugin-import')
 const jestDomPlugin = require('eslint-plugin-jest-dom')
@@ -52,6 +53,7 @@ module.exports = [
         files: TS_FILES,
         plugins: {
             '@typescript-eslint': tsPlugin,
+            'css-modules': cssModulesPlugin,
             prettier: prettierPlugin,
         },
         languageOptions: {
@@ -101,6 +103,7 @@ module.exports = [
             '@typescript-eslint/explicit-module-boundary-types': ['off'],
             '@typescript-eslint/no-empty-function': ['off'],
             '@typescript-eslint/no-explicit-any': ['error'],
+            'css-modules/no-undef-class': 'error',
         },
     },
     {
