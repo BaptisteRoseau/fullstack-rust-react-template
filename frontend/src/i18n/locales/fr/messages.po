@@ -279,6 +279,10 @@ msgstr "Enregistrer"
 msgid "Ship a fullstack app, not a toolchain"
 msgstr "Livrez une application fullstack, pas une chaîne d'outils"
 
+#: src/api/errors.ts:110
+msgid "Something went wrong. Please try again."
+msgstr "Une erreur est survenue. Veuillez réessayer."
+
 #: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx:32
 msgid "Switch to the dark theme"
 msgstr "Passer au thème sombre"
@@ -303,9 +307,21 @@ msgstr "La page que vous cherchez n'existe pas."
 msgid "The profile shared with the rest of the application."
 msgstr "Le profil partagé avec le reste de l'application."
 
+#: src/api/errors.ts:116
+msgid "The request contained characters the server cannot read."
+msgstr "La requête contient des caractères que le serveur ne peut pas lire."
+
 #: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:64
 msgid "The secret is displayed once, right after creation."
 msgstr "Le secret est affiché une seule fois, juste après la création."
+
+#: src/api/errors.ts:117
+msgid "The server could not be reached. Check your connection."
+msgstr "Le serveur est injoignable. Vérifiez votre connexion."
+
+#: src/api/errors.ts:118
+msgid "The server sent a response the application cannot read."
+msgstr "Le serveur a renvoyé une réponse que l'application ne peut pas lire."
 
 #: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx:28
 msgid "Theme: dark. Switch to the system theme."
@@ -319,9 +335,17 @@ msgstr "Thème : clair. Passer au thème sombre."
 msgid "Theme: system. Switch to the light theme."
 msgstr "Thème : système. Passer au thème clair."
 
+#: src/api/errors.ts:114
+msgid "This resource no longer exists."
+msgstr "Cette ressource n'existe plus."
+
 #: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx:35
 msgid "This secret will not be shown again."
 msgstr "Ce secret ne sera plus affiché."
+
+#: src/api/errors.ts:115
+msgid "Too many requests. Please wait a moment and try again."
+msgstr "Trop de requêtes. Patientez un instant avant de réessayer."
 
 #: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:55
 #: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx:33
@@ -329,9 +353,17 @@ msgstr "Ce secret ne sera plus affiché."
 msgid "Unexpected error"
 msgstr "Erreur inattendue"
 
+#: src/api/errors.ts:112
+msgid "You are not allowed to do that."
+msgstr "Vous n'êtes pas autorisé à effectuer cette action."
+
 #: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx:55
 msgid "You have no API key yet."
 msgstr "Vous n'avez pas encore de clé d'API."
+
+#: src/api/errors.ts:111
+msgid "You need to be signed in to do that."
+msgstr "Vous devez être connecté pour effectuer cette action."
 
 #: src/pages/Register/Register.tsx:24
 msgid "You will be redirected to the identity provider to create your account."
@@ -344,3 +376,7 @@ msgstr "Vous allez être redirigé vers le fournisseur d'identité pour vous con
 #: src/pages/User/User.tsx:14
 msgid "Your account"
 msgstr "Votre compte"
+
+#: src/api/errors.ts:113
+msgid "Your session has expired. Please sign in again."
+msgstr "Votre session a expiré. Veuillez vous reconnecter."

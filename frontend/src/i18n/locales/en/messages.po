@@ -279,6 +279,10 @@ msgstr "Save changes"
 msgid "Ship a fullstack app, not a toolchain"
 msgstr "Ship a fullstack app, not a toolchain"
 
+#: src/api/errors.ts:110
+msgid "Something went wrong. Please try again."
+msgstr "Something went wrong. Please try again."
+
 #: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx:32
 msgid "Switch to the dark theme"
 msgstr "Switch to the dark theme"
@@ -303,9 +307,21 @@ msgstr "The page you are looking for does not exist."
 msgid "The profile shared with the rest of the application."
 msgstr "The profile shared with the rest of the application."
 
+#: src/api/errors.ts:116
+msgid "The request contained characters the server cannot read."
+msgstr "The request contained characters the server cannot read."
+
 #: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:64
 msgid "The secret is displayed once, right after creation."
 msgstr "The secret is displayed once, right after creation."
+
+#: src/api/errors.ts:117
+msgid "The server could not be reached. Check your connection."
+msgstr "The server could not be reached. Check your connection."
+
+#: src/api/errors.ts:118
+msgid "The server sent a response the application cannot read."
+msgstr "The server sent a response the application cannot read."
 
 #: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx:28
 msgid "Theme: dark. Switch to the system theme."
@@ -319,9 +335,17 @@ msgstr "Theme: light. Switch to the dark theme."
 msgid "Theme: system. Switch to the light theme."
 msgstr "Theme: system. Switch to the light theme."
 
+#: src/api/errors.ts:114
+msgid "This resource no longer exists."
+msgstr "This resource no longer exists."
+
 #: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx:35
 msgid "This secret will not be shown again."
 msgstr "This secret will not be shown again."
+
+#: src/api/errors.ts:115
+msgid "Too many requests. Please wait a moment and try again."
+msgstr "Too many requests. Please wait a moment and try again."
 
 #: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:55
 #: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx:33
@@ -329,9 +353,17 @@ msgstr "This secret will not be shown again."
 msgid "Unexpected error"
 msgstr "Unexpected error"
 
+#: src/api/errors.ts:112
+msgid "You are not allowed to do that."
+msgstr "You are not allowed to do that."
+
 #: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx:55
 msgid "You have no API key yet."
 msgstr "You have no API key yet."
+
+#: src/api/errors.ts:111
+msgid "You need to be signed in to do that."
+msgstr "You need to be signed in to do that."
 
 #: src/pages/Register/Register.tsx:24
 msgid "You will be redirected to the identity provider to create your account."
@@ -344,3 +376,7 @@ msgstr "You will be redirected to the identity provider to sign in."
 #: src/pages/User/User.tsx:14
 msgid "Your account"
 msgstr "Your account"
+
+#: src/api/errors.ts:113
+msgid "Your session has expired. Please sign in again."
+msgstr "Your session has expired. Please sign in again."

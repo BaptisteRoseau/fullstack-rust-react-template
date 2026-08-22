@@ -1,6 +1,8 @@
+import { I18nProvider } from '@lingui/react'
 import { SWRConfig } from 'swr'
 
 import { apiFetch } from '@/api/client'
+import { i18n } from '@/i18n'
 
 export function SwrWrapper({ children }: { children: React.ReactNode }) {
     return (
@@ -16,4 +18,8 @@ export function SwrWrapper({ children }: { children: React.ReactNode }) {
             {children}
         </SWRConfig>
     )
+}
+
+export function I18nWrapper({ children }: { children: React.ReactNode }) {
+    return <I18nProvider i18n={i18n}>{children}</I18nProvider>
 }
