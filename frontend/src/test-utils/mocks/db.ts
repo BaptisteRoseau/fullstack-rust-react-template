@@ -8,7 +8,6 @@ const models = {
         lastName: String,
         email: String,
         role: String,
-        bio: String,
         teamId: String,
         createdAt: Number,
     },
@@ -71,7 +70,6 @@ export async function seedDb() {
         lastName: 'Lovelace',
         email: 'ada@example.com',
         role: 'admin',
-        bio: 'Builds things with Rust and React.',
         teamId: 'team-1',
         createdAt: Date.UTC(2026, 0, 15),
     })

@@ -5,11 +5,13 @@ use crate::{
     endpoints::{
         api_key::endpoints::{
             __path_create_api_key, __path_delete_api_key, __path_get_api_key,
-            create_api_key, delete_api_key, get_api_key,
+            __path_list_api_keys, create_api_key, delete_api_key, get_api_key,
+            list_api_keys,
         },
         auth::endpoints::{
             __path_callback, __path_login, __path_logout, __path_me, __path_refresh,
-            __path_register, callback, login, logout, me, refresh, register,
+            __path_register, __path_update_me, callback, login, logout, me, refresh,
+            register, update_me,
         },
         ping::endpoints::{__path_ping, ping},
         storage::endpoints::{
@@ -43,7 +45,7 @@ pub(super) fn api_router() -> OpenApiRouter<AppState> {
         .routes(routes!(download))
         .routes(routes!(delete_stored_file))
         // API Key
-        .routes(routes!(create_api_key))
+        .routes(routes!(create_api_key, list_api_keys))
         .routes(routes!(get_api_key))
         .routes(routes!(delete_api_key))
         // Authentication
@@ -52,7 +54,7 @@ pub(super) fn api_router() -> OpenApiRouter<AppState> {
         .routes(routes!(callback))
         .routes(routes!(refresh))
         .routes(routes!(logout))
-        .routes(routes!(me))
+        .routes(routes!(me, update_me))
 }
 
 /// Public routes that qre exposed to the world

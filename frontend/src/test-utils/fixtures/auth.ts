@@ -11,7 +11,6 @@ export function buildCurrentUser(
         firstName: randFirstName(),
         lastName: randLastName(),
         role: 'user',
-        bio: '',
         teamId: randUuid(),
         createdAt: Date.now(),
         ...overrides,

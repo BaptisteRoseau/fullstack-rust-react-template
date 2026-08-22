@@ -175,11 +175,25 @@ impl DatabaseUser for Postgres {
         &mut self,
         patch: UserPatch,
     ) -> Result<User, Box<DatabaseError>> {
-        Ok(patch.execute(self).await?)
+        let id = patch.id;
+        patch.execute(self).await.map_err(|e| match e {
+            CrudError::Sqlx(sqlx::Error::RowNotFound) => {
+                Box::new(DatabaseError::NotFound(id.to_string()))
+            }
+            other => Box::new(DatabaseError::Crud(other)),
+        })
     }
     async fn read_user(&self, uuid: Uuid) -> Result<User, Box<DatabaseError>> {
-        let q = sqlx::query_as::<_, User>("SELECT * FROM user where id == %s").bind(uuid);
-        Ok(q.fetch_one(&self.pool).await?)
+        sqlx::query_as::<_, User>("SELECT * FROM users WHERE id = $1")
+            .bind(uuid)
+            .fetch_one(&self.pool)
+            .await
+            .map_err(|e| match e {
+                sqlx::Error::RowNotFound => {
+                    Box::new(DatabaseError::NotFound(uuid.to_string()))
+                }
+                other => Box::new(DatabaseError::Sqlx(other)),
+            })
     }
     async fn delete_user(&mut self, uuid: Uuid) -> Result<bool, Box<DatabaseError>> {
         let q = sqlx::query("DELETE * FROM user where id == %s").bind(uuid);
@@ -199,41 +213,35 @@ impl DatabaseUser for Postgres {
             .fetch_optional(&self.pool)
             .await?;
 
-        let user =
-            match existing {
-                None => {
-                    sqlx::query_as::<_, User>(
-                        "INSERT INTO users (id, username, first_name, last_name, email) \
+        let user = match existing {
+            None => {
+                sqlx::query_as::<_, User>(
+                    "INSERT INTO users (id, username, first_name, last_name, email) \
                      VALUES ($1, $2, $3, $4, $5) RETURNING *",
-                    )
-                    .bind(id)
-                    .bind(username)
-                    .bind(first_name)
-                    .bind(last_name)
-                    .bind(email)
-                    .fetch_one(&self.pool)
-                    .await?
-                }
-                Some(current)
-                    if current.username == username
-                        && current.first_name == first_name
-                        && current.last_name == last_name
-                        && current.email == email =>
-                {
-                    current
-                }
-                Some(_) => sqlx::query_as::<_, User>(
-                    "UPDATE users SET username = $1, first_name = $2, last_name = $3, \
-                     email = $4 WHERE id = $5 RETURNING *",
                 )
+                .bind(id)
                 .bind(username)
                 .bind(first_name)
                 .bind(last_name)
                 .bind(email)
+                .fetch_one(&self.pool)
+                .await?
+            }
+            Some(current) if current.username == username && current.email == email => {
+                current
+            }
+            Some(_) => {
+                sqlx::query_as::<_, User>(
+                    "UPDATE users SET username = $1, email = $2 WHERE id = $3 \
+                     RETURNING *",
+                )
+                .bind(username)
+                .bind(email)
                 .bind(id)
                 .fetch_one(&self.pool)
-                .await?,
-            };
+                .await?
+            }
+        };
 
         Ok(user)
     }
@@ -296,6 +304,19 @@ impl DatabaseApiKey for Postgres {
                 }
                 other => Box::new(DatabaseError::Sqlx(other)),
             })
+    }
+
+    async fn read_api_keys_by_owner(
+        &self,
+        owner: Uuid,
+    ) -> Result<Vec<ApiKey>, Box<DatabaseError>> {
+        sqlx::query_as::<_, ApiKey>(
+            "SELECT * FROM api_key WHERE owner = $1 ORDER BY created_at DESC",
+        )
+        .bind(owner)
+        .fetch_all(&self.pool)
+        .await
+        .map_err(|e| Box::new(DatabaseError::Sqlx(e)))
     }
 
     async fn delete_api_key(&mut self, id: Uuid) -> Result<bool, Box<DatabaseError>> {

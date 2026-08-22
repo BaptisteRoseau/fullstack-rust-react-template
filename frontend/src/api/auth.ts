@@ -10,15 +10,11 @@ export type CurrentUser = {
     firstName: string
     lastName: string
     role: string
-    bio: string
     teamId: string
     createdAt: number
 }
 
-export type UpdateProfileBody = Pick<
-    CurrentUser,
-    'firstName' | 'lastName' | 'bio'
->
+export type UpdateProfileBody = Pick<CurrentUser, 'firstName' | 'lastName'>
 
 export function authRedirectUrl(
     screen: 'login' | 'register',

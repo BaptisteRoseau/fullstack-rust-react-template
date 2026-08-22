@@ -47,7 +47,6 @@ test.describe('information', () => {
     test('edits and persists the profile', async ({ page }) => {
         await page.goto('/user')
 
-        await page.getByLabel('Bio').fill('Builds compilers for fun.')
         await page.getByLabel('First name').fill('Augusta')
         await page.getByRole('button', { name: 'Save changes' }).click()
 
@@ -57,9 +56,6 @@ test.describe('information', () => {
 
         await page.reload()
 
-        await expect(page.getByLabel('Bio')).toHaveValue(
-            'Builds compilers for fun.',
-        )
         await expect(page.getByLabel('First name')).toHaveValue('Augusta')
 
         await page.getByLabel('First name').fill('Ada')

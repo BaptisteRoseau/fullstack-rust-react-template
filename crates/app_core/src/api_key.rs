@@ -5,6 +5,18 @@ use crate::error::CoreError;
 use crate::models::api_key_from_db;
 use database::Database;
 
+/// Lists the keys owned by `owner`, newest first.
+pub async fn list_api_keys(
+    db: &dyn Database,
+    owner: Uuid,
+) -> Result<Vec<models::ApiKey>, CoreError> {
+    db.read_api_keys_by_owner(owner)
+        .await?
+        .into_iter()
+        .map(api_key_from_db)
+        .collect()
+}
+
 pub async fn create_api_key(
     db: &mut dyn Database,
     owner: Uuid,

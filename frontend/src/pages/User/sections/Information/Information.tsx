@@ -5,7 +5,6 @@ import * as z from 'zod'
 import { ME_ENDPOINT } from '@/api/auth'
 import { apiErrorMessage } from '@/api/errors'
 import { useCurrentUser, useUpdateProfile } from '@/api/service/auth'
-import { TextAreaField } from '@/components/forms/fields/TextAreaField'
 import { TextField } from '@/components/forms/fields/TextField'
 import { Form } from '@/components/forms/Form'
 import { Badge } from '@/design-system/Badge'
@@ -21,7 +20,6 @@ import styles from './information.module.scss'
 const profileSchema = z.object({
     firstName: z.string().min(1),
     lastName: z.string().min(1),
-    bio: z.string().max(500),
 })
 
 export function Information() {
@@ -94,14 +92,12 @@ export function Information() {
                     defaultValues={{
                         firstName: user.firstName,
                         lastName: user.lastName,
-                        bio: user.bio,
                     }}
                 >
                     {() => (
                         <>
                             <TextField name="firstName" label={t`First name`} />
                             <TextField name="lastName" label={t`Last name`} />
-                            <TextAreaField name="bio" label={t`Bio`} />
                             <div className={styles.actions}>
                                 <Button type="submit" disabled={isMutating}>
                                     <Trans>Save changes</Trans>

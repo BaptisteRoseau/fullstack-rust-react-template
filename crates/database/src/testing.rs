@@ -3,7 +3,7 @@
 //! Enable via the `test-utils` feature (add it under `[dev-dependencies]`, not
 //! `[dependencies]`, so it never leaks into non-test builds).
 
-use std::collections::HashMap;
+use std::{cmp::Reverse, collections::HashMap};
 
 use async_trait::async_trait;
 use uuid::Uuid;
@@ -16,9 +16,9 @@ use crate::models::{ApiKey, User, UserPatch};
 /// public fields (e.g. `MockDatabase { api_keys_by_hash, ..Default::default() }`)
 /// before exercising the code under test.
 ///
-/// `create_user`/`update_user` are intentionally left unimplemented: the real
-/// `Postgres` implementation of both is currently broken (they never insert),
-/// so a working mock here would silently diverge from production behavior.
+/// `create_user` is intentionally left unimplemented: the real `Postgres`
+/// implementation is currently broken (it never inserts), so a working mock
+/// here would silently diverge from production behavior.
 #[derive(Default)]
 pub struct MockDatabase {
     pub users: HashMap<Uuid, User>,
@@ -37,9 +37,31 @@ impl DatabaseUser for MockDatabase {
 
     async fn update_user(
         &mut self,
-        _patch: UserPatch,
+        patch: UserPatch,
     ) -> Result<User, Box<DatabaseError>> {
-        unimplemented!("update_user is broken upstream; see Postgres::update_user")
+        let user = self
+            .users
+            .get_mut(&patch.id)
+            .ok_or_else(|| Box::new(DatabaseError::NotFound(patch.id.to_string())))?;
+
+        if let Some(username) = patch.username {
+            user.username = username;
+        }
+        if let Some(first_name) = patch.first_name {
+            user.first_name = first_name;
+        }
+        if let Some(last_name) = patch.last_name {
+            user.last_name = last_name;
+        }
+        if let Some(email) = patch.email {
+            user.email = email;
+        }
+        if let Some(permissions) = patch.permissions {
+            user.permissions = permissions;
+        }
+        user.updated_at = chrono::Utc::now();
+
+        Ok(user.clone())
     }
 
     async fn read_user(&self, uuid: Uuid) -> Result<User, Box<DatabaseError>> {
@@ -73,14 +95,8 @@ impl DatabaseUser for MockDatabase {
             updated_at: now,
         });
 
-        if user.username != username
-            || user.first_name != first_name
-            || user.last_name != last_name
-            || user.email != email
-        {
+        if user.username != username || user.email != email {
             user.username = username;
-            user.first_name = first_name;
-            user.last_name = last_name;
             user.email = email;
             user.updated_at = now;
         }
@@ -132,6 +148,20 @@ impl DatabaseApiKey for MockDatabase {
             .get(hash)
             .cloned()
             .ok_or_else(|| Box::new(DatabaseError::NotFound(hash.to_string())))
+    }
+
+    async fn read_api_keys_by_owner(
+        &self,
+        owner: Uuid,
+    ) -> Result<Vec<ApiKey>, Box<DatabaseError>> {
+        let mut keys: Vec<ApiKey> = self
+            .api_keys_by_id
+            .values()
+            .filter(|key| key.owner == owner)
+            .cloned()
+            .collect();
+        keys.sort_by_key(|key| Reverse(key.created_at));
+        Ok(keys)
     }
 
     async fn delete_api_key(&mut self, id: Uuid) -> Result<bool, Box<DatabaseError>> {

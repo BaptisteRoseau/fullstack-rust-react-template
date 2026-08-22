@@ -21,5 +21,12 @@ pub trait DatabaseApiKey: Send + Sync {
         hash: &str,
     ) -> Result<ApiKey, Box<DatabaseError>>;
 
+    /// Every key owned by `owner`, newest first. An owner with no key yields an
+    /// empty list rather than [`DatabaseError::NotFound`].
+    async fn read_api_keys_by_owner(
+        &self,
+        owner: Uuid,
+    ) -> Result<Vec<ApiKey>, Box<DatabaseError>>;
+
     async fn delete_api_key(&mut self, id: Uuid) -> Result<bool, Box<DatabaseError>>;
 }

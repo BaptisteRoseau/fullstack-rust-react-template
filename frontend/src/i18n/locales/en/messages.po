@@ -75,10 +75,6 @@ msgstr "Authentication built in"
 msgid "Back to home"
 msgstr "Back to home"
 
-#: src/pages/User/sections/Information/Information.tsx:104
-msgid "Bio"
-msgstr "Bio"
-
 #: src/components/ConfirmationDialog/ConfirmationDialog.tsx:36
 #: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:92
 msgid "Cancel"
@@ -121,7 +117,7 @@ msgstr "Could not create the API key"
 msgid "Could not revoke the API key"
 msgstr "Could not revoke the API key"
 
-#: src/pages/User/sections/Information/Information.tsx:53
+#: src/pages/User/sections/Information/Information.tsx:51
 msgid "Could not update the profile"
 msgstr "Could not update the profile"
 
@@ -145,7 +141,7 @@ msgstr "Dismiss"
 msgid "Domain-agnostic primitives on SCSS Modules and design tokens, every one of them in Storybook."
 msgstr "Domain-agnostic primitives on SCSS Modules and design tokens, every one of them in Storybook."
 
-#: src/pages/User/sections/Information/Information.tsx:68
+#: src/pages/User/sections/Information/Information.tsx:66
 msgid "Email"
 msgstr "Email"
 
@@ -153,7 +149,7 @@ msgstr "Email"
 msgid "Endpoint declarations separated from the SWR hooks that call them, mocked end to end."
 msgstr "Endpoint declarations separated from the SWR hooks that call them, mocked end to end."
 
-#: src/pages/User/sections/Information/Information.tsx:102
+#: src/pages/User/sections/Information/Information.tsx:99
 msgid "First name"
 msgstr "First name"
 
@@ -181,7 +177,7 @@ msgstr "Go to your account"
 
 #: src/components/layout/UserMenu/UserMenu.tsx:51
 #: src/pages/User/components/UserNav/UserNav.tsx:20
-#: src/pages/User/sections/Information/Information.tsx:61
+#: src/pages/User/sections/Information/Information.tsx:59
 msgid "Information"
 msgstr "Information"
 
@@ -193,14 +189,14 @@ msgstr "Keys authenticate machine access to the API. The secret is shown once."
 msgid "Language"
 msgstr "Language"
 
-#: src/pages/User/sections/Information/Information.tsx:103
+#: src/pages/User/sections/Information/Information.tsx:100
 msgid "Last name"
 msgstr "Last name"
 
 #: src/components/layout/AppHeader/AppHeader.tsx:26
 #: src/components/ProtectedRoute/ProtectedRoute.tsx:18
 #: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx:39
-#: src/pages/User/sections/Information/Information.tsx:35
+#: src/pages/User/sections/Information/Information.tsx:33
 msgid "Loading"
 msgstr "Loading"
 
@@ -216,7 +212,7 @@ msgstr "Log in"
 msgid "Log out"
 msgstr "Log out"
 
-#: src/pages/User/sections/Information/Information.tsx:82
+#: src/pages/User/sections/Information/Information.tsx:80
 msgid "Member since"
 msgstr "Member since"
 
@@ -251,7 +247,7 @@ msgstr "Page not found"
 msgid "Permissions"
 msgstr "Permissions"
 
-#: src/pages/User/sections/Information/Information.tsx:48
+#: src/pages/User/sections/Information/Information.tsx:46
 msgid "Profile updated"
 msgstr "Profile updated"
 
@@ -271,11 +267,11 @@ msgstr "Revoke"
 msgid "Revoke {0}"
 msgstr "Revoke {0}"
 
-#: src/pages/User/sections/Information/Information.tsx:74
+#: src/pages/User/sections/Information/Information.tsx:72
 msgid "Role"
 msgstr "Role"
 
-#: src/pages/User/sections/Information/Information.tsx:107
+#: src/pages/User/sections/Information/Information.tsx:103
 msgid "Save changes"
 msgstr "Save changes"
 
@@ -303,7 +299,7 @@ msgstr "The API keys could not be loaded."
 msgid "The page you are looking for does not exist."
 msgstr "The page you are looking for does not exist."
 
-#: src/pages/User/sections/Information/Information.tsx:62
+#: src/pages/User/sections/Information/Information.tsx:60
 msgid "The profile shared with the rest of the application."
 msgstr "The profile shared with the rest of the application."
 
@@ -329,7 +325,7 @@ msgstr "This secret will not be shown again."
 
 #: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:55
 #: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx:33
-#: src/pages/User/sections/Information/Information.tsx:54
+#: src/pages/User/sections/Information/Information.tsx:52
 msgid "Unexpected error"
 msgstr "Unexpected error"
 

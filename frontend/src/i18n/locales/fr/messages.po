@@ -75,10 +75,6 @@ msgstr "Authentification intégrée"
 msgid "Back to home"
 msgstr "Retour à l'accueil"
 
-#: src/pages/User/sections/Information/Information.tsx:104
-msgid "Bio"
-msgstr "Biographie"
-
 #: src/components/ConfirmationDialog/ConfirmationDialog.tsx:36
 #: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:92
 msgid "Cancel"
@@ -121,7 +117,7 @@ msgstr "Impossible de créer la clé d'API"
 msgid "Could not revoke the API key"
 msgstr "Impossible de révoquer la clé d'API"
 
-#: src/pages/User/sections/Information/Information.tsx:53
+#: src/pages/User/sections/Information/Information.tsx:51
 msgid "Could not update the profile"
 msgstr "Impossible de mettre à jour le profil"
 
@@ -145,7 +141,7 @@ msgstr "Masquer"
 msgid "Domain-agnostic primitives on SCSS Modules and design tokens, every one of them in Storybook."
 msgstr "Des primitives indépendantes du domaine, en SCSS Modules et jetons de design, toutes présentes dans Storybook."
 
-#: src/pages/User/sections/Information/Information.tsx:68
+#: src/pages/User/sections/Information/Information.tsx:66
 msgid "Email"
 msgstr "E-mail"
 
@@ -153,7 +149,7 @@ msgstr "E-mail"
 msgid "Endpoint declarations separated from the SWR hooks that call them, mocked end to end."
 msgstr "Des déclarations d'endpoints séparées des hooks SWR qui les appellent, simulées de bout en bout."
 
-#: src/pages/User/sections/Information/Information.tsx:102
+#: src/pages/User/sections/Information/Information.tsx:99
 msgid "First name"
 msgstr "Prénom"
 
@@ -181,7 +177,7 @@ msgstr "Accéder à votre compte"
 
 #: src/components/layout/UserMenu/UserMenu.tsx:51
 #: src/pages/User/components/UserNav/UserNav.tsx:20
-#: src/pages/User/sections/Information/Information.tsx:61
+#: src/pages/User/sections/Information/Information.tsx:59
 msgid "Information"
 msgstr "Informations"
 
@@ -193,14 +189,14 @@ msgstr "Les clés authentifient les accès machine à l'API. Le secret n'est aff
 msgid "Language"
 msgstr "Langue"
 
-#: src/pages/User/sections/Information/Information.tsx:103
+#: src/pages/User/sections/Information/Information.tsx:100
 msgid "Last name"
 msgstr "Nom"
 
 #: src/components/layout/AppHeader/AppHeader.tsx:26
 #: src/components/ProtectedRoute/ProtectedRoute.tsx:18
 #: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx:39
-#: src/pages/User/sections/Information/Information.tsx:35
+#: src/pages/User/sections/Information/Information.tsx:33
 msgid "Loading"
 msgstr "Chargement"
 
@@ -216,7 +212,7 @@ msgstr "Se connecter"
 msgid "Log out"
 msgstr "Se déconnecter"
 
-#: src/pages/User/sections/Information/Information.tsx:82
+#: src/pages/User/sections/Information/Information.tsx:80
 msgid "Member since"
 msgstr "Membre depuis"
 
@@ -251,7 +247,7 @@ msgstr "Page introuvable"
 msgid "Permissions"
 msgstr "Permissions"
 
-#: src/pages/User/sections/Information/Information.tsx:48
+#: src/pages/User/sections/Information/Information.tsx:46
 msgid "Profile updated"
 msgstr "Profil mis à jour"
 
@@ -271,11 +267,11 @@ msgstr "Révoquer"
 msgid "Revoke {0}"
 msgstr "Révoquer {0}"
 
-#: src/pages/User/sections/Information/Information.tsx:74
+#: src/pages/User/sections/Information/Information.tsx:72
 msgid "Role"
 msgstr "Rôle"
 
-#: src/pages/User/sections/Information/Information.tsx:107
+#: src/pages/User/sections/Information/Information.tsx:103
 msgid "Save changes"
 msgstr "Enregistrer"
 
@@ -303,7 +299,7 @@ msgstr "Les clés d'API n'ont pas pu être chargées."
 msgid "The page you are looking for does not exist."
 msgstr "La page que vous cherchez n'existe pas."
 
-#: src/pages/User/sections/Information/Information.tsx:62
+#: src/pages/User/sections/Information/Information.tsx:60
 msgid "The profile shared with the rest of the application."
 msgstr "Le profil partagé avec le reste de l'application."
 
@@ -329,7 +325,7 @@ msgstr "Ce secret ne sera plus affiché."
 
 #: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:55
 #: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx:33
-#: src/pages/User/sections/Information/Information.tsx:54
+#: src/pages/User/sections/Information/Information.tsx:52
 msgid "Unexpected error"
 msgstr "Erreur inattendue"
 

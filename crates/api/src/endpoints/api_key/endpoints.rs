@@ -53,6 +53,31 @@ pub(crate) async fn create_api_key(
     ))
 }
 
+/// List the API keys owned by the caller, newest first. Secrets are never listed.
+#[axum_macros::debug_handler(state = AppState)]
+#[utoipa::path(
+    get,
+    path = "/api-key",
+    tag = TAG,
+    responses(
+        (status = OK, body = Vec<GetApiKeyResponse>, description = "The caller's API keys."),
+        (status = UNAUTHORIZED, body = ApiErrorResponse, description = "Not authenticated."),
+    ),
+)]
+pub(crate) async fn list_api_keys(
+    user: UserToken,
+    State(db): State<Arc<RwLock<dyn database::Database>>>,
+) -> Result<Json<Vec<GetApiKeyResponse>>, ApiError> {
+    let api_keys = {
+        let db = db.read().await;
+        app_core::api_key::list_api_keys(&*db, user.id).await?
+    };
+
+    Ok(Json(
+        api_keys.into_iter().map(GetApiKeyResponse::from).collect(),
+    ))
+}
+
 /// Get API key metadata by ID. Returns 404 if not owned by the caller.
 #[axum_macros::debug_handler(state = AppState)]
 #[utoipa::path(

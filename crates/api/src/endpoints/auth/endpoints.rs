@@ -19,9 +19,10 @@ use tokio::sync::RwLock;
 use super::cookies::{
     ACCESS_COOKIE, REFRESH_COOKIE, clear_token_cookies, set_token_cookies,
 };
-use super::models::{GetCallbackParams, GetLoginParams, GetMeResponse};
+use super::models::{GetCallbackParams, GetLoginParams, GetMeResponse, PatchMeRequest};
 use super::redirects::frontend_target;
 use crate::{
+    app_state::AppState,
     error::{ApiError, ApiErrorResponse},
     extractors::error::ExtractorError,
 };
@@ -169,7 +170,9 @@ pub(crate) async fn logout(
     Ok((clear_token_cookies(jar), StatusCode::NO_CONTENT))
 }
 
-/// Return the current user's profile from the OIDC provider's userinfo endpoint.
+/// Return the current user's profile: the OIDC provider's claims, with the
+/// display name and registration date of the locally stored row when it exists.
+#[axum_macros::debug_handler(state = AppState)]
 #[utoipa::path(
     get,
     path = "/auth/me",
@@ -181,20 +184,75 @@ pub(crate) async fn logout(
 )]
 pub(crate) async fn me(
     State(authenticator): State<Arc<RwLock<dyn Authenticator>>>,
+    State(database): State<Arc<RwLock<dyn database::Database>>>,
     jar: CookieJar,
 ) -> Result<Json<GetMeResponse>, ApiError> {
-    let access_token = jar
-        .get(ACCESS_COOKIE)
-        .map(|c| c.value().to_string())
-        .ok_or(ApiError::ExtractorError(ExtractorError::NotLoggedIn))?;
+    let info = caller_userinfo(&authenticator, &jar).await?;
+    let profile = {
+        let db = database.read().await;
+        app_core::user::read_profile(&*db, info.sub).await?
+    };
 
-    let info = authenticator.read().await.userinfo(&access_token).await?;
-    Ok(Json(GetMeResponse::from_userinfo(&info)))
+    let response = GetMeResponse::from_userinfo(&info);
+    Ok(Json(match profile {
+        Some(user) => response.with_profile(&user),
+        None => response,
+    }))
+}
+
+/// Change the display name of the current user. The identity provider keeps
+/// owning the email address, so it is not part of the request.
+#[axum_macros::debug_handler(state = AppState)]
+#[utoipa::path(
+    patch,
+    path = "/auth/me",
+    tag = TAG,
+    request_body = PatchMeRequest,
+    responses(
+        (status = OK, body = GetMeResponse, description = "The updated profile."),
+        (status = NOT_FOUND, body = ApiErrorResponse, description = "The caller has no local profile yet."),
+        (status = UNAUTHORIZED, body = ApiErrorResponse, description = "Not authenticated."),
+    ),
+)]
+pub(crate) async fn update_me(
+    State(authenticator): State<Arc<RwLock<dyn Authenticator>>>,
+    State(database): State<Arc<RwLock<dyn database::Database>>>,
+    jar: CookieJar,
+    Json(body): Json<PatchMeRequest>,
+) -> Result<Json<GetMeResponse>, ApiError> {
+    let info = caller_userinfo(&authenticator, &jar).await?;
+    let user = {
+        let mut db = database.write().await;
+        app_core::user::update_profile(
+            &mut *db,
+            info.sub,
+            body.first_name,
+            body.last_name,
+        )
+        .await?
+    };
+
+    Ok(Json(
+        GetMeResponse::from_userinfo(&info).with_profile(&user),
+    ))
 }
 
 /* =======================================================================================
  * IMPLEMENTATION DETAILS
  * ===================================================================================== */
+
+/// Reads the claims of the caller from the access-token cookie set by the BFF.
+async fn caller_userinfo(
+    authenticator: &Arc<RwLock<dyn Authenticator>>,
+    jar: &CookieJar,
+) -> Result<UserInfo, ApiError> {
+    let access_token = jar
+        .get(ACCESS_COOKIE)
+        .map(|c| c.value().to_string())
+        .ok_or(ApiError::ExtractorError(ExtractorError::NotLoggedIn))?;
+
+    Ok(authenticator.read().await.userinfo(&access_token).await?)
+}
 
 /// Creates or syncs the local user row from Keycloak's userinfo claims.
 async fn register_user(
