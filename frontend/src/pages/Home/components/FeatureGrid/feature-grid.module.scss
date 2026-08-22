@@ -7,7 +7,7 @@
     gap: $space-4;
     padding-bottom: $space-16;
 
-    @include content-container;
+    @include container;
 
     @include media-up($breakpoint-md) {
         grid-template-columns: repeat(3, 1fr);

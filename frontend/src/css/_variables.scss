@@ -1,3 +1,4 @@
+$space-0-5: 0.125rem;
 $space-1: 0.25rem;
 $space-2: 0.5rem;
 $space-3: 0.75rem;
@@ -28,11 +29,12 @@ $font-family-base:
     sans-serif;
 $font-family-mono: ui-monospace, 'SFMono-Regular', 'Menlo', monospace;
 
+$breakpoint-xs: 475px;
 $breakpoint-sm: 640px;
 $breakpoint-md: 768px;
 $breakpoint-lg: 1024px;
-
-$content-width: 72rem;
+$breakpoint-xl: 1280px;
+$breakpoint-2xl: 1536px;
 
 $header-height: 4rem;
 

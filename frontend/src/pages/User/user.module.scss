@@ -8,7 +8,7 @@
     padding-top: $space-8;
     padding-bottom: $space-16;
 
-    @include content-container;
+    @include container;
 
     @include media-up($breakpoint-md) {
         grid-template-columns: 14rem 1fr;

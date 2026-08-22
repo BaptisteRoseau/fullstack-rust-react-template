@@ -22,9 +22,40 @@
     }
 }
 
-@mixin content-container {
+@mixin container {
     width: 100%;
-    max-width: $content-width;
     margin: 0 auto;
     padding: 0 $space-4;
+
+    @include media-up($breakpoint-xs) {
+        max-width: $breakpoint-xs;
+    }
+
+    @include media-up($breakpoint-sm) {
+        max-width: $breakpoint-sm;
+    }
+
+    @include media-up($breakpoint-md) {
+        max-width: $breakpoint-md;
+    }
+
+    @include media-up($breakpoint-lg) {
+        max-width: $breakpoint-lg;
+    }
+
+    @include media-up($breakpoint-xl) {
+        max-width: $breakpoint-xl;
+    }
+
+    @include media-up($breakpoint-2xl) {
+        max-width: $breakpoint-2xl;
+    }
+}
+
+@mixin required-marker {
+    &::after {
+        margin-left: $space-0-5;
+        color: var(--color-danger);
+        content: '*';
+    }
 }
