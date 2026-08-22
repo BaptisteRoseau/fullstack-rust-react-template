@@ -24,15 +24,16 @@ function linguiMacro(): Plugin {
             if (!code.includes('@lingui/')) {
                 return null
             }
-            const parserPlugins = filepath.endsWith('.ts')
-                ? ['typescript']
-                : ['jsx', 'typescript']
             const result = await transformAsync(code, {
                 filename: filepath,
                 babelrc: false,
                 configFile: false,
                 sourceMaps: true,
-                parserOpts: { plugins: parserPlugins },
+                parserOpts: {
+                    plugins: filepath.endsWith('.ts')
+                        ? ['typescript']
+                        : ['jsx', 'typescript'],
+                },
                 plugins: ['@lingui/babel-plugin-lingui-macro'],
             })
             if (!result?.code) {
