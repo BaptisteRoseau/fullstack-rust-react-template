@@ -149,4 +149,4 @@ bun run i18n:check
 ## Related skills
 
 `frontend-api`, `frontend-design-system`, `frontend-component`, `frontend-page`, `frontend-form`,
-`frontend-state`, `frontend-i18n`, `frontend-mocks`, `frontend-testing`.
+`frontend-state`, `frontend-i18n`, `frontend-mocks`, `frontend-testing`, `frontend-seo`.
