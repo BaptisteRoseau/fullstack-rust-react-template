@@ -9,8 +9,11 @@ import {
     KeyIcon,
     LayersIcon,
     LogoutIcon,
+    MonitorIcon,
+    MoonIcon,
     PlusIcon,
     ShieldIcon,
+    SunIcon,
     TrashIcon,
     UserIcon,
 } from './Icon'
@@ -37,8 +40,11 @@ export const AllIcons: Story = {
             <KeyIcon size={24} />
             <LayersIcon size={24} />
             <LogoutIcon size={24} />
+            <MonitorIcon size={24} />
+            <MoonIcon size={24} />
             <PlusIcon size={24} />
             <ShieldIcon size={24} />
+            <SunIcon size={24} />
             <TrashIcon size={24} />
             <UserIcon size={24} />
         </div>

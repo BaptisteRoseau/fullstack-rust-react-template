@@ -44,3 +44,14 @@ it('shows the user name when signed in', () => {
         `expected the account trigger for ${user.firstName}, got: ${document.body.textContent}`,
     ).toBeVisible()
 })
+
+it('offers the theme switcher whether or not a user is signed in', () => {
+    mockCurrentUser(null)
+
+    render(<AppHeader />)
+
+    expect(
+        screen.getByRole('button', { name: /^Theme: system/ }),
+        `expected the theme switcher, got: ${document.body.textContent}`,
+    ).toBeVisible()
+})

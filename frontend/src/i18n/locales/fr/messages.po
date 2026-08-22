@@ -33,7 +33,7 @@ msgstr "Un backend Rust et un frontend React reliés dès le premier commit, ave
 msgid "A typed API layer"
 msgstr "Une couche API typée"
 
-#: src/components/layout/AppHeader/AppHeader.tsx:21
+#: src/components/layout/AppHeader/AppHeader.tsx:24
 msgid "Account"
 msgstr "Compte"
 
@@ -161,7 +161,7 @@ msgstr "Prénom"
 msgid "Footer"
 msgstr "Pied de page"
 
-#: src/components/layout/AppHeader/AppHeader.tsx:20
+#: src/components/layout/AppHeader/AppHeader.tsx:21
 #: src/layouts/AuthLayout/AuthLayout.tsx:14
 #: src/pages/Home/Home.tsx:19
 msgid "Fullstack Template"
@@ -197,14 +197,14 @@ msgstr "Langue"
 msgid "Last name"
 msgstr "Nom"
 
-#: src/components/layout/AppHeader/AppHeader.tsx:23
+#: src/components/layout/AppHeader/AppHeader.tsx:26
 #: src/components/ProtectedRoute/ProtectedRoute.tsx:18
 #: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx:39
 #: src/pages/User/sections/Information/Information.tsx:35
 msgid "Loading"
 msgstr "Chargement"
 
-#: src/components/layout/AppHeader/AppHeader.tsx:30
+#: src/components/layout/AppHeader/AppHeader.tsx:33
 #: src/pages/Home/Home.tsx:49
 #: src/pages/Login/Login.tsx:19
 #: src/pages/Login/Login.tsx:21
@@ -255,7 +255,7 @@ msgstr "Permissions"
 msgid "Profile updated"
 msgstr "Profil mis à jour"
 
-#: src/components/layout/AppHeader/AppHeader.tsx:35
+#: src/components/layout/AppHeader/AppHeader.tsx:38
 #: src/pages/Login/Login.tsx:41
 #: src/pages/Register/Register.tsx:19
 msgid "Register"
@@ -283,6 +283,18 @@ msgstr "Enregistrer"
 msgid "Ship a fullstack app, not a toolchain"
 msgstr "Livrez une application fullstack, pas une chaîne d'outils"
 
+#: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx:32
+msgid "Switch to the dark theme"
+msgstr "Passer au thème sombre"
+
+#: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx:31
+msgid "Switch to the light theme"
+msgstr "Passer au thème clair"
+
+#: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx:33
+msgid "Switch to the system theme"
+msgstr "Passer au thème système"
+
 #: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx:47
 msgid "The API keys could not be loaded."
 msgstr "Les clés d'API n'ont pas pu être chargées."
@@ -298,6 +310,18 @@ msgstr "Le profil partagé avec le reste de l'application."
 #: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:64
 msgid "The secret is displayed once, right after creation."
 msgstr "Le secret est affiché une seule fois, juste après la création."
+
+#: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx:28
+msgid "Theme: dark. Switch to the system theme."
+msgstr "Thème : sombre. Passer au thème système."
+
+#: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx:27
+msgid "Theme: light. Switch to the dark theme."
+msgstr "Thème : clair. Passer au thème sombre."
+
+#: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx:26
+msgid "Theme: system. Switch to the light theme."
+msgstr "Thème : système. Passer au thème clair."
 
 #: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx:35
 msgid "This secret will not be shown again."

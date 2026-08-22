@@ -7,8 +7,11 @@ export {
     KeyIcon,
     LayersIcon,
     LogoutIcon,
+    MonitorIcon,
+    MoonIcon,
     PlusIcon,
     ShieldIcon,
+    SunIcon,
     TrashIcon,
     UserIcon,
 } from './Icon'

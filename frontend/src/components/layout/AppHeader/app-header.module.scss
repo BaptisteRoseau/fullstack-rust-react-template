@@ -18,7 +18,8 @@
     @include container;
 }
 
-.actions {
+.actions,
+.account {
     display: flex;
     align-items: center;
     gap: $space-2;
