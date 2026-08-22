@@ -88,6 +88,53 @@ $duration-fast: 120ms;
 }
 ```
 
+### Mobile first, always
+
+Every breakpoint is a `min-width`. Base rules describe the **narrowest** viewport — one column,
+stacked, full width — and each `@include media-up(...)` step adds what a wider screen affords.
+`media-up` is the only media-query mixin on purpose: a `max-width` query means a desktop default
+is being undone, which is the pattern this rule exists to prevent.
+
+```scss
+.nav {
+    display: flex;
+    flex-direction: row;          // phone: a row of tabs
+
+    @include media-up($breakpoint-md) {
+        flex-direction: column;   // desktop: a sidebar
+        position: sticky;
+    }
+}
+```
+
+### One container per section
+
+`container` is the page's horizontal frame: full width with a gutter on a phone, then a
+`max-width` that steps up through the ladder so the content stops stretching and sits between side
+margins instead.
+
+```scss
+@mixin container {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: $space-4;
+
+    @include media-up($breakpoint-xs) { max-width: $breakpoint-xs; }
+    // … one step per breakpoint, up to $breakpoint-2xl
+}
+```
+
+**Every top-level section of every page includes it** — the hero, the feature grid, the account
+grid, the not-found panel. Include it on the section itself, not on a wrapper around the whole
+page: full-bleed backgrounds, sticky headers and borders then span the viewport while their
+contents stay aligned with every other section. `AppHeader` and `AppFooter` show the shape — a
+full-width `.header` with a contained `.inner`.
+
+It touches the inline axis only (`margin-inline`, `padding-inline`), so a section keeps its own
+`padding-block` no matter where the include sits in the rule. Never nest one container inside
+another: the gutter would be applied twice. A page rendered inside a contained section — anything
+under `ContentLayout` — is already framed.
+
 ### Making tokens importable
 
 Put `src/css` on the Sass load path so every module can `@use 'variables' as *` without relative

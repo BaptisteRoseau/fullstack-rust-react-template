@@ -24,8 +24,8 @@
 
 @mixin container {
     width: 100%;
-    margin: 0 auto;
-    padding: 0 $space-4;
+    margin-inline: auto;
+    padding-inline: $space-4;
 
     @include media-up($breakpoint-xs) {
         max-width: $breakpoint-xs;

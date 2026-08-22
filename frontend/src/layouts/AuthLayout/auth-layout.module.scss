@@ -1,4 +1,5 @@
 @use 'variables' as *;
+@use 'mixins' as *;
 
 .layout {
     display: flex;
@@ -7,7 +8,9 @@
     justify-content: center;
     gap: $space-6;
     min-height: 100%;
-    padding: $space-6;
+    padding-block: $space-6;
+
+    @include container;
 }
 
 .card {

@@ -124,10 +124,14 @@ The split is the whole theming strategy:
 - **CSS custom properties** (`var(--color-primary)`) for anything that changes at runtime — every
   colour, because of the light/dark themes in `src/css/_themes.scss`.
 
-Available mixins: `focus-ring`, `visually-hidden`, `media-up($breakpoint)`, `content-container`.
+Available mixins: `focus-ring`, `visually-hidden`, `media-up($breakpoint)`, `container`,
+`required-marker`. Breakpoints run `$breakpoint-xs` (475px) through `$breakpoint-2xl` (1536px).
 
 **Mobile first.** Base rules target the smallest viewport; widen with `@include media-up(...)`.
 Never write a `max-width` query to undo a desktop default.
+
+**`container` frames sections, not primitives.** Every top-level section of a page includes it;
+a design-system component never does — it fills whatever its parent gives it.
 
 ## Wrapping a Radix primitive
 

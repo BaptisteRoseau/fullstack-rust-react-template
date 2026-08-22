@@ -1,4 +1,5 @@
 @use 'variables' as *;
+@use 'mixins' as *;
 
 .wrapper {
     display: flex;
@@ -7,8 +8,10 @@
     justify-content: center;
     gap: $space-4;
     min-height: 60vh;
-    padding: $space-6;
+    padding-block: $space-6;
     text-align: center;
+
+    @include container;
 }
 
 .description {

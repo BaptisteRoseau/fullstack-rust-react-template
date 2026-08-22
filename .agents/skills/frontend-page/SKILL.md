@@ -90,6 +90,21 @@ hydration warning on lazy roots.
 - `ContentLayout` — presentational wrapper a page renders *inside* the shell for its title,
   description and action bar.
 
+Every top-level section of a page includes the `container` mixin from `mixins` — it is what keeps
+the page between side margins instead of stretching to the viewport. Put it on the section itself
+so full-bleed backgrounds still span the screen, give the section its own `padding-block`, and
+never nest one container in another (anything under `ContentLayout` is already contained).
+
+```scss
+.hero {
+    display: flex;
+    flex-direction: column;
+    padding-block: $space-16;
+
+    @include container;
+}
+```
+
 ## 4. Page folder
 
 Generate it, never hand-write it. From `frontend/`:
