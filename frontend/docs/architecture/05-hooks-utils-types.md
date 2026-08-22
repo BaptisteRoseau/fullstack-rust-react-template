@@ -14,27 +14,28 @@ hook — it belongs in `api/service/` (if it wraps a request) or in the page's `
 
 ```
 src/hooks/
-├── useBooleanState.ts
-├── useClickOutside.ts
-├── useCopyToClipboard.ts
-├── useDebouncedValue.ts
-├── useDisclosure.ts
-├── useIntersectionObserver.ts
-├── useLocalStorage.ts
-├── useMediaQuery.ts
-├── usePrevious.ts
-├── useSearchParamsState/            # folder form: has its own test
-│   ├── useSearchParamsState.ts
-│   ├── useSearchParamsState.test.ts
+├── useBooleanState/
+│   ├── useBooleanState.ts
+│   ├── useBooleanState.test.ts
+│   └── index.ts
+├── useCopyToClipboard/
+│   ├── useCopyToClipboard.ts
+│   ├── useCopyToClipboard.test.ts
+│   └── index.ts
+├── useLocalStorage/
+│   ├── useLocalStorage.ts
+│   ├── useLocalStorage.test.ts
 │   └── index.ts
 └── __mocks__/
     └── useIntersectionObserver.ts   # jsdom has no IntersectionObserver
 ```
 
-Single-file until the hook needs its own test or helpers, then promote to a folder with a barrel.
+One folder per hook — implementation, test and barrel — so consumers keep importing
+`@/hooks/useBooleanState` whatever the folder holds. `bun run generate hook` scaffolds the three
+files; never add them by hand.
 
 ```ts
-// src/hooks/useBooleanState.ts
+// src/hooks/useBooleanState/useBooleanState.ts
 import { useCallback, useState } from 'react';
 
 export function useBooleanState(initialValue = false) {
@@ -50,10 +51,39 @@ export function useBooleanState(initialValue = false) {
 
 Conventions:
 
-- Name is `useXxx`, file name matches the hook exactly.
+- Name is `useXxx`; the folder, the file and the hook all carry that same name.
 - Return an object when there is more than one value; a tuple only for `[value, setValue]` pairs.
 - Memoise returned callbacks with `useCallback` — a hook's consumers put these in dependency
   arrays.
+- The barrel re-exports the hook and its types, nothing else. Import from `@/hooks/useXxx`, never
+  from `@/hooks/useXxx/useXxx`.
+
+### Testing a hook
+
+`renderHook` and `act` from Testing Library, one behaviour per `it`, and the project's
+message-carrying assertions. Shared hooks own no domain knowledge, so they need no MSW and no
+manual `__mocks__` — a hook that would need them belongs in `api/service/` instead. Only reach for
+`SwrWrapper` from `@/test-utils/wrappers` when the hook genuinely sits on SWR.
+
+Stub the browser APIs jsdom lacks in the test file itself, and undo the stub in `afterEach`;
+promote a stub into `src/test-utils/` only once a second hook needs it. `setup-tests.ts` clears
+mocks and the mock database but **not** `localStorage` or global stubs, so a hook touching either
+cleans up after itself:
+
+```ts
+beforeEach(() => {
+    vi.useFakeTimers();
+    vi.stubGlobal('navigator', { clipboard: { writeText } });
+});
+
+afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+});
+```
+
+Cover the initial value, each transition, the memoisation contract the third convention above
+promises, and the failure path — a rejected clipboard write, a missing stored key.
 
 ---
 

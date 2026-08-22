@@ -8,13 +8,18 @@ module.exports = {
     actions: [
         {
             type: 'add',
-            path: 'src/hooks/use{{pascalCase name}}.ts',
+            path: 'src/hooks/use{{pascalCase name}}/use{{pascalCase name}}.ts',
             templateFile: 'generators/hook/hook.ts.hbs',
         },
         {
             type: 'add',
-            path: 'src/hooks/use{{pascalCase name}}.test.ts',
+            path: 'src/hooks/use{{pascalCase name}}/use{{pascalCase name}}.test.ts',
             templateFile: 'generators/hook/hook.test.ts.hbs',
+        },
+        {
+            type: 'add',
+            path: 'src/hooks/use{{pascalCase name}}/index.ts',
+            templateFile: 'generators/hook/index.ts.hbs',
         },
     ],
 }

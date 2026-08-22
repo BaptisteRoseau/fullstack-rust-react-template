@@ -51,6 +51,28 @@ Use `render` from `@/test-utils/render` for anything that needs i18n, SWR or the
 Testing Library `render` is fine for design-system primitives. Each render gets a fresh SWR cache
 (`provider: () => new Map()`), so results never leak between tests.
 
+## Hook tests
+
+`src/hooks/useXxx/useXxx.test.ts`, written with `renderHook` and `act`. Shared hooks own no domain
+knowledge, so they need no MSW and no manual `__mocks__`; only reach for `SwrWrapper` when the hook
+sits on SWR. Stub the browser APIs jsdom lacks in the test file itself and undo them in `afterEach`
+— `setup-tests.ts` clears mocks and the mock database but **not** `localStorage` or global stubs:
+
+```ts
+beforeEach(() => {
+    vi.useFakeTimers()
+    vi.stubGlobal('navigator', { clipboard: { writeText } })
+})
+
+afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
+})
+```
+
+Cover the initial value, each transition, the `useCallback` identity the hook promises its
+consumers, and the failure path.
+
 ## Component and page tests
 
 Mock the service, assert the rendering:

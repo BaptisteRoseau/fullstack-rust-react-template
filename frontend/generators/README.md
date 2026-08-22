@@ -12,7 +12,7 @@ bun run generate
 | `component` | A `design-system/` primitive (with story) or a shared `components/` component |
 | `page` | A `src/pages/<Name>/` folder with page, stylesheet, test and barrel |
 | `api` | `api/<domain>.ts`, its service, manual mock, MSW-backed test and mock handler |
-| `hook` | A shared hook in `src/hooks/` with its test |
+| `hook` | A `src/hooks/<useName>/` folder with the hook, its test and a barrel |
 | `store` | A Zustand store in `src/stores/` |
 
 A generator only writes files. You still have to wire the result up:
