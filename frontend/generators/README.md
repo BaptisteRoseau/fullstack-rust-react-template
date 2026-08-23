@@ -1,27 +1,27 @@
-# Generators
+# generators
 
-Plop templates that scaffold a folder in the shape the architecture expects. Run them from
-`frontend/`:
+Plop templates that scaffold a new folder in the exact shape the architecture expects. Registered
+in [`plopfile.cjs`](../plopfile.cjs) and run with `bun run generate`.
 
-```bash
-bun run generate
+```txt
+generators/
+└── <generator-name>/       # component, page, api, api-hook, hook, store
+    ├── index.cjs           # prompts and the list of files it writes
+    └── *.hbs                # one Handlebars template per generated file
 ```
 
-| Generator | Creates |
-|---|---|
-| `component` | A `design-system/` primitive (with story) or a shared `components/` component |
-| `page` | A `src/pages/<Name>/` folder with page, stylesheet, test and barrel |
+| Generator | Writes |
+| --- | --- |
+| `component` | A `design-system/` primitive (with a story) or a shared `components/` component |
+| `page` | A `src/pages/<Name>/` folder: page, stylesheet, test and barrel |
 | `api` | An `api/domains/<domain>/` folder: fetchers, domain types, converters, cache keys, both tests, and its MSW handler |
-| `api-hook` | An `api/hooks/useApiXxx/` folder with the SWR binding, its test and a barrel |
-| `hook` | A `src/hooks/<useName>/` folder with the hook, its test and a barrel |
-| `store` | A Zustand store in `src/stores/` |
+| `api-hook` | An `api/hooks/useApiXxx/` folder: the SWR binding, its test and a barrel |
+| `hook` | A `src/hooks/<useName>/` folder: the hook, its test and a barrel |
+| `store` | A Zustand store file in `src/stores/` |
 
-A generator only writes files. You still have to wire the result up:
+A generator only writes files; it never edits an existing one, and it does not register the result
+anywhere else in the app.
 
-- a page needs its `PATHS` entry, its lazy route in `src/router/routes.tsx` and a nav link;
-- an api domain needs its handler registered in `src/test-utils/mocks/handlers/index.ts`, and its
-  fetchers must call operations that exist in `src/api/generated` — run
-  `./scripts/build_frontend_api_sdk.sh` first if the endpoint is new;
-- any user-facing string needs a Lingui macro, then `bun run i18n:extract`.
+## Skills
 
-See `frontend/docs/architecture/` for the rules the templates follow.
+- [frontend-architecture](../../.claude/skills/frontend-architecture/SKILL.md)
