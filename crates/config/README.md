@@ -1,46 +1,53 @@
 # Config
 
-This is where all configurable variables and constants should be.
+Every configurable value of the backend. `Config` is built once at startup, then passed read-only to
+every other layer.
 
-Is contains:
+## Files
 
-- [defaults.rs](src/defaults.rs): Default constants used to initialize the config. Every default has to be set here.
-- [cli.rs](src/cli.rs): The command-line interface getters to configure from CLI.
-- [config.rs](src/config.rs): The actual `Config` object and its subconfigs used in the rest of the project.
+| File | Contents |
+| --- | --- |
+| [defaults.rs](src/defaults.rs) | One `DEFAULT_*` constant per setting. Every setting has one |
+| [cli.rs](src/cli.rs) | `CliConfig`: the flat Clap parser for flags, environment variables and the config file |
+| [config.rs](src/config.rs) | `Config` and its sub-structs, built from `CliConfig` |
+| [error.rs](src/error.rs) | `ConfigParsingError` |
 
-Only `Config` and its inner config structures can be public in this crate.
+Only `Config` and its sub-structs are public. `CliConfig` stays private to the crate.
 
-## Adding a new entry
+## Why two structs
 
-1. Add the default entry constant, prefixed by `DEFAULT` in [defaults.rs](src/defaults.rs)
-2. Add the CLI argument in [cli.rs](src/cli.rs). Add `short` and/or `long` only if it makes sense.
-3. Add the conversion from `CliConfig` to `Config` in [config.rs](src/config.rs) in the `try_from` function. Add a new subconfig if that makes sense.
-4. (opt) Add validation in the `validate` only if there are restrictions applicables (ex. invalid format, incompatible arguments, argument provided but ignored)
+`CliConfig` is **flat**. Every setting stays reachable from a CLI flag, an environment variable or
+the config file, with no nesting to spell out.
 
-Here are examples of:
+`Config` is **grouped** into sub-structs such as `ApiConfig` or `PostgresConfig`. An optional
+sub-struct is built only when all of its values are present, so client code reads
+`config.postgres.host` without re-checking anything.
 
-- A default:
+## Conventions
 
-```rs
-pub(crate) const DEFAULT_PROMETHEUS_IP: IpAddr = LOCALHOST;
+**Defaults** are constants named `DEFAULT_<SETTING>`, declared in
+[defaults.rs](src/defaults.rs) and nowhere else:
+
+```rust
+pub(crate) const DEFAULT_PORT: u16 = 8080;
 ```
 
-- A CLI argument:
+**CLI arguments** live in `CliConfig` in [cli.rs](src/cli.rs). Arguments belonging to the same
+sub-config share a prefix, and every one of them takes its default from a `DEFAULT_*` constant:
 
-```rs
+```rust
 /// The port where to bind the server
 #[arg(short, long, env, default_value_t = DEFAULT_PORT)]
 pub(crate) port: u16,
 ```
 
-- A config conversion:
+**Conversions** all happen in the `TryFrom<CliConfig> for Config` impl in
+[config.rs](src/config.rs). It is the only place a `CliConfig` field is read. A sub-config that can
+be switched off is an `Option`, built there only when the feature is on.
 
-```rs
-Ok(Self{
-    debug: value.debug,
-    api: ApiConfig {
-        timeout_sec: value.api_timeout_sec,
-    },
-    ...
-})
-```
+`Config::validate` runs before the conversion. It returns a `ConfigParsingError` for incompatible
+options, and logs a `warn!` for options that are ignored or deprecated.
+
+## Skills
+
+- [backend-config-entry](../../.claude/skills/backend-config-entry/SKILL.md)
