@@ -1,6 +1,6 @@
 # Storage integration tests
 
-```
+```txt
 tests
 ├── assets
 │   └── garage.toml   # Garage server configuration copied into the container
@@ -30,3 +30,8 @@ Three things in `start_container()` are load-bearing and easy to mistake for cer
 ```sh
 cargo test -p storage
 ```
+
+## Skills
+
+- [backend-trait-test](../../../.claude/skills/backend-trait-test/SKILL.md)
+- [backend-feature-gating](../../../.claude/skills/backend-feature-gating/SKILL.md)
