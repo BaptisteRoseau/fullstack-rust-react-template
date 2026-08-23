@@ -7,6 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+package-lock.json
 node_modules
 dist
 dist-ssr
@@ -27,6 +28,9 @@ dist-ssr
 *.sln
 *.sw?
 
+# AI Plans
+plans/
+
 # Rust Binaries
 target/
 dist/
@@ -40,7 +44,7 @@ packages/
 .env
 *.pnp
 *.pnp.js
-
+openapi.json
 
 # MCP and AI tools
 .serena
