@@ -128,15 +128,3 @@ export function useApiErrorMessage() {
         [messages],
     )
 }
-
-/**
- * @deprecated Surfaces the backend's untranslated string. Use
- * {@link useApiErrorMessage}; removed once every call site is migrated.
- */
-export function apiErrorMessage(error: unknown, fallback: string): string {
-    if (!isApiError(error)) {
-        return fallback
-    }
-    const body = error.body as { error?: string; message?: string } | null
-    return body?.error ?? body?.message ?? fallback
-}

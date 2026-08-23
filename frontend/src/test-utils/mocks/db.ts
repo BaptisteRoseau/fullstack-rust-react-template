@@ -1,28 +1,40 @@
-import { factory, primaryKey } from '@mswjs/data'
+import { Collection } from '@msw/data'
 import { nanoid } from 'nanoid'
+import { z } from 'zod'
 
-const models = {
-    user: {
-        id: primaryKey(nanoid),
-        firstName: String,
-        lastName: String,
-        email: String,
-        role: String,
-        teamId: String,
-        createdAt: Number,
-    },
-    apiKey: {
-        id: primaryKey(nanoid),
-        name: String,
-        permissions: Array,
-        createdAt: String,
-        userId: String,
-    },
+/**
+ * Collections are described with Zod rather than a bespoke model DSL: `@msw/data`
+ * speaks Standard Schema, so the record types the handlers see are the schema's
+ * own output types. That is what lets `permissions` be a real `string[]` and
+ * `createdAt` carry the wire's type per collection — an RFC 3339 string for an
+ * API key, an epoch in milliseconds for a user.
+ */
+const userSchema = z.object({
+    id: z.string().default(() => nanoid()),
+    firstName: z.string(),
+    lastName: z.string(),
+    email: z.string(),
+    role: z.string(),
+    teamId: z.string(),
+    createdAt: z.number(),
+})
+
+const apiKeySchema = z.object({
+    id: z.string().default(() => nanoid()),
+    name: z.string(),
+    permissions: z.array(z.string()),
+    createdAt: z.string(),
+    userId: z.string(),
+})
+
+export const db = {
+    user: new Collection({ schema: userSchema }),
+    apiKey: new Collection({ schema: apiKeySchema }),
 }
 
-export const db = factory(models)
+export type Model = keyof typeof db
 
-export type Model = keyof typeof models
+export type ApiKeyRecord = z.infer<typeof apiKeySchema>
 
 const DB_FILE_PATH = 'mocked-db.json'
 const DB_STORAGE_KEY = 'msw-db'
@@ -56,15 +68,15 @@ export async function persistDb(model: Model) {
         return
     }
     const data = await loadDb()
-    data[model] = db[model].getAll()
+    data[model] = db[model].all()
     await storeDb(JSON.stringify(data))
 }
 
 export async function seedDb() {
-    if (db.user.findFirst({ where: { id: { equals: CURRENT_USER_ID } } })) {
+    if (db.user.findFirst((query) => query.where({ id: CURRENT_USER_ID }))) {
         return
     }
-    db.user.create({
+    await db.user.create({
         id: CURRENT_USER_ID,
         firstName: 'Ada',
         lastName: 'Lovelace',
@@ -79,11 +91,11 @@ export async function seedDb() {
 
 export async function initializeDb() {
     const database = await loadDb()
-    Object.entries(db).forEach(([key, model]) => {
-        database[key]?.forEach((entry) => {
-            model.create(entry as never)
-        })
-    })
+    for (const [key, collection] of Object.entries(db)) {
+        for (const entry of database[key] ?? []) {
+            await collection.create(entry as never)
+        }
+    }
     await seedDb()
 }
 
@@ -91,7 +103,7 @@ export function resetDb() {
     if (typeof window !== 'undefined') {
         window.localStorage.clear()
     }
-    Object.values(db).forEach((model) => {
-        model.deleteMany({ where: {} })
+    Object.values(db).forEach((collection) => {
+        collection.clear()
     })
 }

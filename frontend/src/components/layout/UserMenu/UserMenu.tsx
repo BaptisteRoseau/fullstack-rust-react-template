@@ -1,9 +1,8 @@
 import { Trans } from '@lingui/react/macro'
 import { useNavigate } from 'react-router'
-import { useSWRConfig } from 'swr'
 
-import { fullName, ME_ENDPOINT, type CurrentUser } from '@/api/auth'
-import { useLogout } from '@/api/service/auth'
+import type { CurrentUser } from '@/api/domains/currentUser'
+import { useApiLogout } from '@/api/hooks/useApiLogout'
 import { Avatar } from '@/design-system/Avatar'
 import {
     Dropdown,
@@ -15,6 +14,7 @@ import {
 } from '@/design-system/Dropdown'
 import { KeyIcon, LogoutIcon, UserIcon } from '@/design-system/Icon'
 import { PATHS } from '@/router/constants'
+import { fullName } from '@/utils/strings'
 
 import styles from './user-menu.module.scss'
 
@@ -24,14 +24,12 @@ export type UserMenuProps = {
 
 export function UserMenu({ user }: UserMenuProps) {
     const navigate = useNavigate()
-    const { mutate } = useSWRConfig()
-    const { trigger: logout } = useLogout()
+    const { trigger: logout } = useApiLogout()
 
     const name = fullName(user)
 
     async function handleLogout() {
         await logout()
-        await mutate(ME_ENDPOINT, null, { revalidate: false })
         await navigate(PATHS.home)
     }
 

@@ -1,15 +1,15 @@
 import { screen } from '@testing-library/react'
 
-import { useCurrentUser } from '@/api/service/auth'
+import { useApiCurrentUser } from '@/api/hooks/useApiCurrentUser'
 import { buildCurrentUser } from '@/test-utils/fixtures/auth'
 import { render } from '@/test-utils/render'
 
 import { AppHeader } from './AppHeader'
 
-vi.mock('@/api/service/auth')
+vi.mock('@/api/hooks/useApiCurrentUser')
 
 function mockCurrentUser(data: ReturnType<typeof buildCurrentUser> | null) {
-    vi.mocked(useCurrentUser).mockReturnValue({
+    vi.mocked(useApiCurrentUser).mockReturnValue({
         data,
         error: undefined,
         isLoading: false,

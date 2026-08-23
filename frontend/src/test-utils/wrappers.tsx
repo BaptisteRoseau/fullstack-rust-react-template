@@ -1,14 +1,12 @@
 import { I18nProvider } from '@lingui/react'
 import { SWRConfig } from 'swr'
 
-import { apiFetch } from '@/api/client'
 import { i18n } from '@/i18n'
 
 export function SwrWrapper({ children }: { children: React.ReactNode }) {
     return (
         <SWRConfig
             value={{
-                fetcher: apiFetch,
                 provider: () => new Map(),
                 dedupingInterval: 0,
                 revalidateOnFocus: false,

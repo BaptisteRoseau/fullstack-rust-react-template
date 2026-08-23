@@ -4,7 +4,6 @@ import { I18nWrapper } from '@/test-utils/wrappers'
 
 import {
     ApiError,
-    apiErrorMessage,
     isApiError,
     matchApiError,
     toApiError,
@@ -85,16 +84,4 @@ it('translates a known cause and uses the fallback for foreign errors', () => {
     expect(foreign, `expected the call-site fallback, got "${foreign}"`).toBe(
         'Could not load the key',
     )
-})
-
-it('still exposes the backend string through the deprecated helper', () => {
-    const error = new ApiError('ignored', 404, 'NOT_FOUND', {
-        error: 'API key not found',
-        id: 'NOT_FOUND',
-    })
-
-    expect(
-        apiErrorMessage(error, 'fallback'),
-        'the legacy helper must keep its behaviour until every call site moves',
-    ).toBe('API key not found')
 })

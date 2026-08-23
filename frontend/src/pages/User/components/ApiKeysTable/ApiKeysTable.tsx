@@ -1,6 +1,6 @@
 import { Trans, useLingui } from '@lingui/react/macro'
 
-import type { ApiKey } from '@/api/apiKeys'
+import type { ApiKey } from '@/api/domains/apiKeys'
 import { Badge } from '@/design-system/Badge'
 import { Card } from '@/design-system/Card'
 import { Spinner } from '@/design-system/Spinner'
@@ -22,15 +22,9 @@ export type ApiKeysTableProps = {
     apiKeys: ApiKey[]
     isLoading: boolean
     error: unknown
-    onRevoked: () => void
 }
 
-export function ApiKeysTable({
-    apiKeys,
-    isLoading,
-    error,
-    onRevoked,
-}: ApiKeysTableProps) {
+export function ApiKeysTable({ apiKeys, isLoading, error }: ApiKeysTableProps) {
     const { t } = useLingui()
 
     if (isLoading) {
@@ -90,10 +84,7 @@ export function ApiKeysTable({
                         </TableCell>
                         <TableCell>{formatDate(apiKey.createdAt)}</TableCell>
                         <TableCell className={styles.actions}>
-                            <RevokeApiKeyButton
-                                apiKey={apiKey}
-                                onRevoked={onRevoked}
-                            />
+                            <RevokeApiKeyButton apiKey={apiKey} />
                         </TableCell>
                     </TableRow>
                 ))}

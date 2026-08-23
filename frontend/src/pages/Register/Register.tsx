@@ -1,7 +1,7 @@
 import { Trans, useLingui } from '@lingui/react/macro'
 import { Link, useSearchParams } from 'react-router'
 
-import { authRedirectUrl } from '@/api/auth'
+import { registerUrl } from '@/api/domains/session'
 import { Head } from '@/components/head/Head'
 import { Button } from '@/design-system/Button'
 import { Link as TextLink } from '@/design-system/Link'
@@ -29,11 +29,7 @@ export function Register() {
             <Button
                 size="lg"
                 className={styles.action}
-                onClick={() =>
-                    window.location.assign(
-                        authRedirectUrl('register', redirectTo),
-                    )
-                }
+                onClick={() => window.location.assign(registerUrl(redirectTo))}
             >
                 <Trans>Continue to registration</Trans>
             </Button>

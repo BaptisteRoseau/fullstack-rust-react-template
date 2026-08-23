@@ -1,20 +1,25 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 
-import { API_KEYS_ENDPOINT } from '@/api/apiKeys'
-import { buildApiKey } from '@/test-utils/fixtures/apiKeys'
+import { buildGetApiKeyResponse } from '@/test-utils/fixtures/apiKeys'
+import { API_PATHS, endpoint } from '@/test-utils/mocks/utils'
 import { server } from '@/test-utils/server'
 import { SwrWrapper } from '@/test-utils/wrappers'
 
-import { useApiKeys } from './apiKeys'
+import { useApiApiKeys } from './useApiApiKeys'
 
-it('returns the api keys of the caller', async () => {
-    const apiKey = buildApiKey({ name: 'CI deploy key' })
+it('returns the caller keys', async () => {
     server.use(
-        http.get(`*${API_KEYS_ENDPOINT}`, () => HttpResponse.json([apiKey])),
+        http.get(endpoint(API_PATHS.apiKeys), () =>
+            HttpResponse.json([
+                buildGetApiKeyResponse({ name: 'CI deploy key' }),
+            ]),
+        ),
     )
 
-    const { result } = renderHook(() => useApiKeys(), { wrapper: SwrWrapper })
+    const { result } = renderHook(() => useApiApiKeys(), {
+        wrapper: SwrWrapper,
+    })
 
     await waitFor(() =>
         expect(

@@ -1,11 +1,10 @@
-import { REFRESH_ENDPOINT } from '@/api/auth'
 import { client } from '@/api/generated/client.gen'
 import { env } from '@/config/env'
 
 import { toApiError, toNetworkError } from './errors'
 
 const API_BASE_URL = `${env.API_URL}/api`
-const REFRESH_URL = `${env.API_URL}${REFRESH_ENDPOINT}`
+const REFRESH_URL = `${API_BASE_URL}/auth/refresh`
 
 let refreshPromise: Promise<boolean> | null = null
 
@@ -86,26 +85,4 @@ export async function apiCall<TData>(
     }
 
     return result.data as TData
-}
-
-/**
- * @deprecated The hand-written transport, kept until every call site moves to a
- * domain fetcher. Use {@link apiCall} with a generated SDK function instead.
- */
-export async function apiFetch<T>(
-    path: string,
-    init?: RequestInit,
-): Promise<T> {
-    const response = await fetchWithSessionRefresh(`${env.API_URL}${path}`, {
-        credentials: 'include',
-        ...init,
-        headers: { 'Content-Type': 'application/json', ...init?.headers },
-    })
-
-    if (!response.ok) {
-        const body = await response.json().catch(() => null)
-        throw toApiError(body, response)
-    }
-
-    return response.status === 204 ? (undefined as T) : await response.json()
 }

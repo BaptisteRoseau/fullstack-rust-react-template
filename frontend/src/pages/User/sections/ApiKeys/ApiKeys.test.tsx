@@ -1,16 +1,16 @@
 import { screen } from '@testing-library/react'
 
-import { useApiKeys } from '@/api/service/apiKeys'
+import { useApiApiKeys } from '@/api/hooks/useApiApiKeys'
 import { buildApiKey } from '@/test-utils/fixtures/apiKeys'
 import { render } from '@/test-utils/render'
 
 import { ApiKeys } from './ApiKeys'
 
-vi.mock('@/api/service/apiKeys')
+vi.mock('@/api/hooks/useApiApiKeys')
 
 it('lists the api keys', () => {
     const apiKey = buildApiKey({ name: 'CI deploy key' })
-    vi.mocked(useApiKeys).mockReturnValue({
+    vi.mocked(useApiApiKeys).mockReturnValue({
         data: [apiKey],
         error: undefined,
         isLoading: false,
@@ -27,7 +27,7 @@ it('lists the api keys', () => {
 })
 
 it('shows the empty state when there is no key', () => {
-    vi.mocked(useApiKeys).mockReturnValue({
+    vi.mocked(useApiApiKeys).mockReturnValue({
         data: [],
         error: undefined,
         isLoading: false,

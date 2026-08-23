@@ -1,7 +1,7 @@
 import { Trans, useLingui } from '@lingui/react/macro'
 import { Link } from 'react-router'
 
-import { useCurrentUser } from '@/api/service/auth'
+import { useApiCurrentUser } from '@/api/hooks/useApiCurrentUser'
 import { Head } from '@/components/head/Head'
 import { Button } from '@/design-system/Button'
 import { PATHS } from '@/router/constants'
@@ -11,7 +11,7 @@ import styles from './home.module.scss'
 
 export function Home() {
     const { t } = useLingui()
-    const { data: user } = useCurrentUser()
+    const { data: user } = useApiCurrentUser()
 
     return (
         <>

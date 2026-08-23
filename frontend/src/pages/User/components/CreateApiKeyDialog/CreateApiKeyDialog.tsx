@@ -1,13 +1,9 @@
 import { Trans, useLingui } from '@lingui/react/macro'
 import * as z from 'zod'
 
-import {
-    API_KEY_PERMISSIONS,
-    type CreateApiKeyBody,
-    type CreatedApiKey,
-} from '@/api/apiKeys'
-import { apiErrorMessage } from '@/api/errors'
-import { useCreateApiKey } from '@/api/service/apiKeys'
+import { API_KEY_PERMISSIONS, type CreatedApiKey } from '@/api/domains/apiKeys'
+import { useApiErrorMessage } from '@/api/errors'
+import { useApiCreateApiKey } from '@/api/hooks/useApiCreateApiKey'
 import { CheckboxGroupField } from '@/components/forms/fields/CheckboxGroupField'
 import { TextField } from '@/components/forms/fields/TextField'
 import { Form } from '@/components/forms/Form'
@@ -39,20 +35,18 @@ export function CreateApiKeyDialog({
     onCreated,
 }: CreateApiKeyDialogProps) {
     const { t } = useLingui()
-    const { trigger, isMutating } = useCreateApiKey()
+    const { trigger, isMutating } = useApiCreateApiKey()
+    const apiErrorMessage = useApiErrorMessage()
     const addNotification = useNotifications((state) => state.addNotification)
 
     async function handleSubmit(values: z.infer<typeof createApiKeySchema>) {
         try {
-            const apiKey = await trigger(values as CreateApiKeyBody)
-            if (apiKey) {
-                onCreated(apiKey)
-            }
+            onCreated(await trigger(values))
         } catch (error) {
             addNotification({
                 type: 'error',
                 title: t`Could not create the API key`,
-                message: apiErrorMessage(error, t`Unexpected error`),
+                message: apiErrorMessage(error),
             })
         }
     }

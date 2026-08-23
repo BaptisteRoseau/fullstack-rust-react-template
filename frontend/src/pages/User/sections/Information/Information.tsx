@@ -1,10 +1,9 @@
 import { Trans, useLingui } from '@lingui/react/macro'
-import { useSWRConfig } from 'swr'
 import * as z from 'zod'
 
-import { ME_ENDPOINT } from '@/api/auth'
-import { apiErrorMessage } from '@/api/errors'
-import { useCurrentUser, useUpdateProfile } from '@/api/service/auth'
+import { useApiErrorMessage } from '@/api/errors'
+import { useApiCurrentUser } from '@/api/hooks/useApiCurrentUser'
+import { useApiUpdateCurrentUser } from '@/api/hooks/useApiUpdateCurrentUser'
 import { TextField } from '@/components/forms/fields/TextField'
 import { Form } from '@/components/forms/Form'
 import { Badge } from '@/design-system/Badge'
@@ -24,9 +23,9 @@ const profileSchema = z.object({
 
 export function Information() {
     const { t } = useLingui()
-    const { data: user, isLoading } = useCurrentUser()
-    const { trigger, isMutating } = useUpdateProfile()
-    const { mutate } = useSWRConfig()
+    const { data: user, isLoading } = useApiCurrentUser()
+    const { trigger, isMutating } = useApiUpdateCurrentUser()
+    const apiErrorMessage = useApiErrorMessage()
     const addNotification = useNotifications((state) => state.addNotification)
 
     if (isLoading) {
@@ -40,7 +39,6 @@ export function Information() {
     async function handleSubmit(values: z.infer<typeof profileSchema>) {
         try {
             await trigger(values)
-            await mutate(ME_ENDPOINT)
             addNotification({
                 type: 'success',
                 title: t`Profile updated`,
@@ -49,7 +47,7 @@ export function Information() {
             addNotification({
                 type: 'error',
                 title: t`Could not update the profile`,
-                message: apiErrorMessage(error, t`Unexpected error`),
+                message: apiErrorMessage(error),
             })
         }
     }

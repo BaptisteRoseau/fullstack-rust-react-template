@@ -19,6 +19,34 @@ const globals = require('globals')
 const reactVersion = require('./node_modules/react/package.json').version
 
 const TS_FILES = ['**/*.ts', '**/*.tsx']
+
+// The converter layer only exists if nothing can bypass it: outside src/api the
+// generated SDK is unreachable, and a domain is reachable only through its
+// barrel. Both public names live one level down -- @/api/domains/<domain> and
+// @/api/hooks/useApiXxx -- so the patterns block what sits deeper than either.
+// Repeated into every no-restricted-imports block below, because a later flat
+// config block replaces the rule rather than adding to it.
+const API_BOUNDARY_PATTERNS = [
+    {
+        group: ['@/api/generated', '@/api/generated/*'],
+        message:
+            'Wire types stay inside src/api. Import the domain type from @/api/domains/<domain> instead.',
+    },
+    {
+        group: [
+            '@/api/domains/*/*',
+            '@/api/domains/*/*/**',
+            '@/api/hooks/*/*',
+            '@/api/hooks/*/*/**',
+        ],
+        message:
+            'Import a domain through its barrel: @/api/domains/<domain>, or @/api/hooks/useApiXxx.',
+    },
+]
+
+// MSW handlers and the fixtures feeding them must speak the wire shape, and the
+// compiler only enforces that if they can name the generated types.
+const MOCK_BOUNDARY_PATTERNS = API_BOUNDARY_PATTERNS.slice(1)
 const TEST_FILES = [
     'src/**/*.test.{ts,tsx}',
     'src/test-utils/**/*.{ts,tsx}',
@@ -114,6 +142,13 @@ module.exports = [
         },
     },
     {
+        files: TS_FILES,
+        ignores: ['src/api/**'],
+        rules: {
+            'no-restricted-imports': ['error', { patterns: API_BOUNDARY_PATTERNS }],
+        },
+    },
+    {
         files: ['src/design-system/**'],
         rules: {
             'no-restricted-imports': [
@@ -123,6 +158,7 @@ module.exports = [
                         {
                             group: [
                                 '@/api/*',
+                                '@/api/domains/*',
                                 '@/contexts/*',
                                 '@/components/*',
                                 '@/pages/*',
@@ -131,6 +167,7 @@ module.exports = [
                             message:
                                 'The design system must stay domain-agnostic.',
                         },
+                        ...API_BOUNDARY_PATTERNS,
                     ],
                 },
             ],
@@ -148,8 +185,18 @@ module.exports = [
                             message:
                                 'Pages must not import each other. Move shared code to src/components.',
                         },
+                        ...API_BOUNDARY_PATTERNS,
                     ],
                 },
+            ],
+        },
+    },
+    {
+        files: ['src/test-utils/**/*.{ts,tsx}'],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                { patterns: MOCK_BOUNDARY_PATTERNS },
             ],
         },
     },
@@ -162,6 +209,9 @@ module.exports = [
                 {
                     'src/pages/*/': 'PASCAL_CASE',
                     'src/layouts/*/': 'PASCAL_CASE',
+                    'src/api/*/': 'CAMEL_CASE',
+                    'src/api/domains/*/': 'CAMEL_CASE',
+                    'src/api/hooks/*/': 'CAMEL_CASE',
                 },
             ],
             'check-file/filename-naming-convention': [

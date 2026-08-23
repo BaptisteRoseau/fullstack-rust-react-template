@@ -1,22 +1,24 @@
 import { http, HttpResponse } from 'msw'
 
-import { USERS_ENDPOINT } from '@/api/users'
+import type { GetUserResponse } from '@/api/generated'
 
 import { db } from '../db'
-import { endpoint, networkDelay } from '../utils'
+import { API_PATHS, endpoint, networkDelay } from '../utils'
 
 export const userHandlers = [
-    http.get(endpoint(`${USERS_ENDPOINT}/:userId`), async ({ params }) => {
+    http.get(endpoint(`${API_PATHS.users}/:userId`), async ({ params }) => {
         await networkDelay()
-        const user = db.user.findFirst({
-            where: { id: { equals: String(params.userId) } },
-        })
+        const user = db.user.findFirst((query) =>
+            query.where({ id: String(params.userId) }),
+        )
         if (!user) {
             return HttpResponse.json(
                 { id: 'NOT_FOUND', error: 'The user does not exist' },
                 { status: 404 },
             )
         }
-        return HttpResponse.json({ name: `${user.firstName} ${user.lastName}` })
+        return HttpResponse.json<GetUserResponse>({
+            name: `${user.firstName} ${user.lastName}`,
+        })
     }),
 ]

@@ -1,8 +1,8 @@
 import { useLingui } from '@lingui/react/macro'
 
-import type { ApiKey } from '@/api/apiKeys'
-import { apiErrorMessage } from '@/api/errors'
-import { useRevokeApiKey } from '@/api/service/apiKeys'
+import type { ApiKey } from '@/api/domains/apiKeys'
+import { useApiErrorMessage } from '@/api/errors'
+import { useApiRevokeApiKey } from '@/api/hooks/useApiRevokeApiKey'
 import { ConfirmationDialog } from '@/components/ConfirmationDialog'
 import { IconButton } from '@/design-system/Button'
 import { TrashIcon } from '@/design-system/Icon'
@@ -10,27 +10,23 @@ import { useNotifications } from '@/stores/notifications'
 
 export type RevokeApiKeyButtonProps = {
     apiKey: ApiKey
-    onRevoked: () => void
 }
 
-export function RevokeApiKeyButton({
-    apiKey,
-    onRevoked,
-}: RevokeApiKeyButtonProps) {
+export function RevokeApiKeyButton({ apiKey }: RevokeApiKeyButtonProps) {
     const { t } = useLingui()
-    const { trigger, isMutating } = useRevokeApiKey(apiKey.id)
+    const { trigger, isMutating } = useApiRevokeApiKey(apiKey.id)
+    const apiErrorMessage = useApiErrorMessage()
     const addNotification = useNotifications((state) => state.addNotification)
 
     async function handleConfirm() {
         try {
             await trigger()
             addNotification({ type: 'success', title: t`API key revoked` })
-            onRevoked()
         } catch (error) {
             addNotification({
                 type: 'error',
                 title: t`Could not revoke the API key`,
-                message: apiErrorMessage(error, t`Unexpected error`),
+                message: apiErrorMessage(error),
             })
         }
     }

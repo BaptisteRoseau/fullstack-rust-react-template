@@ -1,7 +1,7 @@
 import { useLingui } from '@lingui/react/macro'
 import { Navigate, useLocation } from 'react-router'
 
-import { useCurrentUser } from '@/api/service/auth'
+import { useApiCurrentUser } from '@/api/hooks/useApiCurrentUser'
 import { Spinner } from '@/design-system/Spinner'
 import { PATHS } from '@/router/constants'
 
@@ -9,7 +9,7 @@ import styles from './protected-route.module.scss'
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     const { t } = useLingui()
-    const { data: user, isLoading } = useCurrentUser()
+    const { data: user, isLoading } = useApiCurrentUser()
     const location = useLocation()
 
     if (isLoading) {

@@ -1,7 +1,7 @@
 import { Trans, useLingui } from '@lingui/react/macro'
 import { Link, useSearchParams } from 'react-router'
 
-import { authRedirectUrl } from '@/api/auth'
+import { loginUrl } from '@/api/domains/session'
 import { Head } from '@/components/head/Head'
 import { Button } from '@/design-system/Button'
 import { Link as TextLink } from '@/design-system/Link'
@@ -28,9 +28,7 @@ export function Login() {
             <Button
                 size="lg"
                 className={styles.action}
-                onClick={() =>
-                    window.location.assign(authRedirectUrl('login', redirectTo))
-                }
+                onClick={() => window.location.assign(loginUrl(redirectTo))}
             >
                 <Trans>Continue to sign in</Trans>
             </Button>

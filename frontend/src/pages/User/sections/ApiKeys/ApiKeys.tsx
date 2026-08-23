@@ -1,8 +1,8 @@
 import { Trans, useLingui } from '@lingui/react/macro'
 import { useState } from 'react'
 
-import type { CreatedApiKey } from '@/api/apiKeys'
-import { useApiKeys } from '@/api/service/apiKeys'
+import type { CreatedApiKey } from '@/api/domains/apiKeys'
+import { useApiApiKeys } from '@/api/hooks/useApiApiKeys'
 import { Button } from '@/design-system/Button'
 import { PlusIcon } from '@/design-system/Icon'
 import { ContentLayout } from '@/layouts/ContentLayout'
@@ -13,14 +13,13 @@ import { NewApiKeyBanner } from '../../components/NewApiKeyBanner'
 
 export function ApiKeys() {
     const { t } = useLingui()
-    const { data, error, isLoading, mutate } = useApiKeys()
+    const { data, error, isLoading } = useApiApiKeys()
     const [isCreateOpen, setIsCreateOpen] = useState(false)
     const [createdKey, setCreatedKey] = useState<CreatedApiKey | null>(null)
 
-    async function handleCreated(apiKey: CreatedApiKey) {
+    function handleCreated(apiKey: CreatedApiKey) {
         setCreatedKey(apiKey)
         setIsCreateOpen(false)
-        await mutate()
     }
 
     return (
@@ -45,7 +44,6 @@ export function ApiKeys() {
                 apiKeys={data ?? []}
                 isLoading={isLoading}
                 error={error}
-                onRevoked={() => void mutate()}
             />
 
             <CreateApiKeyDialog

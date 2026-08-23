@@ -1,7 +1,7 @@
 import { Trans, useLingui } from '@lingui/react/macro'
 import { Link } from 'react-router'
 
-import { useCurrentUser } from '@/api/service/auth'
+import { useApiCurrentUser } from '@/api/hooks/useApiCurrentUser'
 import { Logo } from '@/components/layout/Logo'
 import { ThemeSwitcher } from '@/components/layout/ThemeSwitcher'
 import { UserMenu } from '@/components/layout/UserMenu'
@@ -13,7 +13,7 @@ import styles from './app-header.module.scss'
 
 export function AppHeader() {
     const { t } = useLingui()
-    const { data: user, isLoading } = useCurrentUser()
+    const { data: user, isLoading } = useApiCurrentUser()
 
     return (
         <header className={styles.header}>

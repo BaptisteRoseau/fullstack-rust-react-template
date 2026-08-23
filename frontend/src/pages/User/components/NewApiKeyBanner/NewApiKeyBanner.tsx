@@ -1,6 +1,6 @@
 import { Trans, useLingui } from '@lingui/react/macro'
 
-import type { CreatedApiKey } from '@/api/apiKeys'
+import type { CreatedApiKey } from '@/api/domains/apiKeys'
 import { Button, IconButton } from '@/design-system/Button'
 import { CheckIcon, CloseIcon, CopyIcon } from '@/design-system/Icon'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
@@ -35,10 +35,10 @@ export function NewApiKeyBanner({ apiKey, onDismiss }: NewApiKeyBannerProps) {
                 <Trans>This secret will not be shown again.</Trans>
             </p>
             <div className={styles.row}>
-                <code className={styles.key}>{apiKey.key}</code>
+                <code className={styles.key}>{apiKey.secret}</code>
                 <Button
                     variant="secondary"
-                    onClick={() => void copy(apiKey.key)}
+                    onClick={() => void copy(apiKey.secret)}
                 >
                     {isCopied ? <CheckIcon /> : <CopyIcon />}
                     {isCopied ? <Trans>Copied</Trans> : <Trans>Copy</Trans>}

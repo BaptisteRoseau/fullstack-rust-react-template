@@ -1,14 +1,14 @@
 import { screen } from '@testing-library/react'
 
-import { useCurrentUser } from '@/api/service/auth'
+import { useApiCurrentUser } from '@/api/hooks/useApiCurrentUser'
 import { render } from '@/test-utils/render'
 
 import { Home } from './Home'
 
-vi.mock('@/api/service/auth')
+vi.mock('@/api/hooks/useApiCurrentUser')
 
 it('renders the hero and the call to action when signed out', () => {
-    vi.mocked(useCurrentUser).mockReturnValue({
+    vi.mocked(useApiCurrentUser).mockReturnValue({
         data: null,
         error: undefined,
         isLoading: false,
