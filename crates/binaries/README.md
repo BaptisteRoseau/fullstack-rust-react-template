@@ -1,24 +1,30 @@
 # Binaries
 
-This is where all the crates that implement a binary should be. They are the only ones allowed to have a `main.rs` file.
+The only crates allowed a `main.rs`. Everything else in [crates](../README.md) is a library.
 
-Each `main.rs` should look like the following with at least a `program.rs` alongside it:
+Binary crates stay minimal. Logic big enough to name belongs in a library crate, not here.
 
-```rs
-mod program;
-use std::process::exit;
-
-#[tokio::main(flavor = "multi_thread")]
-async fn main() -> Result<(), anyhow::Error> {
-    let config = config::Config::parse()?;
-    if let Err(error) = program::run(&config).await {
-        eprintln!("Fatal Error: {}", error);
-        exit(1);
-    }
-    Ok(())
-}
+```txt
+binaries/
+└── backend/
+    ├── src/
+    │   ├── main.rs      # parses Config, calls program::run, sets the process exit code
+    │   └── program.rs   # the startup sequence: build the backends, serve
+    └── Cargo.toml
 ```
 
-This allows the config to live longer than `program::run` hence be readable in the whole program without lifetime issue.
+## The `main.rs` contract
 
-Binary crates should be minimal. If something is big enough to end up in its own or an existing crate, create it or update existing crates.
+Every binary has a `program.rs` beside its `main.rs`, and `main` does only three things: parse the
+config, call `program::run`, and turn an error into a non-zero exit code. See
+[backend/src/main.rs](./backend/src/main.rs).
+
+`main` owns the `Config` and passes it into `run`. Keeping it at the top level lets it outlive
+`run`, so the whole program can read it without lifetime plumbing.
+
+`main` is also the only place that prints to stderr and calls `exit`. Everything below returns a
+`Result`.
+
+## Skills
+
+- [backend-config-entry](../../.claude/skills/backend-config-entry/SKILL.md)
