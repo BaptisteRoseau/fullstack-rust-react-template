@@ -17,7 +17,6 @@ This set supersedes the flat `frontend/docs/*.md` files, which document the prev
    - [04 – Pages & router](04-pages-router.md)
    - [05 – Hooks, utils & types](05-hooks-utils-types.md)
    - [06 – Tooling: styles, state, i18n, tests](06-tooling.md)
-   - [07 – Bootstrap plan](07-bootstrap-plan.md)
 
 ---
 
