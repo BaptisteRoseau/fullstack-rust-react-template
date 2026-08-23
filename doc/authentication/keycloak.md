@@ -1,86 +1,66 @@
 # Authentication — Keycloak
 
-Keycloak is the identity provider. It hosts the login and registration pages and issues the
-JWTs the backend validates.
+Keycloak is the identity provider. It hosts the login and registration pages, and issues the JWTs
+the backend validates.
 
 ## Bootstrap
 
-The realm is provisioned **automatically** — there is no manual admin-console setup.
+The realm is provisioned **automatically**. There is no manual admin-console setup.
 
-- Service definition: [`infrastructure/docker-compose/docker-compose.authentication.yml`](../../infrastructure/docker-compose/docker-compose.authentication.yml)
-- Realm definition: [`infrastructure/docker-compose/keycloak/import/realm-export.json`](../../infrastructure/docker-compose/keycloak/import/realm-export.json)
+| What | Where |
+| --- | --- |
+| Service definition | [docker-compose.authentication.yml](../../infrastructure/docker-compose/docker-compose.authentication.yml) |
+| Realm definition | [realm-export.json](../../infrastructure/keycloak/import/realm-export.json) |
 
-Keycloak runs with `start-dev --import-realm` and the import directory is bind-mounted
-read-only:
+Keycloak runs with `start-dev --import-realm`, and the import directory is mounted read-only. On
+first boot it imports every realm JSON it finds there.
 
-```yaml
-command: start-dev --import-realm
-volumes:
-  - ./keycloak/import:/opt/keycloak/data/import:ro
-```
-
-On first boot Keycloak imports every realm JSON it finds in that directory. Keycloak listens
-on `localhost:8090` (mapped from the container's `8080`), and the admin console is reachable
-with `admin` / `admin`.
+The realm is named `app`. Keycloak listens on host port `8090`, and the admin console uses the
+bootstrap credentials set in the compose file.
 
 ## The `app` realm
 
-| Setting | Value | Why |
-|---------|-------|-----|
-| `registrationAllowed` | `true` | Enables the self-service registration page. |
-| `verifyEmail` | `true` | New users must confirm their address; the mail is caught by Mailhog (http://localhost:8025), so no real SMTP server is needed. |
-| `accessTokenLifespan` | `300` (seconds) | Short-lived tokens, to exercise the silent refresh. |
-| `sslRequired` | `external` | Dev only — allows plain HTTP on localhost. |
+Read the current values in
+[realm-export.json](../../infrastructure/keycloak/import/realm-export.json). What matters is why
+each one is set:
+
+| Setting | Why |
+| --- | --- |
+| `registrationAllowed` | Turns on the self-service registration page, so the app needs no sign-up form |
+| `verifyEmail` | New users confirm their address. MailHog catches the mail, so no real SMTP server is needed |
+| `accessTokenLifespan` | Deliberately short, so the silent refresh path is exercised in development |
+| `sslRequired` | Set to allow plain HTTP on localhost. Change it for production |
 
 ### Clients
 
-**`webapp`** — the confidential client used by the Backend-for-Frontend.
+**`webapp`** is the confidential client the backend uses. It is *confidential* because the backend
+is a server that can keep a secret and performs the code exchange itself.
 
-| Setting | Value |
-|---------|-------|
-| Access type | confidential (`publicClient: false`, client-secret auth) |
-| Standard (authorization code) flow | enabled |
-| Direct access grants | disabled |
-| PKCE | `S256` required |
-| Redirect URIs | `http://localhost:8080/api/auth/callback` (+ `127.0.0.1`) |
-| Post-logout redirect | `http://localhost:3000/*` |
-| Secret (dev) | `webapp-secret` |
+- Authorization Code flow enabled, direct access grants disabled, PKCE `S256` required.
+- Its redirect URI must match `AUTHENTICATOR_REDIRECT_URL`.
+- An `oidc-audience-mapper` injects the API's audience into the access token. Without it, every
+  token is rejected by the backend's audience validation.
 
-It is *confidential* because the backend is a server that can keep a secret and performs the
-code exchange. An **audience mapper** (`oidc-audience-mapper`) injects the `backend` audience
-into the access token, so the API's audience validation (`AUTHENTICATOR_AUDIENCES=backend`)
-accepts tokens minted for `webapp`.
+**`backend`** is a public client with direct access grants enabled. The application flow does not
+use it. It exists so integration tests and [manual-testing.md](./manual-testing.md) can fetch a raw
+token with `curl`.
 
-**`backend`** — a public client with direct access grants enabled. It is kept for parity with
-the integration tests and for fetching a raw token via `curl`
-(see [manual-testing.md](./manual-testing.md)). The application flow does not use it.
+## What the backend reads
 
-## Token contents
-
-The backend reads two claims from the validated access token:
+From the validated access token:
 
 - `sub` — the user's UUID, surfaced as `UserToken.id`.
-- `iss` — the issuer; its last path segment becomes `UserToken.realm`.
+- `iss` — the issuer. Its last path segment becomes `UserToken.realm`.
 
-`/auth/me` additionally calls Keycloak's `userinfo` endpoint to read `email`, `given_name`
-and `family_name` for display.
+`/auth/me` additionally calls Keycloak's `userinfo` endpoint for the display name and email.
 
-## Customizing
+## Changing the realm
 
-- **Production secret**: replace the `webapp` client `secret` and pass it to the backend via
-  `OIDC_CLIENT_SECRET` (never commit a real secret).
-- **Token lifetimes**: tune `accessTokenLifespan` and the SSO session timeouts in the realm
-  JSON.
-- **Email verification / password reset**: set `verifyEmail: true` and configure SMTP in the
-  realm once you have a mail server.
-- **Branding / extra fields**: customize the Keycloak login theme and registration form — the
-  application does not need to change, since registration is entirely Keycloak-hosted.
+`--import-realm` only imports a realm that does not already exist yet. To re-apply a changed realm
+JSON in development, remove the Keycloak database volume and recreate the containers.
 
-> Re-importing: `--import-realm` only imports a realm that does not already exist. To re-apply
-> a changed realm JSON in development, remove the Keycloak database volume
-> (`postgres_keycloak`) and recreate the containers.
->
-> Beware when refreshing this file from an admin-console export: a partial export silently
-> drops the `clients` section, which leaves the realm without `webapp` and `backend` and
-> breaks the whole login flow. Always check that both clients are still present after
-> re-exporting.
+When refreshing the file from an admin-console export, check that **both** clients are still
+present. A partial export silently drops the `clients` section, which leaves the realm without
+`webapp` and `backend` and breaks the whole login flow.
+
+For production, see the checklist in [configuration.md](./configuration.md).
