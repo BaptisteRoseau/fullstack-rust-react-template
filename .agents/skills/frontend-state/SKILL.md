@@ -9,7 +9,7 @@ Pick the narrowest tool that works. Most "global state" problems are one of the 
 
 | Kind of state | Tool |
 |---|---|
-| Server data | **SWR** — `api/service/*` hooks. Never copy it into a store. |
+| Server data | **SWR** — `api/hooks/useApiXxx` hooks. Never copy it into a store. |
 | State used by one component | `useState` |
 | State shared between a parent and its children | props |
 | State used by one subtree | React context in `src/contexts/<name>/` |
@@ -82,7 +82,7 @@ Raise one from any mutation handler; `<Notifications />` renders them from `src/
 addNotification({
     type: 'error',
     title: t`Could not revoke the API key`,
-    message: apiErrorMessage(error, t`Unexpected error`),
+    message: apiErrorMessage(error),
 })
 ```
 

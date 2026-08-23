@@ -8,8 +8,9 @@ description: How to write Vitest + Testing Library tests and Playwright e2e spec
 | Level | Runner | Location | Doubles |
 |---|---|---|---|
 | Unit — primitive, hook, util | Vitest | next to source | none |
-| Integration — component, page | Vitest + Testing Library | next to source | manual `__mocks__` |
-| Service | Vitest | `src/api/service/*.test.ts` | MSW |
+| Integration — component, page | Vitest + Testing Library | next to source | `vi.mock('@/api/hooks/useApiXxx')` |
+| Domain fetcher | Vitest | `src/api/domains/<domain>/<domain>.test.ts` | MSW |
+| API hook | Vitest | `src/api/hooks/useApiXxx/*.test.ts` | MSW |
 | End-to-end | Playwright | `e2e/` | `mock-server.ts` |
 
 ```bash
@@ -54,7 +55,7 @@ Testing Library `render` is fine for design-system primitives. Each render gets 
 ## Hook tests
 
 `src/hooks/useXxx/useXxx.test.ts`, written with `renderHook` and `act`. Shared hooks own no domain
-knowledge, so they need no MSW and no manual `__mocks__`; only reach for `SwrWrapper` when the hook
+knowledge, so they need no MSW and no module mock; only reach for `SwrWrapper` when the hook
 sits on SWR. Stub the browser APIs jsdom lacks in the test file itself and undo them in `afterEach`
 — `setup-tests.ts` clears mocks and the mock database but **not** `localStorage` or global stubs:
 
@@ -80,16 +81,16 @@ Mock the service, assert the rendering:
 ```tsx
 import { screen } from '@testing-library/react'
 
-import { useApiKeys } from '@/api/service/apiKeys'
+import { useApiApiKeys } from '@/api/hooks/useApiApiKeys'
 import { buildApiKey } from '@/test-utils/fixtures/apiKeys'
 import { render } from '@/test-utils/render'
 
 import { ApiKeys } from './ApiKeys'
 
-vi.mock('@/api/service/apiKeys')
+vi.mock('@/api/hooks/useApiApiKeys')
 
 it('lists the api keys', () => {
-    vi.mocked(useApiKeys).mockReturnValue({
+    vi.mocked(useApiApiKeys).mockReturnValue({
         data: [buildApiKey({ name: 'CI deploy key' })],
         error: undefined,
         isLoading: false,

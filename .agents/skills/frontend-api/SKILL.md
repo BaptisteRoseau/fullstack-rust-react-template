@@ -1,184 +1,234 @@
 ---
 name: frontend-api
-description: How to declare a backend endpoint and its SWR service hooks in src/api (declaration file + service + manual mock + MSW-backed test). Use this when adding or updating a frontend API call, query, mutation or cache invalidation.
+description: How to add or change a call to the backend in src/api — a domain folder (types, converters, fetchers, cache keys) and its SWR binding under api/hooks. Use this when adding or updating a frontend API call, query, mutation, cache invalidation or error handling.
 ---
 
 # Frontend API layer
 
-`src/api/` owns every HTTP call. It is split so that *what an endpoint is* stays side-effect free
-and importable anywhere, while *how it is called* lives in one place.
+`src/api/` is a four-layer client. Work downwards, never sideways:
 
 ```
-src/api/
-├── client.ts               # fetch wrapper: base URL, JSON, 401 refresh, error normalisation
-├── errors.ts               # ApiError, isApiError, apiErrorMessage
-├── <domain>.ts             # endpoint paths + types. NO side effects.
-├── service/
-│   ├── <domain>.ts         # SWR hooks that call the endpoints
-│   ├── <domain>.test.ts    # MSW-backed
-│   └── __mocks__/
-│       └── <domain>.ts     # manual mock consumed by vi.mock
-└── utils/useApiAction.ts   # generic POST/PUT/PATCH/DELETE hook
+api/hooks/useApiXxx/     SWR bindings. The only api entry point components use
+api/domains/<domain>/    domain types, converters, fetchers, cache keys
+api/client.ts errors.ts  transport, apiCall(), ApiError
+api/generated/           SDK built from the backend's OpenAPI document. Never edited
 ```
 
-## 0. Scaffold the domain
+**Never let a generated type escape `src/api/`.** ESLint blocks it, but understand why: a generated
+type says what the backend sends today, a domain type says what the interface needs. `converters.ts`
+is the only place those meet.
 
-The five files below are generated, not hand-written. From `frontend/`:
+## 1. Make sure the operation exists
+
+Every fetcher calls a function from `@/api/generated`. If the endpoint is new, generate it first —
+**do not hand-write a path**:
 
 ```bash
-bun run generate api <domainName> <endpointPath>
-# e.g. bun run generate api apiKeys /api/api-key
+./scripts/build_frontend_api_sdk.sh
 ```
 
-That writes `src/api/<domain>.ts`, `src/api/service/<domain>.ts`,
-`src/api/service/__mocks__/<domain>.ts`, `src/api/service/<domain>.test.ts` and
-`src/test-utils/mocks/handlers/<domain>.ts`. Run it without arguments to be prompted. The steps
-below describe how to fill each generated file in — for an existing domain, skip to the file you
-are editing.
+Then read `src/api/generated/types.gen.ts` for the exact wire shape. If the operation is missing, the
+backend does not have it: add it with the `backend-add-api-endpoint` skill. Never invent it in the
+frontend and let MSW hide the gap. See the `frontend-api-sdk` skill.
 
-## 1. Declare the endpoint
+## 2. Pick the domain
 
-`src/api/<domain>.ts` — constants and types only. Importing it must never trigger a request.
+A domain is **one noun the interface reasons about**, not a backend tag or a URL prefix. It owns that
+noun's type, converters, keys, and every fetcher whose input or output is that noun — whatever path
+it comes from. If your folders mirror the OpenAPI tags, the converter layer is decorative.
+
+Scaffold one with `bun run generate` → `api`; it writes to `src/api/domains/<domain>/`. These are
+the **only** filenames allowed there:
+
+| File | Required when | Contents |
+|---|---|---|
+| `<domain>.ts` | always | the fetchers; the only file calling `generated` |
+| `<domain>.test.ts` | always | MSW-backed; fetcher + converter together |
+| `types.ts` | the domain has a payload | hand-written types; may export an `as const` union source |
+| `converters.ts` | `types.ts` exists | `fromApi*` / `toApi*`; the only file importing generated **types** |
+| `converters.test.ts` | `converters.ts` exists | pure, no MSW |
+| `keys.ts` | something is read through SWR | the cache-key factory |
+| `index.ts` | always | barrel: fetchers, keys, types. **Never** converters |
+
+## 3. Write the domain type first
+
+Hand-write it. Never alias a generated type, never re-export one.
 
 ```ts
-export const API_KEYS_ENDPOINT = '/api/api-key'
-
-export const apiKeyEndpoint = (apiKeyId: string) =>
-    `${API_KEYS_ENDPOINT}/${apiKeyId}`
+// src/api/domains/apiKeys/types.ts
+export const API_KEY_PERMISSIONS = ['read', 'write', 'admin'] as const
+export type ApiKeyPermission = (typeof API_KEY_PERMISSIONS)[number]
 
 export type ApiKey = {
     id: string
     name: string
-    permissions: string[]
-    createdAt: string
+    permissions: ApiKeyPermission[]
+    createdAt: Date
 }
-
-export type CreateApiKeyBody = Pick<ApiKey, 'name' | 'permissions'>
 ```
 
-Paths are **absolute from the origin** and include the `/api` prefix — `env.API_URL` is the bare
-origin (`http://localhost:8080`). Always build URLs from the path helpers; hand-written literals
-are how stale caches happen.
+## 4. Write the converter
 
-Zod validation is **opt-in**. Add a schema only when the payload crosses a trust boundary or is
-genuinely dynamic; then derive the type from it with `z.infer`.
-
-Check the real backend contract with the `api-backend` skill before inventing a shape.
-
-## 2. Write the service
-
-`src/api/service/<domain>.ts` — one hook per operation, named for the operation.
+This is where the real decisions live. Make them deliberately:
 
 ```ts
-import useSWR from 'swr'
+// src/api/domains/apiKeys/converters.ts
+import type { GetApiKeyResponse } from '@/api/generated'
 
-import { API_KEYS_ENDPOINT, apiKeyEndpoint, type ApiKey, type CreateApiKeyBody } from '@/api/apiKeys'
-import { useApiAction } from '@/api/utils/useApiAction'
-
-export function useApiKeys() {
-    return useSWR<ApiKey[]>(API_KEYS_ENDPOINT)
-}
-
-export function useApiKey(apiKeyId: string | undefined) {
-    return useSWR<ApiKey>(apiKeyId ? apiKeyEndpoint(apiKeyId) : null)
-}
-
-export function useCreateApiKey() {
-    return useApiAction<CreateApiKeyBody, ApiKey>(API_KEYS_ENDPOINT, 'POST')
-}
-
-export function useRevokeApiKey(apiKeyId: string) {
-    return useApiAction<void, void>(apiKeyEndpoint(apiKeyId), 'DELETE')
+export function fromGetApiKeyResponse(response: GetApiKeyResponse): ApiKey {
+    return {
+        id: response.id,
+        name: response.name,
+        permissions: response.permissions.filter(isApiKeyPermission),
+        createdAt: new Date(response.createdAt),
+    }
 }
 ```
 
-Rules:
+- **Narrow weak wire types.** `string[]` becomes the union the UI needs.
+- **Filter unknown values, never reject them.** A permission the backend adds tomorrow must not blank
+  the table.
+- **Normalise units at the boundary.** One endpoint sends RFC 3339, another an epoch in
+  milliseconds; both become `Date`. The interface must not know which.
+- **Rename what is dangerous.** The wire's `key` becomes `secret`; `key` next to SWR cache keys is a
+  landmine.
 
-- No `fetcher` argument on read hooks — `apiFetch` is SWR's global fetcher (`src/Context.tsx`).
-  Pass one only when the hook needs different error semantics, as `useCurrentUser` does to turn a
-  401 into `null` rather than an error.
-- A `null` key tells SWR to skip the request. Use it for conditional fetches.
-- Return SWR's result object untouched (`{ data, error, isLoading, mutate }`). Do not
-  destructure-and-rewrap.
-- Components import from `api/service/*`, **never** from `api/client.ts` directly.
-- Filtering, sorting and formatting belong in the component or a `utils/` helper.
+Test converters with no MSW. Assert the decisions, including the unknown-value case.
 
-## 3. Mutate and invalidate
+## 5. Write the fetchers
+
+Verb-first and `Promise`-returning. Reads are `fetch*`; mutations take the domain verb. Everything
+goes through `apiCall`.
+
+```ts
+// src/api/domains/apiKeys/apiKeys.ts
+import { apiCall } from '@/api/client'
+import { createApiKey as createApiKeyRequest, getApiKey } from '@/api/generated'
+
+export async function fetchApiKey(apiKeyId: string): Promise<ApiKey> {
+    return fromGetApiKeyResponse(
+        await apiCall(() => getApiKey({ path: { id: apiKeyId } })),
+    )
+}
+
+export async function createApiKey(apiKey: NewApiKey): Promise<CreatedApiKey> {
+    return fromCreateApiKeyResponse(
+        await apiCall(() =>
+            createApiKeyRequest({ body: toCreateApiKeyRequest(apiKey) }),
+        ),
+    )
+}
+```
+
+The import alias on the generated `createApiKey` is the layer proving it exists: theirs speaks wire
+types, ours speaks domain types.
+
+**Endpoint-specific semantics belong in the fetcher, not in a hook or a component.** A 401 from
+`GET /auth/me` means "signed out", so `fetchCurrentUser` answers `null` instead of throwing.
+
+## 6. Write the cache keys
+
+```ts
+export const apiKeyKeys = {
+    all: ['apiKeys'] as const,
+    detail: (apiKeyId: string) => ['apiKeys', apiKeyId] as const,
+}
+```
+
+Tuples, `as const`, one factory per domain. Never a URL string.
+
+## 7. Write the hook
+
+`bun run generate` → `api-hook`. One folder per hook under `src/api/hooks/`, mirroring `src/hooks/`:
+`useApiXxx.ts`, `useApiXxx.test.ts`, `index.ts`.
+
+Name it `useApi` + operation, **always**, including the stutter: `useApiApiKey`. The prefix is the
+point — `const { data } = useApiKeys()` looks exactly like `useBooleanState()` and hides a network
+request.
+
+A read hook takes its argument **out of the key**, so key and request cannot disagree. A `null` key
+skips the request:
+
+```ts
+export function useApiApiKey(apiKeyId: string | undefined) {
+    return useSWR(apiKeyId ? apiKeyKeys.detail(apiKeyId) : null, ([, id]) =>
+        fetchApiKey(id),
+    )
+}
+```
+
+**A mutation hook owns its invalidation.** No component should have to remember to refresh a list.
+
+```ts
+const MUTATION_KEY = ['apiKeys', 'create'] as const
+
+export function useApiCreateApiKey() {
+    const { mutate } = useSWRConfig()
+
+    return useSWRMutation(
+        MUTATION_KEY,
+        (_key, { arg }: { arg: NewApiKey }) => createApiKey(arg),
+        { onSuccess: () => void mutate(apiKeyKeys.all) },
+    )
+}
+```
+
+Give each mutation a key of its own: two mutation hooks sharing one key share their `isMutating`
+state. Return SWR's result object untouched — never destructure and rewrap.
+
+## 8. Handle errors by cause
+
+Every failure arrives as an `ApiError` carrying an `id`, whether it came from the backend
+(`NOT_FOUND`, `TOKEN_EXPIRED`, …), from a dead connection (`NETWORK`) or from a body outside the
+contract (`PARSE`).
+
+Branch on the id, never on the status code — a 401 is both "not signed in" and "session expired":
+
+```ts
+matchApiError(error, {
+    TOKEN_EXPIRED: () => refresh(),
+    default: () => signOut(),
+})
+```
+
+Show the user `useApiErrorMessage()`, which is translated. The backend's `error` string is English
+and belongs in logs:
 
 ```tsx
-const { trigger, isMutating } = useCreateApiKey()
-const { mutate } = useSWRConfig()
+const apiErrorMessage = useApiErrorMessage()
 
-async function onSubmit(values: CreateApiKeyBody) {
-    await trigger(values)
-    await mutate(API_KEYS_ENDPOINT)
-}
-```
-
-`trigger` rejects on failure — handle it explicitly and surface the message through the
-notifications store with `apiErrorMessage(error, fallback)`. Never swallow it.
-
-Prefix invalidation:
-
-```ts
-mutate((key) => typeof key === 'string' && key.startsWith(API_KEYS_ENDPOINT))
-```
-
-## 4. Add the manual mock
-
-`src/api/service/__mocks__/<domain>.ts` (generated in step 0) — **every** exported hook must be
-mocked, or importers crash on an undefined function.
-
-```ts
-import { vi } from 'vitest'
-
-export const useApiKeys = vi.fn().mockReturnValue({
-    data: [], error: undefined, isLoading: false, mutate: vi.fn(),
-})
-
-export const useCreateApiKey = vi.fn().mockReturnValue({
-    trigger: vi.fn(), isMutating: false,
+addNotification({
+    type: 'error',
+    title: t`Could not revoke the API key`,
+    message: apiErrorMessage(error),
 })
 ```
 
-## 5. Test the service against MSW
+## 9. Mock, then verify
 
-`src/api/service/<domain>.test.ts` is the one place that *should* go through the network layer.
+Add the MSW handler (`frontend-mocks` skill) and register it in
+`src/test-utils/mocks/handlers/index.ts`. **Handlers emit wire shapes, not domain shapes** — type
+them with the generated types so the compiler holds the line:
 
 ```ts
-import { renderHook, waitFor } from '@testing-library/react'
-import { http, HttpResponse } from 'msw'
-
-import { API_KEYS_ENDPOINT } from '@/api/apiKeys'
-import { server } from '@/test-utils/server'
-import { SwrWrapper } from '@/test-utils/wrappers'
-
-import { useApiKeys } from './apiKeys'
-
-it('returns the api keys of the caller', async () => {
-    server.use(http.get(`*${API_KEYS_ENDPOINT}`, () => HttpResponse.json([])))
-
-    const { result } = renderHook(() => useApiKeys(), { wrapper: SwrWrapper })
-
-    await waitFor(() =>
-        expect(
-            result.current.data,
-            `expected data, got error: ${result.current.error}`,
-        ).toBeDefined(),
-    )
-})
+return HttpResponse.json<GetApiKeyResponse>(toGetApiKeyResponse(apiKey))
 ```
 
-`SwrWrapper` provides a fresh cache and `dedupingInterval: 0` so results never leak between cases.
+Then, from `frontend/`:
 
-The generator also created the MSW handler that backs dev and e2e,
-`src/test-utils/mocks/handlers/<domain>.ts` — fill it in and register it in `handlers/index.ts`.
-See the `frontend-mocks` skill.
+```bash
+bun run check-types
+bun run lint
+bun run test
+bun run i18n:check     # if you added user-facing strings
+```
 
-## Authentication
+## Never
 
-Auth is a backend-for-frontend OIDC flow. The browser is redirected to
-`${env.API_URL}/api/auth/{login,register}?redirect=<path>`; the backend drives the OAuth exchange
-and stores tokens in httpOnly cookies. The frontend never sees a token — it only reads
-`/api/auth/me`, calls `/api/auth/logout`, and lets `apiFetch` retry once through
-`/api/auth/refresh` on a 401. Build the entry URLs with `authRedirectUrl()` from `@/api/auth`.
+- Hand-write a path, or call `fetch` outside `api/client.ts`.
+- Import `@/api/generated` outside `src/api/**` (or `src/test-utils/**`).
+- Import past a domain barrel: `@/api/domains/apiKeys/converters` is out of bounds.
+- Export converters from a domain's `index.ts`.
+- Alias or re-export a generated type as a domain type.
+- Call `mutate` by hand in a component for something a mutation hook already owns.
+- Put a formatter or a derivation in the api layer — that is `src/utils/`.

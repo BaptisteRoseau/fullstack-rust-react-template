@@ -148,7 +148,7 @@ Rules:
 
 ## 5. Page component
 
-A page composes; it does not implement. Data comes from `api/service/`, UI from `components/` and
+A page composes; it does not implement. Data comes from `api/hooks/`, UI from `components/` and
 `design-system/`.
 
 ```tsx
@@ -197,7 +197,7 @@ Use `NavLink` with a class callback for the active state, and `end` on the index
 ## 7. Test
 
 ```tsx
-vi.mock('@/api/service/auth')
+vi.mock('@/api/hooks/useApiCurrentUser')
 
 it('renders the hero when signed out', () => {
     vi.mocked(useCurrentUser).mockReturnValue({

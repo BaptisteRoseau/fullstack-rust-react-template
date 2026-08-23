@@ -11,10 +11,10 @@ src/test-utils/
 ├── enableMocking.ts        # MSW browser worker (dev, when VITE_APP_ENABLE_API_MOCKING=true)
 ├── mocks/
 │   ├── browser.ts
-│   ├── db.ts               # @mswjs/data in-memory database
+│   ├── db.ts               # @msw/data in-memory collections
 │   ├── utils.ts            # endpoint(), networkDelay(), session cookie helpers
 │   └── handlers/           # one file per domain + index barrel
-└── fixtures/               # buildCurrentUser(), buildApiKey()
+└── fixtures/               # domain builders (buildApiKey) + wire builders (buildGetApiKeyResponse)
 mock-server.ts              # Express + @mswjs/http-middleware, used by e2e
 ```
 
@@ -31,30 +31,40 @@ existing domain, add the resolver to the domain's handler array.
 ```ts
 import { http, HttpResponse } from 'msw'
 
-import { API_KEYS_ENDPOINT, type CreateApiKeyBody } from '@/api/apiKeys'
+import type { GetApiKeyResponse } from '@/api/generated'
 
 import { CURRENT_USER_ID, db, persistDb } from '../db'
-import { endpoint, isAuthenticated, networkDelay } from '../utils'
+import { API_PATHS, endpoint, isAuthenticated, networkDelay } from '../utils'
 
 export const apiKeyHandlers = [
-    http.get(endpoint(API_KEYS_ENDPOINT), async ({ request }) => {
+    http.get(endpoint(API_PATHS.apiKeys), async ({ request }) => {
         await networkDelay()
         if (!isAuthenticated(request)) {
             return HttpResponse.json(UNAUTHORIZED, { status: 401 })
         }
-        return HttpResponse.json(
-            db.apiKey.findMany({ where: { userId: { equals: CURRENT_USER_ID } } }),
+        return HttpResponse.json<GetApiKeyResponse[]>(
+            db.apiKey
+                .findMany((query) => query.where({ userId: CURRENT_USER_ID }))
+                .map(toGetApiKeyResponse),
         )
     }),
 ]
 ```
 
+**Handlers emit the wire shape, not the domain shape.** This is the easiest trap in the API layer:
+`apiKey.createdAt` is an RFC 3339 string on the wire and a `Date` in the domain, and
+`GetMeResponse.createdAt` is an epoch in milliseconds — all three are `Date` once a converter has
+run. Type every response with the generated type (`HttpResponse.json<GetApiKeyResponse>(…)`) and let
+the compiler hold the line. `src/test-utils/**` is the one place outside `src/api/` allowed to import
+`@/api/generated`, for exactly this reason.
+
 Then register it in `handlers/index.ts` — the generator does not touch the barrel.
 
 Rules:
 
-- Build the path with `endpoint(PATH_CONSTANT)` — it prefixes `*` so the handler matches whatever
-  origin the caller uses, and it derives the URL from `src/api/<domain>.ts` rather than a literal.
+- Build the path with `endpoint(API_PATHS.x)` — `endpoint` prefixes `*` so the handler matches
+  whatever origin the caller uses, and `API_PATHS` in `mocks/utils.ts` keeps every URL in one place
+  instead of scattering literals.
 - Mirror the **real** backend: same status codes, same error body shape
   (`{ id, error }`), same 204-with-no-body semantics. Check with the `api-backend` skill.
 - Mutating handlers call `persistDb(model)` so dev and e2e survive a reload.
@@ -73,9 +83,25 @@ before MSW sees it.
 
 ## The database
 
-`src/test-utils/mocks/db.ts` declares the models and seeds the signed-in user (`CURRENT_USER_ID`,
-Ada Lovelace). Add a model there when you add a domain, and extend `seedDb()` if the domain needs
-a baseline row.
+`src/test-utils/mocks/db.ts` declares the collections and seeds the signed-in user
+(`CURRENT_USER_ID`, Ada Lovelace). Add a collection there when you add a domain, and extend
+`seedDb()` if the domain needs a baseline row.
+
+Collections are `@msw/data` `Collection`s described with a **Zod schema**, so a record's type is the
+schema's output type — `permissions` really is `string[]`, and `createdAt` really is the wire's type
+for that domain. Queries take a builder rather than a nested object, and the mutating methods
+(`create`, `update`, `updateMany`) are async while `findFirst`, `findMany`, `delete` and `deleteMany`
+are not:
+
+```ts
+db.apiKey.findFirst((query) => query.where({ id: apiKeyId }))
+const apiKey = await db.apiKey.create({ name, permissions, userId: CURRENT_USER_ID })
+await db.user.update((query) => query.where({ id: CURRENT_USER_ID }), {
+    data(draft) {
+        Object.assign(draft, body)
+    },
+})
+```
 
 `POST /api/__reset` clears and reseeds the database. The e2e fixture in `e2e/utils/fixtures.ts`
 calls it before every test, which is what keeps the suite order-independent — use `test` from that
@@ -86,26 +112,35 @@ module, never from `@playwright/test` directly.
 Fixtures are **builders**, not frozen objects, so a test states only what it cares about:
 
 ```ts
-import { randEmail, randUuid } from '@ngneat/falso'
+import { randProductName, randUuid } from '@ngneat/falso'
 
 export function buildApiKey(overrides: Partial<ApiKey> = {}): ApiKey {
     return {
         id: randUuid(),
         name: randProductName(),
         permissions: ['read'],
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
         ...overrides,
     }
 }
 ```
+
+A domain builds two kinds of builder, and mixing them is the bug this layout exists to catch:
+
+- **domain builders** (`buildApiKey`) for tests that assert on what a component renders;
+- **wire builders** (`buildGetApiKeyResponse`), typed with the generated response type, for anything
+  handed to `HttpResponse.json`.
+
+`createdAt` is a `Date` in the first and a string in the second. Never feed a domain object to a
+handler.
 
 ## Which double for which test
 
 | Subject | Double |
 |---|---|
 | A primitive, hook or util | none |
-| A component or page (the UI is the subject) | manual `__mocks__` + `vi.mock` |
-| A service hook (the transport is the subject) | MSW via `server.use(...)` |
+| A component or page (the UI is the subject) | `vi.mock('@/api/hooks/useApiXxx')` — the automock plus `vi.mocked(...).mockReturnValue(...)` needs no hand-written double |
+| A domain fetcher or an api hook (the transport is the subject) | MSW via `server.use(...)` |
 | A user journey | MSW through `mock-server.ts` (e2e) |
 
 Do not mix both for one subject.

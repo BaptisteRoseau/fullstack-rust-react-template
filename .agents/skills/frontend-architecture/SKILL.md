@@ -14,8 +14,8 @@ The canonical reference lives in `frontend/docs/architecture/`; this skill is th
 |---|---|
 | Bundler | Vite (single SPA entry) |
 | Routing | React Router, `createBrowserRouter` |
-| Server state | SWR — global `fetcher` set once in `src/Context.tsx` |
-| HTTP | `fetch` wrapper in `src/api/client.ts` — no Axios |
+| Server state | SWR — one binding per operation under `api/hooks/`, no global `fetcher` |
+| HTTP | SDK generated from the backend's OpenAPI document, over `fetch` — no Axios |
 | Global UI state | Zustand (`src/stores/`) |
 | Styling | SCSS Modules + design tokens (`src/css/`) — no Tailwind |
 | Accessible behaviour | Radix UI primitives, we own the CSS |
@@ -28,7 +28,7 @@ The canonical reference lives in `frontend/docs/architecture/`; this skill is th
 
 ```
 src/
-├── api/            # endpoint declarations + SWR services
+├── api/            # generated SDK, domain converters, SWR hooks
 ├── components/     # domain-aware shared components
 ├── config/         # env.ts
 ├── constants/
@@ -56,15 +56,17 @@ Dependencies flow **downwards only**:
 
 ```
 pages/ → components/ → design-system/ → hooks/ · utils/ · types/ · css/
-                    ↘ api/
+                    ↘ api/hooks/ → api/domains/<domain>/ → api/generated/
 ```
 
 - `design-system/` may import `utils/`, `types/`, `css/`, `hooks/`, Radix. It may **never** import
   `api/`, `contexts/`, `components/`, `pages/` or `layouts/`. A primitive takes data as props.
-- `components/` may import `design-system/`, `api/service/`, `contexts/`, `hooks/`. Domain
-  awareness is exactly what distinguishes it from the design system.
+- `components/` may import `design-system/`, `api/domains/<domain>/`, `api/hooks/`, `contexts/`,
+  `hooks/`. Domain awareness is exactly what distinguishes it from the design system.
 - `pages/` may import everything. Routing concerns appear only here and in `router/`.
-- `api/` imports nothing from the UI layers.
+- `api/` imports nothing from the UI layers, and layers internally too: only
+  `api/domains/<domain>/converters.ts` and `api/client.ts` may name anything from `api/generated/`,
+  and outside `src/api/**` a domain is reachable only through its barrel.
 - **No page imports another page.** A page folder is private; its `index.ts` is its only surface.
   Shared UI moves up into `components/`.
 
@@ -92,9 +94,10 @@ Import through the `@/` alias (`@/design-system/Button`), never with `../../../`
 | A pure function used by 2+ modules | `utils/<topic>.ts` |
 | A pure function used by 1 module | that module's `utils.ts` |
 | A hook with no domain knowledge | `hooks/` |
-| A hook that wraps a request | `api/service/<domain>.ts` |
+| A hook that wraps a request | `api/hooks/useApiXxx/` |
+| A `Promise`-returning call to the backend | `api/domains/<domain>/<domain>.ts` |
 | A hook used by one page | `pages/<Page>/hooks/` |
-| A type describing an API payload | `api/<domain>.ts` |
+| A type describing an API payload | `api/domains/<domain>/types.ts` — hand-written, never a generated alias |
 | A generic type helper | `types/common.ts` |
 | Session or scoped UI state | `contexts/<name>/` |
 | App-wide UI state (notifications, theme, locale) | `stores/` |
@@ -107,6 +110,9 @@ Import through the `@/` alias (`@/design-system/Button`), never with `../../../`
 Every file shape described in these skills has a Plop generator in `frontend/generators/`. Run the
 generator, then fill in the generated files. Do not create the folder or copy an existing one by
 hand — the templates are the source of truth for the naming, the barrel and the test file.
+
+`src/api/generated/` is the exception in the other direction: it is written by
+`./scripts/build_frontend_api_sdk.sh`, never by a person. See the `frontend-api-sdk` skill.
 
 Run from `frontend/`:
 

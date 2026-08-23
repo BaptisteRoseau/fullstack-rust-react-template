@@ -13,7 +13,7 @@ call API services, read contexts and reference domain types. That is the single 
 
 | Question | `design-system/` | `components/` |
 |---|---|---|
-| Imports from `api/service/`? | never | yes |
+| Imports from `api/hooks/`? | never | yes |
 | Reads a `contexts/` value or a store? | never | yes |
 | Mentions a domain type (`CurrentUser`, `ApiKey`)? | never | yes |
 | Used by more than one page? | yes | yes — otherwise it belongs to the page |
@@ -67,12 +67,12 @@ path — a component that assumes `data` is defined is a crash waiting for a slo
 ```tsx
 import { Trans, useLingui } from '@lingui/react/macro'
 
-import { useCurrentUser } from '@/api/service/auth'
+import { useApiCurrentUser } from '@/api/hooks/useApiCurrentUser'
 import { Spinner } from '@/design-system/Spinner'
 
 export function AppHeader() {
     const { t } = useLingui()
-    const { data: user, isLoading } = useCurrentUser()
+    const { data: user, isLoading } = useApiCurrentUser()
 
     if (isLoading) {
         return <Spinner size="sm" label={t`Loading`} />
@@ -82,7 +82,7 @@ export function AppHeader() {
 }
 ```
 
-Imports flow `components/` → `design-system/` and `components/` → `api/service/`. Never the
+Imports flow `components/` → `design-system/` and `components/` → `api/hooks/`. Never the
 reverse.
 
 ## Splitting a growing component
@@ -110,13 +110,13 @@ This is the layer where manual service mocks pay off — mock the service, asser
 ```tsx
 import { screen } from '@testing-library/react'
 
-import { useCurrentUser } from '@/api/service/auth'
+import { useApiCurrentUser } from '@/api/hooks/useApiCurrentUser'
 import { buildCurrentUser } from '@/test-utils/fixtures/auth'
 import { render } from '@/test-utils/render'
 
 import { AppHeader } from './AppHeader'
 
-vi.mock('@/api/service/auth')
+vi.mock('@/api/hooks/useApiCurrentUser')
 
 it('shows the user name when signed in', () => {
     const user = buildCurrentUser({ firstName: 'Ada', lastName: 'Lovelace' })

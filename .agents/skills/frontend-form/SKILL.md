@@ -22,7 +22,7 @@ src/components/forms/
 
 The schema lives next to the form that uses it — in the page folder for a page-specific form, in
 the component folder for a reusable one. Schemas describing an API payload live in
-`src/api/<domain>.ts` instead.
+`src/api/domains/<domain>/types.ts` instead.
 
 ```tsx
 import * as z from 'zod'
@@ -57,19 +57,19 @@ it without prop drilling. Most forms ignore the argument.
 
 ## Submitting
 
-Wire the submit handler to a mutation from `api/service/`, revalidate, and report both outcomes:
+Wire the submit handler to a mutation hook from `api/hooks/`. The hook owns its cache
+invalidation, so the handler only reports the outcome:
 
 ```tsx
 async function handleSubmit(values: z.infer<typeof profileSchema>) {
     try {
         await trigger(values)
-        await mutate(ME_ENDPOINT)
         addNotification({ type: 'success', title: t`Profile updated` })
     } catch (error) {
         addNotification({
             type: 'error',
             title: t`Could not update the profile`,
-            message: apiErrorMessage(error, t`Unexpected error`),
+            message: apiErrorMessage(error),
         })
     }
 }
