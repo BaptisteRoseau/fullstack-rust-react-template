@@ -11,4 +11,4 @@ cargo test --workspace --all-features
 
 # Frontend
 cd frontend
-bun test
+bun run test
