@@ -24,7 +24,7 @@ docker compose up -d
 The flow needs **Keycloak**, **Redis** and **Mailhog**:
 
 | Service | Port | Role in the flow |
-|---------|------|------------------|
+| --- | --- | --- |
 | Keycloak | 8090 | Hosts the login/registration pages, issues the tokens. |
 | Redis | 6379 | Stores the PKCE verifier + CSRF state between `/auth/login` and `/auth/callback`. |
 | Mailhog | 8025 (UI) | Catches the registration verification email (the realm has `verifyEmail: true`). |
@@ -56,7 +56,7 @@ curl -s -H "Authorization: Bearer $ADMIN" http://localhost:8090/admin/realms/app
 ```
 
 If they are missing, the realm import did not contain them — see
-[keycloak.md](./keycloak.md). The admin console is at **http://localhost:8090**
+[keycloak.md](./keycloak.md). The admin console is at <http://localhost:8090>
 (`admin` / `admin`).
 
 ---
@@ -77,11 +77,11 @@ The backend listens on **8080**, the frontend on **3000**, and every API route i
 
 ## 3. Register and log in from the browser
 
-1. Open the app (http://localhost:3000) and navigate to a protected route.
+1. Open the app (<http://localhost:3000>) and navigate to a protected route.
 2. You are redirected to the login screen → **Create an account** (or **Continue to sign in**).
    This sends you to Keycloak's hosted page.
 3. Register a new user. Keycloak then asks you to confirm your address: open
-   **http://localhost:8025** (Mailhog), click the link in the *Verify email* message, and the
+   <http://localhost:8030> (MailHog), click the link in the *Verify email* message, and the
    flow resumes automatically.
 4. Keycloak redirects back through `/api/auth/callback`; the backend sets the httpOnly cookies
    and returns you to the app, now authenticated.
@@ -133,7 +133,7 @@ turned verification off, it is already
 curl -s -b kc.jar -c kc.jar "$(grep -i '^location:' reg.hdr | sed 's/^[Ll]ocation: //' | tr -d '\r')" -o /dev/null
 
 # Pull the verification link out of the (quoted-printable) message body.
-VERIFY=$(curl -s http://localhost:8025/api/v2/messages | jq -r '.items[0].Content.Body' | python3 -c "
+VERIFY=$(curl -s http://localhost:8030/api/v2/messages | jq -r '.items[0].Content.Body' | python3 -c "
 import sys, quopri, re
 body = quopri.decodestring(sys.stdin.read().encode()).decode('utf8', 'replace')
 m = re.search(r'http://localhost:8090/realms/app/login-actions/action-token[^\s\"<>]+', body)
@@ -281,7 +281,7 @@ curl -s -X POST http://localhost:8090/realms/app/protocol/openid-connect/token \
 Worth checking after any change to the auth stack:
 
 | Request | Expected |
-|---------|----------|
+| --- | --- |
 | `/api/auth/me` without cookie | `401 UNAUTHORIZED` |
 | `/api/auth/me` with a revoked (but unexpired) token | `401 UNAUTHORIZED` |
 | `/api/auth/me` with an expired token | `401 TOKEN_EXPIRED` (frontend then refreshes) |
@@ -297,14 +297,14 @@ Only same-origin paths beginning with `/` are honored as post-login redirects.
 ## 9. Troubleshooting
 
 | Symptom | Likely cause |
-|---------|-------------|
+| --- | --- |
 | `500 UNEXPECTED` on `/api/auth/login` or `/api/auth/register` | Redis is not reachable — the PKCE/CSRF state cannot be stored. `docker compose up -d redis`. |
 | `curl` gets an empty reply and the backend logs a `CryptoProvider` panic | Two crates enabled conflicting `jsonwebtoken` crypto features. Exactly one of `rust_crypto` / `aws_lc_rs` must be on across the workspace. |
 | `invalid_client` / `unauthorized_client` at the token endpoint | The `webapp` or `backend` client is missing from the realm — check step 1. |
 | `401 TOKEN_EXPIRED` on an API call | Access token expired — expected; the frontend refreshes automatically. With `curl`, refresh (step 7) or fetch a new token (step 5). |
 | `401 UNAUTHORIZED` right after login | Cookies not sent — ensure the frontend uses `withCredentials` and `FRONTEND_URL` matches the browser origin (CORS). |
-| Stuck on Keycloak's "Verify email" page | Open Mailhog at http://localhost:8025 and follow the link, or set `verifyEmail: false` in the realm. |
-| Redirected to Keycloak in a loop | The `webapp` redirect URI must match `OIDC_REDIRECT_URL` exactly; check the realm client config. |
+| Stuck on Keycloak's "Verify email" page | Open MailHog at <http://localhost:8030> and follow the link, or set `verifyEmail: false` in the realm. |
+| Redirected to Keycloak in a loop | The `webapp` redirect URI must match `AUTHENTICATOR_REDIRECT_URL` exactly; check the realm client config. |
 | `invalid sub UUID` | Keycloak `sub` is not a UUID — inspect the payload (step 5). |
 | `No matching key found in JWKS` | Backend fetched JWKS before Keycloak was ready; restart the backend to force a refresh. |
 | Realm `app` not found | The realm did not import — check `docker compose logs keycloak`; on a re-import remove the `postgres_keycloak` volume first. |
