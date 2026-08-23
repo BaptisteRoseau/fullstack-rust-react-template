@@ -1,14 +1,19 @@
 # Storage
 
-This is the storage layer. It provides an interface to save blobs and files.
+The blob and file interface. See [crates/README.md](../README.md) for the service-crate
+shape this crate follows.
 
-It should provide a `Storage` trait and structures for client code, and as a backend use an S3-compatible tool.
+One backend implements the [`Storage`](src/storage.rs) trait: `backends::s3::S3`, an
+S3-compatible client.
 
-## Features
+Every `save` goes through [compressor](../compressor) first, driven by the caller-supplied
+`CompressionParameters`: images can be resized and converted format, and any blob can be
+gzip-compressed. `Storage::save` takes the parameters explicitly, so the caller decides
+the trade-off per file rather than the crate deciding for everyone. `load` reverses the
+gzip step on its own: the backend stores the compression as the object's content-type and
+reads it back from there, so a caller never has to remember what it saved with.
 
-It transparently optimizes the size of blobs:
+## Skills
 
-- Images and videos are optimized using the `caesium` crate
-- Every blob is compressed before being stored, and decompressed when accessed
-
-The control of the compression behavior is done through the `CompressionParameters` struct.
+- [backend-feature-gating](../../.claude/skills/backend-feature-gating/SKILL.md)
+- [backend-trait-test](../../.claude/skills/backend-trait-test/SKILL.md)
