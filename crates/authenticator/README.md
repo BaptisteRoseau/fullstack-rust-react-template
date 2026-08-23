@@ -17,7 +17,7 @@ so they live behind one trait:
 `&self`, so it needs no interior mutability.
 
 | Method | Responsibility |
-|--------|----------------|
+| --- | --- |
 | `validate` | Resolve a caller's credential into a `UserToken`. |
 | `authorize_url` | Build the provider URL to send the browser to, persisting the PKCE verifier and the post-login redirect under a fresh CSRF state. |
 | `exchange_code` | Trade an authorization code for an `AuthSession`, validating and consuming the CSRF state. |
@@ -34,7 +34,7 @@ and `UserInfo`. Errors are `AuthenticatorError` in `error.rs`.
 as one file:
 
 | Module | Contents |
-|--------|----------|
+| --- | --- |
 | `backend.rs` | The `Keycloak` struct, its constructor, and the trait impl delegating to the three modules below. |
 | `endpoints.rs` | `Endpoints::from_issuer` — the single place Keycloak's URL shape is encoded. |
 | `jwt.rs` | RS256 validation against the realm's JWKS, plus the `iss` → realm extraction. |
@@ -68,9 +68,10 @@ authenticator's business — they belong to the API layer and live in `config.ap
 
 ## Testing
 
-Unit tests sit next to the code they cover. Integration tests run against a real Keycloak
-container — see [tests/README.md](./tests/README.md).
+See [crates/README.md](../README.md) for the unit vs. integration split. Integration
+tests run against a real Keycloak container — see [tests/README.md](./tests/README.md).
 
-```sh
-cargo test -p authenticator
-```
+## Skills
+
+- [backend-feature-gating](../../.claude/skills/backend-feature-gating/SKILL.md)
+- [backend-trait-test](../../.claude/skills/backend-trait-test/SKILL.md)
