@@ -1,0 +1,9 @@
+{{! Hand-written. Never alias a generated type here: the point of this file is }}
+{{! that the interface keeps its own shape when the wire changes. }}
+export type {{pascalCase name}} = {
+    id: string
+    name: string
+    createdAt: Date
+}
+
+export type New{{pascalCase name}} = Pick<{{pascalCase name}}, 'name'>

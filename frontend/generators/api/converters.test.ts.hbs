@@ -1,0 +1,14 @@
+import { fromGet{{pascalCase name}}Response } from './converters'
+
+it('turns the wire timestamp into a Date', () => {
+    const {{camelCase name}} = fromGet{{pascalCase name}}Response({
+        id: 'id-1',
+        name: 'a name',
+        createdAt: '2026-01-15T09:30:00Z',
+    })
+
+    expect(
+        {{camelCase name}}.createdAt.toISOString(),
+        `expected the wire instant to survive, got ${ {{~camelCase name}}.createdAt.toISOString()}`,
+    ).toBe('2026-01-15T09:30:00.000Z')
+})

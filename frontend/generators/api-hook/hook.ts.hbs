@@ -1,0 +1,9 @@
+{{! A read hook. For a mutation, swap useSWR for useSWRMutation with a mutation }}
+{{! key of its own and an onSuccess that invalidates the domain's read keys. }}
+import useSWR from 'swr'
+
+import { {{camelCase domain}}Keys, fetch{{pascalCase name}} } from '@/api/domains/{{camelCase domain}}'
+
+export function useApi{{pascalCase name}}() {
+    return useSWR({{camelCase domain}}Keys.all, () => fetch{{pascalCase name}}())
+}

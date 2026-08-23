@@ -1,0 +1,28 @@
+import { http, HttpResponse } from 'msw'
+
+import { endpoint } from '@/test-utils/mocks/utils'
+import { server } from '@/test-utils/server'
+
+import { fetch{{pascalCase name}}List } from './{{camelCase name}}'
+
+it('returns the list as domain objects', async () => {
+    server.use(
+        http.get(endpoint('{{path}}'), () =>
+            HttpResponse.json([
+                {
+                    id: 'id-1',
+                    name: 'a name',
+                    createdAt: '2026-01-15T09:30:00Z',
+                },
+            ]),
+        ),
+    )
+
+    const items = await fetch{{pascalCase name}}List()
+
+    expect(items.length, `expected 1 item, got ${items.length}`).toBe(1)
+    expect(
+        items[0].createdAt instanceof Date,
+        'the fetcher must hand back the converted shape, not the wire one',
+    ).toBe(true)
+})

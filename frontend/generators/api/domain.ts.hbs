@@ -1,10 +1,17 @@
-export const {{constantCase name}}_ENDPOINT = '{{path}}'
+{{! The only file in the domain that calls the generated SDK. }}
+import { apiCall } from '@/api/client'
+import { get{{pascalCase name}}, list{{pascalCase name}} } from '@/api/generated'
 
-export const {{camelCase name}}Endpoint = (id: string) =>
-    `${ {{~constantCase name}}_ENDPOINT}/${id}`
+import { fromGet{{pascalCase name}}Response } from './converters'
+import type { {{pascalCase name}} } from './types'
 
-export type {{pascalCase name}} = {
-    id: string
+export async function fetch{{pascalCase name}}List(): Promise<{{pascalCase name}}[]> {
+    const response = await apiCall(() => list{{pascalCase name}}())
+    return response.map(fromGet{{pascalCase name}}Response)
 }
 
-export type Create{{pascalCase name}}Body = Omit<{{pascalCase name}}, 'id'>
+export async function fetch{{pascalCase name}}(id: string): Promise<{{pascalCase name}}> {
+    return fromGet{{pascalCase name}}Response(
+        await apiCall(() => get{{pascalCase name}}({ path: { id } })),
+    )
+}

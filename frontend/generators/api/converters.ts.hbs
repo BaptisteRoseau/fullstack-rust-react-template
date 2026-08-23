@@ -1,0 +1,14 @@
+{{! The only file in the domain allowed to import generated types. }}
+import type { Get{{pascalCase name}}Response } from '@/api/generated'
+
+import type { {{pascalCase name}} } from './types'
+
+export function fromGet{{pascalCase name}}Response(
+    response: Get{{pascalCase name}}Response,
+): {{pascalCase name}} {
+    return {
+        id: response.id,
+        name: response.name,
+        createdAt: new Date(response.createdAt),
+    }
+}

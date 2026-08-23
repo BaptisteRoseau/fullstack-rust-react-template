@@ -1,18 +1,16 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 
-import { {{constantCase name}}_ENDPOINT } from '@/api/{{camelCase name}}'
+import { endpoint } from '@/test-utils/mocks/utils'
 import { server } from '@/test-utils/server'
 import { SwrWrapper } from '@/test-utils/wrappers'
 
-import { use{{pascalCase name}}List } from './{{camelCase name}}'
+import { useApi{{pascalCase name}} } from './useApi{{pascalCase name}}'
 
-it('returns the list', async () => {
-    server.use(
-        http.get(`*${ {{~constantCase name}}_ENDPOINT}`, () => HttpResponse.json([])),
-    )
+it('returns the data the backend answers', async () => {
+    server.use(http.get(endpoint('/api/TODO'), () => HttpResponse.json([])))
 
-    const { result } = renderHook(() => use{{pascalCase name}}List(), {
+    const { result } = renderHook(() => useApi{{pascalCase name}}(), {
         wrapper: SwrWrapper,
     })
 

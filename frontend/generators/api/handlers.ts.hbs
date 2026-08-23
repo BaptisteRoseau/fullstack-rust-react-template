@@ -1,17 +1,19 @@
+{{! Handlers emit the WIRE shape, not the domain shape. Typing them with the }}
+{{! generated types is what stops a Date leaking into a mocked response. }}
 import { http, HttpResponse } from 'msw'
 
-import { {{constantCase name}}_ENDPOINT } from '@/api/{{camelCase name}}'
+import type { Get{{pascalCase name}}Response } from '@/api/generated'
 
 import { endpoint, isAuthenticated, networkDelay } from '../utils'
 
 const UNAUTHORIZED = { id: 'UNAUTHORIZED', error: 'Not authenticated' }
 
 export const {{camelCase name}}Handlers = [
-    http.get(endpoint({{constantCase name}}_ENDPOINT), async ({ request }) => {
+    http.get(endpoint('{{path}}'), async ({ request }) => {
         await networkDelay()
         if (!isAuthenticated(request)) {
             return HttpResponse.json(UNAUTHORIZED, { status: 401 })
         }
-        return HttpResponse.json([])
+        return HttpResponse.json<Get{{pascalCase name}}Response[]>([])
     }),
 ]
