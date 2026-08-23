@@ -1,6 +1,6 @@
 # Database integration tests
 
-```
+```txt
 tests
 ├── backends
 │   ├── postgres.rs   # the Postgres testcontainer fixture, and the `postgres` binary
@@ -30,3 +30,8 @@ links this crate the way a consumer does, so its binary carries
 ```sh
 cargo test -p database --all-features
 ```
+
+## Skills
+
+- [backend-trait-test](../../../.claude/skills/backend-trait-test/SKILL.md)
+- [backend-feature-gating](../../../.claude/skills/backend-feature-gating/SKILL.md)
