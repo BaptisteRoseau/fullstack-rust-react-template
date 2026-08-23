@@ -1,39 +1,28 @@
 ---
 name: commit-messages
-description: Generate clear, conventional commit messages from git diffs. Use when writing commit messages, reviewing staged changes, or preparing releases.
+description: Use when writing a commit message or preparing a commit in this repository.
 ---
 
-# Commit Message Skill
+# Write a commit message
 
 Generate consistent, informative commit messages following the Conventional Commits specification.
 
-## When to Use This Skill
+## 1. Read the change
 
-- User asks to "commit", "write a commit message", or "prepare commit"
-- User has staged changes and mentions commits
-- Before any `git commit` command
-
-## Process
-
-1. **Analyze changes**: Run `git diff --staged` to see what's being committed
-2. **Identify the type**: Determine the primary change category
-3. **Find the scope**: Identify the main area affected
-4. **Write the message**: Follow the format below
-
-## Commit Message Format
-
+```bash
+git diff --staged
 ```
+
+Commit only what you staged. Never `git add .`.
+
+## 2. Write the subject
+
+```txt
 <type>(<scope>): <description>
-
-[optional body]
-
-[optional footer(s)]
 ```
-
-### Types
 
 | Type | Description | Example |
-|------|-------------|---------|
+| --- | --- | --- |
 | `feat` | New feature | `feat(auth): add OAuth2 login` |
 | `fix` | Bug fix | `fix(api): handle null response` |
 | `docs` | Documentation only | `docs(readme): add setup instructions` |
@@ -44,76 +33,44 @@ Generate consistent, informative commit messages following the Conventional Comm
 | `build` | Build system changes | `build: update webpack config` |
 | `ci` | CI configuration | `ci: add GitHub Actions workflow` |
 | `chore` | Maintenance tasks | `chore(deps): update dependencies` |
-| `ai` |AI agent related | `ai(skill): add the ai type in commit-messages` |
+| `ai` | AI agent related | `ai(skill): add the ai type in commit-messages` |
 | `revert` | Revert previous commit | `revert: feat(auth): add OAuth2` |
 
-### Scope
+The scope is a noun naming the area: a crate (`config`, `api`), `frontend`, `scripts`, `repo`.
+Omit it when the change is genuinely broad.
 
-The scope should be a noun describing the section of the codebase:
-- `auth`, `api`, `db`, `ui`, `config`
-- Feature names: `search`, `checkout`, `dashboard`
-- Or omit if change is broad
+Rules for the description:
 
-### Subject Line Rules
+- Imperative mood: "add", never "added" or "adds".
+- Lowercase after the colon, no full stop at the end.
+- Keep the whole subject line under 72 characters.
 
-- Use imperative mood: "add" not "added" or "adds"
-- Don't capitalize first letter after colon
-- No period at the end
-- Max 72 characters total
+## 3. Add a body when the reason is not obvious
 
-### Body (when needed)
+Separate it from the subject with a blank line and wrap at 72 characters. Say why the change was
+needed and what it makes possible. Use bullets for several related changes.
 
-- Separate from subject with blank line
-- Explain *what* and *why*, not *how*
-- Wrap at 72 characters
-- Use bullet points for multiple changes
+## 4. Add footers when they apply
 
-### Footer (when needed)
+- `Closes #123` to close an issue, `Refs #456` to reference one.
+- `BREAKING CHANGES:` (always plural) followed by one line per break.
 
-- `BREAKING CHANGE:` for breaking changes
-- `Fixes #123` to close issues
-- `Refs #456` to reference without closing
+A change to the HTTP API contract — **removing**, **renaming** or **changing the type of** a field
+or enum key — must be listed with an `API:` prefix. See
+[endpoints/README.md](../../../crates/api/src/endpoints/README.md).
 
-## Examples
+```txt
+update(api): return the user's groups from /auth/me
 
-### Simple feature
-```
-feat(search): add fuzzy matching support
+The frontend needs group membership to decide which nav entries to
+render, and was fetching it separately on every page load.
 
-Implement Levenshtein distance algorithm for typo tolerance
-in search queries. Configurable via FUZZY_THRESHOLD env var.
+BREAKING CHANGES:
+API: renamed GetMeResponse.roles to GetMeResponse.groups
 ```
 
-### Bug fix with issue reference
-```
-fix(cart): prevent duplicate items on rapid clicks (#234 !64)
+## Checklist
 
-Add debounce to add-to-cart button and check for existing
-items before insertion.
-
-Closes #234
-Merge Request !64
-```
-
-### Breaking change
-```
-feat(api)!: change response format to JSON:API
-
-BREAKING CHANGE: API responses now follow JSON:API spec.
-All clients need to update their parsers.
-
-- Wrap data in `data` object
-- Move metadata to `meta` object  
-- Add `links` for pagination
-```
-
-### Multiple related changes
-```
-refactor(auth): consolidate authentication logic
-
-- Extract JWT handling to dedicated service
-- Move session management from controller to middleware
-- Add refresh token rotation
-
-This prepares for the upcoming OAuth2 integration.
-```
+- [ ] The subject says why, not a restatement of the diff.
+- [ ] The type is one from the table above.
+- [ ] An API contract change carries a `BREAKING CHANGES:` footer with an `API:` line.
