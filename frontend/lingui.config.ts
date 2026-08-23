@@ -1,4 +1,5 @@
 import { defineConfig } from '@lingui/conf'
+import { formatter } from '@lingui/format-po'
 
 export default defineConfig({
     locales: ['en', 'fr'],
@@ -9,5 +10,6 @@ export default defineConfig({
             include: ['src/**'],
         },
     ],
+    format: formatter({ lineNumbers: false }),
     compileNamespace: 'ts',
 })

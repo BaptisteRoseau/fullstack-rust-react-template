@@ -13,370 +13,364 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. placeholder {0}: new Date().getFullYear()
-#: src/components/layout/AppFooter/AppFooter.tsx:15
+#: src/components/layout/AppFooter/AppFooter.tsx
 msgid "© {0} Fullstack Template"
 msgstr "© {0} Fullstack Template"
 
-#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx:38
+#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx
 msgid "A real design system"
 msgstr "A real design system"
 
-#: src/pages/Home/Home.tsx:20
+#: src/pages/Home/Home.tsx
 msgid "A Rust and React fullstack application template."
 msgstr "A Rust and React fullstack application template."
 
-#: src/pages/Home/Home.tsx:27
+#: src/pages/Home/Home.tsx
 msgid "A Rust backend and a React frontend wired together with authentication, API keys and observability from the first commit."
 msgstr "A Rust backend and a React frontend wired together with authentication, API keys and observability from the first commit."
 
-#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx:26
+#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx
 msgid "A typed API layer"
 msgstr "A typed API layer"
 
-#: src/components/layout/AppHeader/AppHeader.tsx:24
+#: src/components/layout/AppHeader/AppHeader.tsx
 msgid "Account"
 msgstr "Account"
 
-#: src/pages/User/components/UserNav/UserNav.tsx:17
+#: src/pages/User/components/UserNav/UserNav.tsx
 msgid "Account sections"
 msgstr "Account sections"
 
-#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx:75
+#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx
 msgid "Actions"
 msgstr "Actions"
 
-#: src/pages/Register/Register.tsx:41
+#: src/pages/Register/Register.tsx
 msgid "Already have an account?"
 msgstr "Already have an account?"
 
-#: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx:27
+#: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx
 msgid "API key revoked"
 msgstr "API key revoked"
 
-#: src/components/layout/UserMenu/UserMenu.tsx:57
-#: src/pages/User/components/UserNav/UserNav.tsx:24
-#: src/pages/User/sections/ApiKeys/ApiKeys.tsx:28
+#: src/components/layout/UserMenu/UserMenu.tsx
+#: src/pages/User/components/UserNav/UserNav.tsx
+#: src/pages/User/sections/ApiKeys/ApiKeys.tsx
 msgid "API keys"
 msgstr "API keys"
 
-#: src/components/layout/AppFooter/AppFooter.tsx:27
+#: src/components/layout/AppFooter/AppFooter.tsx
 msgid "API reference"
 msgstr "API reference"
 
-#: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx:41
+#: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx
 msgid "Applications using this key will stop working immediately."
 msgstr "Applications using this key will stop working immediately."
 
-#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx:14
+#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx
 msgid "Authentication built in"
 msgstr "Authentication built in"
 
-#: src/pages/NotFound/NotFound.tsx:24
+#: src/pages/NotFound/NotFound.tsx
 msgid "Back to home"
 msgstr "Back to home"
 
-#: src/components/ConfirmationDialog/ConfirmationDialog.tsx:36
-#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:92
+#: src/components/ConfirmationDialog/ConfirmationDialog.tsx
+#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx
 msgid "Cancel"
 msgstr "Cancel"
 
-#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:77
+#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx
 msgid "CI deploy key"
 msgstr "CI deploy key"
 
-#: src/components/notifications/Notification/Notification.tsx:29
+#: src/components/notifications/Notification/Notification.tsx
 msgid "Close"
 msgstr "Close"
 
-#: src/pages/Register/Register.tsx:38
+#: src/pages/Register/Register.tsx
 msgid "Continue to registration"
 msgstr "Continue to registration"
 
-#: src/pages/Login/Login.tsx:35
+#: src/pages/Login/Login.tsx
 msgid "Continue to sign in"
 msgstr "Continue to sign in"
 
-#: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx:44
+#: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx
 msgid "Copied"
 msgstr "Copied"
 
-#: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx:44
+#: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx
 msgid "Copy"
 msgstr "Copy"
 
 #. placeholder {0}: apiKey.name
-#: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx:23
+#: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx
 msgid "Copy {0} now"
 msgstr "Copy {0} now"
 
-#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:54
+#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx
 msgid "Could not create the API key"
 msgstr "Could not create the API key"
 
-#: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx:32
+#: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx
 msgid "Could not revoke the API key"
 msgstr "Could not revoke the API key"
 
-#: src/pages/User/sections/Information/Information.tsx:51
+#: src/pages/User/sections/Information/Information.tsx
 msgid "Could not update the profile"
 msgstr "Could not update the profile"
 
-#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:96
+#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx
 msgid "Create key"
 msgstr "Create key"
 
-#: src/pages/Register/Register.tsx:21
+#: src/pages/Register/Register.tsx
 msgid "Create your account"
 msgstr "Create your account"
 
-#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx:71
+#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx
 msgid "Created"
 msgstr "Created"
 
-#: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx:26
+#: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx
 msgid "Dismiss"
 msgstr "Dismiss"
 
-#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx:41
+#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx
 msgid "Domain-agnostic primitives on SCSS Modules and design tokens, every one of them in Storybook."
 msgstr "Domain-agnostic primitives on SCSS Modules and design tokens, every one of them in Storybook."
 
-#: src/pages/User/sections/Information/Information.tsx:66
+#: src/pages/User/sections/Information/Information.tsx
 msgid "Email"
 msgstr "Email"
 
-#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx:29
+#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx
 msgid "Endpoint declarations separated from the SWR hooks that call them, mocked end to end."
 msgstr "Endpoint declarations separated from the SWR hooks that call them, mocked end to end."
 
-#: src/pages/User/sections/Information/Information.tsx:99
+#: src/pages/User/sections/Information/Information.tsx
 msgid "First name"
 msgstr "First name"
 
-#: src/components/layout/AppFooter/AppFooter.tsx:19
+#: src/components/layout/AppFooter/AppFooter.tsx
 msgid "Footer"
 msgstr "Footer"
 
-#: src/components/layout/AppHeader/AppHeader.tsx:21
-#: src/layouts/AuthLayout/AuthLayout.tsx:14
-#: src/pages/Home/Home.tsx:19
+#: src/components/layout/AppHeader/AppHeader.tsx
+#: src/layouts/AuthLayout/AuthLayout.tsx
+#: src/pages/Home/Home.tsx
 msgid "Fullstack Template"
 msgstr "Fullstack Template"
 
-#: src/pages/Home/Home.tsx:44
+#: src/pages/Home/Home.tsx
 msgid "Get started"
 msgstr "Get started"
 
-#: src/components/layout/AppFooter/AppFooter.tsx:24
+#: src/components/layout/AppFooter/AppFooter.tsx
 msgid "GitHub"
 msgstr "GitHub"
 
-#: src/pages/Home/Home.tsx:37
+#: src/pages/Home/Home.tsx
 msgid "Go to your account"
 msgstr "Go to your account"
 
-#: src/components/layout/UserMenu/UserMenu.tsx:51
-#: src/pages/User/components/UserNav/UserNav.tsx:20
-#: src/pages/User/sections/Information/Information.tsx:59
+#: src/components/layout/UserMenu/UserMenu.tsx
+#: src/pages/User/components/UserNav/UserNav.tsx
+#: src/pages/User/sections/Information/Information.tsx
 msgid "Information"
 msgstr "Information"
 
-#: src/pages/User/sections/ApiKeys/ApiKeys.tsx:29
+#: src/pages/User/sections/ApiKeys/ApiKeys.tsx
 msgid "Keys authenticate machine access to the API. The secret is shown once."
 msgstr "Keys authenticate machine access to the API. The secret is shown once."
 
-#: src/components/layout/LocaleSwitcher/LocaleSwitcher.tsx:17
+#: src/components/layout/LocaleSwitcher/LocaleSwitcher.tsx
 msgid "Language"
 msgstr "Language"
 
-#: src/pages/User/sections/Information/Information.tsx:100
+#: src/pages/User/sections/Information/Information.tsx
 msgid "Last name"
 msgstr "Last name"
 
-#: src/components/layout/AppHeader/AppHeader.tsx:26
-#: src/components/ProtectedRoute/ProtectedRoute.tsx:18
-#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx:39
-#: src/pages/User/sections/Information/Information.tsx:33
+#: src/components/layout/AppHeader/AppHeader.tsx
+#: src/components/ProtectedRoute/ProtectedRoute.tsx
+#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx
+#: src/pages/User/sections/Information/Information.tsx
 msgid "Loading"
 msgstr "Loading"
 
-#: src/components/layout/AppHeader/AppHeader.tsx:33
-#: src/pages/Home/Home.tsx:49
-#: src/pages/Login/Login.tsx:19
-#: src/pages/Login/Login.tsx:21
-#: src/pages/Register/Register.tsx:44
+#: src/components/layout/AppHeader/AppHeader.tsx
+#: src/pages/Home/Home.tsx
+#: src/pages/Login/Login.tsx
+#: src/pages/Login/Login.tsx
+#: src/pages/Register/Register.tsx
 msgid "Log in"
 msgstr "Log in"
 
-#: src/components/layout/UserMenu/UserMenu.tsx:62
+#: src/components/layout/UserMenu/UserMenu.tsx
 msgid "Log out"
 msgstr "Log out"
 
-#: src/pages/User/sections/Information/Information.tsx:80
+#: src/pages/User/sections/Information/Information.tsx
 msgid "Member since"
 msgstr "Member since"
 
-#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx:65
-#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:76
+#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx
+#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx
 msgid "Name"
 msgstr "Name"
 
-#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:63
+#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx
 msgid "New API key"
 msgstr "New API key"
 
-#: src/pages/User/sections/ApiKeys/ApiKeys.tsx:33
+#: src/pages/User/sections/ApiKeys/ApiKeys.tsx
 msgid "New key"
 msgstr "New key"
 
-#: src/pages/Login/Login.tsx:38
+#: src/pages/Login/Login.tsx
 msgid "No account yet?"
 msgstr "No account yet?"
 
-#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx:17
+#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx
 msgid "OpenID Connect through the backend, with httpOnly cookies and silent token refresh."
 msgstr "OpenID Connect through the backend, with httpOnly cookies and silent token refresh."
 
-#: src/pages/NotFound/NotFound.tsx:15
-#: src/pages/NotFound/NotFound.tsx:17
+#: src/pages/NotFound/NotFound.tsx
+#: src/pages/NotFound/NotFound.tsx
 msgid "Page not found"
 msgstr "Page not found"
 
-#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx:68
-#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:81
+#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx
+#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx
 msgid "Permissions"
 msgstr "Permissions"
 
-#: src/pages/User/sections/Information/Information.tsx:46
+#: src/pages/User/sections/Information/Information.tsx
 msgid "Profile updated"
 msgstr "Profile updated"
 
-#: src/components/layout/AppHeader/AppHeader.tsx:38
-#: src/pages/Login/Login.tsx:41
-#: src/pages/Register/Register.tsx:19
+#: src/components/layout/AppHeader/AppHeader.tsx
+#: src/pages/Login/Login.tsx
+#: src/pages/Register/Register.tsx
 msgid "Register"
 msgstr "Register"
 
-#: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx:42
+#: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx
 msgid "Revoke"
 msgstr "Revoke"
 
 #. placeholder {0}: apiKey.name
-#: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx:40
-#: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx:47
+#: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx
+#: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx
 msgid "Revoke {0}"
 msgstr "Revoke {0}"
 
-#: src/pages/User/sections/Information/Information.tsx:72
+#: src/pages/User/sections/Information/Information.tsx
 msgid "Role"
 msgstr "Role"
 
-#: src/pages/User/sections/Information/Information.tsx:103
+#: src/pages/User/sections/Information/Information.tsx
 msgid "Save changes"
 msgstr "Save changes"
 
-#: src/pages/Home/Home.tsx:24
+#: src/pages/Home/Home.tsx
 msgid "Ship a fullstack app, not a toolchain"
 msgstr "Ship a fullstack app, not a toolchain"
 
-#: src/api/errors.ts:110
+#: src/api/errors.ts
 msgid "Something went wrong. Please try again."
 msgstr "Something went wrong. Please try again."
 
-#: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx:32
+#: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx
 msgid "Switch to the dark theme"
 msgstr "Switch to the dark theme"
 
-#: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx:31
+#: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx
 msgid "Switch to the light theme"
 msgstr "Switch to the light theme"
 
-#: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx:33
+#: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx
 msgid "Switch to the system theme"
 msgstr "Switch to the system theme"
 
-#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx:47
+#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx
 msgid "The API keys could not be loaded."
 msgstr "The API keys could not be loaded."
 
-#: src/pages/NotFound/NotFound.tsx:20
+#: src/pages/NotFound/NotFound.tsx
 msgid "The page you are looking for does not exist."
 msgstr "The page you are looking for does not exist."
 
-#: src/pages/User/sections/Information/Information.tsx:60
+#: src/pages/User/sections/Information/Information.tsx
 msgid "The profile shared with the rest of the application."
 msgstr "The profile shared with the rest of the application."
 
-#: src/api/errors.ts:116
+#: src/api/errors.ts
 msgid "The request contained characters the server cannot read."
 msgstr "The request contained characters the server cannot read."
 
-#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:64
+#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx
 msgid "The secret is displayed once, right after creation."
 msgstr "The secret is displayed once, right after creation."
 
-#: src/api/errors.ts:117
+#: src/api/errors.ts
 msgid "The server could not be reached. Check your connection."
 msgstr "The server could not be reached. Check your connection."
 
-#: src/api/errors.ts:118
+#: src/api/errors.ts
 msgid "The server sent a response the application cannot read."
 msgstr "The server sent a response the application cannot read."
 
-#: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx:28
+#: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx
 msgid "Theme: dark. Switch to the system theme."
 msgstr "Theme: dark. Switch to the system theme."
 
-#: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx:27
+#: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx
 msgid "Theme: light. Switch to the dark theme."
 msgstr "Theme: light. Switch to the dark theme."
 
-#: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx:26
+#: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx
 msgid "Theme: system. Switch to the light theme."
 msgstr "Theme: system. Switch to the light theme."
 
-#: src/api/errors.ts:114
+#: src/api/errors.ts
 msgid "This resource no longer exists."
 msgstr "This resource no longer exists."
 
-#: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx:35
+#: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx
 msgid "This secret will not be shown again."
 msgstr "This secret will not be shown again."
 
-#: src/api/errors.ts:115
+#: src/api/errors.ts
 msgid "Too many requests. Please wait a moment and try again."
 msgstr "Too many requests. Please wait a moment and try again."
 
-#: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx:55
-#: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx:33
-#: src/pages/User/sections/Information/Information.tsx:52
-msgid "Unexpected error"
-msgstr "Unexpected error"
-
-#: src/api/errors.ts:112
+#: src/api/errors.ts
 msgid "You are not allowed to do that."
 msgstr "You are not allowed to do that."
 
-#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx:55
+#: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx
 msgid "You have no API key yet."
 msgstr "You have no API key yet."
 
-#: src/api/errors.ts:111
+#: src/api/errors.ts
 msgid "You need to be signed in to do that."
 msgstr "You need to be signed in to do that."
 
-#: src/pages/Register/Register.tsx:24
+#: src/pages/Register/Register.tsx
 msgid "You will be redirected to the identity provider to create your account."
 msgstr "You will be redirected to the identity provider to create your account."
 
-#: src/pages/Login/Login.tsx:24
+#: src/pages/Login/Login.tsx
 msgid "You will be redirected to the identity provider to sign in."
 msgstr "You will be redirected to the identity provider to sign in."
 
-#: src/pages/User/User.tsx:14
+#: src/pages/User/User.tsx
 msgid "Your account"
 msgstr "Your account"
 
-#: src/api/errors.ts:113
+#: src/api/errors.ts
 msgid "Your session has expired. Please sign in again."
 msgstr "Your session has expired. Please sign in again."
