@@ -1,39 +1,85 @@
 ---
 name: backend-feature-gating
-description: Load this skill BEFORE adding a new backend under a trait crate's `src/backends/` (redis, postgres, s3, keycloak, or a new one), before creating a new trait crate that follows that same `src/backends/` pattern, and before editing any crate's `[features]` table in `Cargo.toml` or its `src/backends/mod.rs`. Also load it when reviewing such a change, since a bad gate silently breaks the non-feature build without failing `--all-features` CI.
+description: Use when adding a backend under a trait crate's src/backends/, creating a new trait crate, or editing a [features] table.
 ---
 
-# Feature-Gating Backend Implementations
+# Feature-gate a backend implementation
 
-Every backend under a trait crate's `src/backends/` (see `crates/README.md`, "Types of crates") is gated behind a disabled-by-default Cargo feature, so a consumer that only needs the trait doesn't pull the backend's dependencies (redis client, sqlx, aws-sdk, ...).
+Every backend under a trait crate's `src/backends/` sits behind a Cargo feature that is **off by
+default**. A crate that only needs the trait must not pull in a Redis client, sqlx or an AWS SDK.
 
-## Checklist for a new backend
+See [crates/README.md](../../../crates/README.md) for the service-crate layout.
 
-- [ ] Add a feature in the crate's `Cargo.toml` `[features]`, named after the backend module (e.g. `postgres = []`).
-- [ ] Gate **both** the module and its re-export in `src/backends/mod.rs`:
-  ```rust
-  #[cfg(feature = "postgres")]
-  mod postgres;
-  #[cfg(feature = "postgres")]
-  pub use postgres::Postgres;
-  ```
-- [ ] Add `required-features = ["postgres"]` to the matching `[[test]]` stanza for its integration-test binary.
-- [ ] In any crate that constructs the concrete type directly (not just the trait object) — e.g. `crates/binaries/backend` — enable the feature on that path dependency.
-- [ ] If another crate's tests use the backend as a double (e.g. `HashMapCache` standing in for `Cache` in `authenticator`'s tests), enable the feature on that crate's `[dev-dependencies]` entry, not `[dependencies]`.
-- [ ] Verify **both** build configurations, not just the one CI runs:
-  - `cargo clippy -p <crate> --all-features` (what `test_lint.sh` runs)
-  - `cargo check -p <crate> --no-default-features` (what a trait-only consumer gets — CI never runs this, so it's the only way to catch dead code left behind in an ungated shared file, e.g. an error-constructor only ever called from the now-gated backend)
+A wrong gate does not fail CI. `test_lint.sh` and `test_units.sh` both pass `--all-features`, so the
+build that breaks is the one nobody runs.
 
-## Do / Don't
+## 1. Declare the feature
 
-| Do | Don't |
-|---|---|
-| Gate both the `mod` and its `pub use` | Gate only one of the two, leaving a dangling re-export or an unreachable module |
-| Name the feature after the backend module | Invent an unrelated feature name |
-| Enable the feature only on the specific dependency edge that needs it (consumer binary, dev-dependency) | Turn the feature on by default inside the trait crate itself |
-| Run the `--no-default-features` check after gating | Trust `--all-features` CI alone |
-| Add `required-features` to the integration test's `[[test]]` stanza | Leave the integration test buildable without its backend feature |
+In the crate's `Cargo.toml`, add a feature named exactly after the backend module:
 
-## Rationale
+```toml
+[features]
+# Each backend under `src/backends` is opt-in; enable the ones you need.
+redis = []
+hash_map = []
+```
 
-`doc/backend-feature-gating.md` has the narrative version of this pattern — keep both in sync if it changes.
+Never enable it by default inside the trait crate.
+
+## 2. Gate the module and its export
+
+In `src/backends/mod.rs`, put `#[cfg(feature = "...")]` on **every** line the backend owns. Gating
+the module but not its re-export leaves a dangling export that fails to compile.
+
+Two shapes are in use. Prefer the first: it keeps the module private and exports only the type.
+
+```rust
+#[cfg(feature = "postgres")]
+mod postgres;
+#[cfg(feature = "postgres")]
+pub use postgres::Postgres;
+```
+
+```rust
+#[cfg(feature = "hash_map")]
+pub mod hash_map;
+```
+
+## 3. Gate the test binary
+
+Each backend has its own test binary. Add `required-features` so it is only built when its backend
+is enabled:
+
+```toml
+[[test]]
+name = "redis"
+path = "tests/backends/redis.rs"
+harness = false
+required-features = ["redis"]
+```
+
+See Skill(backend-trait-test) for what goes inside that binary.
+
+## 4. Enable the feature on the consumers
+
+A crate that names the **concrete type** must turn the feature on for that dependency. A crate that
+only uses the trait must not.
+
+- Constructs the type in normal code, such as
+  [crates/binaries/backend](../../../crates/binaries/backend): enable it under `[dependencies]`.
+- Uses the backend only as a test double, such as `HashMapCache` standing in for a real cache in
+  another crate's tests: enable it under `[dev-dependencies]`, never `[dependencies]`.
+
+## Checklist
+
+```bash
+./scripts/test_no_default_features.sh    # the build CI never runs
+cargo clippy --workspace --all-features -- -A clippy::module_inception
+```
+
+`test_no_default_features.sh` is the one that matters. It compiles the workspace with every optional
+feature off, which is how you find code left unreachable behind a new gate — for example an error
+constructor only ever called from the backend you just gated.
+
+- [ ] The feature name matches the module name.
+- [ ] The trait crate still builds with no features at all.
