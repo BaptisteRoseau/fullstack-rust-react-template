@@ -1,108 +1,58 @@
 # Endpoints
 
-In this directoy are defined the API endpoints.
+The HTTP handlers. Each endpoint group is one directory holding the handlers and the types they
+send and receive.
+
+A handler extracts input, calls [app_core](../../../app_core), and serialises the result. Business
+logic never lives here.
 
 ## Organization
 
-Each endpoint should be defined under a directory as follows:
-
 ```txt
-<name>
-├── models.rs # The API responses & params
-├── endpoints.rs # The API functions
-└── mod.rs
+<name>/
+├── models.rs     # request and response types
+├── endpoints.rs  # the handler functions
+└── mod.rs        # only `pub mod endpoints;` and `pub mod models;`
 ```
 
-By convention, for nested endpoint we use directories separated by `__` per `/`.
-For example, CRUD endpoints for `/user/ressources` would be under `user__ressources.`
+Nested paths join their segments with `__`. CRUD endpoints for `/user/resources` live in
+`user__resources/`.
 
-### Models
+## Models
 
-Models are the specific inputs and outputs of an API.
+Named `<Method><Resource><"Request" | "Response" | "Params">`. For `GET /user/{uuid}` the response
+type is `GetUserResponse`; a path-only endpoint needs no params type.
 
-Each model should derive from `Debug` and `utoipa::ToSchema`. It is possible to add `From<T>` when necessary in an endpoint.
-Each model should have derive from `#[serde(rename_all = "camelCase")]`.
+Every model derives `Debug` and `#[serde(rename_all = "camelCase")]`, plus:
 
-Parameters should derive from `Deserialize` and `IntoParams`.
-Responses should derive from `Serialize` and `ToResponse`.
+| Kind | Additional derives |
+| --- | --- |
+| Response | `Serialize`, `ToSchema`, `ToResponse` |
+| Request body | `Deserialize`, `ToSchema` |
+| Query or path parameters | `Deserialize`, `ToSchema`, `IntoParams` |
 
-They are named as `<method><structure><"Response"|"Params">`.
+Conversions from `app_core` models are implemented here as `From<T>`, so handlers stay free of
+mapping code.
 
-For example, for `GET /user/:path`, there is no params but the response model would be `GetUserResponse`.
+## Handlers
 
-For example:
+Each handler carries a `#[utoipa::path(...)]` attribute declaring its method, path and every
+response it can return. That attribute is the source of the OpenAPI document, which in turn
+generates the frontend SDK — so an undocumented response is a response the frontend cannot see.
 
-```rust
-use serde::{Deserialize, Serialize};
-use utoipa::{IntoParams, ToResponse, ToSchema};
-use uuid::Uuid;
+The doc comment above a handler is published as user-facing API documentation.
 
-/// <Here should be the documentation of the response>
-#[derive(Debug, Serialize, ToSchema, ToResponse)]
-#[serde(rename_all = "camelCase")]
-pub(crate) struct GetUserResponse {
-    pub name: String,
-}
+Handlers return `Result<Json<T>, ApiError>`, or `Result<(StatusCode, Json<T>), ApiError>` when the
+status code varies.
 
-/// <Here should be the documentation of the parameter>
-#[derive(Debug, Deserialize, ToSchema, IntoParams)]
-#[serde(rename_all = "camelCase")]
-pub(crate) struct PostUserParams {
-    pub id: Uuid,
-}
-```
+## API contract
 
-### Endpoints
+These types are the end-user API contract. **Removing**, **renaming** or **changing the type of** a
+field or enum key is a breaking change, and the commit must carry a `BREAKING CHANGES:` footer
+listing each one, prefixed with `API:`.
 
-Endpoints are defined using the utoipa crate as follows:
+## Skills
 
-```rust
-use super::models::GetUserResponse;
-use crate::error::ApiError;
-
-/// <Here is the documentation of the endpoint>
-#[utoipa::path(
-    get,
-    path = "/user/:uuid",
-    responses(
-        (status = OK, body = GetUserResponse, description = "The user information."),
-        (status = NOT_FOUND, body = ApiErrorResponse, description = "The user does not exist."),
-    )
-)]
-pub(crate) async fn get_user(
-    uuid: Path<Uuid>,
-    opt_user: Option<UserToken>,
-    State(state): State<AppState>,
-) -> Result<Json<GetUserResponse>, ApiError> {
-    todo!()
-}
-```
-
-Make sure to:
-
-- Return a `Result<Json<TheCorrespondingResponseModel>, ApiError>`
-- Document the API using a docstring, this will be used to generate user documentation so b eexhaustive
-- Document the parameters and responses
-- Use the correct HTTP method
-- Use `State(state): State<AppState>` when accessing the state is required
-- Use a minimal windows when using a lock from an object in the state
-- Implement the actual logic from in the `crates/app_core` crate, the `api` only handles the input/output/state management
-
-### Mod
-
-Should always be:
-
-```rust
-pub mod models;
-pub mod endpoints;
-```
-
-## Changelog
-
-These structures represent the end-user API contract.
-
-Mark the commit with a "BREAKING CHANGES:" footer with the list of breaking changes prefixed with "API:" in the following cases:
-
-- **removing** fields or enum keys from endpoints
-- **renaming** fields or enum keys from endpoints
-- **changing the type of** fields or enum keys from endpoints
+- [backend-add-api-endpoint](../../../../.claude/skills/backend-add-api-endpoint/SKILL.md)
+- [frontend-api-sdk](../../../../.claude/skills/frontend-api-sdk/SKILL.md)
+- [commit-messages](../../../../.claude/skills/commit-messages/SKILL.md)
