@@ -1,141 +1,72 @@
 ---
 name: frontend-form
-description: How to build or update a form with the shared Form primitives (React Hook Form + Zod schema + FormField-bound fields). Use this when creating or updating a frontend form, input flow, create/edit dialog or validation rule.
+description: Use when creating or updating a frontend form, input flow, create/edit dialog or validation rule.
 ---
 
 # Forms
 
 Forms are React Hook Form + Zod. `src/components/forms/` binds them to the design-system inputs so
-pages never touch RHF's low-level API.
+pages never touch RHF's low-level API. See
+[src/components/forms](../../../frontend/src/components/forms) for the current shape: `Form/`,
+`FormField/` and `fields/` (`TextField`, `TextAreaField`, `CheckboxGroupField`).
 
-```
-src/components/forms/
-├── Form/                       # <form> + FormProvider + zodResolver
-├── FormField/                  # label + control + error, wired to RHF
-└── fields/
-    ├── TextField/
-    ├── TextAreaField/
-    └── CheckboxGroupField/
-```
+## 1. Write the schema
 
-## Writing a form
+Put it next to the form that uses it — in the page folder for a page-specific form, in the
+component folder for a reusable one. A schema describing an API payload lives in
+`src/api/domains/<domain>/types.ts` instead — Skill(frontend-api).
 
-The schema lives next to the form that uses it — in the page folder for a page-specific form, in
-the component folder for a reusable one. Schemas describing an API payload live in
-`src/api/domains/<domain>/types.ts` instead.
-
-```tsx
-import * as z from 'zod'
-
-const profileSchema = z.object({
-    firstName: z.string().min(1),
-    lastName: z.string().min(1),
-    bio: z.string().max(500),
+```ts
+const createApiKeySchema = z.object({
+    name: z.string().min(1),
+    permissions: z.array(z.enum(API_KEY_PERMISSIONS)).min(1),
 })
-
-<Form
-    schema={profileSchema}
-    onSubmit={handleSubmit}
-    className={styles.form}
-    defaultValues={{ firstName: user.firstName, lastName: user.lastName, bio: user.bio }}
->
-    {() => (
-        <>
-            <TextField name="firstName" label={t`First name`} />
-            <TextField name="lastName" label={t`Last name`} />
-            <TextAreaField name="bio" label={t`Bio`} />
-            <Button type="submit" disabled={isMutating}>
-                <Trans>Save changes</Trans>
-            </Button>
-        </>
-    )}
-</Form>
 ```
 
-`Form` takes a render-prop child so a caller that needs RHF state (`watch`, `formState`) can reach
-it without prop drilling. Most forms ignore the argument.
+## 2. Render the form
 
-## Submitting
+`Form` owns the `<form>` element, `FormProvider` and the `zodResolver`. It takes a render-prop
+child so a caller that needs RHF state (`watch`, `formState`) can reach it without prop drilling —
+most forms ignore the argument. See
+[src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx](../../../frontend/src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx)
+for the full pattern: schema, fields, submit handler and dialog footer together.
 
-Wire the submit handler to a mutation hook from `api/hooks/`. The hook owns its cache
-invalidation, so the handler only reports the outcome:
+## 3. Wire the submit handler to a mutation hook
+
+The hook owns its cache invalidation, so the handler only reports the outcome:
 
 ```tsx
-async function handleSubmit(values: z.infer<typeof profileSchema>) {
+async function handleSubmit(values: z.infer<typeof createApiKeySchema>) {
     try {
-        await trigger(values)
-        addNotification({ type: 'success', title: t`Profile updated` })
+        onCreated(await trigger(values))
     } catch (error) {
-        addNotification({
-            type: 'error',
-            title: t`Could not update the profile`,
-            message: apiErrorMessage(error),
-        })
+        addNotification({ type: 'error', title: t`Could not create the API key`, message: apiErrorMessage(error) })
     }
 }
 ```
 
-`trigger` rejects on failure. Never swallow it.
+`trigger` rejects on failure. Never swallow it. See Skill(frontend-state) for `addNotification` and
+Skill(frontend-api) for `apiErrorMessage`.
 
-## Adding a field component
+## 4. Add a field component, if the control doesn't exist yet
 
-Generate the folder first — a field is a shared component under the `forms/fields` grouping. From
-`frontend/`:
+Generate it as a shared component under the `forms/fields` grouping:
 
 ```bash
 bun run generate component components forms/fields <Name>Field
-# e.g. bun run generate component components forms/fields TextAreaField
 ```
 
 Every field builds on `FormField`, which owns the label, the description, the error message and the
-`aria-describedby`/`aria-invalid` wiring — so accessibility is handled once.
-
-```tsx
-export function TextField({ name, label, description, ...inputProps }: TextFieldProps) {
-    const { register } = useFormContext()
-
-    return (
-        <FormField name={name} label={label} description={description}>
-            {(fieldProps) => <TextInput {...fieldProps} {...inputProps} {...register(name)} />}
-        </FormField>
-    )
-}
-```
-
-Spread order matters: `register(name)` **last**, so RHF's `ref`, `name`, `onChange` and `onBlur`
-are never overwritten.
+`aria-describedby`/`aria-invalid` wiring. See
+[src/components/forms/fields/TextField/TextField.tsx](../../../frontend/src/components/forms/fields/TextField/TextField.tsx):
+spread order matters, `register(name)` goes **last**, so RHF's `ref`, `name`, `onChange` and
+`onBlur` are never overwritten.
 
 The control itself is a design-system input — a field component never writes raw markup or CSS for
-the control. If a new control shape is needed, add the primitive to `src/design-system/inputs/`
-first (see the `frontend-design-system` skill), then bind it here.
+the control. If the control shape does not exist yet, add the primitive to
+`src/design-system/inputs/` first — Skill(frontend-design-system) — then bind it here.
 
-## Forms in a dialog
-
-Render `Form` inside `DialogContent` and put the actions in `DialogFooter` so the submit button
-stays inside the `<form>`:
-
-```tsx
-<DialogRoot open={isOpen} onOpenChange={onOpenChange}>
-    <DialogContent title={t`New API key`} description={t`The secret is displayed once.`}>
-        <Form schema={createApiKeySchema} onSubmit={handleSubmit}>
-            {() => (
-                <>
-                    <TextField name="name" label={t`Name`} />
-                    <DialogFooter>
-                        <DialogClose asChild>
-                            <Button variant="secondary"><Trans>Cancel</Trans></Button>
-                        </DialogClose>
-                        <Button type="submit" disabled={isMutating}><Trans>Create key</Trans></Button>
-                    </DialogFooter>
-                </>
-            )}
-        </Form>
-    </DialogContent>
-</DialogRoot>
-```
-
-Control the dialog from the page (`isOpen` / `onOpenChange`) so the form can stay open when the
-submission fails.
+If the form lives inside a dialog, read [dialog-form.md](./dialog-form.md).
 
 ## Rules
 
@@ -144,3 +75,8 @@ submission fails.
   able to submit and see what is wrong.
 - Label every control. A `TextField` without a `label` is a bug, not a style choice.
 - Errors render with `role="alert"`, so tests and e2e assert on the role, not on a class.
+
+## Checklist
+
+- [ ] The submit button disables on `isMutating`, never on `!isValid`.
+- [ ] Every field has a `label`.
