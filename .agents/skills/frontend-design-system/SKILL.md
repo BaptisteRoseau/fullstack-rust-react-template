@@ -1,21 +1,19 @@
 ---
 name: frontend-design-system
-description: How to build or update a domain-agnostic UI primitive in src/design-system (SCSS Module + clsx variants + Radix wrapper + mandatory Storybook story). Use this when creating or editing a button, input, dialog, badge, table or any reusable presentational component.
+description: Use when creating or editing a button, input, dialog, badge, table or any reusable presentational component with no domain knowledge.
 ---
 
 # Design system primitives
 
 `src/design-system/` holds **domain-agnostic** UI primitives. Nothing here knows about users, API
 services or contexts — a primitive receives everything through props. Radix supplies accessible
-behaviour for the hard widgets; we own all the CSS.
+behaviour for the hard widgets; we own all the CSS. See Skill(frontend-architecture) for how this
+layer fits the rest, and Skill(frontend-component) for the domain-aware layer above it.
 
 **Every component in this folder has a Storybook story.** That rule keeps the layer honest: if a
 component cannot be told in a story without mocking an API, it belongs in `src/components/`.
 
-## Folder shape
-
-Generate it — the story, the stylesheet name and the barrel come out right for free. From
-`frontend/`:
+## 1. Generate the folder
 
 ```bash
 bun run generate component design-system "" <ComponentName>
@@ -25,96 +23,28 @@ bun run generate component design-system "" <ComponentName>
 
 The second argument is the grouping folder; pass `""` for none. Run `bun run generate` with no
 arguments to be prompted instead. Choosing the `design-system` layer is what adds the mandatory
-story to the generated folder.
+story — see [Badge](../../../frontend/src/design-system/Badge) for the resulting shape:
+`Badge.tsx`, `Badge.test.tsx`, `Badge.stories.tsx`, `badge.module.scss`, `index.ts`.
 
-```
-Badge/
-├── Badge.tsx               # implementation
-├── Badge.test.tsx          # unit test
-├── Badge.stories.tsx       # mandatory
-├── badge.module.scss       # SCSS Module, kebab-case
-└── index.ts                # barrel
-```
+Lowercase grouping folders (e.g. `inputs/`) are allowed when a family grows past three members. They
+get no barrel of their own — import the leaf: `@/design-system/inputs/TextInput`.
 
-```ts
-// index.ts
-export { Badge } from './Badge'
-export type { BadgeProps } from './Badge'
-```
-
-Lowercase grouping folders (`inputs/`) are allowed when a family grows past three members. They get
-no barrel of their own — import the leaf: `@/design-system/inputs/TextInput`.
-
-## Writing a primitive
+## 2. Write the primitive
 
 Variants are modifier classes composed with `clsx`. Always forward `className` and spread the rest
-of the native props so callers can extend without a wrapper element.
+of the native props so callers can extend without a wrapper element. See
+[src/design-system/Button/Button.tsx](../../../frontend/src/design-system/Button/Button.tsx) — its
+`asChild` prop (Radix `Slot`) is how a router `<Link>` gets button styling without nesting an anchor
+inside a button. For a forwarded input, take `ref` as a normal prop — React 19 needs no
+`forwardRef`.
 
-```tsx
-import { Slot } from '@radix-ui/react-slot'
-import clsx from 'clsx'
+## 3. Write the stylesheet
 
-import styles from './button.module.scss'
-
-export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-    variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
-    size?: 'sm' | 'md' | 'lg'
-    asChild?: boolean
-}
-
-export function Button({
-    variant = 'primary',
-    size = 'md',
-    asChild = false,
-    className,
-    type = 'button',
-    ...props
-}: ButtonProps) {
-    const Component = asChild ? Slot : 'button'
-
-    return (
-        <Component
-            className={clsx(styles.button, styles[variant], styles[size], className)}
-            type={asChild ? undefined : type}
-            {...props}
-        />
-    )
-}
-```
-
-`asChild` (Radix `Slot`) is how a router `<Link>` gets button styling without nesting an anchor
-inside a button:
-
-```tsx
-<Button asChild><Link to={PATHS.login}><Trans>Log in</Trans></Link></Button>
-```
-
-For a forwarded input, take `ref` as a normal prop — React 19 needs no `forwardRef`.
-
-## The stylesheet
-
-`src/css` is on the Sass load path, so tokens import without relative chains.
+`src/css` is on the Sass load path, so tokens import without relative chains:
 
 ```scss
 @use 'variables' as *;
 @use 'mixins' as *;
-
-.button {
-    display: inline-flex;
-    align-items: center;
-    gap: $space-2;
-    border-radius: $radius-md;
-    cursor: pointer;
-
-    &:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    @include focus-ring;
-}
-
-.primary {
-    background-color: var(--color-primary);
-    color: var(--color-on-primary);
-}
 ```
 
 The split is the whole theming strategy:
@@ -130,97 +60,35 @@ Available mixins: `focus-ring`, `visually-hidden`, `media-up($breakpoint)`, `con
 **Mobile first.** Base rules target the smallest viewport; widen with `@include media-up(...)`.
 Never write a `max-width` query to undo a desktop default.
 
-**`container` frames sections, not primitives.** Every top-level section of a page includes it;
-a design-system component never does — it fills whatever its parent gives it.
+**`container` frames sections, not primitives.** Every top-level section of a page includes it; a
+design-system component never does — it fills whatever its parent gives it.
 
-## Wrapping a Radix primitive
+If the primitive wraps a compound Radix widget (dialog, dropdown, table), read
+[radix-wrapper.md](./radix-wrapper.md) first. If it is an icon, read [icons.md](./icons.md) instead.
 
-Keep Radix's compound shape; do not collapse it into one prop-driven component.
-
-```tsx
-import * as RadixDialog from '@radix-ui/react-dialog'
-
-export const DialogRoot = RadixDialog.Root
-export const DialogTrigger = RadixDialog.Trigger
-export const DialogClose = RadixDialog.Close
-
-export function DialogContent({ title, children, className, ...props }: DialogContentProps) {
-    return (
-        <RadixDialog.Portal>
-            <RadixDialog.Overlay className={styles.overlay} />
-            <RadixDialog.Content className={clsx(styles.content, className)} {...props}>
-                <RadixDialog.Title className={styles.title}>{title}</RadixDialog.Title>
-                {children}
-            </RadixDialog.Content>
-        </RadixDialog.Portal>
-    )
-}
-```
-
-A `RadixDialog.Title` is mandatory for screen readers. If a dialog is visually title-less, wrap the
-title in a `visually-hidden` class rather than omitting it. Style state through Radix data
-attributes: `&[data-state='open'] { … }`.
-
-## Icons
-
-SVGs live in `Icon/resources/` and become components through `makeIcon`:
-
-```tsx
-import TrashSvg from './resources/trash.svg?react'
-export const TrashIcon = makeIcon(TrashSvg, 'TrashIcon')
-```
-
-Icons are `aria-hidden` by default — an icon next to a label is decorative. An icon-only control
-carries its own `aria-label` on the **button** (`IconButton` requires it), never on the SVG.
-
-## Story
-
-```tsx
-import type { Meta, StoryObj } from '@storybook/react-vite'
-
-import { Badge } from './Badge'
-
-const meta = {
-    title: 'Design System/Badge',
-    component: Badge,
-} satisfies Meta<typeof Badge>
-
-export default meta
-
-type Story = StoryObj<typeof meta>
-
-export const Default: Story = { args: { children: 'read' } }
-export const AllVariants: Story = {
-    args: { children: 'read' },
-    render: () => (
-        <div style={{ display: 'flex', gap: 8 }}>
-            <Badge>neutral</Badge>
-            <Badge variant="success">active</Badge>
-        </div>
-    ),
-}
-```
+## 4. Write the story
 
 Titles are namespaced `Design System/<Component>`; shared components use `Components/<Component>`.
-The preview decorator supplies i18n, a router and a light/dark toolbar toggle — check both themes.
+See
+[src/design-system/Badge/Badge.stories.tsx](../../../frontend/src/design-system/Badge/Badge.stories.tsx)
+for the shape: a default export with `title` and `component`, then one `Story` per state worth
+showing. The preview decorator supplies i18n, a router and a light/dark toolbar toggle — check both
+themes.
 
-## Test
+## 5. Write the test
 
-Assert on roles, labels and text — never on class names. SCSS Module hashes are not a contract.
-Every assertion carries a message showing the offending value.
+Assert on roles, labels and text — never on class names. SCSS Module hashes are not a contract, and
+Vitest does not process CSS, so `styles.button` is `undefined` in tests. Every assertion carries a
+message showing the offending value — see
+[src/design-system/Button/Button.test.tsx](../../../frontend/src/design-system/Button/Button.test.tsx).
+Primitives use Testing Library's plain `render` — they need no providers. Skill(frontend-testing)
+covers the assertion style in full.
 
-```tsx
-it('calls onClick when pressed', async () => {
-    const onClick = vi.fn()
-    render(<Button onClick={onClick}>Save</Button>)
+## Checklist
 
-    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
-
-    expect(
-        onClick,
-        `expected 1 call, got ${onClick.mock.calls.length}`,
-    ).toHaveBeenCalledTimes(1)
-})
+```bash
+bun run storybook      # check the story renders in both light and dark themes
 ```
 
-Primitives use Testing Library's plain `render` — they need no providers.
+- [ ] The component has a story, unless it genuinely cannot render without an API mock.
+- [ ] No `api/`, `contexts/`, `components/` or `pages/` import anywhere in the folder.
