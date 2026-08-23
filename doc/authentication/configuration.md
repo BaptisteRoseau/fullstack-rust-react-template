@@ -1,61 +1,62 @@
 # Authentication — Configuration
 
-All defaults target a local `docker compose up` setup, so the flow works with **no extra
-configuration**. Override these for other environments.
+Every default targets a local `docker compose up` setup, so the flow works with **no extra
+configuration**. Override these for any other environment.
+
+Current values are in [`crates/config/src/defaults.rs`](../../crates/config/src/defaults.rs). They
+are not repeated here, because they change.
 
 ## Backend
 
-Defined in [`crates/config/src/cli.rs`](../../crates/config/src/cli.rs) /
-[`defaults.rs`](../../crates/config/src/defaults.rs). Each is available as a CLI flag and an
-environment variable.
+Each setting is both a CLI flag and an environment variable. See
+[`crates/config`](../../crates/config/README.md) and Skill(backend-config-entry).
 
 ### Authenticator
 
 One section drives both roles: validating the access tokens callers present, and running the
 Backend-for-Frontend login flow. Every provider endpoint — JWKS, authorize, token, logout,
-userinfo — is derived from the issuer URL, so the two can no longer drift onto different realms.
+userinfo — is derived from the issuer URL, so the two halves cannot drift onto different realms.
 
-| Env var | CLI flag | Default | Purpose |
-|---------|----------|---------|---------|
-| `AUTHENTICATOR_ISSUER_URL` | `--authenticator-issuer-url` | `http://localhost:8090/realms/app` | Realm base URL. |
-| `AUTHENTICATOR_AUDIENCES` | `--authenticator-audiences` | `backend` | Comma-separated audiences the access token must contain. |
-| `AUTHENTICATOR_CLIENT_ID` | `--authenticator-client-id` | `webapp` | Confidential client used by the BFF. |
-| `AUTHENTICATOR_CLIENT_SECRET` | `--authenticator-client-secret` | `webapp-secret` | Client secret. **Override in production.** |
-| `AUTHENTICATOR_REDIRECT_URL` | `--authenticator-redirect-url` | `http://localhost:8080/api/auth/callback` | Must be registered as a redirect URI on the `webapp` client. |
+| Env var | Purpose |
+| --- | --- |
+| `AUTHENTICATOR_ISSUER_URL` | Realm base URL. Every other provider endpoint is derived from it |
+| `AUTHENTICATOR_AUDIENCES` | Comma-separated audiences the access token must contain |
+| `AUTHENTICATOR_CLIENT_ID` | The confidential client the backend uses |
+| `AUTHENTICATOR_CLIENT_SECRET` | Client secret. **Always override in production** |
+| `AUTHENTICATOR_REDIRECT_URL` | The callback. Must also be registered as a redirect URI on the client |
+
+The client's audience mapper must emit an audience listed in `AUTHENTICATOR_AUDIENCES`, or every
+token is rejected.
 
 ### API
 
-| Env var | CLI flag | Default | Purpose |
-|---------|----------|---------|---------|
-| `FRONTEND_URL` | `--frontend-url` | `http://localhost:3000` | Where the browser is sent after login; also the allowed CORS origin. |
-| `COOKIE_SECURE` | `--cookie-secure` | `false` | Set `true` behind HTTPS so cookies carry `Secure`. |
+| Env var | Purpose |
+| --- | --- |
+| `FRONTEND_URL` | Where the browser is sent after login. Also the single allowed CORS origin |
+| `COOKIE_SECURE` | `true` behind HTTPS, so cookies carry `Secure` |
 
 ### Related
 
-| Env var | Default | Purpose |
-|---------|---------|---------|
-| `REDIS_URL` | `redis://127.0.0.1:6379` | Stores the PKCE verifier + CSRF state between `/auth/login` and `/auth/callback`. |
-
-> Make sure the `webapp` client's audience mapper emits an audience listed in
-> `AUTHENTICATOR_AUDIENCES`.
+| Env var | Purpose |
+| --- | --- |
+| `REDIS_URL` | Holds the PKCE verifier and CSRF state between `/auth/login` and `/auth/callback` |
 
 ## Frontend
 
-Defined in [`frontend/src/config/env.ts`](../../frontend/src/config/env.ts) (Vite `VITE_APP_`
-prefix). The frontend needs **no** Keycloak settings — the BFF hides them.
+Validated by [`frontend/src/config/env.ts`](../../frontend/src/config/env.ts). Only variables
+prefixed `VITE_APP_` reach the browser.
 
-| Env var | Default | Purpose |
-|---------|---------|---------|
-| `VITE_APP_API_URL` | — (required) | Backend base URL, e.g. `http://localhost:8080/api`. Login redirects and all API calls are built from it. |
-| `VITE_APP_ENABLE_API_MOCKING` | `false` | `true` serves the MSW mock auth; set `false` to use the real backend. |
-| `VITE_APP_URL` | `http://localhost:3000` | The app's own origin. |
+| Env var | Purpose |
+| --- | --- |
+| `VITE_APP_API_URL` | The backend **origin**, with no trailing path. The `/api` prefix is added by the client |
+| `VITE_APP_ENABLE_API_MOCKING` | `true` starts the MSW worker instead of calling the backend |
+| `VITE_APP_URL` | The app's own origin |
 
 ## Production checklist
 
-- Set a strong `AUTHENTICATOR_CLIENT_SECRET` and rotate the realm's `webapp` secret.
-- `COOKIE_SECURE=true` and serve everything over HTTPS.
+- Set a strong `AUTHENTICATOR_CLIENT_SECRET`, and rotate the one shipped in the dev realm.
+- Set `COOKIE_SECURE=true` and serve everything over HTTPS.
 - Point `AUTHENTICATOR_ISSUER_URL`, `AUTHENTICATOR_REDIRECT_URL` and `FRONTEND_URL` at real
-  hostnames, and add the redirect URI + web origin to the `webapp` client.
-- Consider raising `accessTokenLifespan` from the 60s dev value (see [keycloak.md](./keycloak.md)).
-- In the realm, set `sslRequired` away from `none` and enable email verification once SMTP is
-  configured.
+  hostnames, and register the redirect URI and web origin on the client.
+- Raise the access-token lifespan above its development value — see [keycloak.md](./keycloak.md).
+- In the realm, set `sslRequired` away from `none`, and enable email verification once SMTP works.
