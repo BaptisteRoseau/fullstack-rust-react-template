@@ -1,6 +1,6 @@
 # Cache integration tests
 
-```
+```txt
 tests
 ├── backends
 │   ├── hash_map.rs   # `HashMapCache`, no container, instant
@@ -21,3 +21,8 @@ expiry.
 ```sh
 cargo test -p cache
 ```
+
+## Skills
+
+- [backend-trait-test](../../../.claude/skills/backend-trait-test/SKILL.md)
+- [backend-feature-gating](../../../.claude/skills/backend-feature-gating/SKILL.md)
