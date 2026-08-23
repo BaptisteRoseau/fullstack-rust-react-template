@@ -52,8 +52,9 @@ cargo run -p backend
 cd frontend && cp .env.example .env && bun install && bun run dev
 ```
 
-The frontend's `.env.example` points `VITE_APP_API_URL` at `http://localhost:8080/api`, which is
-where `cargo run -p backend` listens by default (`--port` / `PORT` to change it).
+The frontend's `.env.example` points `VITE_APP_API_URL` at the backend **origin**,
+`http://localhost:8080`, which is where `cargo run -p backend` listens by default (`--port` /
+`PORT` to change it). The `/api` prefix is added by the frontend's API client, not by the variable.
 
 Before pushing, run the same checks the hooks run:
 
@@ -87,45 +88,27 @@ dev server if you run both:
 
 ## Overview
 
-Every directory carries its own `README.md` describing its conventions — read it before
-working there, along with those of its parents.
+Each directory has its own `README.md` describing what belongs there and the rules that hold
+inside it. Read it before working there, together with those of its parents.
 
-```text
+```txt
 .
-├── crates/           # The Rust backend, one crate per layer or capability
-│   ├── api/          # HTTP layer: Axum routes, extractors, middlewares, OpenAPI
-│   ├── app_core/     # Domain layer: business logic, independent of HTTP and SQL
-│   ├── database/     # Postgres access via SQLx, migrations and CRUD traits
-│   ├── models/       # Shared domain structs used across the layers
-│   ├── authenticator/# Identity provider interface + Keycloak backend (BFF, API keys)
-│   ├── cache/        # Cache trait with Redis and in-process HashMap backends
-│   ├── storage/      # Blob storage trait over S3-compatible backends, with compression
-│   ├── compressor/   # Image and blob compression used by the storage layer
-│   ├── rbac/         # Roles, scopes and permission checks
-│   ├── config/       # Read-only configuration from CLI, env and file (Clap)
-│   ├── logging/      # tracing subscriber setup, human-readable or JSON
-│   ├── mailer/       # Transactional email sending
-│   ├── binaries/     # The only crates with a main.rs — notably `backend`
-│   ├── test_trait/   # Harness to run one test suite against every trait backend
-│   └── *_derive/     # Proc-macro crates backing database CRUD and the test harness
-├── frontend/         # React 19 + TypeScript SPA (layer-first layout)
-│   ├── src/          # api/, design-system/, components/, layouts/, pages/, router/
-│   ├── docs/         # architecture/ — the canonical frontend reference
-│   ├── e2e/          # Playwright end-to-end tests
-│   └── generators/   # Plop templates to scaffold components, pages and API domains
-├── infrastructure/   # Everything needed to run the platform in containers
-│   ├── docker/       # Dockerfiles for the backend, frontend, Postgres, homepage
-│   ├── docker-compose/ # Compose fragments merged by the root docker-compose.yml
-│   ├── keycloak/     # Realm export imported on startup
-│   └── prometheus/   # Scrape configuration
-├── scripts/          # build_*.sh, test_*.sh helpers and the git hooks
-├── tools/            # Standalone crates that are more than a script
-│   ├── http_health_checker/ # Tiny static binary used as a container healthcheck
-│   └── openapi_generator/   # Exports openapi.json offline from the api crate
-│                            # (see scripts/build_frontend_api_sdk.sh)
-├── doc/              # Cross-cutting documentation (authentication, refactors)
-└── docker-compose.yml # Entry point including every infrastructure fragment
+├── crates/            # The Rust backend, one crate per layer or capability
+├── frontend/          # React 19 + TypeScript single-page app
+├── infrastructure/    # Dockerfiles, Compose fragments, Keycloak realm, Prometheus config
+├── scripts/           # build_*.sh and test_*.sh helpers, and the git hooks
+├── tools/             # Standalone crates that are more than a script
+├── doc/               # Cross-cutting architecture documentation
+└── docker-compose.yml # Includes every infrastructure fragment
 ```
+
+| Where | Start with |
+| --- | --- |
+| Backend | [crates/README.md](./crates/README.md) |
+| Frontend | [frontend/README.md](./frontend/README.md) |
+| Architecture deep dives | [doc/README.md](./doc/README.md) |
+| Frontend architecture | [frontend/docs/architecture](./frontend/docs/architecture/README.md) |
+| Build, test and lint | [scripts/README.md](./scripts/README.md) |
 
 ### Software Stack
 
@@ -139,29 +122,32 @@ working there, along with those of its parents.
 | SQLx                | Compile-time checked SQL and database migrations               |
 | Clap                | CLI and environment-variable configuration                     |
 | utoipa + Swagger UI | OpenAPI document generation and interactive docs               |
-| thiserror / anyhow  | Typed errors per crate, application-level error context        |
+| thiserror / anyhow  | Typed error enum per crate; anyhow in `api` and the binary     |
 | tracing             | Structured, span-aware logging (compact or JSON)               |
 | testcontainers      | Integration tests against real Postgres and Keycloak instances |
 
 #### Frontend
 
-| Tool                     | Role                                                          |
-| ------------------------ | ------------------------------------------------------------- |
-| TypeScript               | Frontend language, strict typing throughout                   |
-| React 19                 | UI library                                                    |
-| React Router             | Routing, lazy route registration and data loaders             |
-| Vite                     | Dev server and production bundler                             |
-| Bun                      | Package manager and test/script runner                        |
-| TanStack Query           | Server-state fetching, caching and mutations                  |
-| Zustand                  | Global client-side UI state (modals, notifications, theme)    |
-| React Hook Form + Zod    | Forms and schema validation, shared with API response parsing |
-| Radix UI                 | Styling and accessible headless primitives (ShadCN pattern)   |
-| Lingui                   | i18n message extraction and en/fr catalogs                    |
-| Vitest + Testing Library | Unit and integration tests                                    |
-| MSW                      | API mocking for dev, tests and e2e                            |
-| Playwright               | End-to-end tests                                              |
-| Storybook                | Component development and documentation                       |
-| ESLint + Prettier        | Linting and formatting                                        |
+| Tool | Role |
+| --- | --- |
+| TypeScript | Frontend language, strict typing throughout |
+| React 19 | UI library |
+| React Router | Routing and lazy route registration |
+| Vite | Dev server and production bundler |
+| Bun | Package manager, test and script runner |
+| SWR | Server-state fetching, caching and revalidation |
+| `@hey-api/openapi-ts` | Generates the typed API client from the backend's OpenAPI document |
+| SCSS Modules | Component-scoped styling over shared design tokens |
+| clsx | Conditional class composition |
+| Radix UI | Unstyled, accessible behaviour for interactive primitives |
+| Zustand | App-wide UI state such as notifications and theme |
+| React Hook Form + Zod | Forms and schema validation |
+| Lingui | i18n extraction and the en/fr catalogs |
+| Vitest + Testing Library | Unit and integration tests |
+| MSW | API mocking for dev, tests and e2e |
+| Playwright | End-to-end tests |
+| Storybook | Component development and documentation |
+| ESLint + Prettier | Linting and formatting |
 
 #### Infrastructure
 
@@ -180,10 +166,10 @@ working there, along with those of its parents.
 
 ## License
 
-This project is source-available under a [custom commercial license](../LICENSE).
+This project is source-available under a [custom commercial license](./LICENSE).
 
 - **Free** for any company whose all-time revenue has not yet reached $20,000 USD (adjusted for inflation from 2026).
 - **Early license** available for a one-time fee of $5,000 USD before reaching that threshold.
 - **Commercial license** required once the threshold is crossed: one-time fee of max($5,000, 25% of all-time revenue) at the time of payment.
 
-Contact **broseau@gmail.com** to purchase a license.
+Contact <broseau@gmail.com> to purchase a license.
