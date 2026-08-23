@@ -1,32 +1,26 @@
 ---
 name: frontend-testing
-description: How to write Vitest + Testing Library tests and Playwright e2e specs for the frontend, including the render helpers, assertion style and responsive/i18n coverage. Use this when adding or updating frontend tests.
+description: Use when adding or updating a Vitest, Testing Library or Playwright test for the frontend.
 ---
 
 # Testing
 
 | Level | Runner | Location | Doubles |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Unit — primitive, hook, util | Vitest | next to source | none |
 | Integration — component, page | Vitest + Testing Library | next to source | `vi.mock('@/api/hooks/useApiXxx')` |
 | Domain fetcher | Vitest | `src/api/domains/<domain>/<domain>.test.ts` | MSW |
 | API hook | Vitest | `src/api/hooks/useApiXxx/*.test.ts` | MSW |
 | End-to-end | Playwright | `e2e/` | `mock-server.ts` |
 
-```bash
-bun run test          # vitest run
-bun run test:watch
-bun run test:e2e
-```
-
 Do not create a test file next to a new component, page, API service or hook by hand — the Plop
 generator that scaffolds the folder writes it (`bun run generate <component|page|api|hook> …`, see
-the `frontend-architecture` skill). Fill in the generated file. Only e2e specs under `e2e/` are
-written from scratch.
+Skill(frontend-architecture)). Fill in the generated file. Only e2e specs under `e2e/` are written
+from scratch.
 
-## Assertion style
+## 1. Assert with a message
 
-Per the project standard, **every assertion carries a message showing the offending value**:
+Every assertion carries a message showing the offending value:
 
 ```ts
 expect(
@@ -38,9 +32,9 @@ expect(
 Query by **role, label and text** — never by class name. SCSS Module hashes are not a contract, and
 Vitest does not process CSS, so `styles.button` is `undefined` in tests.
 
-## Render helpers
+## 2. Render with the app's helpers
 
-```
+```txt
 src/test-utils/
 ├── render.tsx              # RTL render inside the app provider tree + MemoryRouter
 ├── renderAppAtRoute.tsx    # render the router at a given path
@@ -48,120 +42,38 @@ src/test-utils/
 └── setup-tests.ts          # jest-dom, MSW lifecycle, locale, db reset
 ```
 
-Use `render` from `@/test-utils/render` for anything that needs i18n, SWR or the router. Plain
-Testing Library `render` is fine for design-system primitives. Each render gets a fresh SWR cache
-(`provider: () => new Map()`), so results never leak between tests.
+Use `render` from [`@/test-utils/render`](../../../frontend/src/test-utils/render.tsx) for anything
+that needs i18n, SWR or the router. Plain Testing Library `render` is fine for design-system
+primitives. Each render gets a fresh SWR cache (`provider: () => new Map()`), so results never leak
+between tests.
 
-## Hook tests
+## 3. Write a hook test
 
 `src/hooks/useXxx/useXxx.test.ts`, written with `renderHook` and `act`. Shared hooks own no domain
-knowledge, so they need no MSW and no module mock; only reach for `SwrWrapper` when the hook
-sits on SWR. Stub the browser APIs jsdom lacks in the test file itself and undo them in `afterEach`
-— `setup-tests.ts` clears mocks and the mock database but **not** `localStorage` or global stubs:
-
-```ts
-beforeEach(() => {
-    vi.useFakeTimers()
-    vi.stubGlobal('navigator', { clipboard: { writeText } })
-})
-
-afterEach(() => {
-    vi.useRealTimers()
-    vi.unstubAllGlobals()
-})
-```
+knowledge, so they need no MSW and no module mock; only reach for
+[`SwrWrapper`](../../../frontend/src/test-utils/wrappers.tsx) when the hook sits on SWR. Stub the
+browser APIs jsdom lacks in the test file itself and undo them in `afterEach` —
+`setup-tests.ts` clears mocks and the mock database but **not** `localStorage` or global stubs.
 
 Cover the initial value, each transition, the `useCallback` identity the hook promises its
 consumers, and the failure path.
 
-## Component and page tests
+## 4. Write a component or page test
 
-Mock the service, assert the rendering:
+Mock the service, assert the rendering. See
+[src/components/layout/AppHeader/AppHeader.test.tsx](../../../frontend/src/components/layout/AppHeader/AppHeader.test.tsx):
+`vi.mock('@/api/hooks/useApiCurrentUser')`, then `vi.mocked(...).mockReturnValue(...)` with the
+full SWR result shape — the mocked return must include `isValidating`, since SWR's type requires
+it. Test the states that break in production: loading, error, empty, and populated.
 
-```tsx
-import { screen } from '@testing-library/react'
+## 5. Write a service test
 
-import { useApiApiKeys } from '@/api/hooks/useApiApiKeys'
-import { buildApiKey } from '@/test-utils/fixtures/apiKeys'
-import { render } from '@/test-utils/render'
+Go through the transport, backed by MSW — see Skill(frontend-api) and
+[src/api/domains/apiKeys/apiKeys.test.ts](../../../frontend/src/api/domains/apiKeys/apiKeys.test.ts).
 
-import { ApiKeys } from './ApiKeys'
+## 6. Add an e2e spec, for a critical journey
 
-vi.mock('@/api/hooks/useApiApiKeys')
-
-it('lists the api keys', () => {
-    vi.mocked(useApiApiKeys).mockReturnValue({
-        data: [buildApiKey({ name: 'CI deploy key' })],
-        error: undefined,
-        isLoading: false,
-        isValidating: false,
-        mutate: vi.fn(),
-    })
-
-    render(<ApiKeys />)
-
-    expect(
-        screen.getByText('CI deploy key'),
-        `expected the key row, got: ${document.body.textContent}`,
-    ).toBeVisible()
-})
-```
-
-The mocked return must include `isValidating` — SWR's type requires it.
-
-Test the states that break in production: loading, error, empty, and populated.
-
-## Service tests
-
-Go through the transport, backed by MSW — see the `frontend-api` skill.
-
-## End-to-end
-
-```
-e2e/
-├── auth.spec.ts            # register / login / logout / guard / redirect-back
-├── home.spec.ts
-├── user.spec.ts            # profile edit + api key CRUD
-├── i18n.spec.ts            # locale switch + persistence
-├── responsive.spec.ts      # mobile / tablet / desktop
-└── utils/
-    ├── fixtures.ts         # `test` that resets the mock DB before each test
-    └── session.ts          # login/register/logout helpers
-```
-
-**Import `test` and `expect` from `./utils/fixtures`, not from `@playwright/test`** — the fixture
-resets the mock database before each test, which is what makes the suite order-independent.
-
-`playwright.config.ts` starts both the dev server and the mock API server itself. Locate by role
-and accessible name, exactly as in unit tests.
-
-Cover for any new journey:
-
-- the happy path,
-- the guard (signed-out access redirects and comes back after login),
-- validation failure,
-- cancel/undo,
-- at least one multi-entity case, so list rendering and per-row actions are exercised.
-
-### Responsive
-
-The CSS is mobile-first. `responsive.spec.ts` drives 375 / 768 / 1440 px and asserts both that
-content is reachable and that the page never scrolls horizontally:
-
-```ts
-const overflow = await page.evaluate(
-    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-)
-expect(overflow, 'the page must not scroll horizontally on mobile').toBeLessThanOrEqual(0)
-```
-
-Layout changes across a breakpoint are asserted with bounding boxes (nav above the content on
-mobile, beside it on desktop) rather than class names.
-
-### i18n
-
-`i18n.spec.ts` switches locale through the `LocaleSwitcher` and asserts the translated strings and
-their persistence across a reload. If you change a French translation, update the spec.
+Read [e2e.md](./e2e.md).
 
 ## Storybook
 
@@ -170,5 +82,13 @@ toolbar toggle. Pages do not get stories — they get tests.
 
 ```bash
 bun run storybook
-bun run storybook:build
 ```
+
+## Checklist
+
+```bash
+bun run test
+```
+
+- [ ] Loading, error, empty and populated states are all covered for a component or page test.
+- [ ] Every assertion that could fail ambiguously carries a message with the offending value.
