@@ -1,31 +1,19 @@
 ---
 name: frontend-page
-description: How to add or update a page and its route — PATHS entry, page folder, lazy route registration, layout choice, nav link and test. Use this when creating a new route, screen or view, or restructuring the router.
+description: Use when adding, moving or removing a page, route or screen in the React frontend.
 ---
 
-# Pages and routing
+# Add a frontend page
 
-One SPA, one entry. `src/pages/` holds one folder per route, `src/router/` wires them up,
-`src/layouts/` provides the chrome they render inside.
+A page is one folder under `src/pages/` plus one entry in the router. Run every command from
+`frontend/`.
 
-```
-main.tsx → Context.tsx → App.tsx → router → layout → page
-```
+## 1. Declare the path
 
-## Checklist
-
-1. Add the path to `src/router/constants.ts`.
-2. Scaffold the folder with `bun run generate page <PageName> "<Page title>"` — see §4.
-3. Register the lazy route in `src/router/routes.tsx`, under the right layout.
-4. Add a nav entry if the page is user-reachable.
-5. Wrap every user-facing string in a Lingui macro, then run `bun run i18n:extract` and translate.
-6. Write `<PageName>.test.tsx`.
-7. Add an e2e spec in `e2e/` if the page is part of a critical journey.
-
-## 1. Path constants
-
-Never write a URL literal in a component. Every path and path *builder* lives here, so renaming a
-route is one edit.
+Add the route to `PATHS` in
+[src/router/constants.ts](../../../frontend/src/router/constants.ts). This is the only file where a
+URL literal may appear.
+Never write a URL literal in a component.
 
 ```ts
 export const PATHS = {
@@ -41,174 +29,89 @@ export const PATHS = {
 } as const
 ```
 
-## 2. Route registration
+## 2. Generate the folder
 
-Pages are lazily loaded so each route is its own chunk. The page barrel is what the lazy import
-resolves to.
-
-```tsx
-export const router = createBrowserRouter([
-    {
-        HydrateFallback: () => null,
-        element: <AuthLayout />,
-        children: [
-            { path: PATHS.login, lazy: async () => ({ Component: (await import('@/pages/Login')).Login }) },
-        ],
-    },
-    {
-        HydrateFallback: () => null,
-        element: <AppLayout />,
-        children: [
-            { path: PATHS.home, lazy: async () => ({ Component: (await import('@/pages/Home')).Home }) },
-            {
-                element: <ProtectedRoute><Outlet /></ProtectedRoute>,
-                children: [
-                    {
-                        path: PATHS.user.root,
-                        lazy: async () => ({ Component: (await import('@/pages/User')).User }),
-                        children: [
-                            { index: true, lazy: async () => ({ Component: (await import('@/pages/User')).Information }) },
-                            { path: PATHS.user.apiKeys, lazy: async () => ({ Component: (await import('@/pages/User')).ApiKeys }) },
-                        ],
-                    },
-                ],
-            },
-            { path: PATHS.notFound, lazy: async () => ({ Component: (await import('@/pages/NotFound')).NotFound }) },
-        ],
-    },
-])
+```bash
+bun run generate page <PageName> "<Page title>"
 ```
 
-Guard with a **pathless wrapper route** (`element: <ProtectedRoute><Outlet /></ProtectedRoute>`) so
-the children keep their own `lazy`. `HydrateFallback: () => null` silences React Router's
-hydration warning on lazy roots.
+It writes `<PageName>.tsx`, `<page-name>.module.scss`, `<PageName>.test.tsx` and `index.ts`. Do not
+hand-write them. See [generators/](../../../frontend/generators/README.md).
+Only update them after generation.
 
-## 3. Layouts
+## 3. Register the route
 
-- `AppLayout` — header + `<Outlet/>` + footer. The public shell.
-- `AuthLayout` — centred card for `/auth/*`.
-- `ContentLayout` — presentational wrapper a page renders *inside* the shell for its title,
-  description and action bar.
+Add a lazy entry in [src/router/routes.tsx](../../../frontend/src/router/routes.tsx), copying the
+shape of the entries already there: `path` taken from `PATHS`, `lazy` importing the page barrel.
 
-Every top-level section of a page includes the `container` mixin from `mixins` — it is what keeps
-the page between side margins instead of stretching to the viewport. Put it on the section itself
-so full-bleed backgrounds still span the screen, give the section its own `padding-block`, and
-never nest one container in another (anything under `ContentLayout` is already contained).
+Choose the layout:
+
+- `AppLayout` — header, page, footer. The default.
+- `AuthLayout` — centred card, for `/auth/*` only.
+
+Put the entry inside the `ProtectedRoute` wrapper when the page requires a signed-in user.
+
+For child routes and sub-navigation, read [nested-routes.md](./nested-routes.md).
+
+## 4. Write the page component
+
+A page **composes**, it does not implement.
+
+- Data comes from `api/hooks/` — Skill(frontend-api).
+- UI comes from `src/components/` and `src/design-system/` — Skill(frontend-component).
+- Wrap the body in `ContentLayout` for the title, description and action bar.
+- Set the document title with [Head](../../../frontend/src/components/head/Head), passing a
+  translated `title`.
+- Pass `isLoading` and `error` **down** to the component that renders them. Do not chain early
+  returns in the page.
+
+[src/pages/User/sections/ApiKeys](../../../frontend/src/pages/User/sections/ApiKeys) is the
+reference to copy.
+
+Give every top-level section the `container` mixin. It holds the section between the page margins
+while a full-bleed background still spans the screen:
 
 ```scss
 .hero {
-    display: flex;
-    flex-direction: column;
     padding-block: $space-16;
 
     @include container;
 }
 ```
 
-## 4. Page folder
+Never nest one container inside another. Anything under `ContentLayout` is already contained.
 
-Generate it, never hand-write it. From `frontend/`:
+## 5. Keep page-local code private
+
+Only `index.ts` may be imported from outside the page folder.
+
+```txt
+pages/User/
+├── User.tsx
+├── index.ts        # the only public surface
+├── components/     # used by this page only
+└── sections/       # one folder per child route
+```
+
+- `components/` and `sections/` entries have no generator of their own. Mirror what
+  `bun run generate component` produces.
+- When a second page needs one of them, move it to `src/components/` in the same commit.
+- **No page imports another page.** ESLint enforces this.
+
+## 6. Make it reachable
+
+- Add a nav link if a user should be able to find the page. Use `PATHS`, never a literal.
+- Wrap every user-facing string in a Lingui macro — Skill(frontend-i18n).
+- Fill in the generated test — Skill(frontend-testing). Add an `e2e/` spec if the page is part of a
+  critical journey.
+- Regenerate the SEO files so the route reaches the sitemap — Skill(frontend-seo).
+
+## Checklist
 
 ```bash
-bun run generate page <PageName> "<Page title>"
-# e.g. bun run generate page ApiKeys "API keys"
+.claude/skills/frontend-page/scripts/check_page.sh <PageName>
+cd frontend && bun run i18n:check && bun run seo:check
 ```
 
-That writes `src/pages/<PageName>/` with `<PageName>.tsx`, `<page-name>.module.scss`,
-`<PageName>.test.tsx` and `index.ts` — steps 5 and 7 of the checklist then fill in the generated
-component and test. Run it without arguments to be prompted.
-
-The folder then grows as the page does:
-
-```
-pages/User/
-├── User.tsx                # shell: left nav + <Outlet/>
-├── user.module.scss
-├── index.ts                # exports User, Information, ApiKeys
-├── components/             # used by this page only
-│   ├── UserNav/
-│   ├── ApiKeysTable/
-│   ├── CreateApiKeyDialog/
-│   ├── RevokeApiKeyButton/
-│   └── NewApiKeyBanner/
-└── sections/               # one folder per child route
-    ├── Information/
-    └── ApiKeys/
-```
-
-Rules:
-
-- A page folder is **private**. Nothing outside it may import from its `components/`, `hooks/` or
-  `sections/`. The `index.ts` is the only surface.
-- `components/` and `sections/` entries have no generator of their own — mirror the shape
-  `bun run generate component` produces (`Name.tsx`, `name.module.scss`, `Name.test.tsx`,
-  `index.ts`).
-- When a second page needs one of those parts, move it to `src/components/` in the same commit.
-- **No page imports another page** — ESLint enforces this.
-
-## 5. Page component
-
-A page composes; it does not implement. Data comes from `api/hooks/`, UI from `components/` and
-`design-system/`.
-
-```tsx
-export function ApiKeys() {
-    const { t } = useLingui()
-    const { data, error, isLoading, mutate } = useApiKeys()
-    const [isCreateOpen, setIsCreateOpen] = useState(false)
-
-    return (
-        <ContentLayout
-            title={t`API keys`}
-            description={t`Keys authenticate machine access to the API.`}
-            actions={
-                <Button onClick={() => setIsCreateOpen(true)}>
-                    <PlusIcon />
-                    <Trans>New key</Trans>
-                </Button>
-            }
-        >
-            <ApiKeysTable
-                apiKeys={data ?? []}
-                isLoading={isLoading}
-                error={error}
-                onRevoked={() => void mutate()}
-            />
-            <CreateApiKeyDialog isOpen={isCreateOpen} onOpenChange={setIsCreateOpen} />
-        </ContentLayout>
-    )
-}
-```
-
-Pass loading and error **down** to the component that renders them, so the page body stays one
-readable composition instead of a chain of early returns.
-
-Set the document title with `<Head title={t\`…\`} />` from `@/components/head/Head`.
-
-## 6. Sub-navigation
-
-Prefer real nested routes over local tab state — deep links, back-button and e2e all work for free.
-Use `NavLink` with a class callback for the active state, and `end` on the index link:
-
-```tsx
-<NavLink to={PATHS.user.information} end className={({ isActive }) => clsx(styles.link, isActive && styles.active)}>
-```
-
-## 7. Test
-
-```tsx
-vi.mock('@/api/hooks/useApiCurrentUser')
-
-it('renders the hero when signed out', () => {
-    vi.mocked(useCurrentUser).mockReturnValue({
-        data: null, error: undefined, isLoading: false, isValidating: false, mutate: vi.fn(),
-    })
-
-    render(<Home />)
-
-    expect(
-        screen.getByRole('link', { name: 'Get started' }),
-        `expected a "Get started" link, got: ${document.body.textContent}`,
-    ).toBeVisible()
-})
-```
+- [ ] The page sits under the right layout, and behind `ProtectedRoute` if it needs a session.
+- [ ] Nothing outside the page folder imports its internals.
