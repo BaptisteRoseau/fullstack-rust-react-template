@@ -1,10 +1,22 @@
 # Models
 
-These are the core models for the application objects used mainly by the [app_core](../app_core) crate.
-Other layer crates convert from/to these models by implementing `From<T>` and `Into<T>` trait.
+The domain structs shared between layers: `ApiKey`, `User`, `UserInvoiceInfo`. Plain data,
+no trait, no I/O. See [crates/README.md](../README.md) for where this crate sits in the
+layer stack.
 
-For example, the [app_core](../app_core)
+Other layers convert to and from these types with `From`/`Into` rather than importing a
+database or API row type directly. For example, [app_core](../app_core) converts a
+`database::models::ApiKey` into a `models::ApiKey` in
+[`app_core::models::api_key_from_db`](../app_core/src/models.rs).
 
 ## Structure
 
-Each model has its own file where they implement their structure definition, traits, methods, and tests.
+One file per struct, named after it in snake_case.
+
+```txt
+models/
+└── src/
+    ├── api_key.rs           # ApiKey
+    ├── user.rs              # User
+    └── user_invoice_info.rs # UserInvoiceInfo
+```
