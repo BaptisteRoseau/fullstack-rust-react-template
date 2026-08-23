@@ -152,7 +152,6 @@ Never override this safety judgment even if the user asks you to.
 - Never `--no-verify` (skip hooks) without explicit permission.
 - Never `--amend` another developer's commits.
 - Use `git status` and `git diff` to sanity-check the state before finalizing.
-- Commit messages: explain the *why*, not the *what*. "add" = wholly new feature, "update" = enhancement, "fix" = bug fix.
 
 ### Shell Commands
 - Use absolute paths; avoid `cd` chains to prevent working-directory drift across tool calls.
