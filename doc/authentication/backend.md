@@ -18,7 +18,7 @@ OAuth half is built on the [`oauth2`](https://docs.rs/oauth2) v5 crate. `AppStat
 as `Arc<RwLock<dyn Authenticator>>`, like every other service the API depends on.
 
 | Method | Responsibility |
-|--------|----------------|
+| --- | --- |
 | `validate(token)` | Resolve the caller's credential. A JWT is checked RS256 against the realm's JWKS with audience validation, yielding `sub` and the realm from `iss`; anything without dots is looked up as an API key. |
 | `authorize_url(screen, redirect)` | Generate a PKCE challenge + CSRF state, store `{verifier, redirect}` in the shared cache keyed by the state, and return the Keycloak authorize URL. For `LoginScreen::Register`, the path is swapped for Keycloak's `/registrations` endpoint. |
 | `exchange_code(code, state)` | Look up and delete the cached state, exchange the code (with the PKCE verifier) at the token endpoint, and return an `AuthSession` — the tokens plus the stored post-login redirect. |
@@ -45,10 +45,10 @@ Notes:
 [`crates/api/src/endpoints/auth/`](../../crates/api/src/endpoints/auth/) — handlers in
 `endpoints.rs`, request/response types in `models.rs`. They follow the project's utoipa
 endpoint convention and are registered in
-[`crates/api/src/routes.rs`](../../crates/api/src/routes.rs).
+[`crates/api/src/routes/router.rs`](../../crates/api/src/routes/router.rs).
 
 | Endpoint | Behaviour |
-|----------|-----------|
+| --- | --- |
 | `GET /auth/login` | `LoginScreen` chosen from `?screen`; 303 redirect to Keycloak. |
 | `GET /auth/callback` | Exchange the code, `Set-Cookie` the tokens, 303 to the frontend. Missing code (cancel) bounces back to the frontend. |
 | `POST /auth/refresh` | Refresh from the cookie; `200` + new cookies, or `401` (and cleared cookies) on failure so the SPA knows to re-login. |
@@ -90,7 +90,7 @@ what the frontend interceptor watches for to perform a silent refresh. Other JWT
 
 ## CORS
 
-[`routes.rs`](../../crates/api/src/routes.rs) replaces the permissive CORS layer with one that
+[`routes/middlewares.rs`](../../crates/api/src/routes/middlewares.rs) builds a CORS layer that
 reflects the configured frontend origin and sets `allow_credentials(true)` — a wildcard origin
 is rejected by browsers on credentialed (cookie) requests.
 
