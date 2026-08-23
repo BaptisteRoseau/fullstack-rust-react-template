@@ -9,17 +9,17 @@ short-lived and refreshed transparently when they expire.
 ## Why this design
 
 | Requirement | How it is met |
-|-------------|---------------|
+| --- | --- |
 | Register / log in out of the box | Keycloak's hosted pages with self-service registration enabled; the realm is provisioned automatically on startup. |
 | Tokens not reachable by JavaScript | Tokens live in `HttpOnly` cookies set by the backend; the SPA can neither read nor set them. |
-| Short-lived access tokens | 60s access-token lifespan in the realm. |
+| Short-lived access tokens | A deliberately short access-token lifespan in the realm. |
 | Silent refresh | On a `401 TokenExpired`, the frontend calls `/auth/refresh` once and replays the request — the user notices nothing. |
 | Backend stays a stateless resource server | It keeps validating JWTs via JWKS; the BFF endpoints are an additive layer. |
 
 ## Documentation map
 
 | File | Contents |
-|------|----------|
+| --- | --- |
 | [overview.md](./overview.md) | The end-to-end flow and sequence diagram. Start here. |
 | [keycloak.md](./keycloak.md) | Realm, clients, and how the realm is bootstrapped. |
 | [backend.md](./backend.md) | The Rust side: the `Authenticator` trait, the `/auth/*` endpoints, cookies, the extractor, error mapping. |
