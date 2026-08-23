@@ -10,7 +10,7 @@ bottom of the dependency graph: it may not import from `components/`, `pages/` o
 ## `src/hooks/`
 
 Reusable React hooks with no domain knowledge. A hook that calls an API service is not a shared
-hook — it belongs in `api/service/` (if it wraps a request) or in the page's `hooks/` folder.
+hook — it belongs in `api/hooks/` (if it wraps a request) or in the page's `hooks/` folder.
 
 ```
 src/hooks/
@@ -62,7 +62,7 @@ Conventions:
 
 `renderHook` and `act` from Testing Library, one behaviour per `it`, and the project's
 message-carrying assertions. Shared hooks own no domain knowledge, so they need no MSW and no
-manual `__mocks__` — a hook that would need them belongs in `api/service/` instead. Only reach for
+manual `__mocks__` — a hook that would need them belongs in `api/hooks/` instead. Only reach for
 `SwrWrapper` from `@/test-utils/wrappers` when the hook genuinely sits on SWR.
 
 Stub the browser APIs jsdom lacks in the test file itself, and undo the stub in `afterEach`;
@@ -194,7 +194,7 @@ src/constants/
 ## `src/types/`
 
 TypeScript types shared across layers. Domain types describing an API payload live in
-[`api/<domain>.ts`](01-api.md) next to their endpoints — this folder is for everything else.
+[`api/domains/<domain>/types.ts`](01-api.md) next to their fetchers — this folder is for everything else.
 
 ```
 src/types/
@@ -240,9 +240,9 @@ stylesheet import is an error under `strict`.
 | A pure function used by 2+ modules | `utils/<topic>.ts` |
 | A pure function used by 1 module | that module's `utils.ts` |
 | A hook with no domain knowledge | `hooks/` |
-| A hook that wraps a request | `api/service/<domain>.ts` |
+| A hook that wraps a request | `api/hooks/useApiXxx/` |
 | A hook used by one page | `pages/<Page>/hooks/` |
-| A type describing an API payload | `api/<domain>.ts` |
+| A type describing an API payload | `api/domains/<domain>/types.ts` |
 | A generic type helper | `types/common.ts` |
 | Session or scoped UI state | `contexts/<name>/` |
 | Genuinely app-wide UI state | the Zustand store — see [06](06-tooling.md#global-state) |

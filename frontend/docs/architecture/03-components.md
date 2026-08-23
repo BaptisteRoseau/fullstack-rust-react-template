@@ -10,7 +10,7 @@ Decision rule when you're unsure where a component goes:
 
 | Question | `design-system/` | `components/` |
 |---|---|---|
-| Does it import from `api/service/`? | never | yes |
+| Does it import from `api/hooks/`? | never | yes |
 | Does it read a `contexts/` value? | never | yes |
 | Does it mention a domain type (`User`, `ApiKey`)? | never | yes |
 | Is it used by more than one page? | yes | yes — otherwise it belongs to the page |
@@ -109,7 +109,7 @@ path — a component that assumes `data` is defined is a runtime crash waiting f
 // src/components/layout/UserMenu/UserMenu.tsx
 import { Trans } from '@lingui/react/macro';
 
-import { useCurrentUser } from '@/api/service/auth';
+import { useApiCurrentUser } from '@/api/hooks/useApiCurrentUser';
 import { Dropdown, DropdownItem, DropdownTrigger } from '@/design-system/Dropdown';
 import { Spinner } from '@/design-system/Spinner';
 import { Avatar } from '@/design-system/Avatar';
@@ -141,7 +141,7 @@ export function UserMenu() {
 ```
 
 Note the direction of the imports: `components/` → `design-system/` and `components/` →
-`api/service/`. Never the reverse.
+`api/hooks/`. Never the reverse.
 
 ---
 
@@ -206,7 +206,7 @@ const schema = z.object({
 
 The schema lives next to the form that uses it — in the page folder for a page-specific form, in
 the component folder for a reusable one. Schemas describing an API payload live in
-[`api/<domain>.ts`](01-api.md) instead.
+[`api/domains/<domain>/types.ts`](01-api.md) instead.
 
 `FormField` is the piece that wires a control to RHF state and renders its error; every field
 component builds on it, so error rendering and `aria-describedby` are handled once.
@@ -222,12 +222,12 @@ rendering.
 // src/components/layout/UserMenu/UserMenu.test.tsx
 import { screen } from '@testing-library/react';
 
-import { useCurrentUser } from '@/api/service/auth';
+import { useApiCurrentUser } from '@/api/hooks/useApiCurrentUser';
 import { render } from '@/test-utils/render';
 import { buildUser } from '@/test-utils/fixtures/users';
 import { UserMenu } from './UserMenu';
 
-vi.mock('@/api/service/auth');
+vi.mock('@/api/hooks/useApiCurrentUser');
 
 it('renders the avatar for the signed-in user', () => {
     const user = buildUser({ firstName: 'Ada', lastName: 'Lovelace' });

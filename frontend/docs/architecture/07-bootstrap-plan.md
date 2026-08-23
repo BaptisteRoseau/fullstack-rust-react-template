@@ -73,8 +73,8 @@ Write, in this order — each depends on the previous:
    ([06](06-tooling.md#global-styles-and-tokens))
 2. `src/types/declarations.d.ts` — **do this before any component**, or every `.module.scss`
    import is a type error
-3. `src/api/errors.ts`, `src/api/client.ts` ([01](01-api.md))
-4. `src/api/utils/useApiAction.ts`
+3. `src/api/generated/` — run `./scripts/build_frontend_api_sdk.sh` ([01](01-api.md))
+4. `src/api/errors.ts`, `src/api/client.ts` ([01](01-api.md))
 5. `src/utils/createContext.tsx`, `src/utils/assert.ts`
 6. `src/router/constants.ts` — the `PATHS` object
 7. `src/Context.tsx`, `src/App.tsx`, `src/main.tsx` ([04](04-pages-router.md#bootstrap-chain))
@@ -108,16 +108,16 @@ translating them into the token scale — do not invent a new look while restruc
 
 One domain at a time, mirroring the backend resources in `crates/api`. For each:
 
-1. `src/api/<domain>.ts` — endpoint constants, path builders, types
-2. `src/api/service/<domain>.ts` — SWR read hooks + `useApiAction` mutations
-3. `src/api/service/__mocks__/<domain>.ts` — **every** exported hook mocked
-4. `src/api/service/<domain>.test.ts` — MSW-backed
+1. `src/api/domains/<domain>/types.ts` — hand-written domain types
+2. `src/api/domains/<domain>/converters.ts` + `converters.test.ts` — wire types in, domain types out
+3. `src/api/domains/<domain>/keys.ts`, `<domain>.ts`, `<domain>.test.ts`, `index.ts`
+4. `src/api/hooks/useApiXxx/` — one folder per operation, with its test
 5. `src/test-utils/mocks/handlers/<domain>.ts` + `src/test-utils/fixtures/<domain>.ts`
 
 Rebuild the MSW in-memory DB (`test-utils/mocks/db.ts`) and `mock-server.ts` against the new
 handler layout as you go — the dev server and e2e both depend on them.
 
-**Gate:** `bun run run-mock-server` responds on every migrated endpoint; service tests green.
+**Gate:** `bun run run-mock-server` responds on every migrated endpoint; domain and hook tests green.
 
 ---
 

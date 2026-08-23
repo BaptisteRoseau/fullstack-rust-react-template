@@ -5,9 +5,9 @@ Layer-first source tree. Dependencies flow downwards only; see
 
 | Folder | Role | May import |
 |---|---|---|
-| `api/` | Endpoint declarations and SWR services | nothing from the UI layers |
+| `api/` | Generated SDK, domain converters and SWR hooks | nothing from the UI layers |
 | `design-system/` | Domain-agnostic UI primitives | `utils/`, `types/`, `css/`, `hooks/`, Radix |
-| `components/` | Domain-aware shared components | `design-system/`, `api/service/`, `contexts/`, `hooks/`, `stores/` |
+| `components/` | Domain-aware shared components | `design-system/`, `api/domains/<domain>/`, `api/hooks/`, `contexts/`, `hooks/`, `stores/` |
 | `layouts/` | Page shells rendered by the router | `components/`, `design-system/` |
 | `pages/` | One folder per route, private to itself | everything |
 | `router/` | Route objects and `PATHS` | `pages/`, `layouts/`, `components/` |

@@ -49,7 +49,6 @@ import { I18nProvider } from '@lingui/react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { SWRConfig } from 'swr';
 
-import { apiFetch } from '@/api/client';
 import { ErrorFallback } from '@/components/errors/ErrorFallback';
 import { Notifications } from '@/components/notifications/Notifications';
 import { i18n } from '@/i18n';
@@ -60,7 +59,6 @@ export function Context({ children }: { children: React.ReactNode }) {
             <I18nProvider i18n={i18n}>
                 <SWRConfig
                     value={{
-                        fetcher: apiFetch,
                         revalidateOnFocus: false,
                         shouldRetryOnError: false,
                     }}
@@ -167,8 +165,7 @@ Loaders exist to remove request waterfalls, not to replace hooks. Prime the SWR 
 import { preload } from 'swr';
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { apiFetch } from '@/api/client';
-import { userEndpoint } from '@/api/users';
+import { fetchUser, userKeys } from '@/api/domains/users';
 
 export async function userLoader({ params }: LoaderFunctionArgs) {
     const { userId } = params;
@@ -176,7 +173,7 @@ export async function userLoader({ params }: LoaderFunctionArgs) {
         throw new Response('Missing userId', { status: 400 });
     }
 
-    void preload(userEndpoint(userId), apiFetch);
+    void preload(userKeys.detail(userId), ([, id]) => fetchUser(id));
     return null;
 }
 ```
@@ -272,14 +269,14 @@ Rules:
 
 ### Page component
 
-A page composes; it does not implement. Data comes from `api/service/`, UI from `components/` and
+A page composes; it does not implement. Data comes from `api/hooks/`, UI from `components/` and
 `design-system/`.
 
 ```tsx
 // src/pages/Users/Users.tsx
 import { Trans, useLingui } from '@lingui/react/macro';
 
-import { useUsers } from '@/api/service/users';
+import { useApiUsers } from '@/api/hooks/useApiUsers';
 import { ContentLayout } from '@/layouts/ContentLayout';
 import { Button } from '@/design-system/Button';
 import { useBooleanState } from '@/hooks/useBooleanState';

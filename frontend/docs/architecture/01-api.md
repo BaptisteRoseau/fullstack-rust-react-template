@@ -2,9 +2,18 @@
 
 ← [Back to overview](README.md)
 
-`src/api/` owns every HTTP call to the Rust backend. It is split in two so that *what an endpoint
-is* stays free of side effects and can be imported anywhere (tests, mocks, e2e), while *how it is
-called* lives in one place.
+`src/api/` owns every HTTP call to the Rust backend. It is a real client, in four layers:
+
+| Layer | What it is | Who may import it |
+|---|---|---|
+| `generated/` | The SDK produced from the backend's OpenAPI document. Never hand-edited | `src/api/**` only |
+| `client.ts` · `errors.ts` | Transport and the error contract | `src/api/**` |
+| `domains/<domain>/` | Domain types, converters and `Promise`-returning fetchers | anything, through the barrel |
+| `hooks/` | The SWR bindings. Their names announce that they hit the network | anything |
+
+The split exists so that **nothing above `src/api/` ever sees a wire type**. A generated type
+describes what the backend happens to send today; a domain type describes what the interface needs.
+The converter between them is the only place those two facts meet.
 
 ---
 
@@ -12,306 +21,265 @@ called* lives in one place.
 
 ```
 src/api/
-├── client.ts               # fetch wrapper: base URL, JSON, error normalisation
-├── errors.ts               # ApiError type
-├── <domain>.ts             # Endpoint paths + request/response types. NO side effects.
-├── service/
-│   ├── <domain>.ts         # SWR hooks that actually call the endpoints
-│   ├── <domain>.test.ts
-│   └── __mocks__/
-│       └── <domain>.ts     # Manual mock consumed by `vi.mock`
-└── utils/
-    └── useApiAction.ts     # Generic mutation hook (POST / PUT / PATCH / DELETE)
+├── generated/                  # OUTPUT of the codegen. Committed, never edited
+├── client.ts                   # configures the generated client + apiCall()
+├── errors.ts                   # ApiError, narrowing helpers, translated messages
+├── domains/
+│   └── <domain>/
+│       ├── <domain>.ts         # the fetchers — the only file calling generated/
+│       ├── <domain>.test.ts    # MSW-backed: fetcher + converter together
+│       ├── types.ts            # hand-written domain types
+│       ├── converters.ts       # fromApi* / toApi* — the only file importing generated types
+│       ├── converters.test.ts  # pure, no MSW
+│       ├── keys.ts             # SWR cache-key factory
+│       └── index.ts            # barrel: fetchers, keys, types. NEVER converters
+└── hooks/
+    └── useApiXxx/
+        ├── useApiXxx.ts
+        ├── useApiXxx.test.ts
+        └── index.ts
 ```
 
-One `<domain>.ts` per backend resource — `users.ts`, `apiKeys.ts`, `health.ts`. The file name in
-`service/` always mirrors the declaration file it implements.
+Those are the **only** filenames allowed under `src/api/domains/<domain>/`.
+
+| File | Required when |
+|---|---|
+| `<domain>.ts`, `<domain>.test.ts`, `index.ts` | always |
+| `types.ts` | the domain has a payload |
+| `converters.ts`, `converters.test.ts` | `types.ts` exists |
+| `keys.ts` | something is read through SWR |
+| `constants.ts` | optional, for constants that are not union sources |
+
+---
+
+## The generated SDK (`api/generated/`)
+
+Produced by `@hey-api/openapi-ts` from an OpenAPI document the Rust router emits. Regenerate after
+any change under `crates/api`:
+
+```bash
+./scripts/build_frontend_api_sdk.sh          # regenerate
+./scripts/test_openapi.sh                    # verify the committed SDK still matches the router
+```
+
+`openapi.json` is a build artifact and is **not** committed; `src/api/generated/` is. See
+[`src/api/README.md`](../../src/api/README.md) and the `frontend-api-sdk` skill.
+
+---
+
+## What a domain is
+
+**One noun the interface reasons about, with one domain type at its centre.** Not a backend tag, not
+a URL prefix, not a Rust module. The folder owns that noun's type, converters, keys and every fetcher
+whose input or output is that noun — whichever backend path it comes from.
+
+If the folders mirror the OpenAPI tags, the converter layer is decorative. The backend's single
+`Authentication` tag is deliberately split in two here: `currentUser` is a resource the interface
+renders, `session` is a pair of actions that return nothing.
+
+Naming:
+
+- **Domain folder** — camelCase, under `domains/`, named after the *frontend* noun.
+- **Fetchers** — verb-first, `Promise`-returning. Reads use `fetch*`; mutations use the domain verb
+  (`createApiKey`, `revokeApiKey`, `logout`).
+- **Converters** — `fromApi<Thing>` / `to<Wire>Request`, named after the generated type they touch.
+- **Cache keys** — a `<domain>Keys` object of `as const` tuples.
+- **Hooks** — `useApi` + operation. Always, including the stutter: `useApiApiKey`.
 
 ---
 
 ## The transport (`api/client.ts`)
 
-A single wrapper around `fetch`. It is the only place that knows about the base URL, credentials
-and error shape.
+Configures the generated client once, at module load, and exposes one unwrapper.
 
 ```ts
-// src/api/client.ts
-import { env } from '@/config/env';
-import { ApiError } from './errors';
+client.setConfig({
+    baseUrl: `${env.API_URL}/api`,
+    credentials: 'include',
+    fetch: fetchWithSessionRefresh,
+})
+```
 
-export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-    const response = await fetch(`${env.API_URL}${path}`, {
-        credentials: 'include',
-        ...init,
-        headers: {
-            'Content-Type': 'application/json',
-            ...init?.headers,
-        },
-    });
+`fetchWithSessionRefresh` renews an expired session once and replays the request. It wraps `fetch`
+rather than using the generated client's interceptors, so the behaviour survives a code-generator
+upgrade and can be tested on its own.
 
-    if (!response.ok) {
-        const body = await response.json().catch(() => null);
-        throw new ApiError(`${init?.method ?? 'GET'} ${path} failed`, response.status, body);
-    }
+`apiCall` is the single unwrapper every fetcher goes through:
 
-    // 204 No Content has no body to parse.
-    if (response.status === 204) {
-        return undefined as T;
-    }
-
-    return (await response.json()) as T;
+```ts
+export async function fetchApiKey(apiKeyId: string): Promise<ApiKey> {
+    return fromGetApiKeyResponse(
+        await apiCall(() => getApiKey({ path: { id: apiKeyId } })),
+    )
 }
 ```
 
+It returns the payload on success and throws an `ApiError` on every failure — including the ones the
+backend never saw, because the generated client catches its own throws and reports a network failure
+as a result with no `response`.
+
+---
+
+## Errors (`api/errors.ts`)
+
+`ApiError` carries `status`, the raw `body`, and an `id`:
+
 ```ts
-// src/api/errors.ts
-export class ApiError extends Error {
-    constructor(
-        message: string,
-        readonly status: number,
-        readonly body: unknown,
-    ) {
-        super(message);
-        this.name = 'ApiError';
-    }
-}
+type AnyApiErrorId = ApiErrorId | 'NETWORK' | 'PARSE'
 ```
 
-`apiFetch` is registered as SWR's global `fetcher` in `src/Context.tsx`, so read hooks never pass
-one explicitly:
+`ApiErrorId` comes from the generated schema; `NETWORK` and `PARSE` cover what the backend cannot
+report. The body is parsed with Zod, so a response outside the error contract becomes `PARSE` rather
+than a guess.
+
+Branch on the cause, never on the status code — a 401 is both "not signed in" and "session expired":
+
+```ts
+matchApiError(error, {
+    TOKEN_EXPIRED: () => refresh(),
+    default: () => signOut(),
+})
+```
+
+And render `useApiErrorMessage()`, which maps the id to a **translated** string. The backend's own
+`error` field is English and belongs in logs:
 
 ```tsx
-<SWRConfig value={{ fetcher: apiFetch, revalidateOnFocus: false, shouldRetryOnError: false }}>
+const apiErrorMessage = useApiErrorMessage()
+// …
+addNotification({
+    type: 'error',
+    title: t`Could not revoke the API key`,
+    message: apiErrorMessage(error),
+})
 ```
 
 ---
 
-## Endpoint declaration (`api/<domain>.ts`)
-
-Constants and types only. Importing this file must never trigger a request.
+## A domain, end to end
 
 ```ts
-// src/api/users.ts
-export const USERS_ENDPOINT = '/api/v1/users';
-export const userEndpoint = (userId: string) => `${USERS_ENDPOINT}/${userId}`;
+// src/api/domains/apiKeys/types.ts — nothing here derives from a generated type
+export const API_KEY_PERMISSIONS = ['read', 'write', 'admin'] as const
+export type ApiKeyPermission = (typeof API_KEY_PERMISSIONS)[number]
 
-export type UserRole = 'admin' | 'user';
+export type ApiKey = {
+    id: string
+    name: string
+    permissions: ApiKeyPermission[]
+    createdAt: Date
+}
 
-export type User = {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: UserRole;
-    createdAt: string;
-};
-
-export type UserList = {
-    results: User[];
-    totalCount: number;
-};
-
-export type CreateUserBody = Pick<User, 'email' | 'firstName' | 'lastName' | 'role'>;
+export type CreatedApiKey = ApiKey & { secret: string }
+export type NewApiKey = Pick<ApiKey, 'name' | 'permissions'>
 ```
 
-Path builders are plain functions so that call sites, tests and MSW handlers all derive URLs from
-the same source.
+```ts
+// src/api/domains/apiKeys/converters.ts — the only file here importing @/api/generated
+export function fromGetApiKeyResponse(response: GetApiKeyResponse): ApiKey {
+    return {
+        id: response.id,
+        name: response.name,
+        permissions: response.permissions.filter(isApiKeyPermission),
+        createdAt: new Date(response.createdAt),
+    }
+}
+```
 
-### When to validate with Zod
+Three shaping decisions live there, none of them generatable:
 
-Response validation is **opt-in**, not the default. Add a schema when the payload crosses a trust
-boundary or is genuinely dynamic; skip it for endpoints the backend types already guarantee. When
-you do validate, keep the schema in the declaration file and derive the type from it:
+- the wire's `string[]` narrows to the union the checkbox group needs, **filtering** unknown values
+  rather than rejecting them — a permission the backend adds tomorrow must not blank the table;
+- `createdAt` becomes a `Date`. This resource sends RFC 3339 while `GetMeResponse` sends an epoch in
+  milliseconds; the interface must not care;
+- the wire's `key` becomes `secret`, because `key` next to SWR cache keys is a landmine.
 
 ```ts
-export const userSchema = z.object({ id: z.string(), email: z.email(), /* … */ });
-export type User = z.infer<typeof userSchema>;
+// src/api/domains/apiKeys/keys.ts
+export const apiKeyKeys = {
+    all: ['apiKeys'] as const,
+    detail: (apiKeyId: string) => ['apiKeys', apiKeyId] as const,
+}
+```
+
+```ts
+// src/api/domains/apiKeys/index.ts
+export * from './apiKeys'
+export * from './keys'
+export * from './types'
+// converters stay out — nothing above src/api may call them
 ```
 
 ---
 
-## Service (`api/service/<domain>.ts`)
+## Hooks (`api/hooks/useApiXxx/`)
 
-The hooks components actually call. One hook per operation, named for the operation.
+One folder per hook, mirroring `src/hooks/` exactly. Consumers import
+`@/api/hooks/useApiXxx`, never the inner file.
+
+A read hook takes its argument **out of the key**, so the key and the request cannot disagree, and a
+`null` key skips the request:
 
 ```ts
-// src/api/service/users.ts
-import useSWR from 'swr';
-
-import { useApiAction } from '@/api/utils/useApiAction';
-import {
-    USERS_ENDPOINT,
-    userEndpoint,
-    type CreateUserBody,
-    type User,
-    type UserList,
-} from '@/api/users';
-
-export function useUsers() {
-    return useSWR<UserList>(USERS_ENDPOINT);
-}
-
-export function useUser(userId: string | undefined) {
-    // A null key tells SWR to skip the request entirely.
-    return useSWR<User>(userId ? userEndpoint(userId) : null);
-}
-
-export function useCreateUser() {
-    return useApiAction<CreateUserBody, User>(USERS_ENDPOINT, 'POST');
-}
-
-export function useDeleteUser(userId: string) {
-    return useApiAction<void, void>(userEndpoint(userId), 'DELETE');
+export function useApiApiKey(apiKeyId: string | undefined) {
+    return useSWR(apiKeyId ? apiKeyKeys.detail(apiKeyId) : null, ([, id]) =>
+        fetchApiKey(id),
+    )
 }
 ```
 
-Rules:
+**A mutation hook owns its invalidation.** No call site should have to remember to refresh a list;
+forgetting is silent.
 
-- Components import from `api/service/*`, never from `api/client.ts` directly.
-- A hook returns SWR's result object untouched (`{ data, error, isLoading, mutate }`). Do not
-  destructure-and-rewrap; callers expect the standard shape.
-- Cross-cutting derivations (filtering, sorting, formatting) belong in the component or a `utils/`
-  helper, not in the service.
+```ts
+const MUTATION_KEY = ['apiKeys', 'create'] as const
+
+export function useApiCreateApiKey() {
+    const { mutate } = useSWRConfig()
+
+    return useSWRMutation(
+        MUTATION_KEY,
+        (_key, { arg }: { arg: NewApiKey }) => createApiKey(arg),
+        { onSuccess: () => void mutate(apiKeyKeys.all) },
+    )
+}
+```
+
+The mutation key is the hook's own, never a read key shared with another mutation: two mutation
+hooks on one key share their `isMutating` state.
+
+Return SWR's result object untouched. Do not destructure and rewrap.
 
 ---
 
-## Mutations (`api/utils/useApiAction.ts`)
+## Enforcement
 
-A thin generic over `useSWRMutation` so every mutation has the same signature.
+`eslint.config.cjs` makes the layering mechanical, not a convention:
 
-```ts
-// src/api/utils/useApiAction.ts
-import useSWRMutation from 'swr/mutation';
-
-import { apiFetch } from '@/api/client';
-import type { ApiError } from '@/api/errors';
-
-type Method = 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-
-export function useApiAction<TBody, TResult>(path: string, method: Method = 'POST') {
-    return useSWRMutation<TResult, ApiError, string, TBody>(path, (url, { arg }) =>
-        apiFetch<TResult>(url, {
-            method,
-            body: arg === undefined ? undefined : JSON.stringify(arg),
-        }),
-    );
-}
-```
-
-Usage — `trigger` rejects on failure, so handle it explicitly rather than swallowing:
-
-```tsx
-const { trigger, isMutating } = useCreateUser();
-const { mutate } = useSWRConfig();
-
-async function onSubmit(values: CreateUserBody) {
-    await trigger(values);
-    await mutate(USERS_ENDPOINT); // refresh the list
-}
-```
-
-### Cache invalidation
-
-SWR keys are the endpoint strings themselves. After a mutation, revalidate with the global
-`mutate` from `useSWRConfig()`:
-
-- exact key — `mutate(USERS_ENDPOINT)`
-- key prefix — `mutate(key => typeof key === 'string' && key.startsWith(USERS_ENDPOINT))`
-
-Because invalidation is string-matching rather than hierarchical, **always build keys from the path
-helpers** in the declaration file. Hand-written URL literals are how stale caches happen.
+- `@/api/generated` is unreachable outside `src/api/**` — except `src/test-utils/**`, whose MSW
+  handlers must type their responses with the wire types;
+- anything below a barrel is unreachable outside `src/api/**` — `@/api/domains/<domain>/<file>` and
+  `@/api/hooks/useApiXxx/<file>` alike. The two barrels, `@/api/domains/<domain>` and
+  `@/api/hooks/useApiXxx`, are the public names;
+- `src/design-system/**` may not touch `@/api/*` at all.
 
 ---
 
-## Manual mock (`api/service/__mocks__/<domain>.ts`)
+## Testing
 
-The default way to keep a component test off the network. Every exported hook of the real module
-must be mocked, or importers will crash on an undefined function.
+| File | Backed by | Asserts |
+|---|---|---|
+| `converters.test.ts` | nothing | the shaping decisions: units, unions, renames |
+| `<domain>.test.ts` | MSW | fetcher and converter together, plus the error mapping |
+| `useApiXxx.test.ts` | MSW + `SwrWrapper` | keying, skipping, and that mutations invalidate |
 
-```ts
-// src/api/service/__mocks__/users.ts
-import { vi } from 'vitest';
+Component tests stay off the network with `vi.mock('@/api/hooks/useApiXxx')`: the automock plus
+`vi.mocked(useApiApiKeys).mockReturnValue(...)` needs no hand-maintained double.
 
-export const useUsers = vi.fn().mockReturnValue({
-    data: { results: [], totalCount: 0 },
-    error: undefined,
-    isLoading: false,
-    mutate: vi.fn(),
-});
-
-export const useUser = vi.fn().mockReturnValue({
-    data: undefined,
-    error: undefined,
-    isLoading: false,
-    mutate: vi.fn(),
-});
-
-export const useCreateUser = vi.fn().mockReturnValue({
-    trigger: vi.fn(),
-    isMutating: false,
-});
-
-export const useDeleteUser = vi.fn().mockReturnValue({
-    trigger: vi.fn(),
-    isMutating: false,
-});
-```
-
-Activate it in a test, then override per case:
-
-```tsx
-import { useUsers } from '@/api/service/users';
-
-vi.mock('@/api/service/users');
-
-it('renders the user list', () => {
-    vi.mocked(useUsers).mockReturnValue({
-        data: { results: [buildUser({ email: 'alice@example.com' })], totalCount: 1 },
-        error: undefined,
-        isLoading: false,
-        mutate: vi.fn(),
-    });
-
-    render(<UserList />);
-
-    expect(screen.getByText('alice@example.com'), 'user row should be rendered').toBeVisible();
-});
-```
-
-Use MSW instead when the test exercises the transport itself, or spans several services — see
-[06 – Tooling](06-tooling.md#test-doubles-which-one).
-
----
-
-## Testing a service (`api/service/<domain>.test.ts`)
-
-Service tests are the one place that *should* go through the network layer, backed by MSW.
+MSW handlers emit **wire** shapes. This is the easiest trap in the layer — `apiKey.createdAt` is a
+string on the wire and a `Date` in the domain — so type them with the generated types and let the
+compiler hold the line:
 
 ```ts
-// src/api/service/users.test.ts
-import { renderHook, waitFor } from '@testing-library/react';
-import { http, HttpResponse } from 'msw';
-
-import { server } from '@/test-utils/server';
-import { SwrWrapper } from '@/test-utils/wrappers';
-import { USERS_ENDPOINT } from '@/api/users';
-import { useUsers } from './users';
-
-it('returns the user list', async () => {
-    server.use(
-        http.get(`*${USERS_ENDPOINT}`, () =>
-            HttpResponse.json({ results: [], totalCount: 0 }),
-        ),
-    );
-
-    const { result } = renderHook(() => useUsers(), { wrapper: SwrWrapper });
-
-    await waitFor(() =>
-        expect(result.current.data, `expected data, got error: ${result.current.error}`)
-            .toBeDefined(),
-    );
-});
+return HttpResponse.json<GetApiKeyResponse>(toGetApiKeyResponse(apiKey))
 ```
-
-`SwrWrapper` must disable deduping (`dedupingInterval: 0`) and provide a fresh cache per test,
-otherwise results leak between cases.

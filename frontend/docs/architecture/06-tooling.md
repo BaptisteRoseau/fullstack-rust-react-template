@@ -244,19 +244,21 @@ Three levels, each with a different test double.
 | Level | Runner | Location | Doubles |
 |---|---|---|---|
 | Unit — primitive, hook, util | Vitest | next to source | none |
-| Integration — component, page | Vitest + Testing Library | next to source | manual `__mocks__` |
-| Service | Vitest | `api/service/*.test.ts` | MSW |
+| Integration — component, page | Vitest + Testing Library | next to source | `vi.mock('@/api/hooks/useApiXxx')` |
+| Domain fetcher | Vitest | `api/domains/<domain>/<domain>.test.ts` | MSW |
+| API hook | Vitest | `api/hooks/useApiXxx/*.test.ts` | MSW |
 | End-to-end | Playwright | `e2e/` | MSW dev server or real backend |
 
 ### Test doubles: which one
 
-**Manual `__mocks__` (default for component and page tests).** Fast, explicit, and it lets a test
-state "the request is loading" or "the request failed" in one line instead of orchestrating a
-network response. Use it whenever the subject is the UI.
+**Automocked api hooks (default for component and page tests).** `vi.mock('@/api/hooks/useApiXxx')`
+plus `vi.mocked(useApiXxx).mockReturnValue(...)` lets a test state "the request is loading" or "the
+request failed" in one line instead of orchestrating a network response, and needs no
+hand-maintained double. Use it whenever the subject is the UI.
 
-**MSW.** Use it when the subject is the transport: service hooks, retry/error-mapping behaviour,
-tests spanning several services, plus the dev mock server and e2e. It is also what
-`mock-server.ts` runs.
+**MSW.** Use it when the subject is the transport: domain fetchers, api hooks, retry and
+error-mapping behaviour, tests spanning several domains, plus the dev mock server and e2e. It is
+also what `mock-server.ts` runs.
 
 Do not mix both for one subject — pick the level you are testing.
 
@@ -275,8 +277,8 @@ src/test-utils/
 │   ├── db.ts               # in-memory database
 │   └── browser.ts
 └── fixtures/
-    ├── users.ts            # buildUser({ overrides })
-    └── apiKeys.ts
+    ├── auth.ts             # buildCurrentUser() domain + buildGetMeResponse() wire
+    └── apiKeys.ts          # buildApiKey() domain + buildGetApiKeyResponse() wire
 ```
 
 ```tsx
@@ -308,7 +310,7 @@ Fixtures are **builders**, not frozen objects, so a test can state only what it 
 ```ts
 // src/test-utils/fixtures/users.ts
 import { randEmail, randFirstName, randUuid } from '@ngneat/falso';
-import type { User } from '@/api/users';
+import type { User } from '@/api/domains/users';
 
 export function buildUser(overrides: Partial<User> = {}): User {
     return {
@@ -437,7 +439,7 @@ with than feature-first did:
     rules: {
         'no-restricted-imports': ['error', {
             patterns: [
-                { group: ['@/api/*', '@/contexts/*', '@/components/*', '@/pages/*'],
+                { group: ['@/api/*', '@/api/domains/*', '@/contexts/*', '@/components/*', '@/pages/*'],
                   message: 'The design system must stay domain-agnostic.' },
             ],
         }],

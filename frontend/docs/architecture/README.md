@@ -34,7 +34,7 @@ It combines four well-known patterns:
 | **Colocation** (test, story and stylesheet live next to the source) | Every component folder |
 | **Barrel / module public API** (`index.ts` re-exports; importers never reach inside) | Every component and multi-file module |
 | **Two-tier UI split** — domain-agnostic primitives vs. domain-aware composites | `design-system/` vs. `components/` |
-| **Service layer over HTTP** (declarations separate from the calls that use them) | `api/<domain>.ts` vs. `api/service/<domain>.ts` |
+| **Generated client + anti-corruption layer** (wire types converted at the boundary) | `api/generated/` vs. `api/domains/<domain>/` vs. `api/hooks/` |
 
 The two-tier UI split is essentially the *atoms* boundary of **Atomic Design**, and matches the
 classic **presentational vs. container** distinction: nothing in `design-system/` may import an API
@@ -61,8 +61,8 @@ service or an application context.
 | Bundler / dev server | **Vite** | single SPA entry, no multi-entry setup |
 | Language | **TypeScript** | strict; no `any`, no `@ts-expect-error` |
 | Routing | **React Router** | `createBrowserRouter`, route objects in `src/router/` |
-| Server state | **SWR** | global `fetcher` configured once, see [01](01-api.md) |
-| HTTP transport | **`fetch`** wrapper | `src/api/client.ts`; no Axios |
+| Server state | **SWR** | one binding per operation under `api/hooks/`, see [01](01-api.md) |
+| HTTP transport | **generated SDK** over `fetch` | `@hey-api/openapi-ts` from the backend's OpenAPI document; no Axios |
 | Global client state | **Zustand** | only for genuinely app-wide UI state (notifications, modals) |
 | Scoped state | **React context** | one folder per context under `src/contexts/` |
 | Styling | **SCSS Modules** + design tokens | `*.module.scss`, global tokens in `src/css/` |
@@ -71,7 +71,7 @@ service or an application context.
 | Forms | **React Hook Form + Zod** | retained; not part of the adopted reference |
 | i18n | **Lingui** | Vite plugin (SWC), no Babel |
 | Unit / integration tests | **Vitest + Testing Library** | shares the Vite config |
-| API faking | manual `__mocks__/` (unit) + **MSW** (integration, dev server, e2e) | see [06](06-tooling.md) |
+| API faking | automocked hooks (unit) + **MSW** (integration, dev server, e2e) | see [06](06-tooling.md) |
 | E2E | **Playwright** | unchanged |
 | Component catalogue | **Storybook** | stories colocated with components |
 
@@ -87,7 +87,7 @@ frontend/
 │       └── a11yCheck.ts
 ├── public/
 ├── src/
-│   ├── api/                    # ← 01: endpoint declarations + SWR services
+│   ├── api/                    # ← 01: generated SDK, domain layer, SWR hooks
 │   ├── components/             # ← 03: domain-aware shared components
 │   ├── config/                  # env.ts — validated environment variables
 │   ├── constants/              # App-wide constants
@@ -140,14 +140,22 @@ Dependencies flow **downwards only**. A module may import from any layer below i
                  │                  │
    hooks/ · utils/ · types/ · css/  │
                  │                  │
-              api/  ◄───────────────┘
+         api/hooks/  ◄──────────────┤
+                 │                  │
+    api/domains/<domain>/           │
+                 │                  │
+        api/generated/  ◄───────────┘
 ```
+
+Inside `src/api/` the same rule applies downwards: `hooks/` binds SWR to a domain's fetchers, a
+domain converts wire types to its own, and only `api/domains/<domain>/converters.ts` and
+`api/client.ts` may name anything from `api/generated/`. ESLint enforces both boundaries.
 
 - **`design-system/`** may import `utils/`, `types/`, `css/`, `hooks/`, Radix. It may **never**
   import `api/`, `contexts/`, or anything from `components/` or `pages/`. If a primitive needs data,
   it takes it as a prop.
-- **`components/`** may import `design-system/`, `api/service/`, `contexts/`, `hooks/`. Domain
-  awareness is exactly what distinguishes it from the design system.
+- **`components/`** may import `design-system/`, `api/domains/<domain>/`, `api/hooks/`, `contexts/`,
+  `hooks/`. Domain awareness is exactly what distinguishes it from the design system.
 - **`pages/`** may import everything. Pages are the only place routing concerns appear.
 - **`api/`** imports nothing from the UI layers.
 - **Page-to-page imports are forbidden.** Shared UI moves up into `components/`.

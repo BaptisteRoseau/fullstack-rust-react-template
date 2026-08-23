@@ -33,3 +33,13 @@ Every `test_*.sh` script is used in the `pre-push` hook or can be used as a stan
 ## Build
 
 Every `build_*.sh` script is used to build either the docker containers, the backend, the frontend or any other thing that needs to be built.
+
+### The frontend API SDK
+
+[`build_frontend_api_sdk.sh`](./build_frontend_api_sdk.sh) regenerates `frontend/src/api/generated/`
+from the OpenAPI document the `api` crate emits. Run it after any change under `crates/api`, and
+commit the generated folder — `frontend/openapi.json` is a build artifact and is gitignored.
+
+[`test_openapi.sh`](./test_openapi.sh) is the matching gate: it fails when the committed SDK no
+longer matches the router. Both need cargo *and* bun, which is why the check is not part of
+`test_lint.sh`'s frontend section.

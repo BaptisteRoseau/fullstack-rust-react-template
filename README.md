@@ -60,6 +60,7 @@ Before pushing, run the same checks the hooks run:
 ```bash
 ./scripts/test_lint.sh    # clippy + eslint
 ./scripts/test_units.sh   # cargo test --workspace --all-features + bun test
+./scripts/test_openapi.sh # the committed frontend SDK still matches the api crate
 ./scripts/git_hooks/setup.sh   # install the pre-push hook once
 ```
 
@@ -121,6 +122,7 @@ working there, along with those of its parents.
 ├── tools/            # Standalone crates that are more than a script
 │   ├── http_health_checker/ # Tiny static binary used as a container healthcheck
 │   └── openapi_generator/   # Exports openapi.json offline from the api crate
+│                            # (see scripts/build_frontend_api_sdk.sh)
 ├── doc/              # Cross-cutting documentation (authentication, refactors)
 └── docker-compose.yml # Entry point including every infrastructure fragment
 ```
