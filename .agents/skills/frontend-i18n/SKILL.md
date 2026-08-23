@@ -1,11 +1,11 @@
 ---
 name: frontend-i18n
-description: How to add or update translatable strings with Lingui macros and keep the en/fr PO catalogs complete. Use this when adding user-facing text, translating the frontend, or fixing an i18n:check failure.
+description: Use when adding user-facing text, translating the frontend, or fixing an i18n:check failure.
 ---
 
 # i18n (Lingui)
 
-```
+```txt
 src/i18n/
 ├── index.ts                # i18n instance, locales, loadLocale
 └── locales/{en,fr}/messages.po
@@ -13,21 +13,13 @@ src/i18n/
 
 **Never write a raw user-facing string in JSX.** Every one goes through a macro.
 
-## Macros
+## 1. Wrap the string in a macro
 
 ```tsx
-import { Trans, useLingui } from '@lingui/react/macro'
+const { t } = useLingui()
 
-export function Greeting({ name }: { name: string }) {
-    const { t } = useLingui()
-
-    return (
-        <>
-            <h1><Trans>Welcome back, {name}</Trans></h1>
-            <input aria-label={t`Search users`} />
-        </>
-    )
-}
+<h1><Trans>Welcome back, {name}</Trans></h1>
+<input aria-label={t`Search users`} />
 ```
 
 - `<Trans>` for JSX content.
@@ -38,16 +30,12 @@ export function Greeting({ name }: { name: string }) {
 Interpolation works in both: `` t`Revoke ${apiKey.name}` `` and
 `<Trans>Copy {apiKey.name} now</Trans>`.
 
-## Workflow
+## 2. Extract, translate, compile
 
 ```bash
 bun run i18n:extract    # scan sources → update en.po / fr.po
 bun run i18n:compile    # PO → runtime catalogs
-bun run i18n:check      # CI gate: extraction is clean and complete
 ```
-
-After adding any string: extract, **fill in the French translation**, then compile.
-`i18n:check` compiles with `--strict`, so a single missing `msgstr` fails CI.
 
 Edit `src/i18n/locales/fr/messages.po` by hand — find the `msgid` and write the `msgstr`:
 
@@ -58,18 +46,34 @@ msgstr "Enregistrer"
 
 Use straight apostrophes (`'`) consistently; e2e specs match on the exact string.
 
-## Switching locale
+## 3. Check
 
-`LocaleSwitcher` (in `src/components/layout/`) calls the locale store, which loads the catalog and
-persists the choice. `main.tsx` reads `storedLocale()` before mounting so there is no flash of the
-wrong language. Adding a locale means: add it to `locales` in `src/i18n/index.ts`, add its label to
-`localeLabels`, create `locales/<code>/messages.po`, run extract.
+```bash
+bun run i18n:check
+```
+
+CI gate: extraction is clean and every message is translated (`--strict`). A single missing
+`msgstr` fails it.
+
+## Adding a locale
+
+Add it to `locales` in `src/i18n/index.ts`, add its label to `localeLabels`, create
+`locales/<code>/messages.po`, then run extract. `LocaleSwitcher` (in `src/components/layout/`)
+calls the locale store — Skill(frontend-state) — which loads the catalog and persists the choice.
 
 ## Tests
 
 `src/test-utils/setup-tests.ts` activates the default locale before any test runs, so
 `screen.getByText('Save changes')` matches the English source string. Assert on the rendered text,
-never on the message id.
+never on the message id — Skill(frontend-testing).
 
-For e2e, `e2e/i18n.spec.ts` switches locale through the UI and asserts the French strings —
-so a translation you change must be updated there too.
+For e2e, `e2e/i18n.spec.ts` switches locale through the UI and asserts the French strings — so a
+translation you change must be updated there too.
+
+## Checklist
+
+```bash
+bun run i18n:check
+```
+
+- [ ] The French translation is filled in, not left as the English source string.
