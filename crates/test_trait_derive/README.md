@@ -18,7 +18,7 @@ a compile error instead.
 ## The three macros
 
 | Macro | Applies to | Effect |
-|---|---|---|
+| --- | --- | --- |
 | `#[test_trait]` | an `async fn` inside a suite module | marker only — no transform |
 | `#[test_trait_suite]` | an inline `mod { … }` | appends `trials` and, when possible, `trials_shared` |
 | `test_trait_main!(Fixture)` | a path expression | writes the `harness = false` binary's `fn main()` |
@@ -44,7 +44,7 @@ exactly as written.
 From each collected function it reads:
 
 | Read from | Used for |
-|---|---|
+| --- | --- |
 | the function name | the trial name passed to `Trial::test` |
 | `async` | required; the collector awaits the call |
 | the first parameter's type | the subject: its trait bounds, and how to pass it |
@@ -58,15 +58,8 @@ name the same one: one suite drives one trait.
 The generated items are appended to the module:
 
 ```rust
-pub fn trials<S: Cache, B, F>(rt: Arc<Runtime>, build: B) -> Vec<Trial>
-where
-    B: Fn() -> F + Send + Sync + 'static,
-    F: Future<Output = S>;
-
-pub fn trials_shared<S: Cache + Send + Sync + 'static>(
-    rt: Arc<Runtime>,
-    subject: Arc<S>,
-) -> Vec<Trial>;
+pub fn trials<S: Cache, B: Fn() -> F, F: Future<Output = S>>(rt: Arc<Runtime>, build: B) -> Vec<Trial>;
+pub fn trials_shared<S: Cache + Send + Sync + 'static>(rt: Arc<Runtime>, subject: Arc<S>) -> Vec<Trial>;
 ```
 
 When any test declares a context, both gain a `C: Ctx + Send + Sync + 'static`
@@ -93,7 +86,7 @@ Each of these has a fixture in `tests/fixtures/` pinning the exact message, chec
 `trybuild`:
 
 | Fixture | Rejected because |
-|---|---|
+| --- | --- |
 | `fail_orphan_marker` | `#[test_trait]` outside a suite module — the test would never be collected |
 | `fail_empty_suite` | a suite module with no `#[test_trait]` — it would run nothing |
 | `fail_file_module` | `mod suite;` instead of `mod suite { … }` — no body to read |
@@ -110,14 +103,14 @@ before this check existed.
 
 ## Layout
 
-```
-src
+```txt
+src/
 ├── lib.rs      # the three #[proc_macro*] entry points and their docs
 ├── suite.rs    # #[test_trait_suite] parsing and code generation, plus the marker
 └── main_fn.rs  # test_trait_main! expansion
-tests
+tests/
 ├── trybuild.rs # compile_fail over tests/fixtures/*.rs
-└── fixtures    # one .rs / .stderr pair per rejected way of writing a suite
+└── fixtures/   # one .rs / .stderr pair per rejected way of writing a suite
 ```
 
 ## Running
@@ -132,3 +125,7 @@ diff `trybuild` prints and refresh the `.stderr` with:
 ```sh
 TRYBUILD=overwrite cargo test -p test_trait_derive
 ```
+
+## Skills
+
+- [backend-trait-test](../../.claude/skills/backend-trait-test/SKILL.md)
