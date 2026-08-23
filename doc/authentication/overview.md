@@ -2,7 +2,7 @@
 
 ## Components
 
-```
+```txt
 ┌────────────┐        ┌─────────────────────────┐        ┌────────────┐
 │  Browser   │  XHR   │   Rust backend (BFF)     │  HTTP  │  Keycloak  │
 │ (React SPA)│ ◀────▶ │  /api/auth/* + /api/...  │ ◀────▶ │  realm app │
@@ -63,7 +63,7 @@ sequenceDiagram
 All endpoints are served under `/api` (matching the frontend's `VITE_APP_API_URL`).
 
 | Method & path | Purpose |
-|---------------|---------|
+| --- | --- |
 | `GET /api/auth/login` | Start the flow; `?screen=register` for the registration page, `?redirect=/path` to return to a specific route. |
 | `GET /api/auth/callback` | OAuth callback; exchanges the code and sets the cookies. |
 | `POST /api/auth/refresh` | Mint a fresh access token from the refresh cookie. |
