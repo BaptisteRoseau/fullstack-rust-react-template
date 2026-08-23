@@ -1,6 +1,6 @@
 ---
 name: backend-trait-test
-description: Load this skill when adding or changing a trait or backend in `crates/`, writing or fixing their tests, adding a test double or fixture, or deciding between a unit test and a container test.
+description: Use when adding or changing a trait, a backend or a test double in crates/, or when deciding between a unit test and a container test.
 ---
 
 # Test a Backend Trait
@@ -11,7 +11,7 @@ Most crates in `crates/` expose **one trait** and **one or more backends** imple
 
 **Apply this skill when** the crate has a trait in `src/<mycrate>.rs` and implementations in `src/backends/` (`cache`, `database`, `storage`, `authenticator`). **Skip it** for crates with no backends (`api`, `app_core`, `config`, `models`, the `*_derive` proc-macros).
 
-```
+```txt
 crates/mycrate
 ├── Cargo.toml               # autotests = false + one [[test]] per backend file
 ├── src
@@ -34,7 +34,7 @@ One binary per backend, all running the same suite. Each `tests/backends/*.rs` i
 Read the closest existing example before writing a new one. [`crates/cache/tests`](../../../crates/cache/tests) is the smallest complete one.
 
 | Crate | Trait | Backends | Notable for |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [`cache`](../../../crates/cache/tests) | `Cache` | [`redis.rs`](../../../crates/cache/tests/backends/redis.rs), [`hash_map.rs`](../../../crates/cache/tests/backends/hash_map.rs) | Start here. Two binaries, one containerless, both on [`trait_tests.rs`](../../../crates/cache/tests/trait_tests.rs) |
 | [`database`](../../../crates/database/tests) | `Database` | [`postgres.rs`](../../../crates/database/tests/backends/postgres.rs), [`mock.rs`](../../../crates/database/tests/backends/mock.rs) | `&mut impl` subject; migrations in `start()`; feature-gated double |
 | [`storage`](../../../crates/storage/tests) | `Storage` | [`s3.rs`](../../../crates/storage/tests/backends/s3.rs) | `GenericImage`, post-start provisioning, an asset copied into the container |
@@ -91,52 +91,45 @@ Merge `assets/Cargo.toml`: `autotests = false`, one `[[test]]` stanza per file i
 
 A tree of `tests/`, then only what the code cannot say: which fixture exists, what has to be shaped a particular way, and `cargo test -p mycrate`. Short form: `crates/storage/tests/README.md`. Long form: `crates/authenticator/tests/README.md`.
 
-### Step 6 — run the checklist in §4.
+### Step 6 — run the checklist in §4
 
-## 3. Do and don't
+## 3. Rules that are easy to get wrong
 
 | Do | Don't |
-|---|---|
-| Put one backend per file in `tests/backends/`, and make that file the binary | Add a `tests/<backend>.rs` wrapper holding only `test_trait_main!` |
-| Split work into short, named helper functions (`login_form_action`, `unique_key`) | Write one 80-line `start()` doing container startup, provisioning and parsing |
-| Let a backend file's structure carry the meaning, and put facts it cannot carry (a pinned tag, a load-bearing provisioning step) in `tests/README.md` | Comment a backend file at all beyond its `//!` line — not even a "why" one. Every one of these files has the same shape; prose about it is noise |
+| --- | --- |
 | Type subjects as `&impl MyTrait` | Type them as `&Postgres`, or reach through `db.pool()` into raw SQL |
-| Name a test once, in its `async fn` signature | Hand-write a `Vec<Trial>`, a `macro_rules!` collector, or a `#[test]` fn in these binaries |
-| Run the suite against the in-memory implementation too | Ship a double that no suite ever runs |
-| Gate a test-only double behind `test-utils` + `required-features` | Add a self dev-dependency `mycrate = { path = "." }` — it breaks later builds with `colliding StableCrateId` |
-| Keep suite-facing constants (realm, user id, expected email) in `trait_tests*` | Define them in a backend file and have the suite reach into it |
-| Put provider-specific work behind a test-side trait the fixture implements | Reach for the concrete fixture type inside a test |
-| `include_str!` assets from this crate's own `tests/assets/` | Reach into `infrastructure/` or a sibling crate |
+| Name a test once, in its `async fn` signature | Hand-write a `Vec<Trial>` or a `#[test]` fn in these binaries |
 | Derive per-trial keys with `Uuid::new_v4()` | Share a key, row, bucket path or username between trials |
-| Interpolate values into every assert message | `assert!(result.is_ok())` with no message |
+| Interpolate the actual values into every assert message | `assert!(result.is_ok())` with no message |
 | Use a container when the behaviour lives in the service | Mock the service and assert the mock returns what you set |
-| Unit-test pure logic in `#[cfg(test)]` next to the code | Put backend-internal tests in the trait suite |
+| Run the suite against the in-memory implementation too | Ship a double no suite holds to the contract |
+| Gate a test-only double behind `test-utils` + `required-features` | Add a self dev-dependency `mycrate = { path = "." }` — it breaks builds with `colliding StableCrateId` |
+| Keep suite-facing constants in `trait_tests*` | Define them in a backend file and have the suite reach in |
+| `include_str!` assets from this crate's own `tests/assets/` | Reach into `infrastructure/` or a sibling crate |
 | Use `trials_shared` only when every subject is `&impl` and building is expensive | Use it with a `&mut` or owned subject — it is not generated |
+
+Keep a backend file free of comments beyond its `//!` line. Every one of these files has the same
+shape, so prose about it is noise. Facts the code cannot carry — a pinned image tag, a load-bearing
+provisioning step — belong in `tests/README.md`.
 
 ## 4. Checklist
 
-Run in order from the repo root; each must be clean before the work is done.
-
 ```bash
-cargo fmt --all                                          # applies formatting
-cargo clippy --workspace --all-targets --all-features --fix --allow-dirty
-cargo clippy --workspace --all-targets --all-features    # then fix what is left, by hand
-cargo test -p mycrate --lib                              # unit tests, must be instant
-cargo test -p mycrate --all-features                     # every suite; needs Docker
-./scripts/test_units.sh && ./scripts/test_lint.sh        # before handing back
+.claude/skills/backend-trait-test/scripts/check_trait_tests.sh <crate>
+cargo test -p <crate> --all-features
+cargo test -p <crate> --test <backend> -- --list    # trial count matches expectations
 ```
 
-`--all-features` is not optional: a binary carrying `required-features` is skipped without it and cargo says nothing.
+`--all-features` is not optional. A binary carrying `required-features` is skipped without it, and
+cargo says nothing.
 
-Then verify by reading:
-
+- [ ] No `#[test_trait]` names a concrete type.
+- [ ] Running the suite twice in a row still passes.
+- [ ] Each test would fail if the behaviour it names broke. Delete any that only restates the
+      double's setup.
 - [ ] Every type in `src/backends/` has a file in `tests/backends/` and a `[[test]]` stanza.
 - [ ] The in-memory implementation / `testing::Mock*` double has one too, and is reachable by downstream crates (plain backend, or `test-utils` feature + `pub mod testing`).
 - [ ] Each `tests/backends/*.rs` follows the §2 order, is comment-free apart from its `//!` line, and declares nothing `pub`.
-- [ ] No `#[test_trait]` names a concrete type; no test is named anywhere but its own signature.
-- [ ] Every trial derives its own keys; running the suite twice in a row still passes.
-- [ ] Every assert message interpolates the actual value.
 - [ ] Tests are meaningful: each would fail if the behaviour it names broke. Delete any that only restates the double's setup.
 - [ ] `Cargo.toml` has `autotests = false` and one stanza per backend file.
 - [ ] `tests/README.md` matches the tree on disk.
-- [ ] Trial counts match expectations: `cargo test -p mycrate --test <name> -- --list`.
