@@ -1,6 +1,6 @@
 ---
 name: api-skill-generator
-description: Generate a navigable API skill from an OpenAPI 3.x spec using openapi2skill. Use when you need to interact with a product that exposes a REST API and no documentation nor skill is currently available for it, or if you need to navigate an OpenAPI manifest efficiently.
+description: Use when a product exposes a REST API and no skill for it exists yet, or when navigating an OpenAPI manifest.
 allowed-tools:
     - Read
     - Bash
