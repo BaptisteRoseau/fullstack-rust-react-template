@@ -2,23 +2,11 @@
 
 Here lies the database interaction layer of our backend.
 
-It uses [`sqlx`](https://docs.rs/crate/sqlx/latest) and [`sqlx-cli`](https://docs.rs/crate/sqlx-cli/latest) to make migrations and interact with the database.
+It uses [`sqlx`](https://docs.rs/crate/sqlx/latest) for queries and
+[`sqlx-cli`](https://docs.rs/crate/sqlx-cli/latest) for migrations.
 
-## Quick Start
-
-Install `sqlx` using the following:
-
-```cmd
-cargo install sqlx-cli
-```
-
-Migrations are located under [migrations](./migrations/). To create a new migration, run the following command from the current
-
-```cmd
-sqlx migrate add -rs <name>
-```
-
-Always provide a "rollback" migration under the _down.sql_ file. Rollbacks are supposed to be performed automatically after an unsuccessful migration, even if the rollback is empty.
+Migrations live in [migrations](./migrations/), numbered and applied in order. Each one is a
+reversible pair: a `.up.sql` and a `.down.sql`. A committed migration is never edited.
 
 ## Conventions
 
@@ -55,4 +43,10 @@ The [`generated_models.rs`](./src/generated_models.rs) file is generated using `
 
 DO NOT manually modify this file. If you need to create other models use [./src/models.rs](./src/models.rs).
 
-To generate it, run or read the script [build_database_rust_models.sh](./scripts/generate_database_rust_models.sh).
+To generate it, run or read the script [build_database_rust_models.sh](../../scripts/build_database_rust_models.sh).
+
+## Skills
+
+- [backend-database-migration](../../.claude/skills/backend-database-migration/SKILL.md)
+- [backend-trait-test](../../.claude/skills/backend-trait-test/SKILL.md)
+- [backend-feature-gating](../../.claude/skills/backend-feature-gating/SKILL.md)
