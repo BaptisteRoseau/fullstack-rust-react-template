@@ -4,7 +4,7 @@ Install `openapi2skill` with
 Cargo if available; otherwise download the latest prebuilt release binary on GitHub and place
 it under `~/.local/bin`.
 
-Source and releases: https://github.com/BaptisteRoseau/openapi2skill
+Source and releases: <https://github.com/BaptisteRoseau/openapi2skill>
 
 ## Check whether it is already installed
 
