@@ -1,6 +1,6 @@
 # Authenticator integration tests
 
-```
+```txt
 tests
 ├── assets                # the realms imported into the container
 ├── backends
@@ -32,7 +32,7 @@ The container imports two realms, because the trait spans two provider roles tha
 need different client configurations:
 
 | Realm | Client | Used for |
-|-------|--------|----------|
+| --- | --- | --- |
 | `test-realm` (`assets/realm-export.json`) | `backend`, public, direct access grants | `validate`: minting a token without a browser, plus the API-key path |
 | `oidc-test-realm` (`assets/oidc-realm-export.json`) | `webapp`, confidential, standard flow + registration | `authorize_url`, `exchange_code`, `refresh_tokens`, `userinfo`, `logout` |
 
@@ -63,3 +63,8 @@ cargo test -p authenticator
 
 Requires a running Docker daemon; the Keycloak container takes a few seconds to
 boot and is shared by every test in the binary.
+
+## Skills
+
+- [backend-trait-test](../../../.claude/skills/backend-trait-test/SKILL.md)
+- [backend-feature-gating](../../../.claude/skills/backend-feature-gating/SKILL.md)
