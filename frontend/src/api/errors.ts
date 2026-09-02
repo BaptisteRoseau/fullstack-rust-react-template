@@ -23,6 +23,7 @@ const API_ERROR_IDS = [
     'NOT_FOUND',
     'TOO_MANY_REQUESTS',
     'HEADER_INVALID_ASCII_CHARACTERS',
+    'BAD_REQUEST',
 ] as const satisfies readonly ApiErrorId[]
 
 const apiErrorResponseSchema = z.object({
@@ -114,6 +115,7 @@ export function useApiErrorMessage() {
             NOT_FOUND: t`This resource no longer exists.`,
             TOO_MANY_REQUESTS: t`Too many requests. Please wait a moment and try again.`,
             HEADER_INVALID_ASCII_CHARACTERS: t`The request contained characters the server cannot read.`,
+            BAD_REQUEST: t`This request is invalid.`,
             NETWORK: t`The server could not be reached. Check your connection.`,
             PARSE: t`The server sent a response the application cannot read.`,
         }),

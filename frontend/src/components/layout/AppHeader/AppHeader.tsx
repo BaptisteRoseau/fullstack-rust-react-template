@@ -18,7 +18,7 @@ export function AppHeader() {
     return (
         <header className={styles.header}>
             <div className={styles.inner}>
-                <Logo label={t`Fullstack Template`} />
+                <Logo label={t`Driftbox`} />
                 <div className={styles.actions}>
                     <ThemeSwitcher />
                     <nav className={styles.account} aria-label={t`Account`}>

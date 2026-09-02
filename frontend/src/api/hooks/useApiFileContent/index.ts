@@ -1,0 +1,1 @@
+export { useApiFileContent } from './useApiFileContent'

@@ -1,0 +1,26 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.state {
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: $space-4;
+    list-style: none;
+
+    @include media-up($breakpoint-sm) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    @include media-up($breakpoint-lg) {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    @include media-up($breakpoint-xl) {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+}

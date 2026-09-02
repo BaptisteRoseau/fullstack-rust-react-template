@@ -1,0 +1,1 @@
+export { useApiThumbnail } from './useApiThumbnail'

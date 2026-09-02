@@ -45,6 +45,13 @@ DO NOT manually modify this file. If you need to create other models use [./src/
 
 To generate it, run or read the script [build_database_rust_models.sh](../../scripts/build_database_rust_models.sh).
 
+Not every table goes through the derive. `database_crud_derive::Crud` cannot express an
+`Option<Uuid>` column, so the `directories`, `files`, `directory_permissions` and
+`file_permissions` tables — all of which carry a nullable `parent_id` or need tree queries
+the derive cannot write — have hand-written row structs in
+[`src/models.rs`](./src/models.rs) and hand-written queries in
+[`src/backends/postgres.rs`](./src/backends/postgres.rs).
+
 ## Skills
 
 - [backend-database-migration](../../.claude/skills/backend-database-migration/SKILL.md)

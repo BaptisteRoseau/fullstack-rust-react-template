@@ -21,7 +21,7 @@ test.describe('mobile', () => {
 
         await expect(
             page.getByRole('heading', {
-                name: 'Ship a fullstack app, not a toolchain',
+                name: 'Cloud storage that secures itself',
             }),
         ).toBeVisible()
         expect(
@@ -130,7 +130,7 @@ test.describe('desktop', () => {
         await page.goto('/')
 
         await expect(
-            page.getByRole('banner').getByText('Fullstack Template'),
+            page.getByRole('banner').getByText('Driftbox'),
         ).toBeVisible()
     })
 })

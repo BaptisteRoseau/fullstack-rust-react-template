@@ -1,0 +1,1 @@
+export { useApiGrantDirectoryPermission } from './useApiGrantDirectoryPermission'

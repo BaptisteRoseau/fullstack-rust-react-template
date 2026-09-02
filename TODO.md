@@ -22,7 +22,15 @@
 
 - [ ] Un-flatten the backend crates (rename it "backend" again -> macros/services etc..)
 - [ ] See how to properly handle reactivity on the frontend (use container classes ? Add another optionnal .scss file and include it ? Use variables from the theme constants ?)
+- [ ] Homepage (no network allowed) & Reverse proxies
 
+## PoC results
+
+- [ ] Fix genuine bugs from the report
+- [ ] Mention better Database usage (not CRUD only but complex requests when necessary (ex. DirectoryListing))
+- [ ] Mention better API naming (here everything is files/ , where there could have been directories/ also)
+- [ ] Components should also have a story (with mocks if necessary)
+- [ ] 
 
 ## Error management
 

@@ -10,7 +10,7 @@ test('translates the home page into French and back', async ({ page }) => {
 
     await expect(
         page.getByRole('heading', {
-            name: 'Ship a fullstack app, not a toolchain',
+            name: 'Cloud storage that secures itself',
         }),
     ).toBeVisible()
 
@@ -18,7 +18,7 @@ test('translates the home page into French and back', async ({ page }) => {
 
     await expect(
         page.getByRole('heading', {
-            name: "Livrez une application fullstack, pas une chaîne d'outils",
+            name: 'Un stockage cloud qui se sécurise tout seul',
         }),
     ).toBeVisible()
     await expect(page.getByRole('link', { name: 'Commencer' })).toBeVisible()

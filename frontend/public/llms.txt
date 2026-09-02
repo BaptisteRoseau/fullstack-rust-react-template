@@ -1,6 +1,6 @@
-# Fullstack Template
+# Driftbox
 
-> A Rust and React fullstack application template.
+> Multi-user cloud storage that compresses and encrypts every file on upload.
 
 This is a client-rendered React single-page application with a Rust backend. Only the
 pages listed below are reachable without authentication; everything under /user requires
@@ -11,3 +11,5 @@ a signed-in session.
 - [Home](http://localhost:3000/): Application landing page
 - [Sign in](http://localhost:3000/auth/login): Session login
 - [Register](http://localhost:3000/auth/register): Account creation
+- [Terms of Service](http://localhost:3000/legal/terms): Placeholder terms of service for this proof of concept
+- [Legal mentions](http://localhost:3000/legal/mentions): Placeholder publisher, hosting and personal-data notice

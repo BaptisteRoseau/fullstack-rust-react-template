@@ -1,0 +1,52 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+}
+
+.link {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+    padding: $space-4;
+    color: inherit;
+
+    &:hover {
+        background-color: var(--color-surface-raised);
+    }
+
+    @include focus-ring;
+}
+
+.thumbnail {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 5rem;
+    color: var(--color-primary);
+}
+
+.name {
+    overflow: hidden;
+    font-weight: 500;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.meta {
+    color: var(--color-text-muted);
+    font-size: $font-size-xs;
+}
+
+.actions {
+    position: absolute;
+    top: $space-2;
+    right: $space-2;
+    display: flex;
+    gap: $space-0-5;
+}

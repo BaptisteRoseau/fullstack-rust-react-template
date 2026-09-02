@@ -1,0 +1,1 @@
+export { LegalDisclaimer } from './LegalDisclaimer'

@@ -22,6 +22,16 @@ pub(crate) const DEFAULT_S3_PASSWORD: &str = "password";
 
 pub(crate) const DEFAULT_REDIS_URL: &str = "redis://127.0.0.1:6379";
 
+/// Master key wrapping every per-file data encryption key, base64 of 32 bytes.
+// Dev-only secret; anything encrypted under it is readable by anyone with this
+// repository. Override in production.
+pub(crate) const DEFAULT_STORAGE_ENCRYPTION_KEY: &str =
+    "ZGV2LW9ubHktc3RvcmFnZS1tYXN0ZXIta2V5LTMyYiE=";
+
+/// Number of bytes the decoded [`DEFAULT_STORAGE_ENCRYPTION_KEY`] must hold,
+/// set by AES-256-GCM.
+pub const STORAGE_ENCRYPTION_KEY_LENGTH: usize = 32;
+
 pub(crate) const DEFAULT_API_TIMEOUT_SEC: u16 = 20;
 
 pub(crate) const DEFAULT_RATE_LIMITER_REFRESH_PER_SECOND: u64 = 1;

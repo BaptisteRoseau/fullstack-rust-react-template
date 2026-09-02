@@ -20,7 +20,7 @@ authenticator = { path = "../authenticator" }
 # Crates.io
 anyhow = { version = "1" }
 async-trait = "0"
-axum = { version = "0", features = ["http1", "http2"] }
+axum = { version = "0.8", features = ["http1", "http2", "multipart"] }
 axum-macros = "0"
 axum-prometheus = { version = "*", features = ["metrics-exporter-prometheus"] }
 chrono = { version = "0" }

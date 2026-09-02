@@ -7,7 +7,7 @@ use std::net::{IpAddr, Ipv4Addr};
 
 use crate::config::{
     ApiConfig, AuthenticatorConfig, BindingConfig, Config, PostgresConfig, RedisConfig,
-    S3Config,
+    S3Config, StorageConfig,
 };
 use crate::defaults::*;
 
@@ -36,6 +36,9 @@ pub fn test_config() -> Config {
             url: String::new(),
             user: String::new(),
             password: String::new(),
+        },
+        storage: StorageConfig {
+            encryption_key: [0u8; STORAGE_ENCRYPTION_KEY_LENGTH],
         },
         redis: RedisConfig { url: String::new() },
         postgres: PostgresConfig {

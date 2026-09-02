@@ -1,0 +1,9 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.page {
+    padding-top: $space-8;
+    padding-bottom: $space-16;
+
+    @include container;
+}

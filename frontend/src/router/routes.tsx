@@ -36,12 +36,36 @@ export const router = createBrowserRouter([
                 }),
             },
             {
+                path: PATHS.legal.terms,
+                lazy: async () => ({
+                    Component: (await import('@/pages/Legal')).Terms,
+                }),
+            },
+            {
+                path: PATHS.legal.mentions,
+                lazy: async () => ({
+                    Component: (await import('@/pages/Legal')).Mentions,
+                }),
+            },
+            {
                 element: (
                     <ProtectedRoute>
                         <Outlet />
                     </ProtectedRoute>
                 ),
                 children: [
+                    {
+                        path: PATHS.drive.root,
+                        lazy: async () => ({
+                            Component: (await import('@/pages/Drive')).Drive,
+                        }),
+                    },
+                    {
+                        path: PATHS.drive.directory,
+                        lazy: async () => ({
+                            Component: (await import('@/pages/Drive')).Drive,
+                        }),
+                    },
                     {
                         path: PATHS.user.root,
                         lazy: async () => ({

@@ -1,8 +1,8 @@
 {
     "id": "http://localhost:3000/",
-    "name": "Fullstack Template",
-    "short_name": "Fullstack Template",
-    "description": "A Rust and React fullstack application template.",
+    "name": "Driftbox",
+    "short_name": "Driftbox",
+    "description": "Multi-user cloud storage that compresses and encrypts every file on upload.",
     "start_url": "/",
     "scope": "/",
     "display": "standalone",

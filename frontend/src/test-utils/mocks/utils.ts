@@ -14,11 +14,14 @@ export const FORWARDED_COOKIE_HEADER = 'x-forwarded-cookie'
  */
 export const API_PATHS = {
     apiKeys: '/api/api-key',
+    directories: '/api/files/directories',
+    files: '/api/files',
     login: '/api/auth/login',
     logout: '/api/auth/logout',
     me: '/api/auth/me',
     refresh: '/api/auth/refresh',
     register: '/api/auth/register',
+    upload: '/api/files/upload',
     users: '/api/user',
 } as const
 

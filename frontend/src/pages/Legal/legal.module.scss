@@ -1,0 +1,41 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.document {
+    padding-top: $space-12;
+    padding-bottom: $space-16;
+
+    @include container;
+}
+
+.inner {
+    display: flex;
+    flex-direction: column;
+    gap: $space-6;
+    max-width: 80ch;
+}
+
+.updated {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: $font-size-sm;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+}
+
+.section p,
+.section li {
+    color: var(--color-text-muted);
+}
+
+.section ul {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+    padding-left: $space-6;
+    list-style: disc;
+}

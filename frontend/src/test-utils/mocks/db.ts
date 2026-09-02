@@ -27,14 +27,72 @@ const apiKeySchema = z.object({
     userId: z.string(),
 })
 
+const entrySchema = {
+    id: z.string().default(() => nanoid()),
+    name: z.string(),
+    owner: z.string(),
+    parentId: z.string().nullable().default(null),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+}
+
+const directorySchema = z.object(entrySchema)
+
+/**
+ * `content` holds the bytes as base64 so the record survives the JSON file the
+ * dev and e2e databases are persisted to; `storedSizeBytes` mimics the
+ * backend's compression by reporting less than what was handed over.
+ */
+const fileSchema = z.object({
+    ...entrySchema,
+    mimeType: z.string(),
+    sizeBytes: z.number(),
+    storedSizeBytes: z.number(),
+    hasThumbnail: z.boolean(),
+    content: z.string(),
+})
+
+const permissionSchema = {
+    id: z.string().default(() => nanoid()),
+    grantee: z.string(),
+    grantedBy: z.string(),
+    level: z.enum(['viewer', 'editor', 'manager']),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+}
+
+const directoryPermissionSchema = z.object({
+    ...permissionSchema,
+    directoryId: z.string(),
+})
+
+const filePermissionSchema = z.object({
+    ...permissionSchema,
+    fileId: z.string(),
+})
+
 export const db = {
     user: new Collection({ schema: userSchema }),
     apiKey: new Collection({ schema: apiKeySchema }),
+    directory: new Collection({ schema: directorySchema }),
+    file: new Collection({ schema: fileSchema }),
+    directoryPermission: new Collection({ schema: directoryPermissionSchema }),
+    filePermission: new Collection({ schema: filePermissionSchema }),
 }
 
 export type Model = keyof typeof db
 
 export type ApiKeyRecord = z.infer<typeof apiKeySchema>
+
+export type DirectoryRecord = z.infer<typeof directorySchema>
+
+export type FileRecord = z.infer<typeof fileSchema>
+
+export type DirectoryPermissionRecord = z.infer<
+    typeof directoryPermissionSchema
+>
+
+export type FilePermissionRecord = z.infer<typeof filePermissionSchema>
 
 const DB_FILE_PATH = 'mocked-db.json'
 const DB_STORAGE_KEY = 'msw-db'
@@ -85,8 +143,33 @@ export async function seedDb() {
         teamId: 'team-1',
         createdAt: Date.UTC(2026, 0, 15),
     })
+    const now = new Date(Date.UTC(2026, 0, 15)).toISOString()
+    const invoices = await db.directory.create({
+        id: 'seed-directory',
+        name: 'Invoices',
+        owner: CURRENT_USER_ID,
+        parentId: null,
+        createdAt: now,
+        updatedAt: now,
+    })
+    const welcome = 'Welcome to Driftbox.\n'
+    await db.file.create({
+        id: 'seed-file',
+        name: 'welcome.txt',
+        owner: CURRENT_USER_ID,
+        parentId: invoices.parentId,
+        mimeType: 'text/plain',
+        sizeBytes: welcome.length,
+        storedSizeBytes: Math.ceil(welcome.length * 0.6),
+        hasThumbnail: false,
+        content: btoa(welcome),
+        createdAt: now,
+        updatedAt: now,
+    })
     await persistDb('user')
     await persistDb('apiKey')
+    await persistDb('directory')
+    await persistDb('file')
 }
 
 export async function initializeDb() {

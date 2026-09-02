@@ -1,0 +1,1 @@
+export { useApiDirectoryPermissions } from './useApiDirectoryPermissions'

@@ -11,7 +11,7 @@ export function AuthLayout() {
 
     return (
         <div className={styles.layout}>
-            <Logo label={t`Fullstack Template`} />
+            <Logo label={t`Driftbox`} />
             <Card className={styles.card}>
                 <Outlet />
             </Card>

@@ -1,8 +1,8 @@
 use super::router::api_router;
 use crate::endpoints::{
     api_key::endpoints::tag as api_key_tag, auth::endpoints::tag as auth_tag,
-    ping::endpoints::tag as ping_tag, storage::endpoints::tag as storage_tag,
-    user::endpoints::tag as user_tag,
+    files::endpoints::tag as files_tag, ping::endpoints::tag as ping_tag,
+    storage::endpoints::tag as storage_tag, user::endpoints::tag as user_tag,
 };
 use config::Config;
 use std::sync::OnceLock;
@@ -122,6 +122,7 @@ fn api_tags() -> Vec<utoipa::openapi::Tag> {
     vec![
         auth_tag(),
         user_tag(),
+        files_tag(),
         storage_tag(),
         api_key_tag(),
         ping_tag(),

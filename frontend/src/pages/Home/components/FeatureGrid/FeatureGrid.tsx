@@ -1,7 +1,12 @@
 import { Trans } from '@lingui/react/macro'
 
 import { Card } from '@/design-system/Card'
-import { BoltIcon, LayersIcon, ShieldIcon } from '@/design-system/Icon'
+import {
+    KeyIcon,
+    MonitorIcon,
+    ShieldIcon,
+    UserIcon,
+} from '@/design-system/Icon'
 
 import styles from './feature-grid.module.scss'
 
@@ -11,36 +16,50 @@ export function FeatureGrid() {
             <Card className={styles.feature}>
                 <ShieldIcon size={24} className={styles.icon} />
                 <h2>
-                    <Trans>Authentication built in</Trans>
+                    <Trans>Compressed and encrypted</Trans>
                 </h2>
                 <p className={styles.description}>
                     <Trans>
-                        OpenID Connect through the backend, with httpOnly
-                        cookies and silent token refresh.
+                        Every upload is squeezed down and sealed before it is
+                        stored. You never configure a cipher or pick an archive
+                        format.
                     </Trans>
                 </p>
             </Card>
             <Card className={styles.feature}>
-                <BoltIcon size={24} className={styles.icon} />
+                <MonitorIcon size={24} className={styles.icon} />
                 <h2>
-                    <Trans>A typed API layer</Trans>
+                    <Trans>Instant previews</Trans>
                 </h2>
                 <p className={styles.description}>
                     <Trans>
-                        Endpoint declarations separated from the SWR hooks that
-                        call them, mocked end to end.
+                        Thumbnails for photos and first-page previews for
+                        documents appear as soon as a file lands, without
+                        downloading it.
                     </Trans>
                 </p>
             </Card>
             <Card className={styles.feature}>
-                <LayersIcon size={24} className={styles.icon} />
+                <KeyIcon size={24} className={styles.icon} />
                 <h2>
-                    <Trans>A real design system</Trans>
+                    <Trans>Sharing you can aim</Trans>
                 </h2>
                 <p className={styles.description}>
                     <Trans>
-                        Domain-agnostic primitives on SCSS Modules and design
-                        tokens, every one of them in Storybook.
+                        Share exactly the folder or file you choose, nothing
+                        more, as viewer, editor or manager.
+                    </Trans>
+                </p>
+            </Card>
+            <Card className={styles.feature}>
+                <UserIcon size={24} className={styles.icon} />
+                <h2>
+                    <Trans>Built for several people</Trans>
+                </h2>
+                <p className={styles.description}>
+                    <Trans>
+                        Each member signs in with their own account and sees
+                        only their own files and what has been shared with them.
                     </Trans>
                 </p>
             </Card>

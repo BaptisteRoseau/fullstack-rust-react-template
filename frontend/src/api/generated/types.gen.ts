@@ -11,6 +11,7 @@ export type ApiErrorId =
     | 'UNEXPECTED'
     | 'UNAUTHORIZED'
     | 'FORBIDDEN'
+    | 'BAD_REQUEST'
     | 'TOKEN_EXPIRED'
     | 'NOT_FOUND'
     | 'TOO_MANY_REQUESTS'
@@ -42,6 +43,59 @@ export type GetApiKeyResponse = {
     id: string
     name: string
     permissions: Array<string>
+}
+
+/**
+ * A directory in the caller's tree.
+ */
+export type GetDirectoryResponse = {
+    createdAt: string
+    id: string
+    name: string
+    owner: string
+    /**
+     * `null` when the directory sits at the root of its owner's tree.
+     */
+    parentId?: string | null
+    updatedAt: string
+}
+
+/**
+ * One level of the tree: what the listed directory is, and what it holds.
+ */
+export type GetEntriesResponse = {
+    directories: Array<GetDirectoryResponse>
+    directory?: null | GetDirectoryResponse
+    files: Array<GetFileResponse>
+}
+
+/**
+ * A stored file. Sizes are reported both before and after the server's own
+ * compression and encryption, so a client can show what the storage costs.
+ */
+export type GetFileResponse = {
+    createdAt: string
+    /**
+     * Whether a thumbnail can be fetched for this file.
+     */
+    hasThumbnail: boolean
+    id: string
+    mimeType: string
+    name: string
+    owner: string
+    /**
+     * `null` when the file sits at the root of its owner's tree.
+     */
+    parentId?: string | null
+    /**
+     * Size of the original content, in bytes.
+     */
+    sizeBytes: number
+    /**
+     * Size actually held by the object store, in bytes.
+     */
+    storedSizeBytes: number
+    updatedAt: string
 }
 
 /**
@@ -81,10 +135,37 @@ export type GetMeResponse = {
 }
 
 /**
+ * One grant on a file or directory.
+ */
+export type GetPermissionResponse = {
+    createdAt: string
+    /**
+     * The user that granted it.
+     */
+    grantedBy: string
+    /**
+     * The user the level was granted to.
+     */
+    grantee: string
+    id: string
+    level: PermissionLevel
+    updatedAt: string
+}
+
+/**
  * Here is the documentation of the response
  */
 export type GetUserResponse = {
     name: string
+}
+
+/**
+ * A rename, a move, or both. An omitted field is left untouched; sending
+ * `parentId: null` moves the entry to the caller's root.
+ */
+export type PatchEntryRequest = {
+    name?: string | null
+    parentId?: string | null
 }
 
 /**
@@ -99,6 +180,29 @@ export type PatchMeRequest = {
      * The new family name.
      */
     lastName: string
+}
+
+/**
+ * How much a user may do with a shared file or directory.
+ */
+export type PermissionLevel = 'viewer' | 'editor' | 'manager'
+
+/**
+ * A new directory.
+ */
+export type PostDirectoryRequest = {
+    name: string
+    /**
+     * Omit to create the directory at the caller's root.
+     */
+    parentId?: string | null
+}
+
+/**
+ * The level to grant.
+ */
+export type PutPermissionRequest = {
+    level: PermissionLevel
 }
 
 /**
@@ -358,6 +462,601 @@ export type RegisterData = {
         redirect?: string | null
     }
     url: '/auth/register'
+}
+
+export type ListEntriesData = {
+    body?: never
+    path?: never
+    query?: {
+        parentId?: string | null
+    }
+    url: '/files'
+}
+
+export type ListEntriesErrors = {
+    /**
+     * Not authenticated.
+     */
+    401: ApiErrorResponse
+    /**
+     * No such directory, or not visible to the caller.
+     */
+    404: ApiErrorResponse
+}
+
+export type ListEntriesError = ListEntriesErrors[keyof ListEntriesErrors]
+
+export type ListEntriesResponses = {
+    /**
+     * The directory and its direct children.
+     */
+    200: GetEntriesResponse
+}
+
+export type ListEntriesResponse =
+    ListEntriesResponses[keyof ListEntriesResponses]
+
+export type CreateDirectoryData = {
+    body: PostDirectoryRequest
+    path?: never
+    query?: never
+    url: '/files/directories'
+}
+
+export type CreateDirectoryErrors = {
+    /**
+     * The name is empty, too long or holds a path separator.
+     */
+    400: ApiErrorResponse
+    /**
+     * Not authenticated.
+     */
+    401: ApiErrorResponse
+    /**
+     * No such parent, or not writable by the caller.
+     */
+    404: ApiErrorResponse
+}
+
+export type CreateDirectoryError =
+    CreateDirectoryErrors[keyof CreateDirectoryErrors]
+
+export type CreateDirectoryResponses = {
+    /**
+     * Directory created.
+     */
+    201: GetDirectoryResponse
+}
+
+export type CreateDirectoryResponse =
+    CreateDirectoryResponses[keyof CreateDirectoryResponses]
+
+export type DeleteDirectoryData = {
+    body?: never
+    path: {
+        /**
+         * Directory ID
+         */
+        id: string
+    }
+    query?: never
+    url: '/files/directories/{id}'
+}
+
+export type DeleteDirectoryErrors = {
+    /**
+     * Not authenticated.
+     */
+    401: ApiErrorResponse
+    /**
+     * No such directory, or not managed by the caller.
+     */
+    404: ApiErrorResponse
+}
+
+export type DeleteDirectoryError =
+    DeleteDirectoryErrors[keyof DeleteDirectoryErrors]
+
+export type DeleteDirectoryResponses = {
+    /**
+     * Directory deleted.
+     */
+    204: void
+}
+
+export type DeleteDirectoryResponse =
+    DeleteDirectoryResponses[keyof DeleteDirectoryResponses]
+
+export type UpdateDirectoryData = {
+    body: PatchEntryRequest
+    path: {
+        /**
+         * Directory ID
+         */
+        id: string
+    }
+    query?: never
+    url: '/files/directories/{id}'
+}
+
+export type UpdateDirectoryErrors = {
+    /**
+     * Invalid name, or the directory would be moved inside itself.
+     */
+    400: ApiErrorResponse
+    /**
+     * Not authenticated.
+     */
+    401: ApiErrorResponse
+    /**
+     * No such directory, or not writable by the caller.
+     */
+    404: ApiErrorResponse
+}
+
+export type UpdateDirectoryError =
+    UpdateDirectoryErrors[keyof UpdateDirectoryErrors]
+
+export type UpdateDirectoryResponses = {
+    /**
+     * The updated directory.
+     */
+    200: GetDirectoryResponse
+}
+
+export type UpdateDirectoryResponse =
+    UpdateDirectoryResponses[keyof UpdateDirectoryResponses]
+
+export type ListDirectoryPermissionsData = {
+    body?: never
+    path: {
+        /**
+         * Directory ID
+         */
+        id: string
+    }
+    query?: never
+    url: '/files/directories/{id}/permissions'
+}
+
+export type ListDirectoryPermissionsErrors = {
+    /**
+     * Not authenticated.
+     */
+    401: ApiErrorResponse
+    /**
+     * No such directory, or not managed by the caller.
+     */
+    404: ApiErrorResponse
+}
+
+export type ListDirectoryPermissionsError =
+    ListDirectoryPermissionsErrors[keyof ListDirectoryPermissionsErrors]
+
+export type ListDirectoryPermissionsResponses = {
+    /**
+     * The grants on the directory.
+     */
+    200: Array<GetPermissionResponse>
+}
+
+export type ListDirectoryPermissionsResponse =
+    ListDirectoryPermissionsResponses[keyof ListDirectoryPermissionsResponses]
+
+export type RevokeDirectoryPermissionData = {
+    body?: never
+    path: {
+        /**
+         * Directory ID
+         */
+        id: string
+        /**
+         * The user whose grant is revoked
+         */
+        userId: string
+    }
+    query?: never
+    url: '/files/directories/{id}/permissions/{userId}'
+}
+
+export type RevokeDirectoryPermissionErrors = {
+    /**
+     * Not authenticated.
+     */
+    401: ApiErrorResponse
+    /**
+     * No such grant or directory, or not managed by the caller.
+     */
+    404: ApiErrorResponse
+}
+
+export type RevokeDirectoryPermissionError =
+    RevokeDirectoryPermissionErrors[keyof RevokeDirectoryPermissionErrors]
+
+export type RevokeDirectoryPermissionResponses = {
+    /**
+     * Grant revoked.
+     */
+    204: void
+}
+
+export type RevokeDirectoryPermissionResponse =
+    RevokeDirectoryPermissionResponses[keyof RevokeDirectoryPermissionResponses]
+
+export type GrantDirectoryPermissionData = {
+    body: PutPermissionRequest
+    path: {
+        /**
+         * Directory ID
+         */
+        id: string
+        /**
+         * The user to grant the level to
+         */
+        userId: string
+    }
+    query?: never
+    url: '/files/directories/{id}/permissions/{userId}'
+}
+
+export type GrantDirectoryPermissionErrors = {
+    /**
+     * Granting to oneself, or above the caller's own level.
+     */
+    400: ApiErrorResponse
+    /**
+     * Not authenticated.
+     */
+    401: ApiErrorResponse
+    /**
+     * No such directory or user, or not managed by the caller.
+     */
+    404: ApiErrorResponse
+}
+
+export type GrantDirectoryPermissionError =
+    GrantDirectoryPermissionErrors[keyof GrantDirectoryPermissionErrors]
+
+export type GrantDirectoryPermissionResponses = {
+    /**
+     * The grant.
+     */
+    200: GetPermissionResponse
+}
+
+export type GrantDirectoryPermissionResponse =
+    GrantDirectoryPermissionResponses[keyof GrantDirectoryPermissionResponses]
+
+export type UploadFileData = {
+    /**
+     * A `file` field holding the content to store.
+     */
+    body: string
+    path?: never
+    query?: {
+        parentId?: string | null
+    }
+    url: '/files/upload'
+}
+
+export type UploadFileErrors = {
+    /**
+     * No `file` field, or an unusable name.
+     */
+    400: ApiErrorResponse
+    /**
+     * Not authenticated.
+     */
+    401: ApiErrorResponse
+    /**
+     * No such directory, or not writable by the caller.
+     */
+    404: ApiErrorResponse
+}
+
+export type UploadFileError = UploadFileErrors[keyof UploadFileErrors]
+
+export type UploadFileResponses = {
+    /**
+     * File stored.
+     */
+    201: GetFileResponse
+}
+
+export type UploadFileResponse = UploadFileResponses[keyof UploadFileResponses]
+
+export type DeleteFileData = {
+    body?: never
+    path: {
+        /**
+         * File ID
+         */
+        id: string
+    }
+    query?: never
+    url: '/files/{id}'
+}
+
+export type DeleteFileErrors = {
+    /**
+     * Not authenticated.
+     */
+    401: ApiErrorResponse
+    /**
+     * No such file, or not managed by the caller.
+     */
+    404: ApiErrorResponse
+}
+
+export type DeleteFileError = DeleteFileErrors[keyof DeleteFileErrors]
+
+export type DeleteFileResponses = {
+    /**
+     * File deleted.
+     */
+    204: void
+}
+
+export type DeleteFileResponse = DeleteFileResponses[keyof DeleteFileResponses]
+
+export type GetFileData = {
+    body?: never
+    path: {
+        /**
+         * File ID
+         */
+        id: string
+    }
+    query?: never
+    url: '/files/{id}'
+}
+
+export type GetFileErrors = {
+    /**
+     * Not authenticated.
+     */
+    401: ApiErrorResponse
+    /**
+     * No such file, or not visible to the caller.
+     */
+    404: ApiErrorResponse
+}
+
+export type GetFileError = GetFileErrors[keyof GetFileErrors]
+
+export type GetFileResponses = {
+    /**
+     * The file's metadata.
+     */
+    200: GetFileResponse
+}
+
+export type GetFileResponse2 = GetFileResponses[keyof GetFileResponses]
+
+export type UpdateFileData = {
+    body: PatchEntryRequest
+    path: {
+        /**
+         * File ID
+         */
+        id: string
+    }
+    query?: never
+    url: '/files/{id}'
+}
+
+export type UpdateFileErrors = {
+    /**
+     * The name is empty, too long or holds a path separator.
+     */
+    400: ApiErrorResponse
+    /**
+     * Not authenticated.
+     */
+    401: ApiErrorResponse
+    /**
+     * No such file, or not writable by the caller.
+     */
+    404: ApiErrorResponse
+}
+
+export type UpdateFileError = UpdateFileErrors[keyof UpdateFileErrors]
+
+export type UpdateFileResponses = {
+    /**
+     * The updated file.
+     */
+    200: GetFileResponse
+}
+
+export type UpdateFileResponse = UpdateFileResponses[keyof UpdateFileResponses]
+
+export type DownloadFileData = {
+    body?: never
+    path: {
+        /**
+         * File ID
+         */
+        id: string
+    }
+    query?: never
+    url: '/files/{id}/download'
+}
+
+export type DownloadFileErrors = {
+    /**
+     * Not authenticated.
+     */
+    401: ApiErrorResponse
+    /**
+     * No such file, or not visible to the caller.
+     */
+    404: ApiErrorResponse
+}
+
+export type DownloadFileError = DownloadFileErrors[keyof DownloadFileErrors]
+
+export type DownloadFileResponses = {
+    /**
+     * The file's content.
+     */
+    200: Blob | File
+}
+
+export type DownloadFileResponse =
+    DownloadFileResponses[keyof DownloadFileResponses]
+
+export type ListFilePermissionsData = {
+    body?: never
+    path: {
+        /**
+         * File ID
+         */
+        id: string
+    }
+    query?: never
+    url: '/files/{id}/permissions'
+}
+
+export type ListFilePermissionsErrors = {
+    /**
+     * Not authenticated.
+     */
+    401: ApiErrorResponse
+    /**
+     * No such file, or not managed by the caller.
+     */
+    404: ApiErrorResponse
+}
+
+export type ListFilePermissionsError =
+    ListFilePermissionsErrors[keyof ListFilePermissionsErrors]
+
+export type ListFilePermissionsResponses = {
+    /**
+     * The grants on the file.
+     */
+    200: Array<GetPermissionResponse>
+}
+
+export type ListFilePermissionsResponse =
+    ListFilePermissionsResponses[keyof ListFilePermissionsResponses]
+
+export type RevokeFilePermissionData = {
+    body?: never
+    path: {
+        /**
+         * File ID
+         */
+        id: string
+        /**
+         * The user whose grant is revoked
+         */
+        userId: string
+    }
+    query?: never
+    url: '/files/{id}/permissions/{userId}'
+}
+
+export type RevokeFilePermissionErrors = {
+    /**
+     * Not authenticated.
+     */
+    401: ApiErrorResponse
+    /**
+     * No such grant or file, or not managed by the caller.
+     */
+    404: ApiErrorResponse
+}
+
+export type RevokeFilePermissionError =
+    RevokeFilePermissionErrors[keyof RevokeFilePermissionErrors]
+
+export type RevokeFilePermissionResponses = {
+    /**
+     * Grant revoked.
+     */
+    204: void
+}
+
+export type RevokeFilePermissionResponse =
+    RevokeFilePermissionResponses[keyof RevokeFilePermissionResponses]
+
+export type GrantFilePermissionData = {
+    body: PutPermissionRequest
+    path: {
+        /**
+         * File ID
+         */
+        id: string
+        /**
+         * The user to grant the level to
+         */
+        userId: string
+    }
+    query?: never
+    url: '/files/{id}/permissions/{userId}'
+}
+
+export type GrantFilePermissionErrors = {
+    /**
+     * Granting to oneself, or above the caller's own level.
+     */
+    400: ApiErrorResponse
+    /**
+     * Not authenticated.
+     */
+    401: ApiErrorResponse
+    /**
+     * No such file or user, or not managed by the caller.
+     */
+    404: ApiErrorResponse
+}
+
+export type GrantFilePermissionError =
+    GrantFilePermissionErrors[keyof GrantFilePermissionErrors]
+
+export type GrantFilePermissionResponses = {
+    /**
+     * The grant.
+     */
+    200: GetPermissionResponse
+}
+
+export type GrantFilePermissionResponse =
+    GrantFilePermissionResponses[keyof GrantFilePermissionResponses]
+
+export type DownloadThumbnailData = {
+    body?: never
+    path: {
+        /**
+         * File ID
+         */
+        id: string
+    }
+    query?: never
+    url: '/files/{id}/thumbnail'
+}
+
+export type DownloadThumbnailErrors = {
+    /**
+     * Not authenticated.
+     */
+    401: ApiErrorResponse
+    /**
+     * No such file, no thumbnail, or not visible to the caller.
+     */
+    404: ApiErrorResponse
+}
+
+export type DownloadThumbnailError =
+    DownloadThumbnailErrors[keyof DownloadThumbnailErrors]
+
+export type DownloadThumbnailResponses = {
+    /**
+     * The thumbnail.
+     */
+    200: unknown
 }
 
 export type PingData = {

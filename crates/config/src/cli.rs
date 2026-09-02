@@ -106,6 +106,14 @@ pub(crate) struct CliConfig {
     pub(crate) s3_password: String,
 
     /* ===============
+    STORAGE
+    ================ */
+    /// Base64-encoded 32-byte master key wrapping every per-file encryption key.
+    /// Losing or changing it makes every already stored file unreadable.
+    #[arg(long, env, default_value_t = DEFAULT_STORAGE_ENCRYPTION_KEY.to_string())]
+    pub(crate) storage_encryption_key: String,
+
+    /* ===============
     REDIS
     ================ */
     /// Redis URL (e.g. redis://127.0.0.1:6379)

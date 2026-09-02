@@ -1,0 +1,35 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $space-3;
+}
+
+.text {
+    flex: 1;
+    min-width: 12rem;
+}
+
+.title {
+    font-size: $font-size-sm;
+    font-weight: 500;
+}
+
+.description {
+    color: var(--color-text-muted);
+    font-size: $font-size-xs;
+}
+
+.id {
+    overflow: hidden;
+    padding: $space-1 $space-2;
+    border-radius: $radius-sm;
+    background-color: var(--color-surface-raised);
+    font-family: $font-family-mono;
+    font-size: $font-size-xs;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

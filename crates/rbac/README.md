@@ -20,6 +20,10 @@ nothing in the workspace.
   group ids and granted permissions.
 - [`Role`](src/role.rs) — grants and forbids of `Permissions`, not yet wired into
   `has_access`.
+- [`PermissionLevel`](src/permission_level.rs) — `Viewer < Editor < Manager`, the ordered
+  level a user holds on one shared file or directory. Ordered so that "has at least X" is a
+  `>=` comparison. Independent of `AccessControl`: the file feature resolves levels from the
+  database in [app_core](../app_core), and this enum is the vocabulary both ends agree on.
 
 ## Directory
 
@@ -29,6 +33,7 @@ rbac/
 │   ├── permissions.rs      # the Permissions enum
 │   ├── scope.rs            # Scope and its access check
 │   ├── access_control.rs   # AccessControl, UserPermissions, has_access
+│   ├── permission_level.rs # PermissionLevel: Viewer < Editor < Manager
 │   └── role.rs             # Role (grants/forbids), not yet used elsewhere
 └── Cargo.toml
 ```

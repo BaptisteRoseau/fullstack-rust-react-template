@@ -1,0 +1,52 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.breadcrumbs {
+    min-width: 0;
+}
+
+.list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $space-1;
+    list-style: none;
+    font-size: $font-size-sm;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: $space-1;
+    min-width: 0;
+}
+
+.separator {
+    flex-shrink: 0;
+    color: var(--color-text-muted);
+}
+
+.link {
+    padding: $space-0-5 $space-1;
+    border-radius: $radius-sm;
+    color: var(--color-text-muted);
+
+    &:hover {
+        color: var(--color-text);
+    }
+
+    @include focus-ring;
+}
+
+.current {
+    overflow: hidden;
+    padding: $space-0-5 $space-1;
+    color: var(--color-text);
+    font-weight: 500;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.elision {
+    color: var(--color-text-muted);
+}

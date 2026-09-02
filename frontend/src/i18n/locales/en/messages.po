@@ -12,26 +12,93 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: src/pages/Drive/components/UploadDropZone/UploadDropZone.tsx
+msgid "…or drop them anywhere below."
+msgstr "…or drop them anywhere below."
+
+#. placeholder {0}: formatFileSize(file.sizeBytes)
+#. placeholder {1}: file.mimeType
+#. placeholder {2}: formatDateTime(file.createdAt)
+#: src/pages/Drive/components/FilePreviewDialog/FilePreviewDialog.tsx
+msgid "{0} · {1} · added {2}"
+msgstr "{0} · {1} · added {2}"
+
+#: src/pages/Drive/components/EntryActions/EntryActions.tsx
+msgid "{name} deleted"
+msgstr "{name} deleted"
+
+#: src/pages/Drive/components/MoveEntryDialog/MoveEntryDialog.tsx
+msgid "{name} moved"
+msgstr "{name} moved"
+
+#: src/pages/Drive/components/ShareEntryDialog/ShareEntryDialog.tsx
+msgid "{name} shared"
+msgstr "{name} shared"
+
 #. placeholder {0}: new Date().getFullYear()
 #: src/components/layout/AppFooter/AppFooter.tsx
-msgid "© {0} Fullstack Template"
-msgstr "© {0} Fullstack Template"
+msgid "© {0} Driftbox"
+msgstr "© {0} Driftbox"
 
-#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx
-msgid "A real design system"
-msgstr "A real design system"
+#: src/pages/Drive/components/FileCard/FileCard.tsx
+msgid "−{saved}%"
+msgstr "−{saved}%"
 
-#: src/pages/Home/Home.tsx
-msgid "A Rust and React fullstack application template."
-msgstr "A Rust and React fullstack application template."
+#: src/pages/Drive/components/ShareEntryDialog/ShareEntryDialog.tsx
+msgid "00000000-0000-0000-0000-000000000000"
+msgstr "00000000-0000-0000-0000-000000000000"
 
-#: src/pages/Home/Home.tsx
-msgid "A Rust backend and a React frontend wired together with authentication, API keys and observability from the first commit."
-msgstr "A Rust backend and a React frontend wired together with authentication, API keys and observability from the first commit."
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "1. Acceptance of these terms"
+msgstr "1. Acceptance of these terms"
 
-#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx
-msgid "A typed API layer"
-msgstr "A typed API layer"
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "10. Contact"
+msgstr "10. Contact"
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "2. What Driftbox does"
+msgstr "2. What Driftbox does"
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "3. Your account"
+msgstr "3. Your account"
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "4. Acceptable use"
+msgstr "4. Acceptable use"
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "5. Storage, compression and encryption"
+msgstr "5. Storage, compression and encryption"
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "6. Retention and deletion"
+msgstr "6. Retention and deletion"
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "7. Limitation of liability"
+msgstr "7. Limitation of liability"
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "8. Changes to these terms"
+msgstr "8. Changes to these terms"
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "9. Governing law"
+msgstr "9. Governing law"
+
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "A real deployment would name its hosting provider here, along with the registered address and telephone number of that provider, as French law requires."
+msgstr "A real deployment would name its hosting provider here, along with the registered address and telephone number of that provider, as French law requires."
+
+#: src/pages/Drive/components/ShareEntryDialog/ShareEntryDialog.tsx
+msgid "Access level"
+msgstr "Access level"
+
+#: src/pages/Drive/components/ShareEntryDialog/ShareEntryDialog.tsx
+msgid "Access revoked"
+msgstr "Access revoked"
 
 #: src/components/layout/AppHeader/AppHeader.tsx
 msgid "Account"
@@ -41,9 +108,17 @@ msgstr "Account"
 msgid "Account sections"
 msgstr "Account sections"
 
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "Accounts are personal. Do not share a single account between several people: invite them instead, so that each person signs in with their own identity and each action can be traced back to a real user."
+msgstr "Accounts are personal. Do not share a single account between several people: invite them instead, so that each person signs in with their own identity and each action can be traced back to a real user."
+
 #: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx
 msgid "Actions"
 msgstr "Actions"
+
+#: src/pages/Drive/components/EntryActions/EntryActions.tsx
+msgid "Actions for {name}"
+msgstr "Actions for {name}"
 
 #: src/pages/Register/Register.tsx
 msgid "Already have an account?"
@@ -67,18 +142,37 @@ msgstr "API reference"
 msgid "Applications using this key will stop working immediately."
 msgstr "Applications using this key will stop working immediately."
 
-#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx
-msgid "Authentication built in"
-msgstr "Authentication built in"
+#: src/pages/Drive/components/ShareEntryDialog/ShareEntryDialog.tsx
+msgid "Ask them for their user ID — there is no directory search yet."
+msgstr "Ask them for their user ID — there is no directory search yet."
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "attempt to reach files, folders or accounts that were not shared with you;"
+msgstr "attempt to reach files, folders or accounts that were not shared with you;"
 
 #: src/pages/NotFound/NotFound.tsx
 msgid "Back to home"
 msgstr "Back to home"
 
+#: src/pages/Drive/components/DriveBreadcrumbs/DriveBreadcrumbs.tsx
+msgid "Breadcrumb"
+msgstr "Breadcrumb"
+
+#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx
+msgid "Built for several people"
+msgstr "Built for several people"
+
 #: src/components/ConfirmationDialog/ConfirmationDialog.tsx
+#: src/pages/Drive/components/CreateDirectoryDialog/CreateDirectoryDialog.tsx
+#: src/pages/Drive/components/MoveEntryDialog/MoveEntryDialog.tsx
+#: src/pages/Drive/components/RenameEntryDialog/RenameEntryDialog.tsx
 #: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx
 msgid "Cancel"
 msgstr "Cancel"
+
+#: src/pages/Drive/components/UploadDropZone/UploadDropZone.tsx
+msgid "Choose files to upload"
+msgstr "Choose files to upload"
 
 #: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx
 msgid "CI deploy key"
@@ -88,6 +182,22 @@ msgstr "CI deploy key"
 msgid "Close"
 msgstr "Close"
 
+#: src/pages/Home/Home.tsx
+msgid "Cloud storage that secures itself"
+msgstr "Cloud storage that secures itself"
+
+#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx
+msgid "Compressed and encrypted"
+msgstr "Compressed and encrypted"
+
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "Contact"
+msgstr "Contact"
+
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "Contact: legal@driftbox.example (fictional mailbox)."
+msgstr "Contact: legal@driftbox.example (fictional mailbox)."
+
 #: src/pages/Register/Register.tsx
 msgid "Continue to registration"
 msgstr "Continue to registration"
@@ -96,10 +206,16 @@ msgstr "Continue to registration"
 msgid "Continue to sign in"
 msgstr "Continue to sign in"
 
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "Cookies and local storage"
+msgstr "Cookies and local storage"
+
+#: src/pages/Drive/components/YourUserId/YourUserId.tsx
 #: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx
 msgid "Copied"
 msgstr "Copied"
 
+#: src/pages/Drive/components/YourUserId/YourUserId.tsx
 #: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx
 msgid "Copy"
 msgstr "Copy"
@@ -109,17 +225,58 @@ msgstr "Copy"
 msgid "Copy {0} now"
 msgstr "Copy {0} now"
 
+#: src/pages/Drive/components/YourUserId/YourUserId.tsx
+msgid "Copy your user ID"
+msgstr "Copy your user ID"
+
 #: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx
 msgid "Could not create the API key"
 msgstr "Could not create the API key"
+
+#: src/pages/Drive/components/CreateDirectoryDialog/CreateDirectoryDialog.tsx
+msgid "Could not create the folder"
+msgstr "Could not create the folder"
+
+#: src/pages/Drive/components/EntryActions/EntryActions.tsx
+msgid "Could not delete {name}"
+msgstr "Could not delete {name}"
+
+#: src/pages/Drive/components/EntryActions/EntryActions.tsx
+msgid "Could not download {name}"
+msgstr "Could not download {name}"
+
+#: src/pages/Drive/components/MoveEntryDialog/MoveEntryDialog.tsx
+msgid "Could not move {name}"
+msgstr "Could not move {name}"
+
+#: src/pages/Drive/components/RenameEntryDialog/RenameEntryDialog.tsx
+msgid "Could not rename {name}"
+msgstr "Could not rename {name}"
+
+#: src/pages/Drive/components/ShareEntryDialog/ShareEntryDialog.tsx
+msgid "Could not revoke the access"
+msgstr "Could not revoke the access"
 
 #: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx
 msgid "Could not revoke the API key"
 msgstr "Could not revoke the API key"
 
+#: src/pages/Drive/components/ShareEntryDialog/ShareEntryDialog.tsx
+msgid "Could not share {name}"
+msgstr "Could not share {name}"
+
 #: src/pages/User/sections/Information/Information.tsx
 msgid "Could not update the profile"
 msgstr "Could not update the profile"
+
+#. placeholder {0}: file.name
+#: src/pages/Drive/components/UploadDropZone/UploadDropZone.tsx
+msgid "Could not upload {0}"
+msgstr "Could not upload {0}"
+
+#: src/pages/Drive/components/CreateDirectoryDialog/CreateDirectoryDialog.tsx
+msgid "Create folder"
+msgstr "Create folder"
 
 #: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx
 msgid "Create key"
@@ -133,35 +290,127 @@ msgstr "Create your account"
 msgid "Created"
 msgstr "Created"
 
+#: src/pages/Drive/components/EntryActions/EntryActions.tsx
+msgid "Delete"
+msgstr "Delete"
+
+#: src/pages/Drive/components/EntryActions/EntryActions.tsx
+#: src/pages/Drive/components/EntryActions/EntryActions.tsx
+msgid "Delete {name}"
+msgstr "Delete {name}"
+
+#: src/pages/Legal/components/LegalDisclaimer/LegalDisclaimer.tsx
+msgid "Demo content"
+msgstr "Demo content"
+
+#: src/pages/Drive/components/MoveEntryDialog/MoveEntryDialog.tsx
+msgid "Destination"
+msgstr "Destination"
+
 #: src/pages/User/components/NewApiKeyBanner/NewApiKeyBanner.tsx
 msgid "Dismiss"
 msgstr "Dismiss"
 
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "distribute malware, or use a share link as a delivery channel for an attack;"
+msgstr "distribute malware, or use a share link as a delivery channel for an attack;"
+
+#: src/pages/Drive/components/EntryActions/EntryActions.tsx
+#: src/pages/Drive/components/FilePreviewDialog/FilePreviewDialog.tsx
+msgid "Download"
+msgstr "Download"
+
+#: src/components/layout/AppHeader/AppHeader.tsx
+#: src/layouts/AuthLayout/AuthLayout.tsx
+#: src/pages/Home/Home.tsx
+msgid "Driftbox"
+msgstr "Driftbox"
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "Driftbox is a multi-user cloud storage service. It lets you upload files, organise them into folders, browse previews of images and documents, and share individual files or folders with other members of your team."
+msgstr "Driftbox is a multi-user cloud storage service. It lets you upload files, organise them into folders, browse previews of images and documents, and share individual files or folders with other members of your team."
+
+#: src/pages/Home/components/TrustStrip/TrustStrip.tsx
+msgid "Driftbox is a proof-of-concept build, so read the terms before you trust it with anything you cannot afford to lose."
+msgstr "Driftbox is a proof-of-concept build, so read the terms before you trust it with anything you cannot afford to lose."
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "Driftbox is provided as is, without warranty of any kind. To the fullest extent permitted by law, Driftbox SAS is not liable for lost data, lost profits, interrupted business or any indirect damage arising from the use of, or the inability to use, the service."
+msgstr "Driftbox is provided as is, without warranty of any kind. To the fullest extent permitted by law, Driftbox SAS is not liable for lost data, lost profits, interrupted business or any indirect damage arising from the use of, or the inability to use, the service."
+
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "Driftbox is published by Driftbox SAS, a fictional simplified joint-stock company with a share capital of 10,000 euros, registered at 12 rue des Nuages, 75000 Paris, France, under the imaginary trade register number 000 000 000 RCS Paris."
+msgstr "Driftbox is published by Driftbox SAS, a fictional simplified joint-stock company with a share capital of 10,000 euros, registered at 12 rue des Nuages, 75000 Paris, France, under the imaginary trade register number 000 000 000 RCS Paris."
+
+#: src/pages/Home/Home.tsx
+msgid "Driftbox keeps the documents, photos and archives of your whole team in one place. Every file is compressed and encrypted the moment it is uploaded — no setting to turn on, no key to remember."
+msgstr "Driftbox keeps the documents, photos and archives of your whole team in one place. Every file is compressed and encrypted the moment it is uploaded — no setting to turn on, no key to remember."
+
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "Driftbox processes the data strictly needed to run an account: your name, your email address, the team you belong to, and the metadata of the files you store. The legal basis is the performance of the contract formed by the terms of service."
+msgstr "Driftbox processes the data strictly needed to run an account: your name, your email address, the team you belong to, and the metadata of the files you store. The legal basis is the performance of the contract formed by the terms of service."
+
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "Driftbox sets no advertising or analytics cookie. Signing in stores a session cookie that the browser cannot read from JavaScript, and it is what keeps you logged in between visits."
+msgstr "Driftbox sets no advertising or analytics cookie. Signing in stores a session cookie that the browser cannot read from JavaScript, and it is what keeps you logged in between visits."
+
+#: src/components/layout/UserMenu/UserMenu.tsx
+#: src/pages/Drive/Drive.tsx
+#: src/pages/Drive/Drive.tsx
+msgid "Drive"
+msgstr "Drive"
+
 #: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx
-msgid "Domain-agnostic primitives on SCSS Modules and design tokens, every one of them in Storybook."
-msgstr "Domain-agnostic primitives on SCSS Modules and design tokens, every one of them in Storybook."
+msgid "Each member signs in with their own account and sees only their own files and what has been shared with them."
+msgstr "Each member signs in with their own account and sees only their own files and what has been shared with them."
+
+#: src/pages/Drive/components/ShareEntryDialog/ShareEntryDialog.tsx
+msgid "Editor"
+msgstr "Editor"
 
 #: src/pages/User/sections/Information/Information.tsx
 msgid "Email"
 msgstr "Email"
 
 #: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx
-msgid "Endpoint declarations separated from the SWR hooks that call them, mocked end to end."
-msgstr "Endpoint declarations separated from the SWR hooks that call them, mocked end to end."
+msgid "Every upload is squeezed down and sealed before it is stored. You never configure a cipher or pick an archive format."
+msgstr "Every upload is squeezed down and sealed before it is stored. You never configure a cipher or pick an archive format."
+
+#: src/pages/Drive/components/ShareEntryDialog/ShareEntryDialog.tsx
+msgid "Everyone you add here sees this entry, and everything under it."
+msgstr "Everyone you add here sees this entry, and everything under it."
+
+#: src/pages/Drive/components/EntryActions/EntryActions.tsx
+msgid "Everything inside this folder is deleted with it. This cannot be undone."
+msgstr "Everything inside this folder is deleted with it. This cannot be undone."
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "Files are compressed and encrypted automatically, without any action on your part. Sharing is granular: each share names a single file or a single folder and gives the recipient one of three roles — viewer, editor or manager. A share never grants access to anything above the item you picked."
+msgstr "Files are compressed and encrypted automatically, without any action on your part. Sharing is granular: each share names a single file or a single folder and gives the recipient one of three roles — viewer, editor or manager. A share never grants access to anything above the item you picked."
+
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "Files uploaded by users remain the property of their authors. Driftbox claims no right over them beyond what is strictly needed to store, compress, encrypt, preview and deliver them back to the people you shared them with."
+msgstr "Files uploaded by users remain the property of their authors. Driftbox claims no right over them beyond what is strictly needed to store, compress, encrypt, preview and deliver them back to the people you shared them with."
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "Files you delete are removed from the browsable listing straight away and purged from storage within thirty days. Deleting your account removes your profile, your files and every share you granted; shares that other people granted to you simply stop being visible to you."
+msgstr "Files you delete are removed from the browsable listing straight away and purged from storage within thirty days. Deleting your account removes your profile, your files and every share you granted; shares that other people granted to you simply stop being visible to you."
 
 #: src/pages/User/sections/Information/Information.tsx
 msgid "First name"
 msgstr "First name"
 
+#: src/pages/Drive/components/CreateDirectoryDialog/CreateDirectoryDialog.tsx
+msgid "Folder created"
+msgstr "Folder created"
+
 #: src/components/layout/AppFooter/AppFooter.tsx
 msgid "Footer"
 msgstr "Footer"
 
-#: src/components/layout/AppHeader/AppHeader.tsx
-#: src/layouts/AuthLayout/AuthLayout.tsx
-#: src/pages/Home/Home.tsx
-msgid "Fullstack Template"
-msgstr "Fullstack Template"
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "For any question about these mentions, write to legal@driftbox.example or to Driftbox SAS, 12 rue des Nuages, 75000 Paris, France. Both are fictional and nobody reads them."
+msgstr "For any question about these mentions, write to legal@driftbox.example or to Driftbox SAS, 12 rue des Nuages, 75000 Paris, France. Both are fictional and nobody reads them."
 
 #: src/pages/Home/Home.tsx
 msgid "Get started"
@@ -171,15 +420,48 @@ msgstr "Get started"
 msgid "GitHub"
 msgstr "GitHub"
 
-#: src/pages/Home/Home.tsx
-msgid "Go to your account"
-msgstr "Go to your account"
+#: src/pages/Drive/components/YourUserId/YourUserId.tsx
+msgid "Give this to someone so they can share a folder with you."
+msgstr "Give this to someone so they can share a folder with you."
+
+#: src/pages/Drive/components/DriveBreadcrumbs/DriveBreadcrumbs.tsx
+#: src/pages/Drive/components/MoveEntryDialog/MoveEntryDialog.tsx
+msgid "Home"
+msgstr "Home"
+
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "Hosting"
+msgstr "Hosting"
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "If you do not agree with any part of them, do not create an account and do not use the service. If you accept them on behalf of an organisation, you confirm that you are allowed to bind that organisation."
+msgstr "If you do not agree with any part of them, do not create an account and do not use the service. If you accept them on behalf of an organisation, you confirm that you are allowed to bind that organisation."
+
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "In this proof of concept there is no hosting company: the application runs on a container stack that anyone can start on their own machine. The API is a Rust service, accounts live in a PostgreSQL database and uploaded files live in a self-hosted distributed object store, all launched side by side from a single compose file."
+msgstr "In this proof of concept there is no hosting company: the application runs on a container stack that anyone can start on their own machine. The API is a Rust service, accounts live in a PostgreSQL database and uploaded files live in a self-hosted distributed object store, all launched side by side from a single compose file."
 
 #: src/components/layout/UserMenu/UserMenu.tsx
 #: src/pages/User/components/UserNav/UserNav.tsx
 #: src/pages/User/sections/Information/Information.tsx
 msgid "Information"
 msgstr "Information"
+
+#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx
+msgid "Instant previews"
+msgstr "Instant previews"
+
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "Intellectual property"
+msgstr "Intellectual property"
+
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "Intra-community VAT number: FR00 000000000 (fictional)."
+msgstr "Intra-community VAT number: FR00 000000000 (fictional)."
+
+#: src/pages/Drive/components/CreateDirectoryDialog/CreateDirectoryDialog.tsx
+msgid "Invoices"
+msgstr "Invoices"
 
 #: src/pages/User/sections/ApiKeys/ApiKeys.tsx
 msgid "Keys authenticate machine access to the API. The secret is shown once."
@@ -193,8 +475,30 @@ msgstr "Language"
 msgid "Last name"
 msgstr "Last name"
 
+#: src/pages/Legal/Mentions/Mentions.tsx
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "Last updated: 1 January 2026."
+msgstr "Last updated: 1 January 2026."
+
+#: src/pages/Home/components/TrustStrip/TrustStrip.tsx
+msgid "Legal"
+msgstr "Legal"
+
+#: src/components/layout/AppFooter/AppFooter.tsx
+#: src/pages/Home/components/TrustStrip/TrustStrip.tsx
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "Legal mentions"
+msgstr "Legal mentions"
+
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "Legal mentions — Driftbox"
+msgstr "Legal mentions — Driftbox"
+
 #: src/components/layout/AppHeader/AppHeader.tsx
 #: src/components/ProtectedRoute/ProtectedRoute.tsx
+#: src/pages/Drive/components/DriveListing/DriveListing.tsx
+#: src/pages/Drive/components/FilePreviewDialog/FilePreviewDialog.tsx
+#: src/pages/Drive/components/ShareEntryDialog/ShareEntryDialog.tsx
 #: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx
 #: src/pages/User/sections/Information/Information.tsx
 msgid "Loading"
@@ -212,10 +516,32 @@ msgstr "Log in"
 msgid "Log out"
 msgstr "Log out"
 
+#: src/pages/Drive/components/ShareEntryDialog/ShareEntryDialog.tsx
+msgid "Manager"
+msgstr "Manager"
+
 #: src/pages/User/sections/Information/Information.tsx
 msgid "Member since"
 msgstr "Member since"
 
+#: src/pages/Drive/components/MoveEntryDialog/MoveEntryDialog.tsx
+msgid "Move"
+msgstr "Move"
+
+#: src/pages/Drive/components/MoveEntryDialog/MoveEntryDialog.tsx
+msgid "Move {name}"
+msgstr "Move {name}"
+
+#: src/pages/Drive/components/EntryActions/EntryActions.tsx
+msgid "Move to…"
+msgstr "Move to…"
+
+#: src/pages/Home/Home.tsx
+msgid "Multi-user cloud storage that compresses and encrypts every file on upload."
+msgstr "Multi-user cloud storage that compresses and encrypts every file on upload."
+
+#: src/pages/Drive/components/CreateDirectoryDialog/CreateDirectoryDialog.tsx
+#: src/pages/Drive/components/RenameEntryDialog/RenameEntryDialog.tsx
 #: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx
 #: src/pages/User/components/CreateApiKeyDialog/CreateApiKeyDialog.tsx
 msgid "Name"
@@ -225,6 +551,11 @@ msgstr "Name"
 msgid "New API key"
 msgstr "New API key"
 
+#: src/pages/Drive/components/CreateDirectoryDialog/CreateDirectoryDialog.tsx
+#: src/pages/Drive/Drive.tsx
+msgid "New folder"
+msgstr "New folder"
+
 #: src/pages/User/sections/ApiKeys/ApiKeys.tsx
 msgid "New key"
 msgstr "New key"
@@ -233,9 +564,30 @@ msgstr "New key"
 msgid "No account yet?"
 msgstr "No account yet?"
 
-#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx
-msgid "OpenID Connect through the backend, with httpOnly cookies and silent token refresh."
-msgstr "OpenID Connect through the backend, with httpOnly cookies and silent token refresh."
+#: src/pages/Drive/components/ShareEntryDialog/ShareEntryDialog.tsx
+msgid "Nobody else has access yet."
+msgstr "Nobody else has access yet."
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "Nothing in this section limits liability that cannot be limited under the applicable law, such as liability for gross negligence or for personal injury."
+msgstr "Nothing in this section limits liability that cannot be limited under the applicable law, such as liability for gross negligence or for personal injury."
+
+#: src/pages/Drive/components/FilePreviewDialog/FilePreviewDialog.tsx
+msgid "Only the first part of this file is shown. Download it to read the rest."
+msgstr "Only the first part of this file is shown. Download it to read the rest."
+
+#: src/pages/Drive/components/RenameEntryDialog/RenameEntryDialog.tsx
+msgid "Only the name changes; the contents stay where they are."
+msgstr "Only the name changes; the contents stay where they are."
+
+#. placeholder {0}: directory.name
+#: src/pages/Drive/components/DirectoryCard/DirectoryCard.tsx
+msgid "Open {0}"
+msgstr "Open {0}"
+
+#: src/pages/Home/Home.tsx
+msgid "Open your drive"
+msgstr "Open your drive"
 
 #: src/pages/NotFound/NotFound.tsx
 #: src/pages/NotFound/NotFound.tsx
@@ -247,15 +599,73 @@ msgstr "Page not found"
 msgid "Permissions"
 msgstr "Permissions"
 
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "Personal data"
+msgstr "Personal data"
+
+#: src/pages/Drive/components/MoveEntryDialog/MoveEntryDialog.tsx
+msgid "Pick a folder from the one you are in, or send it back to Home."
+msgstr "Pick a folder from the one you are in, or send it back to Home."
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "place a load on the service that degrades it for other users, whether through automation or otherwise."
+msgstr "place a load on the service that degrades it for other users, whether through automation or otherwise."
+
+#: src/pages/Legal/components/LegalDisclaimer/LegalDisclaimer.tsx
+msgid "Placeholder for this proof of concept, not a real legal agreement. Driftbox is a fictional product, the company and addresses below do not exist, and none of this text has been written or reviewed by a lawyer."
+msgstr "Placeholder for this proof of concept, not a real legal agreement. Driftbox is a fictional product, the company and addresses below do not exist, and none of this text has been written or reviewed by a lawyer."
+
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "Placeholder legal mentions for the Driftbox proof of concept."
+msgstr "Placeholder legal mentions for the Driftbox proof of concept."
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "Placeholder terms of service for the Driftbox proof of concept."
+msgstr "Placeholder terms of service for the Driftbox proof of concept."
+
+#: src/pages/Drive/components/EntryActions/EntryActions.tsx
+msgid "Preview"
+msgstr "Preview"
+
+#. placeholder {0}: file.name
+#: src/pages/Drive/components/FileCard/FileCard.tsx
+msgid "Preview {0}"
+msgstr "Preview {0}"
+
 #: src/pages/User/sections/Information/Information.tsx
 msgid "Profile updated"
 msgstr "Profile updated"
+
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "Publication director: Camille Dupont, fictional managing director."
+msgstr "Publication director: Camille Dupont, fictional managing director."
+
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "Publisher"
+msgstr "Publisher"
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "Questions about these terms go to legal@driftbox.example, or by post to Driftbox SAS, 12 rue des Nuages, 75000 Paris, France. Both the address and the mailbox are fictional and nobody reads them."
+msgstr "Questions about these terms go to legal@driftbox.example, or by post to Driftbox SAS, 12 rue des Nuages, 75000 Paris, France. Both the address and the mailbox are fictional and nobody reads them."
 
 #: src/components/layout/AppHeader/AppHeader.tsx
 #: src/pages/Login/Login.tsx
 #: src/pages/Register/Register.tsx
 msgid "Register"
 msgstr "Register"
+
+#: src/pages/Drive/components/EntryActions/EntryActions.tsx
+#: src/pages/Drive/components/RenameEntryDialog/RenameEntryDialog.tsx
+msgid "Rename"
+msgstr "Rename"
+
+#: src/pages/Drive/components/RenameEntryDialog/RenameEntryDialog.tsx
+msgid "Rename {name}"
+msgstr "Rename {name}"
+
+#: src/pages/Drive/components/RenameEntryDialog/RenameEntryDialog.tsx
+msgid "Renamed"
+msgstr "Renamed"
 
 #: src/pages/User/components/RevokeApiKeyButton/RevokeApiKeyButton.tsx
 msgid "Revoke"
@@ -267,6 +677,11 @@ msgstr "Revoke"
 msgid "Revoke {0}"
 msgstr "Revoke {0}"
 
+#. placeholder {0}: permission.grantee
+#: src/pages/Drive/components/ShareEntryDialog/ShareEntryDialog.tsx
+msgid "Revoke the access of {0}"
+msgstr "Revoke the access of {0}"
+
 #: src/pages/User/sections/Information/Information.tsx
 msgid "Role"
 msgstr "Role"
@@ -275,13 +690,43 @@ msgstr "Role"
 msgid "Save changes"
 msgstr "Save changes"
 
-#: src/pages/Home/Home.tsx
-msgid "Ship a fullstack app, not a toolchain"
-msgstr "Ship a fullstack app, not a toolchain"
+#: src/pages/Home/components/TrustStrip/TrustStrip.tsx
+msgid "Sealed before it is stored"
+msgstr "Sealed before it is stored"
+
+#: src/pages/Drive/components/EntryActions/EntryActions.tsx
+#: src/pages/Drive/components/ShareEntryDialog/ShareEntryDialog.tsx
+msgid "Share"
+msgstr "Share"
+
+#: src/pages/Drive/components/ShareEntryDialog/ShareEntryDialog.tsx
+msgid "Share {name}"
+msgstr "Share {name}"
+
+#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx
+msgid "Share exactly the folder or file you choose, nothing more, as viewer, editor or manager."
+msgstr "Share exactly the folder or file you choose, nothing more, as viewer, editor or manager."
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "share material you have no right to share, including work protected by a copyright that belongs to someone else;"
+msgstr "share material you have no right to share, including work protected by a copyright that belongs to someone else;"
+
+#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx
+msgid "Sharing you can aim"
+msgstr "Sharing you can aim"
 
 #: src/api/errors.ts
 msgid "Something went wrong. Please try again."
 msgstr "Something went wrong. Please try again."
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "store or distribute content that is illegal where you live or where the service is operated;"
+msgstr "store or distribute content that is illegal where you live or where the service is operated;"
+
+#. placeholder {0}: formatFileSize(file.storedSizeBytes)
+#: src/pages/Drive/components/FileCard/FileCard.tsx
+msgid "Stored as {0} after compression and encryption"
+msgstr "Stored as {0} after compression and encryption"
 
 #: src/components/layout/ThemeSwitcher/ThemeSwitcher.tsx
 msgid "Switch to the dark theme"
@@ -295,13 +740,39 @@ msgstr "Switch to the light theme"
 msgid "Switch to the system theme"
 msgstr "Switch to the system theme"
 
+#: src/components/layout/AppFooter/AppFooter.tsx
+#: src/pages/Home/components/TrustStrip/TrustStrip.tsx
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "Terms of Service"
+msgstr "Terms of Service"
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "Terms of Service — Driftbox"
+msgstr "Terms of Service — Driftbox"
+
 #: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx
 msgid "The API keys could not be loaded."
 msgstr "The API keys could not be loaded."
 
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "The Driftbox name, its interface, its texts and its illustrations are presented as the property of Driftbox SAS. Reproducing or adapting them outside the private-use exceptions provided by law would require prior written permission."
+msgstr "The Driftbox name, its interface, its texts and its illustrations are presented as the property of Driftbox SAS. Reproducing or adapting them outside the private-use exceptions provided by law would require prior written permission."
+
+#: src/pages/Drive/components/CreateDirectoryDialog/CreateDirectoryDialog.tsx
+msgid "The folder is created where you are now."
+msgstr "The folder is created where you are now."
+
 #: src/pages/NotFound/NotFound.tsx
 msgid "The page you are looking for does not exist."
 msgstr "The page you are looking for does not exist."
+
+#: src/pages/Drive/components/ShareEntryDialog/ShareEntryDialog.tsx
+msgid "The people with access could not be loaded."
+msgstr "The people with access could not be loaded."
+
+#: src/pages/Drive/components/FilePreviewDialog/FilePreviewDialog.tsx
+msgid "The preview could not be loaded."
+msgstr "The preview could not be loaded."
 
 #: src/pages/User/sections/Information/Information.tsx
 msgid "The profile shared with the rest of the application."
@@ -335,6 +806,38 @@ msgstr "Theme: light. Switch to the dark theme."
 msgid "Theme: system. Switch to the light theme."
 msgstr "Theme: system. Switch to the light theme."
 
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "These terms are governed by the laws of the placeholder jurisdiction of France, and any dispute that cannot be settled amicably will be brought before the courts of Paris. This is a placeholder clause in a fictional document and has no legal effect."
+msgstr "These terms are governed by the laws of the placeholder jurisdiction of France, and any dispute that cannot be settled amicably will be brought before the courts of Paris. This is a placeholder clause in a fictional document and has no legal effect."
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "These terms form the agreement between Driftbox SAS, a fictional company registered at 12 rue des Nuages, 75000 Paris, France, and any person who creates an account on Driftbox or uses the service in any way. By registering an account, uploading a file or opening a link that someone shared with you, you accept these terms in full."
+msgstr "These terms form the agreement between Driftbox SAS, a fictional company registered at 12 rue des Nuages, 75000 Paris, France, and any person who creates an account on Driftbox or uses the service in any way. By registering an account, uploading a file or opening a link that someone shared with you, you accept these terms in full."
+
+#: src/pages/Drive/components/EntryActions/EntryActions.tsx
+msgid "This file is deleted for everyone it was shared with. This cannot be undone."
+msgstr "This file is deleted for everyone it was shared with. This cannot be undone."
+
+#: src/pages/Drive/components/DriveListing/DriveListing.tsx
+msgid "This folder could not be loaded."
+msgstr "This folder could not be loaded."
+
+#: src/pages/Drive/components/DriveListing/DriveListing.tsx
+msgid "This folder is empty. Upload a file to start."
+msgstr "This folder is empty. Upload a file to start."
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "This is a technical demonstration. There is no service level agreement, no uptime commitment and no guaranteed backup. Keep your own copy of anything that matters, and do not use Driftbox as the only home of important data."
+msgstr "This is a technical demonstration. There is no service level agreement, no uptime commitment and no guaranteed backup. Keep your own copy of anything that matters, and do not use Driftbox as the only home of important data."
+
+#: src/pages/Drive/components/FilePreviewDialog/FilePreviewDialog.tsx
+msgid "This kind of file cannot be previewed here."
+msgstr "This kind of file cannot be previewed here."
+
+#: src/api/errors.ts
+msgid "This request is invalid."
+msgstr "This request is invalid."
+
 #: src/api/errors.ts
 msgid "This resource no longer exists."
 msgstr "This resource no longer exists."
@@ -343,17 +846,73 @@ msgstr "This resource no longer exists."
 msgid "This secret will not be shown again."
 msgstr "This secret will not be shown again."
 
+#: src/pages/Home/components/FeatureGrid/FeatureGrid.tsx
+msgid "Thumbnails for photos and first-page previews for documents appear as soon as a file lands, without downloading it."
+msgstr "Thumbnails for photos and first-page previews for documents appear as soon as a file lands, without downloading it."
+
 #: src/api/errors.ts
 msgid "Too many requests. Please wait a moment and try again."
 msgstr "Too many requests. Please wait a moment and try again."
+
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "Under the General Data Protection Regulation you may access your data, correct it, ask for it to be erased, object to its processing or request it in a portable format. Write to legal@driftbox.example; a genuine service would answer within one month and would name the supervisory authority you can complain to."
+msgstr "Under the General Data Protection Regulation you may access your data, correct it, ask for it to be erased, object to its processing or request it in a portable format. Write to legal@driftbox.example; a genuine service would answer within one month and would name the supervisory authority you can complain to."
+
+#: src/pages/Drive/components/UploadDropZone/UploadDropZone.tsx
+msgid "Upload complete"
+msgstr "Upload complete"
+
+#: src/pages/Drive/components/UploadDropZone/UploadDropZone.tsx
+msgid "Upload files"
+msgstr "Upload files"
+
+#: src/pages/Drive/components/UploadDropZone/UploadDropZone.tsx
+msgid "Uploading"
+msgstr "Uploading"
+
+#: src/pages/Home/components/TrustStrip/TrustStrip.tsx
+msgid "Uploads are compressed and encrypted while they are still in memory, so nothing ever reaches the storage layer in the clear. Permissions are checked on every read, and a share grants access to what you picked and to nothing above it."
+msgstr "Uploads are compressed and encrypted while they are still in memory, so nothing ever reaches the storage layer in the clear. Permissions are checked on every read, and a share grants access to what you picked and to nothing above it."
+
+#: src/pages/Drive/components/ShareEntryDialog/ShareEntryDialog.tsx
+msgid "User ID"
+msgstr "User ID"
+
+#: src/pages/Drive/components/ShareEntryDialog/ShareEntryDialog.tsx
+msgid "Viewer"
+msgstr "Viewer"
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "We keep technical logs, which may contain your account identifier and IP address, for twelve months, and we may retain what an applicable law requires us to retain for longer."
+msgstr "We keep technical logs, which may contain your account identifier and IP address, for twelve months, and we may retain what an applicable law requires us to retain for longer."
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "We may suspend an account that breaks these rules, and will tell the account holder why whenever the law allows us to."
+msgstr "We may suspend an account that breaks these rules, and will tell the account holder why whenever the law allows us to."
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "We may update these terms as the service changes. When a change is significant, we will announce it in the application at least thirty days before it takes effect. Continuing to use Driftbox after that date means you accept the updated terms; if you do not, you may delete your account at any time."
+msgstr "We may update these terms as the service changes. When a change is significant, we will announce it in the application at least thirty days before it takes effect. Continuing to use Driftbox after that date means you accept the updated terms; if you do not, you may delete your account at any time."
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "When you upload a file, Driftbox compresses it and then encrypts it before writing it to storage. The compressed, encrypted form is the only form ever stored; the readable version is rebuilt when you, or someone you shared it with, asks for it. Previews and thumbnails are generated at upload time and stored the same way."
+msgstr "When you upload a file, Driftbox compresses it and then encrypts it before writing it to storage. The compressed, encrypted form is the only form ever stored; the readable version is rebuilt when you, or someone you shared it with, asks for it. Previews and thumbnails are generated at upload time and stored the same way."
 
 #: src/api/errors.ts
 msgid "You are not allowed to do that."
 msgstr "You are not allowed to do that."
 
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "You are responsible for the accuracy of the information on your account, for keeping your credentials confidential, and for everything that happens under your account. Tell us immediately if you believe someone else has gained access to it."
+msgstr "You are responsible for the accuracy of the information on your account, for keeping your credentials confidential, and for everything that happens under your account. Tell us immediately if you believe someone else has gained access to it."
+
 #: src/pages/User/components/ApiKeysTable/ApiKeysTable.tsx
 msgid "You have no API key yet."
 msgstr "You have no API key yet."
+
+#: src/pages/Legal/Terms/Terms.tsx
+msgid "You keep every right you already had over the files you upload. In exchange, you agree not to use Driftbox to:"
+msgstr "You keep every right you already had over the files you upload. In exchange, you agree not to use Driftbox to:"
 
 #: src/api/errors.ts
 msgid "You need to be signed in to do that."
@@ -371,6 +930,18 @@ msgstr "You will be redirected to the identity provider to sign in."
 msgid "Your account"
 msgstr "Your account"
 
+#: src/pages/Drive/Drive.tsx
+msgid "Your files. Compressed and encrypted before they are stored, and shareable with anyone you give access to."
+msgstr "Your files. Compressed and encrypted before they are stored, and shareable with anyone you give access to."
+
+#: src/pages/Legal/Mentions/Mentions.tsx
+msgid "Your interface language and your light or dark theme are remembered in the local storage of your browser. They never leave your device and clearing your browsing data removes them."
+msgstr "Your interface language and your light or dark theme are remembered in the local storage of your browser. They never leave your device and clearing your browsing data removes them."
+
 #: src/api/errors.ts
 msgid "Your session has expired. Please sign in again."
 msgstr "Your session has expired. Please sign in again."
+
+#: src/pages/Drive/components/YourUserId/YourUserId.tsx
+msgid "Your user ID"
+msgstr "Your user ID"

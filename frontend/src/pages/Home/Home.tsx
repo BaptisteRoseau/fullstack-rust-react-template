@@ -7,6 +7,7 @@ import { Button } from '@/design-system/Button'
 import { PATHS } from '@/router/constants'
 
 import { FeatureGrid } from './components/FeatureGrid'
+import { TrustStrip } from './components/TrustStrip'
 import styles from './home.module.scss'
 
 export function Home() {
@@ -16,25 +17,26 @@ export function Home() {
     return (
         <>
             <Head
-                title={t`Fullstack Template`}
-                description={t`A Rust and React fullstack application template.`}
+                title={t`Driftbox`}
+                description={t`Multi-user cloud storage that compresses and encrypts every file on upload.`}
             />
             <section className={styles.hero}>
                 <h1 className={styles.title}>
-                    <Trans>Ship a fullstack app, not a toolchain</Trans>
+                    <Trans>Cloud storage that secures itself</Trans>
                 </h1>
                 <p className={styles.subtitle}>
                     <Trans>
-                        A Rust backend and a React frontend wired together with
-                        authentication, API keys and observability from the
-                        first commit.
+                        Driftbox keeps the documents, photos and archives of
+                        your whole team in one place. Every file is compressed
+                        and encrypted the moment it is uploaded — no setting to
+                        turn on, no key to remember.
                     </Trans>
                 </p>
                 <div className={styles.actions}>
                     {user ? (
                         <Button size="lg" asChild>
-                            <Link to={PATHS.user.information}>
-                                <Trans>Go to your account</Trans>
+                            <Link to={PATHS.drive.root}>
+                                <Trans>Open your drive</Trans>
                             </Link>
                         </Button>
                     ) : (
@@ -54,6 +56,7 @@ export function Home() {
                 </div>
             </section>
             <FeatureGrid />
+            <TrustStrip />
         </>
     )
 }

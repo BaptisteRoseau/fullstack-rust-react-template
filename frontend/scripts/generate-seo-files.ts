@@ -14,6 +14,14 @@ const PAGE_LABELS: Record<PublicPath, { name: string; note: string }> = {
     [PATHS.home]: { name: 'Home', note: 'Application landing page' },
     [PATHS.login]: { name: 'Sign in', note: 'Session login' },
     [PATHS.register]: { name: 'Register', note: 'Account creation' },
+    [PATHS.legal.terms]: {
+        name: 'Terms of Service',
+        note: 'Placeholder terms of service for this proof of concept',
+    },
+    [PATHS.legal.mentions]: {
+        name: 'Legal mentions',
+        note: 'Placeholder publisher, hosting and personal-data notice',
+    },
 }
 
 const XML_ENTITIES: Record<string, string> = {

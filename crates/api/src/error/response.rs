@@ -14,6 +14,7 @@ pub(crate) enum ApiErrorId {
     Unexpected,
     Unauthorized,
     Forbidden,
+    BadRequest,
     TokenExpired,
     NotFound,
     TooManyRequests,
@@ -159,6 +160,13 @@ impl From<CoreError> for ApiErrorResponse {
     fn from(val: CoreError) -> Self {
         match val {
             CoreError::NotFound(_) => ApiErrorResponse::not_found(),
+            // The message names what the caller got wrong and nothing about the
+            // server, so it is the one core error worth echoing back.
+            CoreError::InvalidRequest(ref reason) => ApiErrorResponse::new(
+                ApiErrorId::BadRequest,
+                reason,
+                StatusCode::BAD_REQUEST,
+            ),
             _ => ApiErrorResponse::unexpected(),
         }
     }

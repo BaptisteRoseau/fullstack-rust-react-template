@@ -2,6 +2,8 @@ use crate::error::ConfigParsingError;
 use std::net::IpAddr;
 use tracing::warn;
 
+use base64::Engine;
+
 use crate::cli::CliConfig;
 use crate::defaults::*;
 
@@ -41,6 +43,15 @@ pub struct S3Config {
 #[derive(Debug, Clone)]
 pub struct RedisConfig {
     pub url: String,
+}
+
+/// Settings of the encrypted file store built on top of [`S3Config`].
+#[derive(Debug, Clone)]
+pub struct StorageConfig {
+    /// The decoded master key. Every file carries its own data encryption key,
+    /// itself encrypted under this one, so rotating it means re-wrapping the
+    /// stored keys rather than re-encrypting the files.
+    pub encryption_key: [u8; STORAGE_ENCRYPTION_KEY_LENGTH],
 }
 
 #[derive(Debug, Clone)]
@@ -86,6 +97,7 @@ pub struct Config {
     pub api: ApiConfig,
     pub server: ServerBindingConfig,
     pub s3: S3Config,
+    pub storage: StorageConfig,
     pub redis: RedisConfig,
     pub postgres: PostgresConfig,
     pub prometheus: Option<PrometheusConfig>,
@@ -143,6 +155,11 @@ impl TryFrom<CliConfig> for Config {
                 user: value.s3_user,
                 password: value.s3_password,
             },
+            storage: StorageConfig {
+                encryption_key: decode_storage_encryption_key(
+                    &value.storage_encryption_key,
+                )?,
+            },
             redis: RedisConfig {
                 url: value.redis_url,
             },
@@ -189,6 +206,24 @@ impl Config {
 
         Ok(())
     }
+}
+
+/// Decodes the base64 master key and holds it to the exact length AES-256-GCM
+/// takes, so a truncated or mistyped key is refused at startup rather than at
+/// the first upload.
+fn decode_storage_encryption_key(
+    encoded: &str,
+) -> Result<[u8; STORAGE_ENCRYPTION_KEY_LENGTH], ConfigParsingError> {
+    let decoded = base64::engine::general_purpose::STANDARD
+        .decode(encoded.trim())
+        .map_err(|_| ConfigParsingError::StorageEncryptionKeyNotBase64)?;
+
+    decoded.try_into().map_err(|decoded: Vec<u8>| {
+        ConfigParsingError::StorageEncryptionKeyLength {
+            expected: STORAGE_ENCRYPTION_KEY_LENGTH,
+            found: decoded.len(),
+        }
+    })
 }
 
 test_utils::tests_file!(

@@ -12,7 +12,7 @@ import {
     DropdownSeparator,
     DropdownTrigger,
 } from '@/design-system/Dropdown'
-import { KeyIcon, LogoutIcon, UserIcon } from '@/design-system/Icon'
+import { FolderIcon, KeyIcon, LogoutIcon, UserIcon } from '@/design-system/Icon'
 import { PATHS } from '@/router/constants'
 import { fullName } from '@/utils/strings'
 
@@ -41,6 +41,11 @@ export function UserMenu({ user }: UserMenuProps) {
             </DropdownTrigger>
             <DropdownContent>
                 <DropdownLabel>{user.email}</DropdownLabel>
+                <DropdownSeparator />
+                <DropdownItem onSelect={() => void navigate(PATHS.drive.root)}>
+                    <FolderIcon />
+                    <Trans>Drive</Trans>
+                </DropdownItem>
                 <DropdownSeparator />
                 <DropdownItem
                     onSelect={() => void navigate(PATHS.user.information)}

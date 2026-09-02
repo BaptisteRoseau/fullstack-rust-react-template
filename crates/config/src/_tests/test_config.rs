@@ -14,6 +14,7 @@ impl Default for CliConfig {
             s3_url: DEFAULT_S3_URL.to_string(),
             s3_user: DEFAULT_S3_USER.to_string(),
             s3_password: DEFAULT_S3_PASSWORD.to_string(),
+            storage_encryption_key: DEFAULT_STORAGE_ENCRYPTION_KEY.to_string(),
             redis_url: DEFAULT_REDIS_URL.to_string(),
             database_host: DEFAULT_DATABASE_HOST.to_string(),
             database_port: DEFAULT_DATABASE_PORT,
@@ -67,4 +68,51 @@ fn test_validate_ignore_prometheus_config() {
     assert!(result.is_ok());
     assert!(config.is_ok());
     assert!(config.unwrap().prometheus.is_none());
+}
+
+#[test]
+fn test_default_storage_encryption_key_decodes_to_the_expected_length() {
+    let cli_config = CliConfig::default();
+
+    let config = Config::try_from(cli_config).expect("the default config must parse");
+
+    assert_eq!(
+        config.storage.encryption_key.len(),
+        STORAGE_ENCRYPTION_KEY_LENGTH,
+        "the shipped default key must decode to {STORAGE_ENCRYPTION_KEY_LENGTH} bytes, got {}",
+        config.storage.encryption_key.len()
+    );
+}
+
+#[test]
+fn test_validate_refuses_a_storage_encryption_key_of_the_wrong_length() {
+    let mut cli_config = CliConfig::default();
+    // Base64 of 16 bytes: valid base64, wrong size for AES-256.
+    cli_config.storage_encryption_key = "MTIzNDU2Nzg5MDEyMzQ1Ng==".to_string();
+
+    let config = Config::try_from(cli_config);
+
+    match config {
+        Err(ConfigParsingError::StorageEncryptionKeyLength { expected, found }) => {
+            assert_eq!(
+                (expected, found),
+                (STORAGE_ENCRYPTION_KEY_LENGTH, 16),
+                "unexpected lengths reported: expected={expected} found={found}"
+            );
+        }
+        other => panic!("a 16-byte key must be refused, got {other:?}"),
+    }
+}
+
+#[test]
+fn test_validate_refuses_a_storage_encryption_key_that_is_not_base64() {
+    let mut cli_config = CliConfig::default();
+    cli_config.storage_encryption_key = "not base64 at all!!".to_string();
+
+    let config = Config::try_from(cli_config);
+
+    assert!(
+        matches!(config, Err(ConfigParsingError::StorageEncryptionKeyNotBase64)),
+        "a non-base64 key must be refused, got {config:?}"
+    );
 }

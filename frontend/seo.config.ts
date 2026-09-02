@@ -28,7 +28,13 @@ export type SeoConfig = z.infer<typeof SeoConfigSchema>
  * `PATHS` stays unpublished until it is added here, so authenticated or
  * half-finished routes never leak into the sitemap.
  */
-export const PUBLIC_PATHS = [PATHS.home, PATHS.login, PATHS.register] as const
+export const PUBLIC_PATHS = [
+    PATHS.home,
+    PATHS.login,
+    PATHS.register,
+    PATHS.legal.terms,
+    PATHS.legal.mentions,
+] as const
 
 function createSeoConfig(): SeoConfig {
     const rawConfig = {
@@ -36,10 +42,10 @@ function createSeoConfig(): SeoConfig {
             process.env.SEO_SITE_URL ??
             process.env.VITE_APP_APP_URL ??
             'http://localhost:3000',
-        siteName: process.env.SEO_SITE_NAME ?? 'Fullstack Template',
+        siteName: process.env.SEO_SITE_NAME ?? 'Driftbox',
         siteDescription:
             process.env.SEO_SITE_DESCRIPTION ??
-            'A Rust and React fullstack application template.',
+            'Multi-user cloud storage that compresses and encrypts every file on upload.',
         themeColor: process.env.SEO_THEME_COLOR ?? '#2f6feb',
         // Placeholder address: replace it per deployment with a mailbox that a
         // human actually reads, or security reports will go nowhere.

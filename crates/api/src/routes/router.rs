@@ -13,6 +13,19 @@ use crate::{
             __path_register, __path_update_me, callback, login, logout, me, refresh,
             register, update_me,
         },
+        files::endpoints::{
+            __path_create_directory, __path_delete_directory, __path_delete_file,
+            __path_download_file, __path_download_thumbnail, __path_get_file,
+            __path_grant_directory_permission, __path_grant_file_permission,
+            __path_list_directory_permissions, __path_list_entries,
+            __path_list_file_permissions, __path_revoke_directory_permission,
+            __path_revoke_file_permission, __path_update_directory, __path_update_file,
+            __path_upload_file, create_directory, delete_directory, delete_file,
+            download_file, download_thumbnail, get_file, grant_directory_permission,
+            grant_file_permission, list_directory_permissions, list_entries,
+            list_file_permissions, revoke_directory_permission, revoke_file_permission,
+            update_directory, update_file, upload_file,
+        },
         ping::endpoints::{__path_ping, ping},
         storage::endpoints::{
             __path_delete_stored_file, __path_download, __path_upload,
@@ -44,6 +57,21 @@ pub(super) fn api_router() -> OpenApiRouter<AppState> {
         .routes(routes!(upload))
         .routes(routes!(download))
         .routes(routes!(delete_stored_file))
+        // Files: the encrypted, shareable file tree
+        .routes(routes!(list_entries))
+        .routes(routes!(upload_file))
+        .routes(routes!(create_directory))
+        .routes(routes!(update_directory, delete_directory))
+        .routes(routes!(list_directory_permissions))
+        .routes(routes!(
+            grant_directory_permission,
+            revoke_directory_permission,
+        ))
+        .routes(routes!(get_file, update_file, delete_file))
+        .routes(routes!(download_file))
+        .routes(routes!(download_thumbnail))
+        .routes(routes!(list_file_permissions))
+        .routes(routes!(grant_file_permission, revoke_file_permission))
         // API Key
         .routes(routes!(create_api_key, list_api_keys))
         .routes(routes!(get_api_key))
