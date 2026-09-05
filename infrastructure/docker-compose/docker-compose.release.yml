@@ -7,7 +7,7 @@ services:
         image: localhost/backend:latest
         build:
             context: ../..
-            dockerfile: infrastructure/docker/backend/Dockerfile.release
+            dockerfile: infrastructure/docker/app_backend/Dockerfile.release
             tags:
                 - "localhost/backend:latest"
         depends_on:
@@ -41,7 +41,7 @@ services:
         image: localhost/frontend:latest
         build:
             context: ../..
-            dockerfile: infrastructure/docker/frontend/Dockerfile.release
+            dockerfile: infrastructure/docker/app_frontend/Dockerfile.release
             tags:
                 - "localhost/frontend:latest"
         container_name: frontend

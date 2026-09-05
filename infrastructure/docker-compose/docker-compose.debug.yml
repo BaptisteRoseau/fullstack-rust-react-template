@@ -11,7 +11,7 @@ services:
     image: localhost/backend:latest-debug
     build:
       context: ../..
-      dockerfile: infrastructure/docker/backend/Dockerfile.debug
+      dockerfile: infrastructure/docker/app_backend/Dockerfile.debug
       tags:
         - "localhost/backend:latest-debug"
     depends_on:
@@ -45,7 +45,7 @@ services:
     image: localhost/frontend:latest-debug
     build:
       context: ../..
-      dockerfile: infrastructure/docker/frontend/Dockerfile.debug
+      dockerfile: infrastructure/docker/app_frontend/Dockerfile.debug
       tags:
         - "localhost/frontend:latest-debug"
     container_name: frontend
