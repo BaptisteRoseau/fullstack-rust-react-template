@@ -8,11 +8,16 @@ Three crates form the main stack. Dependencies flow one way only:
 
 ```txt
 api → app_core → database
+mcp ↗
 ```
 
 - `api` may use `app_core` and `database`.
 - `app_core` may use `database`.
 - `database` may use neither.
+
+[mcp](./mcp) is a second protocol crate sitting at the same level as `api`: it may use
+`app_core` and `database`, and must never import `api`. `api` mounts its HTTP endpoint, so
+the dependency runs `api → mcp` and never the other way.
 
 An inner layer never imports an outer one. This keeps each layer readable and testable on its own.
 
@@ -24,6 +29,7 @@ trait, never on a concrete backend.
 ```txt
 crates/
 ├── api/                  # HTTP layer: routes, endpoints, extractors, middlewares
+├── mcp/                  # Model Context Protocol layer: the tools assistants can call
 ├── app_core/             # Business logic. The only place domain rules live
 ├── database/             # Postgres access and migrations
 ├── models/               # Domain structs shared between layers
@@ -102,6 +108,7 @@ Integration suites are written once against the trait, then replayed against eve
 ## Skills
 
 - [backend-add-api-endpoint](../.claude/skills/backend-add-api-endpoint/SKILL.md)
+- [backend-add-mcp-tool](../.claude/skills/backend-add-mcp-tool/SKILL.md)
 - [backend-config-entry](../.claude/skills/backend-config-entry/SKILL.md)
 - [backend-feature-gating](../.claude/skills/backend-feature-gating/SKILL.md)
 - [backend-trait-test](../.claude/skills/backend-trait-test/SKILL.md)

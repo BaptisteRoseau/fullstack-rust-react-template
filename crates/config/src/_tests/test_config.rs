@@ -1,6 +1,7 @@
 //TODO: Config priority: default->file->env->cli
 //TODO: CliConfig merging priority: self->other
 use super::*;
+use clap::Parser;
 use std::net::{IpAddr, Ipv4Addr};
 
 impl Default for CliConfig {
@@ -37,6 +38,10 @@ impl Default for CliConfig {
             authenticator_redirect_url: DEFAULT_AUTHENTICATOR_REDIRECT_URL.to_string(),
             frontend_url: DEFAULT_FRONTEND_URL.to_string(),
             cookie_secure: DEFAULT_COOKIE_SECURE,
+            mcp_path: DEFAULT_MCP_PATH.to_string(),
+            mcp_allowed_hosts: DEFAULT_MCP_ALLOWED_HOSTS.to_string(),
+            no_mcp_json_response: false,
+            no_mcp: false,
         }
     }
 }
@@ -67,4 +72,67 @@ fn test_validate_ignore_prometheus_config() {
     assert!(result.is_ok());
     assert!(config.is_ok());
     assert!(config.unwrap().prometheus.is_none());
+}
+
+#[test]
+fn test_validate_ignore_mcp_config() {
+    let mut cli_config = CliConfig::default();
+    cli_config.no_mcp = true;
+    cli_config.mcp_path = "/somewhere-else".to_string();
+
+    let result = Config::validate(&cli_config);
+    let config = Config::try_from(cli_config);
+
+    assert!(result.is_ok(), "validate rejected a disabled MCP server: {result:?}");
+    let config = config.expect("building a Config with the MCP server disabled");
+    assert!(
+        config.mcp.is_none(),
+        "expected no McpConfig when --no-mcp is set, got {:?}",
+        config.mcp
+    );
+}
+
+#[test]
+fn test_mcp_allowed_hosts_are_split_on_commas() {
+    let mut cli_config = CliConfig::default();
+    cli_config.mcp_allowed_hosts = "localhost, api.example.com ,".to_string();
+
+    let config = Config::try_from(cli_config).expect("building a Config with an MCP server");
+    let mcp = config.mcp.expect("the MCP server is enabled by default");
+
+    assert_eq!(
+        mcp.allowed_hosts,
+        vec!["localhost".to_string(), "api.example.com".to_string()],
+        "empty and padded entries should be dropped, got {:?}",
+        mcp.allowed_hosts
+    );
+}
+
+#[test]
+fn test_mcp_flags_are_exposed_on_the_command_line() {
+    let cli_config = CliConfig::try_parse_from([
+        "backend",
+        "--mcp-path",
+        "/tools",
+        "--mcp-allowed-hosts",
+        "api.example.com",
+        "--no-mcp-json-response",
+    ])
+    .expect("the MCP flags should be accepted by the parser");
+
+    let config = Config::try_from(cli_config).expect("building a Config");
+    let mcp = config.mcp.expect("the MCP server is enabled by default");
+
+    assert_eq!(mcp.path, "/tools", "--mcp-path did not reach Config, got {}", mcp.path);
+    assert_eq!(
+        mcp.allowed_hosts,
+        vec!["api.example.com".to_string()],
+        "--mcp-allowed-hosts did not reach Config, got {:?}",
+        mcp.allowed_hosts
+    );
+    assert!(
+        !mcp.json_response,
+        "--no-mcp-json-response did not reach Config, got {}",
+        mcp.json_response
+    );
 }

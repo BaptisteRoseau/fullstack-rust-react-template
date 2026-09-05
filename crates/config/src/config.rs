@@ -72,6 +72,26 @@ pub struct SwaggerConfig {
     pub openapi_path: String,
 }
 
+/// The MCP (Model Context Protocol) Streamable HTTP endpoint served by the backend.
+///
+/// Present only when the endpoint is enabled: the [`mcp`] crate is initialized from
+/// this struct alone, and the [`api`] crate mounts nothing when it is `None`.
+#[derive(Debug, Clone)]
+pub struct McpConfig {
+    /// Path the endpoint answers on, e.g. `/mcp`. Mounted at the server root, next to
+    /// the Swagger UI, not under the `/api` prefix.
+    pub path: String,
+    /// `Host` header values accepted by the endpoint. This is the DNS-rebinding guard
+    /// mandated by the MCP specification for HTTP transports, so it defaults to the
+    /// loopback names and must list the public domain of a real deployment. Empty
+    /// disables the check.
+    pub allowed_hosts: Vec<String>,
+    /// Answer a simple tool call with one `application/json` body instead of an event
+    /// stream. The server still falls back to `text/event-stream` when a tool emits a
+    /// notification before its result.
+    pub json_response: bool,
+}
+
 /// The main configuration.
 ///
 /// This struct is passed to the whole program to configure the server.
@@ -91,6 +111,17 @@ pub struct Config {
     pub prometheus: Option<PrometheusConfig>,
     pub swagger: Option<SwaggerConfig>,
     pub authenticator: AuthenticatorConfig,
+    pub mcp: Option<McpConfig>,
+}
+
+/// Splits a comma-separated CLI value into its non-empty entries.
+fn split_list(value: &str) -> Vec<String> {
+    value
+        .split(',')
+        .map(str::trim)
+        .filter(|entry| !entry.is_empty())
+        .map(str::to_string)
+        .collect()
 }
 
 impl Config {
@@ -112,6 +143,16 @@ impl TryFrom<CliConfig> for Config {
                 ip: value.prometheus_ip,
                 port: value.prometheus_port,
                 path: value.prometheus_path,
+            })
+        };
+
+        let mcp = if value.no_mcp {
+            None
+        } else {
+            Some(McpConfig {
+                path: value.mcp_path,
+                allowed_hosts: split_list(&value.mcp_allowed_hosts),
+                json_response: !value.no_mcp_json_response,
             })
         };
 
@@ -155,14 +196,10 @@ impl TryFrom<CliConfig> for Config {
             },
             prometheus,
             swagger,
+            mcp,
             authenticator: AuthenticatorConfig {
                 issuer_url: value.authenticator_issuer_url,
-                audiences: value
-                    .authenticator_audiences
-                    .split(',')
-                    .filter(|s| !s.is_empty())
-                    .map(str::to_string)
-                    .collect(),
+                audiences: split_list(&value.authenticator_audiences),
                 client_id: value.authenticator_client_id,
                 client_secret: value.authenticator_client_secret,
                 redirect_url: value.authenticator_redirect_url,
@@ -185,6 +222,10 @@ impl Config {
                 || cli_config.prometheus_port != DEFAULT_PROMETHEUS_PORT)
         {
             warn!("Ignoring Prometheus server configuration because it is deactivated.");
+        }
+
+        if cli_config.no_mcp && cli_config.mcp_path != DEFAULT_MCP_PATH {
+            warn!("Ignoring MCP server configuration because it is deactivated.");
         }
 
         Ok(())

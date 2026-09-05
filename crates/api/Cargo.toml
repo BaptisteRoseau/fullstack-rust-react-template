@@ -13,6 +13,7 @@ database = { path = "../database" }
 storage = { path = "../storage" }
 cache = { path = "../cache" }
 models = { path = "../models" }
+mcp = { path = "../mcp" }
 rbac = { path = "../rbac" }
 compressor = { path = "../compressor" }
 authenticator = { path = "../authenticator" }

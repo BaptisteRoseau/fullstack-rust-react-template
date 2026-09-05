@@ -43,3 +43,10 @@ pub(crate) const DEFAULT_AUTHENTICATOR_REDIRECT_URL: &str =
     "http://localhost:8080/api/auth/callback";
 pub(crate) const DEFAULT_FRONTEND_URL: &str = "http://localhost:3000";
 pub(crate) const DEFAULT_COOKIE_SECURE: bool = false;
+
+// MCP (Model Context Protocol) Streamable HTTP endpoint, mounted by the api crate.
+pub(crate) const DEFAULT_MCP_PATH: &str = "/mcp";
+// Loopback only, matching rmcp's own default: the `Host` allow list is what stops a
+// browser page on another origin from driving this endpoint through DNS rebinding.
+// A deployment answering on a real domain must list it here.
+pub(crate) const DEFAULT_MCP_ALLOWED_HOSTS: &str = "localhost,127.0.0.1,::1";

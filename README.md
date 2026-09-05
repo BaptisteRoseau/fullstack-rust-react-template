@@ -20,6 +20,8 @@ What you get out of the box:
 - A layer-first React frontend (SWR, SCSS Modules, Radix UI) with routing, i18n, forms,
   MSW mocks, Storybook and tests — see [frontend/docs/architecture](./frontend/docs/architecture).
 - Metrics, dashboards, structured logging, an OpenAPI document and Swagger UI.
+- An MCP endpoint exposing part of the backend to assistants as callable tools —
+  see [crates/mcp](./crates/mcp).
 - Scripts for building, linting, unit tests, coverage, CVE and license checks, plus git hooks.
 
 Remaining work is tracked in [TODO.md](./TODO.md).
@@ -76,6 +78,7 @@ dev server if you run both:
 | Frontend (container)             | <http://127.0.0.1:8080> | `FRONTEND_PORT`   |
 | Backend (container)              | <http://127.0.0.1:9876> | `BACKEND_PORT`    |
 | Swagger UI                       | <http://127.0.0.1:7070> | `SWAGGER_PORT`    |
+| MCP endpoint (on the backend)    | <http://127.0.0.1:8080/mcp> | `--mcp-path`  |
 | Homepage (index of all services) | <http://127.0.0.1:3002> | `HOMEPAGE_PORT`   |
 | Grafana                          | <http://127.0.0.1:3000> | `GRAFANA_PORT`    |
 | Prometheus                       | <http://127.0.0.1:9090> | `PROMETHEUS_PORT` |
@@ -122,6 +125,7 @@ inside it. Read it before working there, together with those of its parents.
 | SQLx                | Compile-time checked SQL and database migrations               |
 | Clap                | CLI and environment-variable configuration                     |
 | utoipa + Swagger UI | OpenAPI document generation and interactive docs               |
+| rmcp                | Model Context Protocol server, over Streamable HTTP            |
 | thiserror / anyhow  | Typed error enum per crate; anyhow in `api` and the binary     |
 | tracing             | Structured, span-aware logging (compact or JSON)               |
 | testcontainers      | Integration tests against real Postgres and Keycloak instances |

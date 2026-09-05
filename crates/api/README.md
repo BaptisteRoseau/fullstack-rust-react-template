@@ -21,6 +21,12 @@ directly by handlers.
 - `error::ApiError` — the crate-wide error enum. See the error convention in
   [crates/README.md](../README.md).
 
+`public_routes` also mounts the MCP endpoint of the [mcp](../mcp) crate, when
+`config.mcp` is set. `api` sees exactly two things from that crate — `McpState` and
+`mcp_routes` — and is where the endpoint's authentication is applied, so the tools
+themselves hold no notion of identity. See `with_mcp` in
+[routes/router.rs](src/routes/router.rs).
+
 ## Directory
 
 ```txt
@@ -61,4 +67,5 @@ what the client receives.
 ## Skills
 
 - [backend-add-api-endpoint](../../.claude/skills/backend-add-api-endpoint/SKILL.md)
+- [backend-add-mcp-tool](../../.claude/skills/backend-add-mcp-tool/SKILL.md)
 - [backend-feature-gating](../../.claude/skills/backend-feature-gating/SKILL.md)

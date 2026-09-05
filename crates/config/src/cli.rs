@@ -170,6 +170,26 @@ pub(crate) struct CliConfig {
     /// OAuth redirect URL pointing back to the backend callback endpoint
     #[arg(long, env, default_value_t = DEFAULT_AUTHENTICATOR_REDIRECT_URL.to_string())]
     pub(crate) authenticator_redirect_url: String,
+
+    /* ===============
+    MCP
+    ================ */
+    /// The path where to bind the MCP Streamable HTTP endpoint
+    #[arg(long, env, default_value_t = DEFAULT_MCP_PATH.to_string())]
+    pub(crate) mcp_path: String,
+
+    /// Comma-separated list of Host headers the MCP endpoint answers to. Add the
+    /// public domain of the deployment; an empty list accepts any host.
+    #[arg(long, env, default_value_t = DEFAULT_MCP_ALLOWED_HOSTS.to_string())]
+    pub(crate) mcp_allowed_hosts: String,
+
+    /// Stream MCP tool results as an event stream instead of a single JSON body
+    #[arg(long, env, default_value_t = false)]
+    pub(crate) no_mcp_json_response: bool,
+
+    /// Deactivate the MCP server
+    #[arg(long, env, default_value_t = false)]
+    pub(crate) no_mcp: bool,
 }
 
 impl CliConfig {
