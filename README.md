@@ -40,6 +40,7 @@ CVEs), `sqlx-cli` (migrations), `markdownlint`, `cspell`.
 
 ```bash
 # 1. Environment variables (.env is a symlink to .env.dev by default)
+cp .env.dev .env
 source .env
 
 # 2. Bring up Postgres, Redis, SeaweedFS, Keycloak, Prometheus, Grafana...
