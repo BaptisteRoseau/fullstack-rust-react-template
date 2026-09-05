@@ -20,6 +20,7 @@
     - [ ] Invoices
     - [ ] Files
 
+- [ ] PDF size optimizations (search for a crate -> add into compression/)
 - [ ] Un-flatten the backend crates (rename it "backend" again -> macros/services etc..)
 - [ ] See how to properly handle reactivity on the frontend (use container classes ? Add another optionnal .scss file and include it ? Use variables from the theme constants ?)
 
@@ -47,34 +48,19 @@
     - [ ] Avoid creating new boxes every time we convert an error ?
     - [ ] Find a way to factorize openapi specs for error responses
     - [ ] Create endpoint-specific error response schemas
-- [ ] Add the file name to the upload/download endpoint using the file metadata (currently downloading a blob)
-- [ ] Maybe use the s3 client directly instead of `Storage` since its interface is so good
+- [ ] Add the file name to the upload/download endpoint using the file metadata (currently downloading a blob) (See how it's done in the file storage PoC)
 - [ ] Standardize API tests
 
 - [ ] Nix & k3s infra
 
-- [ ] Cache uuid <-> username in Redis
+- [ ] Cache uuid <-> username in Redis ?
 - [ ] use username as slug ?
-- [ ] Use testcontainers for `can_reach_google` test
 
-- [ ] Snippets/tool to make templates (extractors, db queries etc..)
+- [ ] Snippets/tool to make templates (extractors, db queries etc..) (Wait for a final state of the related codebase)
 
 ## Milestones
 
 ### Current
-
-- [ ] Avoir un docker compose up qui fonctionne:
-    - [x] DB
-    - [x] Prometheus
-    - [x] Grafana
-    - [x] Backend
-    - [x] Metrics endpoint
-    - [x] Frontend
-    - [x] Fix bun run dev
-    - [ ] Simple echo API with a simple button (somehow like a TODO app)
-    - [ ] CRUD files s3
-
-- [ ] Generate `frontend/src/types/api.ts` from the openapi of the backend.
 
 1. [x] Fix SQLx migrations
 2. [x] Generate Rust models from SQLx
@@ -109,7 +95,7 @@
 
 - [x] Set a request ID for logging purposes
 - [ ] Use slugs instead of IDs whenever possible
-- [ ] Use a Protobuf schema to generate Rust models and Typescript structures
+- [ ] Use a Protobuf schema to generate Rust models and Typescript structures ?
 - [ ] Implement an actual CORS middleware
 - [x] Add compression middleware
 - [x] Add tracing middleware (set sensitive headers before)
@@ -123,10 +109,10 @@
 - [ ] Convert `app_core` models to API models and vice-versa
 - [x] Add error handling middleware & global error conversion
 - [x] Trace errors & normalize error response
-- [ ] Support both REST & gRCP from the same handler (split with `/rest/` and `/grpc/` in the URL)
+- [ ] Support both REST & RCP from the same handler (based on the `Content-Type` header)
 - [ ] Add an MCP crate (similar to the API crate), merge it in the router
 - [ ] Better health checks (see kube probes (startup/ready/alive))
-- [ ] Pagination
+- [ ] Pagination standardization
 - [ ] API routes standards (GET is always for multiple objects with pagination, POST/PUT/DELETE are for 1 item only with IDs or slugs, when to use ID vs when to use slug,  etc..)
 
 ### Testing, CI/CD, Docker and scripts
@@ -159,7 +145,7 @@
 ### Frontend
 
 - [ ] SSR vs Client query helper
-- [ ] Build React mainstream architecture (component/pages/controllers)
+- [X] Build React mainstream architecture (component/pages/controllers)
 
 ### Core and authentication - API
 
@@ -168,8 +154,8 @@
 
 ### User Management & Information Update (back & front)
 
-- [ ] User Dashboard
-- [ ] API to update user information (/me, not /user/id)
+- [X] User Dashboard
+- [X] API to update user information (/me, not /user/id)
 
 ### Storage layer
 
@@ -206,7 +192,7 @@
 - [ ] Skills for everything that is satisfying enough long-term
     - [X] Endpoint writing
     - [X] Config entries
-- [ ] `doc/` for developer documentation
+- [ ] `doc/` for developer documentation (+ Redocly)
 - [X] CLAUDE.md and other LLM templates
 
 ### Extras
@@ -216,6 +202,5 @@
 - [ ] Pre-built Grafana dashboards
 - [ ] Kubernetes manifests
 - [ ] Nix flake (Docker & Prometheus & Kubernetes)
-- [ ] Hasicorp Vault for certificates/keys/passwords ?
 - [ ] Agent integration (MCP Gateway ?) read-only for every service (Backend, Postgres)
-- [ ] Admin Dashboard ? -> Requires SSR to "display X only if user Y can"
+- [ ] Admin Dashboard ?
