@@ -11,3 +11,6 @@
 # Rust Binaries
 target/
 dist/
+
+# Node modules
+node_modules/
