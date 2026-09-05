@@ -1,8 +1,8 @@
 ---
 include:
-  - infrastructure/docker-compose/docker-compose.base.yml
-  - infrastructure/docker-compose/docker-compose.monitoring.yml
-  - infrastructure/docker-compose/docker-compose.debug-services.yml
-  - infrastructure/docker-compose/docker-compose.authentication.yml
-  - infrastructure/docker-compose/docker-compose.release.yml
-  - infrastructure/docker-compose/docker-compose.debug.yml
+  - infrastructure/docker-compose/base.docker-compose.yml
+  - infrastructure/docker-compose/monitoring.docker-compose.yml
+  - infrastructure/docker-compose/debug-services.docker-compose.yml
+  - infrastructure/docker-compose/authentication.docker-compose.yml
+  - infrastructure/docker-compose/release.docker-compose.yml
+  - infrastructure/docker-compose/debug.docker-compose.yml

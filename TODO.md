@@ -5,6 +5,7 @@
     - [ ] Write a README
     - [ ] Simplifyier
 
+- [ ] Add cargo target env variable in the debug container
 - [ ] SQL-based backend for Database
     - [ ] Use as a Drop-in replacement for Postgres/SQlite/MyQSL.. -> Then use SQLite as the database exposed mock
     - [ ] Use a Database mock to replace the @crates/app_core/src/api_key.rs tests
