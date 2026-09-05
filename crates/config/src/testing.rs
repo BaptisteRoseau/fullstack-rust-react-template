@@ -15,8 +15,8 @@ use crate::defaults::*;
 /// `Config` but only care about a few fields. Mutate the returned value as needed.
 ///
 /// Connection details (s3, redis, postgres) are left empty so a test never
-/// accidentally reaches a real service; `prometheus` and `swagger` are disabled;
-/// the server binds to an ephemeral port on loopback.
+/// accidentally reaches a real service; `prometheus`, `swagger` and `mcp` are
+/// disabled; the server binds to an ephemeral port on loopback.
 pub fn test_config() -> Config {
     Config {
         debug: false,
@@ -47,6 +47,7 @@ pub fn test_config() -> Config {
         },
         prometheus: None,
         swagger: None,
+        mcp: None,
         authenticator: AuthenticatorConfig {
             issuer_url: DEFAULT_AUTHENTICATOR_ISSUER_URL.to_string(),
             audiences: DEFAULT_AUTHENTICATOR_AUDIENCES

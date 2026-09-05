@@ -20,11 +20,14 @@ use crate::{
         },
         user::endpoints::{__path_get_user, get_user},
     },
+    models::UserToken,
 };
-use axum::{Router, routing::get};
+use axum::{Router, middleware::from_extractor_with_state, routing::get};
 use axum_prometheus::metrics_exporter_prometheus::PrometheusHandle;
 use config::Config;
+use mcp::{McpState, mcp_routes};
 use std::future::ready;
+use std::sync::Arc;
 use utoipa::openapi::OpenApi;
 use utoipa_axum::{router::OpenApiRouter, routes};
 use utoipa_swagger_ui::SwaggerUi;
@@ -61,12 +64,42 @@ pub(super) fn api_router() -> OpenApiRouter<AppState> {
 pub fn public_routes(config: &Config, state: AppState) -> Router {
     let (api_routes, _) = api_router().split_for_parts();
     // The whole API (typed endpoints + auth BFF) lives under `/api`, matching the
-    // frontend's `VITE_APP_API_URL`. Swagger keeps its own absolute path at the root.
+    // frontend's `VITE_APP_API_URL`. Swagger and MCP keep their own absolute paths at
+    // the root: neither is part of the REST contract the frontend SDK is generated from.
     let routes = Router::new()
         .nest("/api", api_routes)
         .merge(swagger(config, openapi(config)));
+    let routes = with_mcp(routes, config, &state);
 
     with_middlewares(routes, config).with_state(state)
+}
+
+/// Mounts the MCP Streamable HTTP endpoint, when it is enabled.
+///
+/// The `mcp` crate exposes exactly two items — [`McpState`] and [`mcp_routes`] — so its
+/// tools, its handler and `rmcp` itself stay invisible from here. This function only
+/// decides *where* the endpoint hangs and *who* may reach it.
+///
+/// Authentication is applied here rather than inside the tools: the endpoint is wrapped
+/// in the same [`UserToken`] check the authenticated API endpoints use, so an anonymous
+/// caller is turned away before any tool runs. That is what lets `mcp` hold no notion of
+/// identity, and it means a tool never has to re-check one.
+fn with_mcp(
+    routes: Router<AppState>,
+    config: &Config,
+    state: &AppState,
+) -> Router<AppState> {
+    let Some(mcp_config) = config.mcp.as_ref() else {
+        return routes;
+    };
+
+    let mcp_state = McpState::new(Arc::clone(&state.database));
+    routes.merge(
+        mcp_routes(mcp_config, mcp_state)
+            .layer(from_extractor_with_state::<UserToken, AppState>(
+                state.clone(),
+            )),
+    )
 }
 
 /// Swagger UI and OpenAPI routes layer.

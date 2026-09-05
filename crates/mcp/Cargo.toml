@@ -1,0 +1,29 @@
+[package]
+name = "mcp"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# Local crates
+test_utils = { path = "../test_utils" }
+config = { path = "../config" }
+app_core = { path = "../app_core" }
+database = { path = "../database" }
+
+# Crates.io
+axum = { version = "0", features = ["http1", "http2"] }
+chrono = { version = "0" }
+rmcp = { version = "3", features = ["transport-streamable-http-server"] }
+schemars = { version = "1", features = ["uuid1", "chrono04"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tokio = { version = "1", features = ["sync"] }
+tracing = "0"
+uuid = { version = "1", features = ["serde", "v7"] }
+
+[dev-dependencies]
+database = { path = "../database", features = ["test-utils"] }
+http-body-util = "0.1"
+tokio = { version = "1", features = ["macros", "rt"] }
+tower = { version = "0.5", features = ["util"] }

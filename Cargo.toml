@@ -12,6 +12,7 @@ members = [
   "crates/database",
   "crates/database_crud_derive",
   "crates/logging",
+  "crates/mcp",
   "crates/storage",
   "crates/test_trait",
   "crates/test_trait_derive",
