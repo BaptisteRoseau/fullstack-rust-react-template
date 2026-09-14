@@ -1,0 +1,13 @@
+---
+# 'start-dev' never runs outside a laptop: production runs the real server
+# behind the ingress, which terminates TLS and forwards the original host.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+spec:
+  template:
+    spec:
+      containers:
+        - name: keycloak
+          args: ["start"]

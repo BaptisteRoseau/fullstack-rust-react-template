@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend
+data:
+  DEBUG: "true"
+  AUTHENTICATOR_ISSUER_URL: https://auth.dev.example.com/realms/app
+  AUTHENTICATOR_REDIRECT_URL: https://app.dev.example.com/api/auth/callback
+  FRONTEND_URL: https://app.dev.example.com
+  COOKIE_SECURE: "true"

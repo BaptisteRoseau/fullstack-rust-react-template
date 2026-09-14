@@ -1,0 +1,22 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mailhog
+  labels:
+    app.kubernetes.io/name: mailhog
+    app.kubernetes.io/component: smtp
+    app.kubernetes.io/part-of: fullstack-rust-react-template
+spec:
+  type: ClusterIP
+  ports:
+    - name: smtp
+      port: 1025
+      targetPort: smtp
+      protocol: TCP
+    - name: http
+      port: 8025
+      targetPort: http
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: mailhog

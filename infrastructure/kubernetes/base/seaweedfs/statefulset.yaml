@@ -1,0 +1,89 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seaweedfs
+  labels:
+    app.kubernetes.io/name: seaweedfs
+    app.kubernetes.io/component: object-storage
+    app.kubernetes.io/part-of: fullstack-rust-react-template
+spec:
+  serviceName: seaweedfs
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: seaweedfs
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: seaweedfs
+        app.kubernetes.io/component: object-storage
+        app.kubernetes.io/part-of: fullstack-rust-react-template
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: seaweedfs
+          image: chrislusf/seaweedfs:latest
+          # The 'server' command starts master, volume and filer together;
+          # '-s3' adds the S3-compatible gateway the backend talks to.
+          args: ["server", "-s3", "-dir=/data", "-ip.bind=0.0.0.0"]
+          ports:
+            - name: s3
+              containerPort: 8333
+              protocol: TCP
+            - name: master
+              containerPort: 9333
+              protocol: TCP
+            - name: filer
+              containerPort: 8888
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /cluster/healthz
+              port: master
+            periodSeconds: 5
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /cluster/healthz
+              port: master
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /cluster/healthz
+              port: master
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          app.kubernetes.io/name: seaweedfs
+          app.kubernetes.io/component: object-storage
+          app.kubernetes.io/part-of: fullstack-rust-react-template
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 20Gi

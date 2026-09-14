@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: fullstack-rust-react-template
+data:
+  IP: 0.0.0.0
+  PORT: "9876"
+  PROMETHEUS_IP: 0.0.0.0
+  PROMETHEUS_PORT: "9100"
+  SWAGGER_IP: 0.0.0.0
+  SWAGGER_PORT: "7070"
+  SWAGGER_UI_PATH: /v1/docs/swagger-ui
+  SWAGGER_OPENAPI_PATH: /v1/docs/openapi.json
+  DEBUG: "false"
+  DATABASE_HOST: postgres
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: application
+  DATABASE_USER: readwrite
+  REDIS_URL: redis://redis:6379
+  S3_URL: http://seaweedfs:8333
+  S3_USER: backendkey
+  AUTHENTICATOR_ISSUER_URL: http://keycloak:8080/realms/app
+  AUTHENTICATOR_CLIENT_ID: webapp

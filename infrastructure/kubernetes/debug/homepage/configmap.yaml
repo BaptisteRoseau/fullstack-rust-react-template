@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage
+  labels:
+    app.kubernetes.io/name: homepage
+    app.kubernetes.io/component: dashboard
+    app.kubernetes.io/part-of: fullstack-rust-react-template
+data:
+  # Homepage rejects requests whose Host header is not listed here, so the
+  # overlays replace this with the host they actually serve it on.
+  HOMEPAGE_ALLOWED_HOSTS: localhost:3002

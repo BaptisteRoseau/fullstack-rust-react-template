@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend
+data:
+  AUTHENTICATOR_ISSUER_URL: https://auth.example.com/realms/app
+  AUTHENTICATOR_REDIRECT_URL: https://app.example.com/api/auth/callback
+  FRONTEND_URL: https://app.example.com
+  COOKIE_SECURE: "true"
+  LOG_JSON: "true"
+  # The interactive API documentation is a development aid, not a public endpoint.
+  NO_SWAGGER: "true"

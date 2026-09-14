@@ -1,0 +1,19 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - configmap.yaml
+  - deployment.yaml
+  - service.yaml
+
+# Shares the dashboard definition with Docker Compose instead of copying it.
+configMapGenerator:
+  - name: homepage-config
+    files:
+      - ../../../docker/homepage/config/docker.yaml
+    options:
+      labels:
+        app.kubernetes.io/name: homepage
+        app.kubernetes.io/component: dashboard
+        app.kubernetes.io/part-of: fullstack-rust-react-template

@@ -1,0 +1,50 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: app-dev
+
+resources:
+  - namespace.yaml
+  - ../../base
+  - ../../monitoring
+  - ../../debug
+
+labels:
+  - includeSelectors: false
+    pairs:
+      app.kubernetes.io/instance: dev
+
+# Immutable tags only: a release is a one-line change here.
+images:
+  - name: backend
+    newName: ghcr.io/example/backend
+    newTag: "0000000000000000000000000000000000000000" # replace with the released git SHA
+  - name: frontend
+    newName: ghcr.io/example/frontend
+    newTag: "0000000000000000000000000000000000000000" # replace with the released git SHA
+  - name: app_postgres
+    newName: ghcr.io/example/app_postgres
+    newTag: "0000000000000000000000000000000000000000" # replace with the released git SHA
+
+replicas:
+  - name: backend
+    count: 1
+  - name: frontend
+    count: 1
+
+patches:
+  - path: backend/configmap.yaml
+  - path: backend/deployment.yaml
+  - path: frontend/ingress.yaml
+  - path: homepage/configmap.yaml
+  - path: keycloak/ingress.yaml
+  # A shared dev cluster scales by hand; autoscaling only hides capacity problems here.
+  - target:
+      kind: HorizontalPodAutoscaler
+    patch: |
+      apiVersion: autoscaling/v2
+      kind: HorizontalPodAutoscaler
+      metadata:
+        name: unused
+      $patch: delete

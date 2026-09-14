@@ -1,0 +1,23 @@
+---
+# Host, TLS and ingress class are environment-specific and come from the overlays.
+# The browser is redirected to this host during login, so the issuer URL the
+# backend validates tokens against must match it.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak
+  labels:
+    app.kubernetes.io/name: keycloak
+    app.kubernetes.io/component: identity-provider
+    app.kubernetes.io/part-of: fullstack-rust-react-template
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  name: http

@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak
+data:
+  KC_HOSTNAME: https://auth.example.com
+  KC_HOSTNAME_STRICT: "true"
+  KC_PROXY_HEADERS: xforwarded
+  KC_HTTP_ENABLED: "true"

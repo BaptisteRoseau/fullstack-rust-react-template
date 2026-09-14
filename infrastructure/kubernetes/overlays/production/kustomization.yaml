@@ -1,0 +1,36 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: app
+
+resources:
+  - namespace.yaml
+  - ../../base
+  - ../../monitoring
+
+labels:
+  - includeSelectors: false
+    pairs:
+      app.kubernetes.io/instance: production
+
+# Immutable tags only: a release is a one-line change here.
+images:
+  - name: backend
+    newName: ghcr.io/example/backend
+    newTag: "0000000000000000000000000000000000000000" # replace with the released git SHA
+  - name: frontend
+    newName: ghcr.io/example/frontend
+    newTag: "0000000000000000000000000000000000000000" # replace with the released git SHA
+  - name: app_postgres
+    newName: ghcr.io/example/app_postgres
+    newTag: "0000000000000000000000000000000000000000" # replace with the released git SHA
+
+patches:
+  - path: backend/configmap.yaml
+  - path: backend/deployment.yaml
+  - path: backend/hpa.yaml
+  - path: frontend/ingress.yaml
+  - path: keycloak/configmap.yaml
+  - path: keycloak/deployment.yaml
+  - path: keycloak/ingress.yaml
