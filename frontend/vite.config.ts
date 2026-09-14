@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 
+import { rm } from 'node:fs/promises'
 import path from 'node:path'
 
 import { transformAsync } from '@babel/core'
@@ -11,6 +12,8 @@ import { defineConfig } from 'vitest/config'
 
 import { writeSeoFiles } from './scripts/generate-seo-files'
 import { seoConfig } from './seo.config'
+
+const MOCK_WORKER_FILENAME = 'mockServiceWorker.js'
 
 function linguiMacro(): Plugin {
     return {
@@ -68,9 +71,36 @@ function seoFiles(): Plugin {
     }
 }
 
+/**
+ * Drops the MSW worker script from the build output. It has to live in
+ * `public/` so the dev server can serve it from the root scope, but it is a
+ * test utility and has no business shipping inside the release image.
+ */
+function excludeMockWorker(): Plugin {
+    let outDir = ''
+
+    return {
+        name: 'exclude-mock-worker',
+        apply: 'build',
+        configResolved(config) {
+            outDir = path.resolve(config.root, config.build.outDir)
+        },
+        async closeBundle() {
+            await rm(path.join(outDir, MOCK_WORKER_FILENAME), { force: true })
+        },
+    }
+}
+
 export default defineConfig({
     base: './',
-    plugins: [linguiMacro(), react(), lingui(), svgr(), seoFiles()],
+    plugins: [
+        linguiMacro(),
+        react(),
+        lingui(),
+        svgr(),
+        seoFiles(),
+        excludeMockWorker(),
+    ],
     resolve: {
         alias: { '@': path.resolve(__dirname, 'src') },
     },
