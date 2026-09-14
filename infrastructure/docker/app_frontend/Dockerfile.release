@@ -1,5 +1,5 @@
 # Rust builder used for miniserve and the HTTP health checker
-FROM rust:1.94 AS rust_builder
+FROM rust:1.98 AS rust_builder
 
 ARG target=x86_64-unknown-linux-gnu
 WORKDIR /build
@@ -27,9 +27,9 @@ RUN bun vite build --outDir /dist
 # and miniserve to serve them.
 FROM scratch
 
-COPY --from=RUST_BUILDER /opt/http_health_checker /bin/http_health_checker
-COPY --from=RUST_BUILDER /opt/bin/miniserve /bin/miniserve
-COPY --from=SITE_BUILDER /dist /usr/app
+COPY --from=rust_builder /opt/http_health_checker /bin/http_health_checker
+COPY --from=rust_builder /opt/bin/miniserve /bin/miniserve
+COPY --from=site_builder /dist /usr/app
 
 USER 10001
 WORKDIR /usr/app
