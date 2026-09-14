@@ -10,7 +10,6 @@ use uuid::Uuid;
 
 use super::models::{CreateApiKeyRequest, CreateApiKeyResponse, GetApiKeyResponse};
 use crate::{
-    app_state::AppState,
     error::{ApiError, ApiErrorResponse},
     models::UserToken,
 };
@@ -24,7 +23,6 @@ fn parse_permissions(raw: &[String]) -> Vec<rbac::Permissions> {
 }
 
 /// Create a new API key. Returns the raw key once — it cannot be retrieved again.
-#[axum_macros::debug_handler(state = AppState)]
 #[utoipa::path(
     post,
     path = "/api-key",
@@ -54,7 +52,6 @@ pub(crate) async fn create_api_key(
 }
 
 /// List the API keys owned by the caller, newest first. Secrets are never listed.
-#[axum_macros::debug_handler(state = AppState)]
 #[utoipa::path(
     get,
     path = "/api-key",
@@ -79,7 +76,6 @@ pub(crate) async fn list_api_keys(
 }
 
 /// Get API key metadata by ID. Returns 404 if not owned by the caller.
-#[axum_macros::debug_handler(state = AppState)]
 #[utoipa::path(
     get,
     path = "/api-key/{id}",
@@ -114,7 +110,6 @@ pub(crate) async fn get_api_key(
 }
 
 /// Delete an API key. Returns 404 if not owned by the caller.
-#[axum_macros::debug_handler(state = AppState)]
 #[utoipa::path(
     delete,
     path = "/api-key/{id}",

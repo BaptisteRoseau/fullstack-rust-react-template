@@ -103,6 +103,7 @@ fn parameters_lossless() -> CSParameters {
         keep_metadata: true,
         width: 0,
         height: 0,
+        keep_rotation: true,
     }
 }
 
@@ -139,6 +140,7 @@ fn parameters_lossy() -> CSParameters {
         keep_metadata: true,
         width: 0,
         height: 0,
+        keep_rotation: true,
     }
 }
 
