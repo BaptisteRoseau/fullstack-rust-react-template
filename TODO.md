@@ -137,6 +137,7 @@
 - [x] Add Mailhog for local development
 - [ ] Add unit & integration tests using testcontainers when necessary
 - [ ] Use transaction/rollback in setUp/tearDown for tests
+- [ ] Use chef and proxies to avoid re-downloading/compiling everything on every CI run
 
 ### Security
 
@@ -170,7 +171,7 @@
     - [ ] meta: filename, type, owner & access
     - [x] gzip compression by default
     - [x] caesium image optimizer
-    - [ ] pdf file compression
+    - [ ] pdf file compression (see https://github.com/yfedoseev/pdf_oxide/tree/main)
 - [ ] Add benchmarks and use testcontainers to set them ups
 
 ### Payment Gateway
