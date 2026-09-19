@@ -1,5 +1,16 @@
 # TODO
 
+## Infra
+
+- [ ] Test out docker image builds, docker compose, kubernetes
+- [ ] Make Nix flake and NixOS image
+
+## Other
+
+- [ ] Make a draw.io schema of production environment in the documentation
+- [ ] Enforce some paragraphs convention in the README.nd files (make a skill) -> `Layout`, `Rules`, `Conventions`
+- [ ] Remove CLAUDE.md symlinks
+
 - [ ] Skills
     - [ ] Write a skill
     - [ ] Write a README
@@ -13,13 +24,7 @@
 - [ ] Add a mention or a tag in the Rust crates to tell whether they are for testing/traits/utils
 - [ ] Make an MCP crate with Rust macros (similar to the API layer)
 
-- [ ] Agents (implementer, reviewer, planner..)
-
-- [ ] Objects for V1:
-    - [ ] Users
-    - [ ] Api Keys
-    - [ ] Invoices
-    - [ ] Files
+- [ ] Agents (implementer, reviewer, planner, pentester..)
 
 - [ ] PDF size optimizations (search for a crate -> add into compression/)
 - [ ] Un-flatten the backend crates (rename it "backend" again -> macros/services etc..)
