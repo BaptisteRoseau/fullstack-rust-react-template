@@ -261,7 +261,7 @@ Every `## Rules` section of a README.md is absolute and should be followed in it
 
 ### Code Guidelines
 
-- You are forbidden to write comments. Use well-named variables and function.
+- You are forbidden to write comments unless explicitely asked. Use well-named variables and function.
 - Docstrings should be minimal. One liners for the simplest ones.
 - Use simple terms a commonly used words as if you were talking to a junior engineer.
 
