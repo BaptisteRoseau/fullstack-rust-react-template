@@ -25,6 +25,7 @@
 - [ ] Un-flatten the backend crates (rename it "backend" again -> macros/services etc..)
 - [ ] See how to properly handle reactivity on the frontend (use container classes ? Add another optionnal .scss file and include it ? Use variables from the theme constants ?)
 
+- [ ] Markdownlint + Markdownlink script
 
 ## Error management
 

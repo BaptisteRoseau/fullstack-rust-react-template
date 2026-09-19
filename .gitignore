@@ -49,3 +49,10 @@ openapi.json
 # MCP and AI tools
 .serena
 .playwright-mcp/
+
+# kompose utils
+kompose
+*.sha256
+
+# Docker compose override
+docker-compose.override.yml

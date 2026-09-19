@@ -39,7 +39,7 @@ services:
     profiles: [debug]
     restart: on-failure
     volumes:
-      - ".:/src"
+      - "${GIT_ROOT:-../..}/:/src"
 
   frontend:
     image: localhost/frontend:latest-debug
@@ -58,7 +58,7 @@ services:
     restart: on-failure
     profiles: [debug]
     volumes:
-      - "./frontend:/src"
+      - "${GIT_ROOT:-../..}/frontend:/src"
 
 networks:
   net:

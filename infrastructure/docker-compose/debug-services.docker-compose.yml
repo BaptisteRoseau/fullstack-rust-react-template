@@ -26,8 +26,9 @@ services:
     ports:
       - "${HOMEPAGE_PORT}:3000"
     restart: unless-stopped
+    user: 1000
     volumes:
-      - ../docker/homepage/config/docker.yaml:/app/config/docker.yaml:ro
+      - ${GIT_ROOT:-../..}/infrastructure/configs/homepage/config/docker.yaml:/app/config/docker.yaml:ro
 
 networks:
   net:

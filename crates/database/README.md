@@ -45,6 +45,10 @@ DO NOT manually modify this file. If you need to create other models use [./src/
 
 To generate it, run or read the script [build_database_rust_models.sh](../../scripts/build_database_rust_models.sh).
 
+## Rules
+
+- Using `app_core` or `api` crates is forbidden here
+
 ## Skills
 
 - [backend-database-migration](../../.claude/skills/backend-database-migration/SKILL.md)

@@ -257,6 +257,14 @@ Never do any of the following:
 
 Each should contain a README.md file further describing how to work with it.
 
+Every `## Rules` section of a README.md is absolute and should be followed in its directory and its children.
+
+### Code Guidelines
+
+- You are forbidden to write comments. Use well-named variables and function.
+- Docstrings should be minimal. One liners for the simplest ones.
+- Use simple terms a commonly used words as if you were talking to a junior engineer.
+
 ### Testing
 
 Always run the unit tests and linters. Use the `test_lint.sh` and `test_units.sh` files to run the tests. Focus on fixing the issues before going any further.

@@ -31,7 +31,7 @@ services:
     ports:
       - "8090:8080"
     volumes:
-      - ../keycloak/import:/opt/keycloak/data/import:ro
+      - ${GIT_ROOT:-../..}/infrastructure/configs/keycloak/import:/opt/keycloak/data/import:ro
     depends_on:
       - postgres_keycloak
     networks:

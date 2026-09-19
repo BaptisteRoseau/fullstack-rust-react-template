@@ -174,3 +174,13 @@ for overlay in dev production; do
         kubeconform -summary -strict -kubernetes-version 1.30.0
 done
 ```
+
+## Rules
+
+- This directory is part of the `infrastructure` and does not know about the rest of the repository.
+- It can only use files from:
+    - [infrastructure/kubernetes](./infrastructure/kubernetes)
+    - [infrastructure/configs](./infrastructure/configs)
+    - [infrastructure/docker](./infrastructure/docker) (only for the image names)
+- Volumes are considered either empty or filled with a config map. Never bind code or config or relative path.
+- Always pin exact versions to container images, never `latest`.
