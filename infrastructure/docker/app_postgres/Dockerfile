@@ -1,4 +1,4 @@
-FROM postgres:18
+FROM postgres:18.6
 
 ENV PGDATA="/var/lib/postgresql/data"
 VOLUME [ "/var/lib/postgresql/data" ]

@@ -1,19 +1,48 @@
 # Kubernetes
 
 Manifests to deploy the application on a Kubernetes cluster: the backend, the frontend and the
-services they depend on (Postgres, Redis, SeaweedFS, Keycloak, Prometheus, Grafana).
+services they depend on (Postgres, Redis, SeaweedFS, Keycloak).
 
 Docker Compose remains the way to run the stack locally, see
 [../docker-compose](../docker-compose/README.md). This directory targets real clusters.
 
 ## Layout
 
-Manifests are grouped **by component**, not by kind: one directory per deployable thing, holding
-every object that thing needs. Components are gathered in the same groups the Compose files use,
-so a profile there maps to a directory here. Environment differences live in Kustomize overlays
-that patch the base, so a component is described once.
+Manifests are grouped **by component**, not by kind: one directory per deployable thing, holding every object that thing needs.
 
-```text
+Environment differences live in Kustomize overlays that patch the base, so a component is described once.
+
+```txt
+kubernetes/
+├── base/                           # The services required to run the application
+│   ├── <component>/
+│   │   ├── <manifests>
+│   │   └── kustomization.yaml
+│   └── kustomization.yaml          # lists the components above
+├── monitoring/                     # Grafana, Postgres Exporter
+│   ├── <component>/
+│   │   └── <manifests>
+│   └── kustomization.yaml
+├── debug/                          # Development-only conveniences
+│   ├── <component>/
+│   │   └── <manifests>
+│   └── kustomization.yaml
+└── overlays/                        # Same component tree as the groups they patch
+    ├── dev/
+    │   ├── <component>/
+    │   │   └── <manifests>
+    │   ├── namespace.yaml
+    │   └── kustomization.yaml      # namespace, image tags, replicas: 1, patch list
+    └── production/
+        ├── <component>/
+        │   └── <manifests>
+        ├── namespace.yaml
+        └── kustomization.yaml
+```
+
+Example for the backend component:
+
+```txt
 kubernetes/
 ├── base/                           # The services required to run the application
 │   ├── backend/
@@ -24,58 +53,17 @@ kubernetes/
 │   │   ├── secret.example.yaml
 │   │   ├── service.yaml
 │   │   └── kustomization.yaml
-│   ├── frontend/
-│   │   ├── deployment.yaml
-│   │   ├── hpa.yaml
-│   │   ├── ingress.yaml
-│   │   ├── pdb.yaml
-│   │   ├── service.yaml
-│   │   └── kustomization.yaml
-│   ├── postgres/
-│   │   ├── configmap.yaml
-│   │   ├── secret.example.yaml
-│   │   ├── service.yaml
-│   │   ├── statefulset.yaml
-│   │   └── kustomization.yaml
-│   ├── keycloak/
-│   ├── keycloak-postgres/
-│   ├── migrate/
-│   ├── redis/
-│   ├── seaweedfs/
-│   └── kustomization.yaml          # lists the components above
-├── monitoring/                     # Prometheus, Grafana, Postgres Exporter
-│   ├── grafana/
-│   ├── postgres-exporter/
-│   ├── prometheus/
-│   └── kustomization.yaml
-├── debug/                          # Development-only conveniences
-│   ├── homepage/
-│   ├── mailhog/
-│   └── kustomization.yaml
 └── overlays/                        # Same component tree as the groups they patch
     ├── dev/
     │   ├── backend/
     │   │   ├── configmap.yaml
     │   │   └── deployment.yaml
-    │   ├── frontend/
-    │   │   └── ingress.yaml
-    │   ├── homepage/
-    │   │   └── configmap.yaml
-    │   ├── keycloak/
-    │   │   └── ingress.yaml
-    │   ├── namespace.yaml
     │   └── kustomization.yaml      # namespace, image tags, replicas: 1, patch list
     └── production/
         ├── backend/
         │   ├── configmap.yaml
         │   ├── deployment.yaml
         │   └── hpa.yaml
-        ├── frontend/
-        │   └── ingress.yaml
-        ├── keycloak/
-        │   ├── configmap.yaml
-        │   ├── deployment.yaml
-        │   └── ingress.yaml
         ├── namespace.yaml
         └── kustomization.yaml
 ```
@@ -108,22 +96,27 @@ kubernetes/
   and `part-of`; overlays add `instance`, and `version` follows the image tag they set.
 - **Selectors match on `app.kubernetes.io/name` only.** A selector is immutable once applied, so it
   must not pick up a label an overlay can change.
-- **Configuration is never copied.** The migrations, the Keycloak realm and the Homepage dashboard
-  are read from their canonical location through `configMapGenerator`, the same files Docker
-  Compose mounts.
+- **Configuration is never copied.** The Keycloak realm and the Homepage dashboard are read from
+  their canonical location under [../configs](../configs) through `configMapGenerator`, the same
+  files Docker Compose mounts. What lives outside `infrastructure/` is embedded in an image
+  instead: the migrations ship inside
+  [app_migration](../docker/app_migration/Dockerfile) rather than being mounted.
 - **Every workload declares probes, resource requests and a restrictive `securityContext`**
   (`runAsNonRoot`, `allowPrivilegeEscalation: false`, all capabilities dropped, and a read-only
   root filesystem wherever the image tolerates one).
-- **Services present once on every node belong to the node**, like node-exporter or Prometheus, do not add them as kubernetes containers but add them in the [NixOS](../nix) image.
+- **Services present once on every node belong to the node**, like node-exporter or Prometheus, do
+  not add them as kubernetes containers but add them in the [NixOS](../nix) image. Grafana's
+  datasource points at the node's Prometheus for that reason, and the `prometheus.io/*` annotations
+  on a pod template are what the node's Prometheus discovers.
 
 ## Environments
 
 Two overlays:
 
-| Overlay              | Target                | Typical patches                                            |
-| -------------------- | --------------------- | ---------------------------------------------------------- |
-| `overlays/dev`       | Shared dev cluster    | Single replicas, small resource requests, debug log level, no HPA, the `debug` group |
-| `overlays/production`| Production cluster    | HPAs, PDBs, production hosts and TLS, tuned resources, Keycloak in production mode |
+| Overlay               | Target             | Typical patches                                                                      |
+| --------------------- | ------------------ | ------------------------------------------------------------------------------------ |
+| `overlays/dev`        | Shared dev cluster | Single replicas, small resource requests, debug log level, no HPA, the `debug` group |
+| `overlays/production` | Production cluster | HPAs, PDBs, production hosts and TLS, tuned resources, Keycloak in production mode   |
 
 Building needs `--load-restrictor LoadRestrictionsNone`, because the generated ConfigMaps read
 their content from outside this directory rather than duplicating it:
@@ -139,8 +132,11 @@ kustomize build --load-restrictor LoadRestrictionsNone infrastructure/kubernetes
 kustomize build --load-restrictor LoadRestrictionsNone infrastructure/kubernetes/overlays/production
 ```
 
-Image tags are set by the overlays through `images:` and must be immutable — a git SHA, never
-`latest`. A release is therefore a one-line change to an overlay.
+Image tags are set by the overlays through `images:` and must be immutable: the
+`<version>-<short commit>` form that [../docker](../docker/README.md#rules) defines, such as
+`1.2.3-85e1cce`. Never deploy a rolling tag — `1.2.3`, `1.2`, `1` and `latest` all move to a later
+build. A release is therefore a one-line change to an overlay, and
+`app.kubernetes.io/version` moves with it.
 
 Namespaces, CRDs and the cluster-scoped objects a component assumes are applied before it, on a
 first install only. The example hosts (`app.example.com`, `auth.example.com`) and image registry
@@ -169,19 +165,25 @@ crash dumps and child processes.
 ## Validation
 
 ```bash
-for overlay in dev production; do
-    kustomize build --load-restrictor LoadRestrictionsNone \
-        "infrastructure/kubernetes/overlays/$overlay" |
-        kubeconform -summary -strict -kubernetes-version 1.30.0
-done
+./scripts/test_infra_lint.sh
+```
+
+which runs, for every overlay:
+
+```bash
+kustomize build --load-restrictor LoadRestrictionsNone \
+    "infrastructure/kubernetes/overlays/$overlay" |
+    kubeconform -summary -strict -kubernetes-version 1.30.0
 ```
 
 ## Rules
 
 - This directory is part of the `infrastructure` and does not know about the rest of the repository.
 - It can only use files from:
-    - [infrastructure/kubernetes](./infrastructure/kubernetes)
-    - [infrastructure/configs](./infrastructure/configs)
-    - [infrastructure/docker](./infrastructure/docker) (only for the image names)
+    - [infrastructure/kubernetes](.)
+    - [infrastructure/configs](../configs)
+    - [infrastructure/docker](../docker) (only for the image names)
+      Anything else a workload needs is embedded in its image at build time.
 - Volumes are considered either empty or filled with a config map. Never bind code or config or relative path.
 - Always pin exact versions to container images, never `latest`.
+- Prometheus and the other per-node services are not deployed here, see [../nix](../nix).

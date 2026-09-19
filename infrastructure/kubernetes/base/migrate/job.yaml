@@ -28,8 +28,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: sqlx
-          image: nxyt/sqlx-cli:latest
-          args: ["sqlx", "migrate", "run"]
+          image: app_migration
           env:
             - name: POSTGRES_DB
               valueFrom:
@@ -59,11 +58,3 @@ spec:
             readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
-          volumeMounts:
-            - name: migrations
-              mountPath: /migrations
-              readOnly: true
-      volumes:
-        - name: migrations
-          configMap:
-            name: migrations

@@ -3,6 +3,5 @@ include:
   - infrastructure/docker-compose/base.docker-compose.yml
   - infrastructure/docker-compose/monitoring.docker-compose.yml
   - infrastructure/docker-compose/debug-services.docker-compose.yml
-  - infrastructure/docker-compose/authentication.docker-compose.yml
   - infrastructure/docker-compose/release.docker-compose.yml
   - infrastructure/docker-compose/debug.docker-compose.yml

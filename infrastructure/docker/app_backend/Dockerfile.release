@@ -1,4 +1,4 @@
-FROM rust:1.98 AS health_checker
+FROM rust:1.98.1 AS health_checker
 
 ARG target=x86_64-unknown-linux-gnu
 WORKDIR /build
@@ -13,7 +13,7 @@ RUN cd ./http_health_checker/ && \
     mv target/$target/release/http_health_checker /opt/http_health_checker && \
     chmod 555 /opt/http_health_checker
 
-FROM rust:1.98 AS builder
+FROM rust:1.98.1 AS builder
 
 ARG target=x86_64-unknown-linux-gnu
 
@@ -45,12 +45,12 @@ FROM scratch
 
 COPY --from=health_checker /opt/http_health_checker /http_health_checker
 COPY --from=builder /opt/backend /backend
-COPY --from=builder /opt/config.yml /etc/crates/config.yml
+COPY --from=builder /opt/config.yml /etc/backend/config.yml
 USER 10001
 WORKDIR /
 
-# API Server ; Prometheus /metrics
-EXPOSE 9876 9100
+# API Server ; Prometheus /metrics ; Swagger UI
+EXPOSE 9876 9100 7070
 
 HEALTHCHECK \
     --start-period=5s \

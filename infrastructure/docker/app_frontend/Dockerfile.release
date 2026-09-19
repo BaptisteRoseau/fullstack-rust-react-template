@@ -1,5 +1,5 @@
 # Rust builder used for static-web-server and the HTTP health checker
-FROM rust:1.98 AS rust_builder
+FROM rust:1.98.1 AS rust_builder
 
 ARG target=x86_64-unknown-linux-gnu
 WORKDIR /build
@@ -18,7 +18,7 @@ RUN cd ./http_health_checker/ && \
     chmod 555 /opt/http_health_checker
 
 # Site builder used to compile the web application into an SPA
-FROM oven/bun:1 AS site_builder
+FROM oven/bun:1.3.14 AS site_builder
 WORKDIR /usr/src/app
 COPY frontend .
 RUN bun vite build --outDir /dist

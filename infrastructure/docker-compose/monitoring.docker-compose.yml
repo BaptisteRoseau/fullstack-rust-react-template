@@ -10,29 +10,29 @@ services:
     ports:
       - "${PROMETHEUS_PORT}:9090"
     restart: on-failure
-    profiles: [monitoring]
+    profiles: [debug-services]
     volumes:
       - "prometheus:/prometheus"
-      - ${GIT_ROOT:-../..}/infrastructure/prometheus:/etc/prometheus
+      - ${GIT_ROOT:-../..}/infrastructure/configs/prometheus:/etc/prometheus
 
   postgres_exporter:
-    image: quay.io/prometheuscommunity/postgres-exporter
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.17.1
     container_name: postgres-exporter
     networks:
       - net
     restart: on-failure
-    profiles: [monitoring]
+    profiles: [debug-services]
     environment:
       DATA_SOURCE_URI: "postgres:5432/postgres?sslmode=disable"
       DATA_SOURCE_USER: ${POSTGRES_USER}
       DATA_SOURCE_PASS: ${POSTGRES_PASSWORD}
 
   grafana:
-    image: grafana/grafana:12.3
+    image: grafana/grafana:12.3.11
     container_name: grafana
     networks:
       - net
-    profiles: [monitoring]
+    profiles: [debug-services]
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
@@ -46,4 +46,5 @@ networks:
   net:
 
 volumes:
+  grafana:
   prometheus:

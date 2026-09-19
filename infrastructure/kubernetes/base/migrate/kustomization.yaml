@@ -4,25 +4,3 @@ kind: Kustomization
 
 resources:
   - job.yaml
-
-# The migrations stay a single source of truth shared with the backend crate and
-# Docker Compose, so they are never copied into this directory. Kustomize does not
-# glob outside its own root, so a new migration is added to this list as well.
-configMapGenerator:
-  - name: migrations
-    files:
-      - ../../../../crates/database/migrations/0001_created_at_updated_at_trigger.down.sql
-      - ../../../../crates/database/migrations/0001_created_at_updated_at_trigger.up.sql
-      - ../../../../crates/database/migrations/0002_user_table.down.sql
-      - ../../../../crates/database/migrations/0002_user_table.up.sql
-      - ../../../../crates/database/migrations/0003_apikey_table.down.sql
-      - ../../../../crates/database/migrations/0003_apikey_table.up.sql
-      - ../../../../crates/database/migrations/0004_user_username.down.sql
-      - ../../../../crates/database/migrations/0004_user_username.up.sql
-      - ../../../../crates/database/migrations/0005_user_permissions_not_null.down.sql
-      - ../../../../crates/database/migrations/0005_user_permissions_not_null.up.sql
-    options:
-      labels:
-        app.kubernetes.io/name: migrate
-        app.kubernetes.io/component: database-migration
-        app.kubernetes.io/part-of: fullstack-rust-react-template

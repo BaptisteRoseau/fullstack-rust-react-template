@@ -2,17 +2,23 @@
 # the backend code and have a hot-reload equivalent, to make it
 # easier to work between frontend and backend.
 
-FROM rust:1.98
+FROM rust:1.98.1
 
 ARG target=x86_64-unknown-linux-gnu
 
 RUN cargo install cargo-watch
 ENV CARGO_TARGET_DIR=/build
 
+RUN useradd --uid 1000 --create-home developer && \
+    mkdir -p /build && \
+    chown developer:developer /build
+
 WORKDIR /src
 VOLUME [ "/src" ]
+USER developer
 
-EXPOSE 9876
+# API Server ; Prometheus /metrics ; Swagger UI
+EXPOSE 9876 9100 7070
 
 ENTRYPOINT [ "cargo", "watch", "--why", "--delay", "1.5", \
     "-x", "'run --bin backend --debug'", \

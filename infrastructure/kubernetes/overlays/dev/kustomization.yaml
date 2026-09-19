@@ -14,18 +14,22 @@ labels:
   - includeSelectors: false
     pairs:
       app.kubernetes.io/instance: dev
+      app.kubernetes.io/version: "0.0.0-0000000" # keep in sync with the image tags below
 
 # Immutable tags only: a release is a one-line change here.
 images:
   - name: backend
     newName: ghcr.io/example/backend
-    newTag: "0000000000000000000000000000000000000000" # replace with the released git SHA
+    newTag: "0.0.0-0000000" # replace with the released <version>-<short commit>
   - name: frontend
     newName: ghcr.io/example/frontend
-    newTag: "0000000000000000000000000000000000000000" # replace with the released git SHA
+    newTag: "0.0.0-0000000" # replace with the released <version>-<short commit>
   - name: app_postgres
     newName: ghcr.io/example/app_postgres
-    newTag: "0000000000000000000000000000000000000000" # replace with the released git SHA
+    newTag: "0.0.0-0000000" # replace with the released <version>-<short commit>
+  - name: app_migration
+    newName: ghcr.io/example/app_migration
+    newTag: "0.0.0-0000000" # replace with the released <version>-<short commit>
 
 replicas:
   - name: backend

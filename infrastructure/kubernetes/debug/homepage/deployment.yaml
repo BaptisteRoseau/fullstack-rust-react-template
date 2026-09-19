@@ -19,11 +19,14 @@ spec:
         app.kubernetes.io/part-of: fullstack-rust-react-template
     spec:
       securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: homepage
-          image: ghcr.io/gethomepage/homepage:latest
+          image: ghcr.io/gethomepage/homepage:v1.4.0
           envFrom:
             - configMapRef:
                 name: homepage
@@ -57,13 +60,13 @@ spec:
               drop: ["ALL"]
           volumeMounts:
             - name: config
-              mountPath: /app/config/docker.yaml
-              subPath: docker.yaml
+              mountPath: /app/config/services.yaml
+              subPath: services.yaml
               readOnly: true
       volumes:
         - name: config
           configMap:
             name: homepage-config
             items:
-              - key: docker.yaml
-                path: docker.yaml
+              - key: services.yaml
+                path: services.yaml

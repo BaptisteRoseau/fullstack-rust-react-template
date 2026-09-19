@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: mailhog
-          image: mailhog/mailhog:latest
+          image: mailhog/mailhog:v1.0.1
           ports:
             - name: smtp
               containerPort: 1025

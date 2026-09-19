@@ -12,7 +12,7 @@ resources:
 configMapGenerator:
   - name: keycloak-realm-import
     files:
-      - ../../../keycloak/import/realm-export.json
+      - ../../../configs/keycloak/import/realm-export.json
     options:
       labels:
         app.kubernetes.io/name: keycloak

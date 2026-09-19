@@ -14,5 +14,6 @@ data:
       - name: Prometheus
         type: prometheus
         access: proxy
-        url: http://prometheus:9090
+        # Prometheus runs on every node from the NixOS image, not in the cluster.
+        url: http://prometheus.example.com:9090
         isDefault: true

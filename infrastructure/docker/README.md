@@ -29,19 +29,53 @@ For docker images where the image build differs between release and debug, use t
 
 - Use multi-stage builds to avoid intermediate objects in the final image
 - Always use pinned images for `FROM` instructions, never `latest`
-- Always specify a `USER` that is not root
-- Always include exposed ports, commented with the exposed service (ex. `EXPOSE 8080 # web server`)
+- Always specify a `USER` that is not root, for images built here and for upstream images that run
+  as root by default. An upstream image whose own entrypoint drops privileges keeps its entrypoint:
+  pin the UID in the deployment manifest instead of overriding `USER`, or the entrypoint loses the
+  rights it needs to prepare its data directory.
+- Always include exposed ports, commented with the exposed service when there is more than one.
+  Docker only reads `#` at the start of a line, so the comment goes above the instruction:
+
+  ```dockerfile
+  # API server ; Prometheus metrics ; Swagger UI
+  EXPOSE 9876 9100 7070
+  ```
+
 - Always include expected volumes (ex. `VOLUME [ "/var/lib/postgresql/data" ]`)
-- Include a `HEALTHCHECK` when usefull. For HTTP services, use [tools/http_health_checker/Cargo.toml](../../tools/http_health_checker/Cargo.toml)
+- Release images that keep running must declare a `HEALTHCHECK`. For HTTP services, use
+  [tools/http_health_checker](../../tools/http_health_checker/Cargo.toml). Two kinds of image skip
+  it: debug images, which are rebuilt and watched by hand and would pay for the health checker
+  build stage on every hot reload, and one-shot images that run to completion, which have nothing
+  left to poll — their exit code is the health signal.
 - For release images, always use the minimal image for the final image. If exposing a single binary, use the `FROM scratch` image.
 - When compiling a binary, specify `ARG target=x86_64-unknown-linux-gnu`
 
-For a complete example, read [./app_backend/Dockerfile.release]([./app_backend/Dockerfile.release]).
+For a complete example, read [app_backend/Dockerfile.release](./app_backend/Dockerfile.release).
+
+## Verification
+
+Every Dockerfile must pass the build checker, which parses and lints it without running a build:
+
+```bash
+./scripts/test_infra_lint.sh
+```
+
+Run it after editing any image definition. It also covers the Compose manifests and the Kubernetes
+overlays, and the `pre-push` hook runs it with the other `test_*.sh` scripts.
 
 ## Rules
 
 - Every `docker/<dir>` is named `docker/app_<service>`
 - Tag conventions:
-    - Use short commit and latest version: `1.2.3-85e1cce`
+    - The version is the latest git tag, or `0.0.0` when the repository has none
+    - The build tag is that version and the short commit: `1.2.3-85e1cce`
     - Append `debug` to debug images: `1.2.3-85e1cce-debug`
-    - Update `latest` image: `latest` and `latest-debug`
+    - Publishing a build also moves the rolling tags `1.2.3`, `1.2`, `1` and `latest`, and their
+      `-debug` equivalents, onto it
+    - Never deploy a rolling tag: manifests reference the immutable `1.2.3-85e1cce` form
+
+    ```bash
+    version="$(git describe --tags --abbrev=0 2>/dev/null || echo 0.0.0)"
+    commit="$(git rev-parse --short HEAD)"
+    # 1.2.3-85e1cce 1.2.3 1.2 1 latest
+    ```

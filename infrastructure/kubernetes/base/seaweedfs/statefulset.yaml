@@ -28,7 +28,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: seaweedfs
-          image: chrislusf/seaweedfs:latest
+          image: chrislusf/seaweedfs:4.47
           # The 'server' command starts master, volume and filer together;
           # '-s3' adds the S3-compatible gateway the backend talks to.
           args: ["server", "-s3", "-dir=/data", "-ip.bind=0.0.0.0"]

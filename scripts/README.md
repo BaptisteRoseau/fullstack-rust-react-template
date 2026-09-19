@@ -29,6 +29,22 @@ Every `test_*.sh` script is used in the `pre-push` hook or can be used as a stan
 - Dependencies CVEs
 - Licences compliance
 - Linter results
+- Infrastructure manifests
+
+### Infrastructure
+
+[`test_infra_lint.sh`](./test_infra_lint.sh) checks every Dockerfile with `docker build --check`,
+merges the Compose manifests with all profiles through `docker compose config`, and builds both
+Kustomize overlays through `kubeconform`. None of it starts a container.
+
+The Kubernetes part needs `kustomize` and `kubeconform`, which are not needed anywhere else in the
+project. The script skips that part when they are missing rather than failing the `pre-push` hook,
+so install them to get the full check:
+
+```sh
+go install sigs.k8s.io/kustomize/kustomize/v5@latest
+go install github.com/yannh/kubeconform/cmd/kubeconform@latest
+```
 
 ## Build
 

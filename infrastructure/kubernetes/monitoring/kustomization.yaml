@@ -5,4 +5,3 @@ kind: Kustomization
 resources:
   - grafana
   - postgres-exporter
-  - prometheus

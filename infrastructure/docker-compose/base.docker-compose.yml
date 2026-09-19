@@ -26,21 +26,21 @@ services:
       - "postgres:/var/lib/postgresql/data"
 
   migrate:
-    image: nxyt/sqlx-cli:latest
+    image: nxyt/sqlx-cli:v0.70
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - net
     container_name: app_sqlx
-    command: sqlx migrate run
+    command: sqlx migrate run --source /migrations
     volumes:
       - ${GIT_ROOT:-../..}/crates/database/migrations/:/migrations
     environment:
       DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DATABASE}?sslmode=disable"
 
   redis:
-    image: redis:7-alpine
+    image: redis:7.4.11-alpine
     container_name: app_redis
     networks:
       - net
@@ -54,7 +54,7 @@ services:
       retries: 5
 
   seaweedfs:
-    image: chrislusf/seaweedfs:latest
+    image: chrislusf/seaweedfs:4.47
     container_name: seaweedfs
     ports:
       - "${S3_PORT}:8333" # S3 Gateway API
@@ -65,10 +65,63 @@ services:
     # The 'server' command starts all essential services together.
     # '-s3' enables the S3-compatible gateway.
     command: "server -s3 -dir=/data -ip.bind=0.0.0.0"
+    networks:
+      - net
+
+  postgres_keycloak:
+    image: postgres:15.19
+    container_name: app_postgres_keycloak
+    environment:
+      POSTGRES_DB: ${KEYCLOAK_DATABASE}
+      POSTGRES_USER: ${KEYCLOAK_DATABASE_USER}
+      POSTGRES_PASSWORD: ${KEYCLOAK_DATABASE_PASSWORD}
+    networks:
+      - net
+    restart: on-failure
+    volumes:
+      - "postgres_keycloak:/var/lib/postgresql/data"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.6.4
+    container_name: keycloak
+    command: start-dev --import-realm
+    depends_on:
+      - postgres_keycloak
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres_keycloak:5432/${KEYCLOAK_DATABASE}
+      KC_DB_USERNAME: ${KEYCLOAK_DATABASE_USER}
+      KC_DB_PASSWORD: ${KEYCLOAK_DATABASE_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_HTTP_ENABLED: true
+      KC_IMPORT: /opt/keycloak/data/import/realm-export.json
+    networks:
+      - net
+    ports:
+      - "${KEYCLOAK_PORT}:8080" # web UI and OIDC endpoints
+    restart: on-failure
+    volumes:
+      - ${GIT_ROOT:-../..}/infrastructure/configs/keycloak/import:/opt/keycloak/data/import:ro
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: mailhog
+    networks:
+      - net
+    ports:
+      - "${MAILHOG_SMTP_PORT}:1025" # SMTP server
+      - "${MAILHOG_PORT}:8025" # Web UI
+    restart: on-failure
 
 networks:
   net:
 
 volumes:
   postgres:
+  postgres_keycloak:
   seaweedfs_data:

@@ -1,0 +1,53 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/configs/services/
+
+# Ports come from the environment: Homepage substitutes any {{HOMEPAGE_VAR_*}}
+# placeholder with the matching variable, which the compose manifest maps to the
+# values in .env.dev. Icons point at the favicon each service serves itself, so
+# they stay correct when a service is upgraded.
+# Services that only run under a profile are listed too: an entry whose service
+# is stopped simply shows as unreachable.
+
+- Application:
+    - Frontend:
+        href: http://localhost:{{HOMEPAGE_VAR_FRONTEND_PORT}}/
+        icon: http://localhost:{{HOMEPAGE_VAR_FRONTEND_PORT}}/favicon.ico
+        description: React application
+    - Swagger:
+        href: http://localhost:{{HOMEPAGE_VAR_SWAGGER_PORT}}/v1/docs/swagger-ui/
+        icon: http://localhost:{{HOMEPAGE_VAR_SWAGGER_PORT}}/v1/docs/swagger-ui/favicon-32x32.png
+        description: Backend API documentation
+    - Keycloak:
+        href: http://localhost:{{HOMEPAGE_VAR_KEYCLOAK_PORT}}/
+        # Keycloak serves its icon under a build hash that changes on upgrade, so
+        # this is the one icon to re-check after bumping the image. `keycloak`
+        # also works here and uses the bundled dashboard icon instead.
+        icon: http://localhost:{{HOMEPAGE_VAR_KEYCLOAK_PORT}}/resources/0egzv/admin/keycloak.v2/favicon.svg
+        description: Authentication and realm administration
+
+- Debug:
+    - Grafana:
+        href: http://localhost:{{HOMEPAGE_VAR_GRAFANA_PORT}}/
+        icon: http://localhost:{{HOMEPAGE_VAR_GRAFANA_PORT}}/public/img/fav32.png
+        description: Metrics dashboards
+    - Prometheus:
+        href: http://localhost:{{HOMEPAGE_VAR_PROMETHEUS_PORT}}/
+        icon: http://localhost:{{HOMEPAGE_VAR_PROMETHEUS_PORT}}/favicon.svg
+        description: Metrics collection and queries
+    - PGAdmin:
+        href: http://localhost:{{HOMEPAGE_VAR_PGADMIN_PORT}}/
+        icon: http://localhost:{{HOMEPAGE_VAR_PGADMIN_PORT}}/favicon.ico
+        description: Postgres administration
+    - MailHog:
+        href: http://localhost:{{HOMEPAGE_VAR_MAILHOG_PORT}}/
+        icon: http://localhost:{{HOMEPAGE_VAR_MAILHOG_PORT}}/images/hog.png
+        description: Catches every mail the stack sends
+    - SeaweedFS Filer:
+        href: http://localhost:{{HOMEPAGE_VAR_S3_BROWSER_PORT}}/
+        icon: http://localhost:{{HOMEPAGE_VAR_S3_BROWSER_PORT}}/favicon.ico
+        description: Browse the S3 buckets
+    - SeaweedFS Master:
+        href: http://localhost:{{HOMEPAGE_VAR_S3_ADMIN_PORT}}/
+        icon: http://localhost:{{HOMEPAGE_VAR_S3_ADMIN_PORT}}/favicon.ico
+        description: Cluster topology and volume status

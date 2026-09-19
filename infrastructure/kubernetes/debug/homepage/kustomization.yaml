@@ -11,7 +11,7 @@ resources:
 configMapGenerator:
   - name: homepage-config
     files:
-      - ../../../docker/homepage/config/docker.yaml
+      - ../../../configs/homepage/config/services.yaml
     options:
       labels:
         app.kubernetes.io/name: homepage

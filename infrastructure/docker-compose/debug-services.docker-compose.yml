@@ -3,36 +3,54 @@
 
 services:
   pgadmin:
-    image: dpage/pgadmin4:9.1
+    image: dpage/pgadmin4:9.1.0
     container_name: pgadmin
     networks:
       - net
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-    profiles: [debug]
+    profiles: [debug-services]
     ports:
       - "${PGADMIN_PORT}:80"
     restart: on-failure
     volumes:
       - "pgadmin:/var/lib/pgadmin"
 
-  # Use only for local development purposes.
   homepage:
-    image: ghcr.io/gethomepage/homepage:latest
+    image: localhost/homepage:latest
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/app_homepage/Dockerfile
+      tags:
+        - "localhost/homepage:latest"
     container_name: homepage
+    networks:
+      - net
     environment:
-      HOMEPAGE_ALLOWED_HOSTS: localhost:${HOMEPAGE_PORT}
+      HOMEPAGE_ALLOWED_HOSTS: localhost:${HOMEPAGE_PORT},127.0.0.1:3000
+      PUID: 1000
+      PGID: 1000
+      # Homepage substitutes these into services.yaml as {{HOMEPAGE_VAR_*}}.
+      HOMEPAGE_VAR_FRONTEND_PORT: ${FRONTEND_PORT}
+      HOMEPAGE_VAR_SWAGGER_PORT: ${SWAGGER_PORT}
+      HOMEPAGE_VAR_KEYCLOAK_PORT: ${KEYCLOAK_PORT}
+      HOMEPAGE_VAR_GRAFANA_PORT: ${GRAFANA_PORT}
+      HOMEPAGE_VAR_PROMETHEUS_PORT: ${PROMETHEUS_PORT}
+      HOMEPAGE_VAR_PGADMIN_PORT: ${PGADMIN_PORT}
+      HOMEPAGE_VAR_MAILHOG_PORT: ${MAILHOG_PORT}
+      HOMEPAGE_VAR_S3_BROWSER_PORT: ${S3_BROWSER_PORT}
+      HOMEPAGE_VAR_S3_ADMIN_PORT: ${S3_ADMIN_PORT}
+    profiles: [debug-services]
     ports:
       - "${HOMEPAGE_PORT}:3000"
     restart: unless-stopped
-    user: 1000
+    user: "1000:1000"
     volumes:
-      - ${GIT_ROOT:-../..}/infrastructure/configs/homepage/config/docker.yaml:/app/config/docker.yaml:ro
+      - ${GIT_ROOT:-../..}/infrastructure/configs/homepage/config/services.yaml:/app/config/services.yaml:ro
 
 networks:
   net:
 
 volumes:
-  grafana:
   pgadmin:
