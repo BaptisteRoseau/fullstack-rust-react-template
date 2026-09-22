@@ -1,6 +1,4 @@
 ---
-# 'start-dev' never runs outside a laptop: production runs the real server
-# behind the ingress, which terminates TLS and forwards the original host.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -8,6 +6,21 @@ metadata:
 spec:
   template:
     spec:
+      # Losing one node must not take the identity provider with it.
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: keycloak
       containers:
         - name: keycloak
-          args: ["start"]
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              memory: 2Gi

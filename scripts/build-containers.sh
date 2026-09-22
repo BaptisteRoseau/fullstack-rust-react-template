@@ -4,7 +4,7 @@ GIT_ROOT=$(git rev-parse --show-toplevel)
 VERSION=${VERSION:='1.0.0'}
 TARGET=${TARGET:=x86_64-unknown-linux-gnu}
 ENGINE=${ENGINE='docker'}
-IMAGE_NAME=${IMAGE_NAME:='localhost/backend'}
+IMAGE_NAME=${IMAGE_NAME:='localhost/app_backend'}
 
 "$ENGINE" build \
     --file "$SCRIPT_DIR/Dockerfile.release" \

@@ -89,8 +89,10 @@ kubernetes/
 - **Overlay component directories have no `kustomization.yaml`.** Patches are not resources: the
   overlay's own `kustomization.yaml` lists them under `patches:`, and a nested kustomization would
   apply them a second time as objects of their own.
-- **Bases stay environment-agnostic.** No namespace, no image tag, no replica count, no host name —
-  overlays set those. Anything that differs between dev and production is a patch.
+- **Bases stay environment-agnostic.** No namespace, no replica count, no host name, and no tag on
+  an image this repository builds — overlays set those. An image pulled from a registry keeps the
+  exact tag it is published with, in the base. Anything that differs between dev and production is
+  a patch.
 - **Label everything** with `app.kubernetes.io/name`, `instance`, `component`, `part-of` and
   `version` so selectors, dashboards and `kubectl get all -l` work. Bases carry `name`, `component`
   and `part-of`; overlays add `instance`, and `version` follows the image tag they set.
@@ -183,5 +185,6 @@ kustomize build --load-restrictor LoadRestrictionsNone \
     - [infrastructure/docker](../docker) (only for the image names)
       Anything else a workload needs is embedded in its image at build time.
 - Volumes are considered either empty or filled with a config map. Never bind code or config or relative path.
-- Always pin exact versions to container images, never `latest`.
+- Always pin exact versions to container images, never `latest`. Images this repository builds are
+  pinned by the overlay's `images:`, upstream images by the base.
 - Prometheus and the other per-node services are not deployed here, see [../nix](../nix).

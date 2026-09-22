@@ -76,7 +76,6 @@ dev server if you run both:
 | Backend (`cargo run -p backend`) | <http://127.0.0.1:8080> | `--port` / `PORT` |
 | Frontend (container)             | <http://127.0.0.1:8080> | `FRONTEND_PORT`   |
 | Backend (container)              | <http://127.0.0.1:9876> | `BACKEND_PORT`    |
-| Swagger UI                       | <http://127.0.0.1:7070> | `SWAGGER_PORT`    |
 | Homepage (index of all services) | <http://127.0.0.1:3002> | `HOMEPAGE_PORT`   |
 | Grafana                          | <http://127.0.0.1:3000> | `GRAFANA_PORT`    |
 | Prometheus                       | <http://127.0.0.1:9090> | `PROMETHEUS_PORT` |

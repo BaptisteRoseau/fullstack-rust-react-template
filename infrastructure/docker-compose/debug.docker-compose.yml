@@ -7,16 +7,19 @@
 # Run using --profile debug
 #
 services:
-  backend:
-    image: localhost/backend:latest-debug
+  backend-debug:
+    image: localhost/app_backend:latest-debug
     build:
       context: ../..
       dockerfile: infrastructure/docker/app_backend/Dockerfile.debug
       tags:
-        - "localhost/backend:latest-debug"
+        - "localhost/app_backend:latest-debug"
     depends_on:
       migrate:
           condition: service_completed_successfully
+    container_name: app_backend
+    env_file:
+      - ${GIT_ROOT:-../..}/.env
     environment:
       IP: 0.0.0.0
       PORT: 9876
@@ -28,26 +31,25 @@ services:
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
       DATABASE_NAME: ${POSTGRES_DATABASE}
-      DATABASE_USER: ${POSTGRES_USER}
-      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_USER: ${POSTGRES_READWRITE_USER}
+      DATABASE_PASSWORD: ${POSTGRES_READWRITE_PASSWORD}
     networks:
       - net
     ports:
       - "${BACKEND_PORT}:9876"
-      - "${SWAGGER_PORT}:7070"
     profiles: [debug]
     restart: on-failure
     volumes:
       - "${GIT_ROOT:-../..}/:/src"
 
-  frontend:
-    image: localhost/frontend:latest-debug
+  frontend-debug:
+    image: localhost/app_frontend:latest-debug
     build:
       context: ../..
       dockerfile: infrastructure/docker/app_frontend/Dockerfile.debug
       tags:
-        - "localhost/frontend:latest-debug"
-    container_name: frontend
+        - "localhost/app_frontend:latest-debug"
+    container_name: app_frontend
     environment:
       API_ROOT: ${API_ROOT}
     networks:

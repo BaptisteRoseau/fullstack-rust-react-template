@@ -7,7 +7,7 @@ services:
     build:
       context: ../..
       dockerfile: infrastructure/docker/app_postgres/Dockerfile
-      tags: ["app_postgres:latest"]
+      tags: ["localhost/app_postgres:latest"]
     container_name: app_postgres
     environment:
       POSTGRES_DB: ${POSTGRES_DATABASE}
@@ -26,16 +26,19 @@ services:
       - "postgres:/var/lib/postgresql/data"
 
   migrate:
-    image: nxyt/sqlx-cli:v0.70
+    image: localhost/app_migration:latest
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/app_migration/Dockerfile
+      tags: ["localhost/app_migration:latest"]
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - net
-    container_name: app_sqlx
-    command: sqlx migrate run --source /migrations
+    container_name: app_migration
     volumes:
-      - ${GIT_ROOT:-../..}/crates/database/migrations/:/migrations
+      - ${GIT_ROOT:-../..}/crates/database/migrations/:/migrations:ro
     environment:
       DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DATABASE}?sslmode=disable"
 
@@ -82,13 +85,16 @@ services:
       - "postgres_keycloak:/var/lib/postgresql/data"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.6.4
+    image: localhost/app_keycloak:latest
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/app_keycloak/Dockerfile
+      tags: ["localhost/app_keycloak:latest"]
     container_name: keycloak
-    command: start-dev --import-realm
+    command: start --optimized --import-realm
     depends_on:
       - postgres_keycloak
     environment:
-      KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres_keycloak:5432/${KEYCLOAK_DATABASE}
       KC_DB_USERNAME: ${KEYCLOAK_DATABASE_USER}
       KC_DB_PASSWORD: ${KEYCLOAK_DATABASE_PASSWORD}
@@ -96,9 +102,11 @@ services:
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
+      # Without a fixed host the issuer follows the request, so the stack works
+      # both from the browser on localhost and from inside the compose network.
       KC_HOSTNAME_STRICT: false
-      KC_HOSTNAME_STRICT_HTTPS: false
       KC_HTTP_ENABLED: true
+      KC_CACHE: local
       KC_IMPORT: /opt/keycloak/data/import/realm-export.json
     networks:
       - net

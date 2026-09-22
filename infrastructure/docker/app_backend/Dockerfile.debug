@@ -17,10 +17,10 @@ WORKDIR /src
 VOLUME [ "/src" ]
 USER developer
 
-# API Server ; Prometheus /metrics ; Swagger UI
-EXPOSE 9876 9100 7070
+# API Server ; Prometheus /metrics
+EXPOSE 9876 9100
 
 ENTRYPOINT [ "cargo", "watch", "--why", "--delay", "1.5", \
-    "-x", "'run --bin backend --debug'", \
+    "-x", "'run --bin backend -- --debug'", \
     "--watch", "./Cargo.toml", \
     "--watch", "crates" ]

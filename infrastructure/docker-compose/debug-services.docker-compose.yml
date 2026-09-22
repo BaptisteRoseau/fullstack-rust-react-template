@@ -18,22 +18,22 @@ services:
       - "pgadmin:/var/lib/pgadmin"
 
   homepage:
-    image: localhost/homepage:latest
+    image: localhost/app_homepage:latest
     build:
       context: ../..
       dockerfile: infrastructure/docker/app_homepage/Dockerfile
       tags:
-        - "localhost/homepage:latest"
+        - "localhost/app_homepage:latest"
     container_name: homepage
     networks:
       - net
     environment:
-      HOMEPAGE_ALLOWED_HOSTS: localhost:${HOMEPAGE_PORT},127.0.0.1:3000
+      HOMEPAGE_ALLOWED_HOSTS: localhost:${HOMEPAGE_PORT},127.0.0.1:${HOMEPAGE_PORT}
       PUID: 1000
       PGID: 1000
       # Homepage substitutes these into services.yaml as {{HOMEPAGE_VAR_*}}.
       HOMEPAGE_VAR_FRONTEND_PORT: ${FRONTEND_PORT}
-      HOMEPAGE_VAR_SWAGGER_PORT: ${SWAGGER_PORT}
+      HOMEPAGE_VAR_BACKEND_PORT: ${BACKEND_PORT}
       HOMEPAGE_VAR_KEYCLOAK_PORT: ${KEYCLOAK_PORT}
       HOMEPAGE_VAR_GRAFANA_PORT: ${GRAFANA_PORT}
       HOMEPAGE_VAR_PROMETHEUS_PORT: ${PROMETHEUS_PORT}

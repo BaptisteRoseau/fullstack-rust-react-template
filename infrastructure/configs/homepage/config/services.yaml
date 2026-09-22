@@ -15,8 +15,8 @@
         icon: http://localhost:{{HOMEPAGE_VAR_FRONTEND_PORT}}/favicon.ico
         description: React application
     - Swagger:
-        href: http://localhost:{{HOMEPAGE_VAR_SWAGGER_PORT}}/v1/docs/swagger-ui/
-        icon: http://localhost:{{HOMEPAGE_VAR_SWAGGER_PORT}}/v1/docs/swagger-ui/favicon-32x32.png
+        href: http://localhost:{{HOMEPAGE_VAR_BACKEND_PORT}}/v1/docs/swagger-ui/
+        icon: http://localhost:{{HOMEPAGE_VAR_BACKEND_PORT}}/v1/docs/swagger-ui/favicon-32x32.png
         description: Backend API documentation
     - Keycloak:
         href: http://localhost:{{HOMEPAGE_VAR_KEYCLOAK_PORT}}/

@@ -38,6 +38,15 @@ spec:
           envFrom:
             - secretRef:
                 name: grafana
+          env:
+            # The node running this pod also runs Prometheus. An overlay pointing
+            # at a cluster-wide store overrides PROMETHEUS_URL.
+            - name: NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: PROMETHEUS_URL
+              value: http://$(NODE_IP):9090
           ports:
             - name: http
               containerPort: 3000

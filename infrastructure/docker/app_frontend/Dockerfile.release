@@ -1,4 +1,4 @@
-# Rust builder used for static-web-server and the HTTP health checker
+# Rust builder used for static-web-server
 FROM rust:1.98.1 AS rust_builder
 
 ARG target=x86_64-unknown-linux-gnu
@@ -6,16 +6,6 @@ WORKDIR /build
 
 RUN RUSTFLAGS='-C target-feature=+crt-static' \
     cargo install static-web-server --locked --root /opt/ --target $target
-
-COPY tools/http_health_checker/ ./http_health_checker/
-
-RUN cd ./http_health_checker/ && \
-    RUSTFLAGS='-C target-feature=+crt-static' \
-    cargo build \
-    --release \
-    --target $target && \
-    mv target/$target/release/http_health_checker /opt/http_health_checker && \
-    chmod 555 /opt/http_health_checker
 
 # Site builder used to compile the web application into an SPA
 FROM oven/bun:1.3.14 AS site_builder
@@ -32,7 +22,7 @@ RUN bun scripts/compress-dist.ts /dist
 # and static-web-server to serve them.
 FROM scratch
 
-COPY --from=rust_builder /opt/http_health_checker /bin/http_health_checker
+COPY --from=localhost/tmp_health_checker:latest /http_health_checker /bin/http_health_checker
 COPY --from=rust_builder /opt/bin/static-web-server /bin/static-web-server
 COPY --from=site_builder /dist /usr/app
 

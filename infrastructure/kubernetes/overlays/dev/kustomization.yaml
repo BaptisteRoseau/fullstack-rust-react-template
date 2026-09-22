@@ -12,23 +12,30 @@ resources:
 
 labels:
   - includeSelectors: false
+    includeTemplates: true
     pairs:
       app.kubernetes.io/instance: dev
       app.kubernetes.io/version: "0.0.0-0000000" # keep in sync with the image tags below
 
 # Immutable tags only: a release is a one-line change here.
 images:
-  - name: backend
-    newName: ghcr.io/example/backend
+  - name: app_backend
+    newName: ghcr.io/example/app_backend
     newTag: "0.0.0-0000000" # replace with the released <version>-<short commit>
-  - name: frontend
-    newName: ghcr.io/example/frontend
+  - name: app_frontend
+    newName: ghcr.io/example/app_frontend
     newTag: "0.0.0-0000000" # replace with the released <version>-<short commit>
   - name: app_postgres
     newName: ghcr.io/example/app_postgres
     newTag: "0.0.0-0000000" # replace with the released <version>-<short commit>
   - name: app_migration
     newName: ghcr.io/example/app_migration
+    newTag: "0.0.0-0000000" # replace with the released <version>-<short commit>
+  - name: app_homepage
+    newName: ghcr.io/example/app_homepage
+    newTag: "0.0.0-0000000" # replace with the released <version>-<short commit>
+  - name: app_keycloak
+    newName: ghcr.io/example/app_keycloak
     newTag: "0.0.0-0000000" # replace with the released <version>-<short commit>
 
 replicas:
@@ -42,6 +49,7 @@ patches:
   - path: backend/deployment.yaml
   - path: frontend/ingress.yaml
   - path: homepage/configmap.yaml
+  - path: keycloak/configmap.yaml
   - path: keycloak/ingress.yaml
   # A shared dev cluster scales by hand; autoscaling only hides capacity problems here.
   - target:

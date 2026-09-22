@@ -7,4 +7,10 @@ data:
   KC_HOSTNAME: https://auth.example.com
   KC_HOSTNAME_STRICT: "true"
   KC_PROXY_HEADERS: xforwarded
+  # The ingress terminates TLS, so the pod itself serves plain HTTP inside the
+  # cluster. Every replica keeps a warm pool to the same database.
   KC_HTTP_ENABLED: "true"
+  KC_DB_POOL_INITIAL_SIZE: "5"
+  KC_DB_POOL_MIN_SIZE: "5"
+  KC_DB_POOL_MAX_SIZE: "20"
+  KC_LOG_CONSOLE_OUTPUT: json

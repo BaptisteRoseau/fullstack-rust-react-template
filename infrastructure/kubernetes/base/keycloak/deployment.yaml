@@ -9,7 +9,10 @@ metadata:
     app.kubernetes.io/part-of: fullstack-rust-react-template
 spec:
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app.kubernetes.io/name: keycloak
@@ -29,23 +32,38 @@ spec:
           type: RuntimeDefault
       containers:
         - name: keycloak
-          image: quay.io/keycloak/keycloak:26.6.4
-          # '--import-realm' provisions the `app` realm (self-service registration
-          # and the `webapp` confidential client) from the mounted import directory
-          # on first boot. Overlays targeting a real cluster replace 'start-dev'
-          # with 'start' and set KC_HOSTNAME.
-          args: ["start-dev", "--import-realm"]
+          image: app_keycloak
+          # app_keycloak is already augmented, so '--optimized' skips the build
+          # step every other start would repeat. '--import-realm' provisions the
+          # `app` realm (self-service registration and the `webapp` confidential
+          # client) from the mounted import directory on first boot. Both
+          # overlays set the KC_HOSTNAME that 'start' refuses to run without.
+          args: ["start", "--optimized", "--import-realm"]
           envFrom:
             - configMapRef:
                 name: keycloak
             - secretRef:
                 name: keycloak
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            # Infinispan finds its peers through the headless service, and the
+            # JVM sizes its heap from the container limit rather than the node.
+            - name: JAVA_OPTS_APPEND
+              value: >-
+                -XX:MaxRAMPercentage=70
+                -Djgroups.dns.query=keycloak-headless.$(POD_NAMESPACE).svc.cluster.local
           ports:
             - name: http
               containerPort: 8080
               protocol: TCP
             - name: management
               containerPort: 9000
+              protocol: TCP
+            - name: jgroups
+              containerPort: 7800
               protocol: TCP
           startupProbe:
             httpGet:
@@ -75,13 +93,23 @@ spec:
               memory: 1536Mi
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
           volumeMounts:
+            - name: data
+              mountPath: /opt/keycloak/data
+            - name: tmp
+              mountPath: /tmp
             - name: realm-import
               mountPath: /opt/keycloak/data/import
               readOnly: true
       volumes:
+        # The only two paths an optimized server writes to once it is running.
+        - name: data
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
         - name: realm-import
           configMap:
             name: keycloak-realm-import

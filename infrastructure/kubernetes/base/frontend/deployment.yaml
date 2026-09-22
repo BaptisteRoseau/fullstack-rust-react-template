@@ -40,7 +40,7 @@ spec:
               app.kubernetes.io/name: frontend
       containers:
         - name: frontend
-          image: frontend
+          image: app_frontend
           ports:
             - name: http
               containerPort: 8080

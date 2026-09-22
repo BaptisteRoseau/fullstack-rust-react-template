@@ -1,0 +1,21 @@
+---
+# Infinispan discovers the other replicas by resolving this name to their pod
+# IPs, which a ClusterIP service does not expose.
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak-headless
+  labels:
+    app.kubernetes.io/name: keycloak
+    app.kubernetes.io/component: identity-provider
+    app.kubernetes.io/part-of: fullstack-rust-react-template
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: tcp-jgroups
+      port: 7800
+      targetPort: jgroups
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: keycloak

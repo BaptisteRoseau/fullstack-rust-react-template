@@ -6,7 +6,9 @@ resources:
   - configmap.yaml
   - deployment.yaml
   - ingress.yaml
+  - pdb.yaml
   - service.yaml
+  - service-headless.yaml
 
 # The realm definition stays a single source of truth shared with Docker Compose.
 configMapGenerator:

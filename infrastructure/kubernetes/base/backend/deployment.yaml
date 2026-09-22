@@ -45,7 +45,7 @@ spec:
               app.kubernetes.io/name: backend
       containers:
         - name: backend
-          image: backend
+          image: app_backend
           envFrom:
             - configMapRef:
                 name: backend
@@ -57,9 +57,6 @@ spec:
               protocol: TCP
             - name: metrics
               containerPort: 9100
-              protocol: TCP
-            - name: swagger
-              containerPort: 7070
               protocol: TCP
           startupProbe:
             httpGet:

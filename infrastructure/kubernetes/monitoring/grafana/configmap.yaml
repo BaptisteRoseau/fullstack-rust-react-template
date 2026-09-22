@@ -14,6 +14,7 @@ data:
       - name: Prometheus
         type: prometheus
         access: proxy
-        # Prometheus runs on every node from the NixOS image, not in the cluster.
-        url: http://prometheus.example.com:9090
+        # Prometheus runs on every node from the NixOS image, not in the cluster,
+        # so the address comes from the pod environment rather than a Service.
+        url: $__env{PROMETHEUS_URL}
         isDefault: true

@@ -15,6 +15,18 @@ The `<other assets embeded in the image>` contains every assets **embeded** in t
 
 For configs bound at runtime through a mounted volume or kubernetes config maps, use [infrastructure/configs](../configs).
 
+A `tmp_<name>` directory holds a build-only image. It is never deployed and never published: it
+exists so several release images can `COPY --from` one artifact instead of each compiling it.
+[tmp_health_checker](./tmp_health_checker/Dockerfile) is the one such image, and every release
+image with an HTTP `HEALTHCHECK` takes the binary from it:
+
+```dockerfile
+COPY --from=localhost/tmp_health_checker:latest /http_health_checker /bin/http_health_checker
+```
+
+Because that is an image reference rather than a stage, it must be built first or the build fails
+resolving it. `./scripts/test_infra_lint.sh` builds it before reading the other Dockerfiles.
+
 For docker images where the image build differs between release and debug, use the following convention:
 
 ```txt
@@ -37,8 +49,8 @@ For docker images where the image build differs between release and debug, use t
   Docker only reads `#` at the start of a line, so the comment goes above the instruction:
 
   ```dockerfile
-  # API server ; Prometheus metrics ; Swagger UI
-  EXPOSE 9876 9100 7070
+  # API server ; Prometheus metrics
+  EXPOSE 9876 9100
   ```
 
 - Always include expected volumes (ex. `VOLUME [ "/var/lib/postgresql/data" ]`)
@@ -65,14 +77,19 @@ overlays, and the `pre-push` hook runs it with the other `test_*.sh` scripts.
 
 ## Rules
 
-- Every `docker/<dir>` is named `docker/app_<service>`
+- Every `docker/<dir>` is named `docker/app_<service>`, or `docker/tmp_<name>` for a build-only
+  image that nothing deploys.
+- Image names are `app_*` for images built by this repository, remote image names stay unchanged.
+- A `tmp_*` image is only ever tagged `latest`: nothing deploys it, so it has no version to carry,
+  and the conventions below do not apply to it.
+- Difference between `debug` and `release` images lies in the `-debug` suffix in the tag, not the image name.
 - Tag conventions:
-    - The version is the latest git tag, or `0.0.0` when the repository has none
-    - The build tag is that version and the short commit: `1.2.3-85e1cce`
-    - Append `debug` to debug images: `1.2.3-85e1cce-debug`
+    - The version is the latest git tag, or `0.0.0` when the repository has none.
+    - The build tag is that version and the short commit: `1.2.3-85e1cce`.
+    - Append `debug` to debug images: `1.2.3-85e1cce-debug`.
     - Publishing a build also moves the rolling tags `1.2.3`, `1.2`, `1` and `latest`, and their
-      `-debug` equivalents, onto it
-    - Never deploy a rolling tag: manifests reference the immutable `1.2.3-85e1cce` form
+      `-debug` equivalents, onto it.
+    - Never deploy a rolling tag: manifests reference the immutable `1.2.3-85e1cce` form.
 
     ```bash
     version="$(git describe --tags --abbrev=0 2>/dev/null || echo 0.0.0)"
