@@ -104,10 +104,8 @@ kubernetes/
 - **Every workload declares probes, resource requests and a restrictive `securityContext`**
   (`runAsNonRoot`, `allowPrivilegeEscalation: false`, all capabilities dropped, and a read-only
   root filesystem wherever the image tolerates one).
-- **Services present once on every node belong to the node**, like node-exporter or Prometheus, do
-  not add them as kubernetes containers but add them in the [NixOS](../nix) image. Grafana's
-  datasource points at the node's Prometheus for that reason, and the `prometheus.io/*` annotations
-  on a pod template are what the node's Prometheus discovers.
+- **Services present once on every node belong to the node**, like Node Exporter, do
+  not add them as kubernetes containers but add them in the [NixOS](../nix) image.
 
 ## Environments
 

@@ -4,7 +4,7 @@ This repository contains Nix manifests to build the NixOS image for production n
 
 ## Conventions
 
-If a service should be present once on every node (ex. Prometheus, Node Exporter, Kubernetes), include it into the NixOS image.
+If a service should be present once on every node (ex. Node Exporter, Kubernetes), include it into the NixOS image.
 
 Otherwise, the service belongs to [Kubernetes manifests](../kubernetes).
 
@@ -14,7 +14,6 @@ Each node includes at least the following services:
 
 - fail2ban
 - Kubernetes
-- Prometheus
 - Node Exporter (hardware prometheus metrics)
 
 ### Network Management
