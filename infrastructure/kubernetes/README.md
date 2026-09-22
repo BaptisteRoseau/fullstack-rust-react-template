@@ -165,7 +165,7 @@ crash dumps and child processes.
 ## Validation
 
 ```bash
-./scripts/test_infra_lint.sh
+./scripts/test_lint_infra.sh
 ```
 
 which runs, for every overlay:

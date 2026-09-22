@@ -25,7 +25,7 @@ COPY --from=localhost/tmp_health_checker:latest /http_health_checker /bin/http_h
 ```
 
 Because that is an image reference rather than a stage, it must be built first or the build fails
-resolving it. `./scripts/test_infra_lint.sh` builds it before reading the other Dockerfiles.
+resolving it. `./scripts/test_lint_infra.sh` builds it before reading the other Dockerfiles.
 
 For docker images where the image build differs between release and debug, use the following convention:
 
@@ -36,6 +36,8 @@ For docker images where the image build differs between release and debug, use t
     ├── Dockerfile.release
     └── <other assets embeded in the images>
 ```
+
+Images used exclusively for CI are prefixed `ci_*`.
 
 ### Image Convention
 
@@ -69,7 +71,7 @@ For a complete example, read [app_backend/Dockerfile.release](./app_backend/Dock
 Every Dockerfile must pass the build checker, which parses and lints it without running a build:
 
 ```bash
-./scripts/test_infra_lint.sh
+./scripts/test_lint_infra.sh
 ```
 
 Run it after editing any image definition. It also covers the Compose manifests and the Kubernetes

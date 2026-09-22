@@ -51,7 +51,7 @@ docker compose up -d
 The manifests must merge cleanly with every profile active:
 
 ```bash
-./scripts/test_infra_lint.sh
+./scripts/test_lint_infra.sh
 ```
 
 It parses and interpolates without starting anything, so it catches a missing variable, a bad
