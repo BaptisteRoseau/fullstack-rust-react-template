@@ -7,12 +7,10 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-package-lock.json
 node_modules
 dist
 dist-ssr
 *.local
-*.lock
 
 # Editor directories and files
 .vscode/*
@@ -56,3 +54,6 @@ kompose
 
 # Docker compose override
 docker-compose.override.yml
+
+# Agent scheduler state
+.agents/scheduled_tasks.lock
