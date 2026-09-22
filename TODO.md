@@ -31,6 +31,19 @@
 - [ ] See how to properly handle reactivity on the frontend (use container classes ? Add another optionnal .scss file and include it ? Use variables from the theme constants ?)
 
 - [ ] Markdownlint + Markdownlink script
+- [ ] Nix flake (for development)
+    - [ ] Rust
+    - [ ] Bun
+    - [ ] All linters
+    - [ ] Docker
+    - [ ] K3D
+    - [ ] Kube
+    - [ ] Rust tools
+
+- [ ] Apply scripts/ensure_created_at_and_updated_at.sql at the end of migrations
+- [ ] Make/verify DB migrations transactions (if one breaks, nothing is commited)
+
+- [ ] Standardize skills prefix (doc/git/backend/frontend/infra)
 
 ## Error management
 
@@ -152,7 +165,6 @@
 
 ### Frontend
 
-- [ ] SSR vs Client query helper
 - [X] Build React mainstream architecture (component/pages/controllers)
 
 ### Core and authentication - API
@@ -200,15 +212,20 @@
 - [ ] Skills for everything that is satisfying enough long-term
     - [X] Endpoint writing
     - [X] Config entries
-- [ ] `doc/` for developer documentation (+ Redocly)
+- [ ] `doc/dev` for developer documentation (+ Redocly)
+- [ ] `doc/userguide` for end-user
 - [X] CLAUDE.md and other LLM templates
+- [ ] Redaction simplifier
+- [ ] Git workflow
 
 ### Extras
 
 - [ ] Add a management CLI binary -> bound to `api_core` handlers
+- [ ] Add a development management tool (to replace the different plain shell scripts)
 - [ ] Loki docker/k3s plugin to expose docker logs to Grafana
 - [ ] Pre-built Grafana dashboards
 - [ ] Kubernetes manifests
 - [ ] Nix flake (Docker & Prometheus & Kubernetes)
 - [ ] Agent integration (MCP Gateway ?) read-only for every service (Backend, Postgres)
+    - [ ] Ask for write operations
 - [ ] Admin Dashboard ?
