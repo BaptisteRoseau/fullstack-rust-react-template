@@ -6,7 +6,7 @@
     "node_modules/**",
     "target/**"
   ],
-  "language": "en",
+  "language": ["en", "fr"],
   "version": "0.2",
   "words": [
     "Addrs",
