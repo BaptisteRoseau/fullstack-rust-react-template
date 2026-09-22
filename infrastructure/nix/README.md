@@ -1,6 +1,10 @@
 # Nix
 
-This repository contains Nix manifests to build the NixOS image for production nodes.
+Nix manifests, split by what they are used for:
+
+- [dev](./dev) holds the packages the root `flake.nix` development shell needs and that nixpkgs
+  does not provide, such as `sql-gen`.
+- [prod](./prod) holds the manifests building the NixOS image for production nodes.
 
 ## Conventions
 

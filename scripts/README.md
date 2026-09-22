@@ -46,6 +46,19 @@ go install sigs.k8s.io/kustomize/kustomize/v5@latest
 go install github.com/yannh/kubeconform/cmd/kubeconform@latest
 ```
 
+### Nix
+
+[`test_lint_nix.sh`](./test_lint_nix.sh) checks every `.nix` file: `nixfmt` for formatting, `statix`
+for anti-patterns, `deadnix` for unused bindings and arguments, then `nix flake check --no-build`
+to evaluate every flake output without building it.
+
+All four come from the development shell, so the script skips itself when `nixfmt` is missing rather
+than failing the `pre-push` hook of a developer who does not use Nix:
+
+```sh
+nix develop -c ./scripts/test_lint_nix.sh
+```
+
 ## Build
 
 Every `build_*.sh` script is used to build either the docker containers, the backend, the frontend or any other thing that needs to be built.
