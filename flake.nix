@@ -11,9 +11,9 @@
 
   outputs =
     {
-      self,
       nixpkgs,
       disko,
+      ...
     }:
     let
       systems = [
@@ -21,7 +21,8 @@
         "aarch64-linux"
         "aarch64-darwin"
       ];
-      forAllSystems = builder: nixpkgs.lib.genAttrs systems (system: builder nixpkgs.legacyPackages.${system});
+      forAllSystems =
+        builder: nixpkgs.lib.genAttrs systems (system: builder nixpkgs.legacyPackages.${system});
 
       sqlGenFor = pkgs: pkgs.callPackage ./infrastructure/nix/dev/sql-gen.nix { };
 
@@ -73,6 +74,7 @@
             kubeconform
 
             markdownlint-cli
+            markdown-link-check
             cspell
             typos
             shellcheck
@@ -91,9 +93,22 @@
 
           env = {
             RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
+
+            # cargo-llvm-cov reads the profiles rustc's instrumentation writes, so
+            # its llvm-profdata has to be the one rustc was built against rather
+            # than whatever LLVM nixpkgs defaults to. Without these it stops at
+            # "failed to find llvm-tools-preview".
+            LLVM_COV = "${pkgs.rustc.llvmPackages.llvm}/bin/llvm-cov";
+            LLVM_PROFDATA = "${pkgs.rustc.llvmPackages.llvm}/bin/llvm-profdata";
           };
 
           shellHook = ''
+            # openssl-sys links libssl dynamically and the binary carries no rpath,
+            # so the test and dev binaries need it on the runtime path too.
+            export LD_LIBRARY_PATH="${
+              pkgs.lib.makeLibraryPath [ pkgs.openssl ]
+            }''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+
             echo "Dev shell ready: $(cargo --version), bun $(bun --version)"
           '';
         };

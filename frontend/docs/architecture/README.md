@@ -29,7 +29,7 @@ architecture. Top-level folders are technical roles — `api/`, `components/`, `
 It combines four well-known patterns:
 
 | Pattern | Where it shows up here |
-|---|---|
+| --- | --- |
 | **Colocation** (test, story and stylesheet live next to the source) | Every component folder |
 | **Barrel / module public API** (`index.ts` re-exports; importers never reach inside) | Every component and multi-file module |
 | **Two-tier UI split** — domain-agnostic primitives vs. domain-aware composites | `design-system/` vs. `components/` |
@@ -55,7 +55,7 @@ service or an application context.
 ## Stack
 
 | Concern | Choice | Notes |
-|---|---|---|
+| --- | --- | --- |
 | Package manager | **Bun** | unchanged |
 | Bundler / dev server | **Vite** | single SPA entry, no multi-entry setup |
 | Language | **TypeScript** | strict; no `any`, no `@ts-expect-error` |
@@ -78,7 +78,7 @@ service or an application context.
 
 ## Directory tree
 
-```
+```txt
 frontend/
 ├── e2e/                        # Playwright specs, one file per user journey
 │   ├── <journey>.spec.ts
@@ -116,7 +116,7 @@ frontend/
 ### Deliberate omissions from the reference architecture
 
 | Reference had | Here | Why |
-|---|---|---|
+| --- | --- | --- |
 | `applications/frontoffice/` vs. `pages/` | one `src/pages/` | Single SPA — there is no public/admin split |
 | `src/entries/*` (many Vite entries) | one `src/main.tsx` | Not a multi-page server-rendered app |
 | `babel/i18n/`, `vite/plugins/entryLocale/` | Lingui Vite plugin | No Babel in this toolchain |
@@ -130,7 +130,7 @@ frontend/
 
 Dependencies flow **downwards only**. A module may import from any layer below it, never above.
 
-```
+```txt
               pages/  ──────────────┐
                  │                  │
             components/  ───────────┤
@@ -166,7 +166,7 @@ domain converts wire types to its own, and only `api/domains/<domain>/converters
 Components use `PascalCase` for folders and `.tsx` files; everything else is lowercase.
 
 | Pattern | Meaning |
-|---|---|
+| --- | --- |
 | `ComponentName/ComponentName.tsx` | React component (folder name matches file name) |
 | `ComponentName.test.tsx` | Unit / integration test (Vitest + Testing Library) |
 | `ComponentName.stories.tsx` | Storybook story |

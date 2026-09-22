@@ -31,9 +31,16 @@ Every `test_*.sh` script is used in the `pre-push` hook or can be used as a stan
 - Linter results
 - Infrastructure manifests
 
+### Dependency advisories
+
+[`test_cve.sh`](./test_cve.sh) reports, it does not gate: it prints every advisory `cargo audit`
+and `bun-audit` find and still exits 0. Advisories land in transitive dependencies, so the fix is
+usually an upstream release rather than a commit here, and one published overnight should not stop
+a push. Read its output and upgrade whatever has a fixed release.
+
 ### Infrastructure
 
-[`test_infra_lint.sh`](./test_infra_lint.sh) checks every Dockerfile with `docker build --check`,
+[`test_lint_infra.sh`](./test_lint_infra.sh) checks every Dockerfile with `docker build --check`,
 merges the Compose manifests with all profiles through `docker compose config`, and builds both
 Kustomize overlays through `kubeconform`. None of it starts a container.
 
@@ -51,6 +58,13 @@ go install github.com/yannh/kubeconform/cmd/kubeconform@latest
 [`test_lint_nix.sh`](./test_lint_nix.sh) checks every `.nix` file: `nixfmt` for formatting, `statix`
 for anti-patterns, `deadnix` for unused bindings and arguments, then `nix flake check --no-build`
 to evaluate every flake output without building it.
+
+It evaluates the outputs one by one rather than running `nix flake check`, which takes every node
+down to its `system.build.toplevel` and trips the assertion `base.nix` makes on
+`infrastructure/nix/prod/authorized_keys`. That file is provisioned per machine and absent from a
+fresh clone, so the nodes are evaluated with a lint-only key: everything except the key itself is
+checked here, and the real one is what `nix build .#nixosConfigurations.<node>...` verifies at
+deploy time. See [../infrastructure/nix/prod](../infrastructure/nix/prod).
 
 All four come from the development shell, so the script skips itself when `nixfmt` is missing rather
 than failing the `pre-push` hook of a developer who does not use Nix:

@@ -9,8 +9,8 @@ The realm is provisioned **automatically**. There is no manual admin-console set
 
 | What | Where |
 | --- | --- |
-| Service definition | [docker-compose.authentication.yml](../../infrastructure/docker-compose/docker-compose.authentication.yml) |
-| Realm definition | [realm-export.json](../../infrastructure/keycloak/import/realm-export.json) |
+| Service definition | [base.docker-compose.yml](../../infrastructure/docker-compose/base.docker-compose.yml) |
+| Realm definition | [realm-export.json](../../infrastructure/configs/keycloak/import/realm-export.json) |
 
 Keycloak runs with `start-dev --import-realm`, and the import directory is mounted read-only. On
 first boot it imports every realm JSON it finds there.
@@ -21,7 +21,7 @@ bootstrap credentials set in the compose file.
 ## The `app` realm
 
 Read the current values in
-[realm-export.json](../../infrastructure/keycloak/import/realm-export.json). What matters is why
+[realm-export.json](../../infrastructure/configs/keycloak/import/realm-export.json). What matters is why
 each one is set:
 
 | Setting | Why |

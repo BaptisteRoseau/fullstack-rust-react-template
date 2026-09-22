@@ -12,7 +12,7 @@ bottom of the dependency graph: it may not import from `components/`, `pages/` o
 Reusable React hooks with no domain knowledge. A hook that calls an API service is not a shared
 hook — it belongs in `api/hooks/` (if it wraps a request) or in the page's `hooks/` folder.
 
-```
+```txt
 src/hooks/
 ├── useBooleanState/
 │   ├── useBooleanState.ts
@@ -91,7 +91,7 @@ promises, and the failure path — a rejected clipboard write, a missing stored 
 
 Pure functions and non-React helpers. No JSX, no hooks, no imports from `api/`.
 
-```
+```txt
 src/utils/
 ├── createContext.tsx       # typed createContext factory
 ├── date.ts                 # dayjs formatting helpers
@@ -147,7 +147,7 @@ export function assertNever(value: never): never {
 One folder per context, each with the definition, the provider and the consumer hook separated so
 that importing the hook does not pull in the provider's dependencies.
 
-```
+```txt
 src/contexts/
 ├── auth/
 │   ├── AuthContext.ts
@@ -179,7 +179,7 @@ API response is duplicating the cache you already have.
 
 App-wide constants that are not routes (those live in `router/constants.ts`) and not module-local.
 
-```
+```txt
 src/constants/
 ├── index.ts
 ├── pagination.ts       # DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS
@@ -196,7 +196,7 @@ src/constants/
 TypeScript types shared across layers. Domain types describing an API payload live in
 [`api/domains/<domain>/types.ts`](01-api.md) next to their fetchers — this folder is for everything else.
 
-```
+```txt
 src/types/
 ├── index.ts            # barrel
 ├── common.ts           # Nullable<T>, DeepPartial<T>, AsyncState<T>
@@ -236,7 +236,7 @@ stylesheet import is an error under `strict`.
 ## Rules of thumb
 
 | You have… | It goes in… |
-|---|---|
+| --- | --- |
 | A pure function used by 2+ modules | `utils/<topic>.ts` |
 | A pure function used by 1 module | that module's `utils.ts` |
 | A hook with no domain knowledge | `hooks/` |

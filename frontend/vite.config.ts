@@ -124,7 +124,7 @@ export default defineConfig({
         exclude: ['**/node_modules/**', '**/e2e/**'],
         css: { modules: { classNameStrategy: 'non-scoped' } },
         coverage: {
-            include: ['src/**'],
+            include: ['src/**/*.{ts,tsx}'],
         },
     },
     optimizeDeps: { exclude: ['fsevents'] },

@@ -9,7 +9,7 @@ from [`design-system/`](02-design-system.md), which may not.
 Decision rule when you're unsure where a component goes:
 
 | Question | `design-system/` | `components/` |
-|---|---|---|
+| --- | --- | --- |
 | Does it import from `api/hooks/`? | never | yes |
 | Does it read a `contexts/` value? | never | yes |
 | Does it mention a domain type (`User`, `ApiKey`)? | never | yes |
@@ -23,7 +23,7 @@ A component used by exactly one page lives in that page's `components/` folder �
 
 ## Directory tree
 
-```
+```txt
 src/components/
 ├── errors/
 │   ├── ErrorFallback/          # Root error-boundary UI
@@ -74,7 +74,7 @@ Folder structure inside a component is identical to the design system's: `Compon
 When a component grows past ~150 lines, split it into sibling files inside its own folder rather
 than creating a parallel top-level component. The barrel decides what is public.
 
-```
+```txt
 DataTable/
 ├── DataTable.tsx               # public
 ├── DataTableEmptyState.tsx     # internal
@@ -87,7 +87,7 @@ DataTable/
 
 If a sub-part itself needs a stylesheet and a test, promote it to a nested folder:
 
-```
+```txt
 DataTable/
 ├── DataTable.tsx
 ├── index.ts

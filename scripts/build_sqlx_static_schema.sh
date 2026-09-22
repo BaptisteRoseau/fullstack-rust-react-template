@@ -7,7 +7,7 @@ cd "$GIT_ROOT"
 function ensure_installed(){
     executable=$1
     if [ ! -x "$(command -v $executable)" ]; then
-        echo "Missing $executable, please install it and rerun this script" >2
+        echo "Missing $executable, please install it and rerun this script" >&2
         exit 1
     fi
 }
@@ -38,7 +38,20 @@ docker run \
     --name sqlx_query_temp \
     app_postgres:latest > /dev/null
 
-sleep 5
+echo "Waiting for the database to accept connections"
+for _ in $(seq 60); do
+    if docker exec sqlx_query_temp pg_isready -q \
+        -h 127.0.0.1 -p 5432 -U "${POSTGRES_USER}" -d "${POSTGRES_DATABASE}"; then
+        break
+    fi
+    sleep 1
+done
+if ! docker exec sqlx_query_temp pg_isready -q \
+    -h 127.0.0.1 -p 5432 -U "${POSTGRES_USER}" -d "${POSTGRES_DATABASE}"; then
+    echo "The database never became ready" >&2
+    docker stop sqlx_query_temp >/dev/null 2>&1 || true
+    exit 1
+fi
 
 echo "Starting SQLx migrations"
 DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@127.0.0.1:${POSTGRES_PORT}/${POSTGRES_DATABASE}?sslmode=disable"

@@ -9,7 +9,7 @@ One SPA, one entry. `src/pages/` holds one folder per route; `src/router/` wires
 
 ## Bootstrap chain
 
-```
+```txt
 main.tsx  →  Context.tsx  →  App.tsx  →  router  →  layout  →  page
 ```
 
@@ -79,7 +79,7 @@ tree. Add a provider in one place only.
 
 ## Router (`src/router/`)
 
-```
+```txt
 src/router/
 ├── routes.tsx          # createBrowserRouter route objects
 ├── constants.ts        # PATHS — the single source of truth for URLs
@@ -185,7 +185,7 @@ plain hook does not need one.
 
 ## Layouts (`src/layouts/`)
 
-```
+```txt
 src/layouts/
 ├── AppLayout/
 │   ├── AppLayout.tsx           # header + sidebar + <Outlet/>
@@ -224,7 +224,7 @@ wrapper a page renders *inside* it for its title and action bar.
 
 ## Pages (`src/pages/`)
 
-```
+```txt
 src/pages/
 ├── Dashboard/
 │   ├── Dashboard.tsx
@@ -329,7 +329,7 @@ Each tab is its own file under `tabs/`, never a branch inside the page component
 Wizards share state through a context + reducer scoped to the page folder, never through global
 state:
 
-```
+```txt
 pages/Onboarding/
 ├── Onboarding.tsx
 ├── context/

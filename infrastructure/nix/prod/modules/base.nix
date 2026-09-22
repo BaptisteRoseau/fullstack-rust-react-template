@@ -1,5 +1,20 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
+let
+  authorizedKeysFile = ../authorized_keys;
+  authorizedKeys =
+    if builtins.pathExists authorizedKeysFile then
+      lib.filter (line: line != "" && !(lib.hasPrefix "#" line)) (
+        lib.splitString "\n" (builtins.readFile authorizedKeysFile)
+      )
+    else
+      [ ];
+in
 {
   options.app.node.privateInterface = lib.mkOption {
     type = lib.types.nullOr lib.types.str;
@@ -9,9 +24,11 @@
   };
 
   config = {
-    boot.loader.systemd-boot.enable = true;
-    boot.loader.efi.canTouchEfiVariables = true;
-    boot.tmp.cleanOnBoot = true;
+    boot = {
+      loader.systemd-boot.enable = true;
+      loader.efi.canTouchEfiVariables = true;
+      tmp.cleanOnBoot = true;
+    };
 
     time.timeZone = "UTC";
     i18n.defaultLocale = "en_US.UTF-8";
@@ -38,7 +55,7 @@
     users.users.admin = {
       isNormalUser = true;
       extraGroups = [ "wheel" ];
-      openssh.authorizedKeys.keys = [ ];
+      openssh.authorizedKeys.keys = authorizedKeys;
     };
 
     security.sudo.wheelNeedsPassword = false;
@@ -53,7 +70,7 @@
       };
     };
 
-    services.journald.extraConfig = "SystemMaxUse=2G";
+    services.journald.settings.Journal.SystemMaxUse = "2G";
 
     environment.systemPackages = with pkgs; [
       curl
@@ -68,7 +85,7 @@
     assertions = [
       {
         assertion = config.users.users.admin.openssh.authorizedKeys.keys != [ ];
-        message = "users.users.admin.openssh.authorizedKeys.keys is empty: the node would be unreachable.";
+        message = "infrastructure/nix/prod/authorized_keys is missing or empty: the node would be unreachable. Write your SSH public keys in it, one per line.";
       }
     ];
   };

@@ -25,8 +25,8 @@ hash_map = []
 
 [dev-dependencies]
 test_trait = { path = "../test_trait" }
-testcontainers = "0.24"
-testcontainers-modules = { version = "0.12", features = ["redis"] }
+testcontainers = "0.27"
+testcontainers-modules = { version = "0.15", features = ["redis"] }
 serde = { version = "1", features = ["derive"] }
 # `macros` for `#[tokio::test]`, `time` for the expiry tests' sleep.
 tokio = { version = "1", features = ["rt", "macros", "time"] }

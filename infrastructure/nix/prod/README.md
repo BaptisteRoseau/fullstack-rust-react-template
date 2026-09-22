@@ -119,9 +119,23 @@ at activation time into `/run/secrets` with real ownership.
 
 Nothing below has been run yet: the configurations evaluate against nixpkgs but no machine exists.
 
-Before anything else, add your SSH public key to `users.users.admin.openssh.authorizedKeys.keys`
-in [modules/base.nix](./modules/base.nix). An assertion fails the build while the list is empty,
-because a node with no key and no password login is a node nobody can log into.
+Before anything else, write your SSH public keys into `authorized_keys` in this directory, one per
+line, `#` starting a comment:
+
+```sh
+cat ~/.ssh/id_ed25519.pub >> infrastructure/nix/prod/authorized_keys
+```
+
+[modules/base.nix](./modules/base.nix) reads that file into
+`users.users.admin.openssh.authorizedKeys.keys`, and an assertion fails the build while it is
+missing or empty, because a node with no key and no password login is a node nobody can log into.
+[scripts/test_lint_nix.sh](../../../scripts/test_lint_nix.sh) evaluates the nodes with a lint-only
+key so that the `pre-push` hook still checks the rest of the manifests without it, which is why a
+green hook does not mean a node is deployable.
+
+The file is yours, not the repository's: every machine provisions its own, and nothing commits it.
+It is not in `.gitignore` on purpose, because a flake only sees the files git knows about plus the
+untracked ones, and an ignored file would be invisible to `nix flake check`.
 
 Build a node without a machine, to check it evaluates and compiles:
 

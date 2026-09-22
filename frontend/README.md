@@ -26,7 +26,7 @@ VITE_APP_API_URL=http://localhost:8081 bun run dev
 **Layer-first**: top-level folders under `src/` are technical roles — `api/`, `design-system/`,
 `components/`, `pages/`, `hooks/`, `utils/` — and dependencies flow downwards only.
 
-```
+```txt
 pages/ → components/ → design-system/ → hooks/ · utils/ · types/ · css/
                     ↘ api/hooks/ → api/domains/<domain>/ → api/generated/
 ```
@@ -39,7 +39,7 @@ The canonical reference is [`docs/architecture/`](docs/architecture/README.md). 
 [overview](docs/architecture/README.md), then the section you need:
 
 | Doc | Covers |
-|---|---|
+| --- | --- |
 | [01 – API layer](docs/architecture/01-api.md) | the generated SDK, domain converters, SWR hooks |
 | [02 – Design system](docs/architecture/02-design-system.md) | primitives, SCSS Modules, Radix, stories |
 | [03 – Shared components](docs/architecture/03-components.md) | domain-aware components, forms |
@@ -66,7 +66,7 @@ do not hand-write a backend path anywhere. After any change under `crates/api`:
 ## Commands
 
 | Command | What it does |
-|---|---|
+| --- | --- |
 | `bun run dev` | Vite dev server on port 3000 |
 | `bun run build` | Type-check then production build |
 | `bun run check-types` | `tsc --noEmit` |
@@ -87,7 +87,7 @@ do not hand-write a backend path anywhere. After any change under `crates/api`:
 ## Environment
 
 | Variable | Meaning |
-|---|---|
+| --- | --- |
 | `VITE_APP_API_URL` | Backend origin, no trailing path (`http://localhost:8080`) |
 | `VITE_APP_ENABLE_API_MOCKING` | Start the MSW browser worker instead of hitting the backend |
 | `VITE_APP_URL` | The app's own origin, used by mock redirects |

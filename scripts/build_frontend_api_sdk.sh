@@ -44,10 +44,15 @@ if [ "$GENERATED_DOCUMENT" != "$OPENAPI_OUTPUT" ]; then
     trap 'rm -f "$GENERATED_DOCUMENT"' EXIT
 fi
 
+# What the scrub keeps out is the application's own configuration, not the
+# toolchain's: inside `nix develop` cargo finds openssl and its own dependencies
+# through these, and dropping them fails the build instead of the document.
 scrubbed_env=(env -i PATH="$PATH" HOME="$HOME")
-if [ -n "${CARGO_TARGET_DIR:-}" ]; then
-    scrubbed_env+=(CARGO_TARGET_DIR="$CARGO_TARGET_DIR")
-fi
+for variable in CARGO_TARGET_DIR CARGO_HOME RUSTUP_HOME PKG_CONFIG_PATH LD_LIBRARY_PATH; do
+    if [ -n "${!variable:-}" ]; then
+        scrubbed_env+=("$variable=${!variable}")
+    fi
+done
 "${scrubbed_env[@]}" ./scripts/build_openapi.sh
 
 if [ "$GENERATED_DOCUMENT" != "$OPENAPI_OUTPUT" ]; then

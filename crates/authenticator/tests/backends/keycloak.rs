@@ -1,6 +1,7 @@
 //! Runs the `Authenticator` trait suites against the `Keycloak` backend.
 
 use std::sync::Arc;
+use std::time::Duration;
 
 use async_trait::async_trait;
 use reqwest::header::{COOKIE, SET_COOKIE};
@@ -153,6 +154,7 @@ impl KeycloakFixture {
                 "/opt/keycloak/data/import/oidc-realm-export.json",
                 BFF_REALM_EXPORT.as_bytes().to_vec(),
             )
+            .with_startup_timeout(KEYCLOAK_STARTUP_TIMEOUT)
             .start()
             .await
             .expect("failed to start keycloak container");
@@ -216,6 +218,9 @@ impl KeycloakFixture {
 const KEYCLOAK_IMAGE: &str = "quay.io/keycloak/keycloak";
 const KEYCLOAK_TAG: &str = "26.6.4";
 const KEYCLOAK_PORT: u16 = 8080;
+// Keycloak imports both realms before it logs "started in", which the 60 second
+// default does not cover on a loaded machine or under coverage instrumentation.
+const KEYCLOAK_STARTUP_TIMEOUT: Duration = Duration::from_secs(300);
 
 const AUDIENCE: &str = "backend";
 

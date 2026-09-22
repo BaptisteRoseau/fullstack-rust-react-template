@@ -14,7 +14,7 @@ honest: if a component can't be told in a story without mocking an API, it belon
 
 ## Directory tree
 
-```
+```txt
 src/design-system/
 ├── Avatar/
 ├── Badge/
@@ -72,7 +72,7 @@ no `index.ts` of their own — import the leaf: `@/design-system/inputs/TextInpu
 
 ## Component folder structure
 
-```
+```txt
 Badge/
 ├── Badge.tsx               # implementation
 ├── Badge.test.tsx          # unit test

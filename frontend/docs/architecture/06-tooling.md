@@ -6,7 +6,7 @@
 
 ## Global styles and tokens
 
-```
+```txt
 src/css/
 ├── main.scss           # aggregator imported once by main.tsx
 ├── _reset.scss         # normalise / box-sizing
@@ -200,7 +200,7 @@ sharing state between a parent and child (props), or state used by one subtree (
 
 ## i18n (Lingui)
 
-```
+```txt
 src/i18n/
 ├── index.ts                # i18n instance + activateLocale
 ├── locales/
@@ -226,7 +226,7 @@ export function Greeting({ name }: { name: string }) {
 }
 ```
 
-`<Trans>` for JSX content, `` t`` `` for attributes and non-JSX strings. The Lingui Vite plugin
+`<Trans>` for JSX content, ``t`` `` for attributes and non-JSX strings. The Lingui Vite plugin
 compiles macros through SWC — **no Babel is involved** anywhere in this toolchain.
 
 ```bash
@@ -242,7 +242,7 @@ bun run i18n:check      # CI gate: extraction is clean and complete
 Three levels, each with a different test double.
 
 | Level | Runner | Location | Doubles |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Unit — primitive, hook, util | Vitest | next to source | none |
 | Integration — component, page | Vitest + Testing Library | next to source | `vi.mock('@/api/hooks/useApiXxx')` |
 | Domain fetcher | Vitest | `api/domains/<domain>/<domain>.test.ts` | MSW |
@@ -264,7 +264,7 @@ Do not mix both for one subject — pick the level you are testing.
 
 ### `src/test-utils/`
 
-```
+```txt
 src/test-utils/
 ├── render.tsx              # RTL render wrapped in the app's provider tree
 ├── renderAppAtRoute.tsx    # render the whole router at a given path
@@ -357,7 +357,7 @@ the test. Never snapshot a component that fetches data — the snapshot becomes 
 
 ## Storybook
 
-```
+```txt
 src/stories/
 ├── Introduction.mdx
 ├── tokens.mdx              # colour / spacing scale documentation
@@ -376,7 +376,7 @@ Pages do not get stories — they get tests.
 
 ## End-to-end (Playwright)
 
-```
+```txt
 e2e/
 ├── auth.spec.ts
 ├── users.spec.ts

@@ -15,6 +15,7 @@
     - [ ] Write a skill
     - [ ] Write a README
     - [ ] Simplifyier
+    - [ ] Adding a new tool -> look for linters, formatters, tests, config etc..
 
 - [ ] Add cargo target env variable in the debug container
 - [ ] SQL-based backend for Database
@@ -23,8 +24,12 @@
 
 - [ ] Add a mention or a tag in the Rust crates to tell whether they are for testing/traits/utils
 - [ ] Make an MCP crate with Rust macros (similar to the API layer)
+- [ ] Smart formatter (formatter based on git diff to know wich formatter to apply)
 
 - [ ] Agents (implementer, reviewer, planner, pentester..)
+- [ ] Use Grafana Alloy instead of node_exporter (can also get docker logs, system logs as well as metrics)
+    - [ ] See use cases: <https://github.com/grafana/alloy-scenarios>
+    - [ ] Add Loki instances + add alloy configuration + add it in Nix prod
 
 - [ ] Reformat .cspell.json -> .cspell.yml
 
@@ -191,7 +196,7 @@
     - [ ] meta: filename, type, owner & access
     - [x] gzip compression by default
     - [x] caesium image optimizer
-    - [ ] pdf file compression (see https://github.com/yfedoseev/pdf_oxide/tree/main)
+    - [ ] pdf file compression (see <https://github.com/yfedoseev/pdf_oxide/tree/main>)
 - [ ] Add benchmarks and use testcontainers to set them ups
 
 ### Payment Gateway

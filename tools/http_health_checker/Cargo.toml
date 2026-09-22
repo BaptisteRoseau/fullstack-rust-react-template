@@ -6,6 +6,10 @@ edition = "2024"
 authors = ["Baptiste Roseau"]
 
 [dependencies]
+# Held at 2.x on purpose. minreq 3.0.0 would clear three rustls-webpki
+# advisories, but it panics with `unreachable!()` on a host that does not
+# resolve, so the checker aborts with 101 instead of reporting unhealthy, which
+# is the one thing a HEALTHCHECK must never do. Revisit when 3.x fixes it.
 minreq = { version = "2.8", features = ["https"] }
 
 # Test-only: the tests serve their own endpoints rather than reaching the

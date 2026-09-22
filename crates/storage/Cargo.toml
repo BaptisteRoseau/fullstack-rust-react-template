@@ -24,7 +24,7 @@ s3 = []
 
 [dev-dependencies]
 test_trait = { path = "../test_trait" }
-testcontainers = "0.24"
+testcontainers = "0.27"
 uuid = { version = "1", features = ["v4"] }
 
 [[test]]

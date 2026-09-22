@@ -17,8 +17,8 @@ test-utils = []
 
 [dev-dependencies]
 test_trait = { path = "../test_trait" }
-testcontainers = "0.24"
-testcontainers-modules = { version = "0.12", features = ["redis"] } # if it has the service
+testcontainers = "0.27"
+testcontainers-modules = { version = "0.15", features = ["redis"] } # if it has the service
 uuid = { version = "1", features = ["v4"] }
 
 [[test]]

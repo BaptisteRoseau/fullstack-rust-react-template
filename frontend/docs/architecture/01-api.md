@@ -5,7 +5,7 @@
 `src/api/` owns every HTTP call to the Rust backend. It is a real client, in four layers:
 
 | Layer | What it is | Who may import it |
-|---|---|---|
+| --- | --- | --- |
 | `generated/` | The SDK produced from the backend's OpenAPI document. Never hand-edited | `src/api/**` only |
 | `client.ts` · `errors.ts` | Transport and the error contract | `src/api/**` |
 | `domains/<domain>/` | Domain types, converters and `Promise`-returning fetchers | anything, through the barrel |
@@ -19,7 +19,7 @@ The converter between them is the only place those two facts meet.
 
 ## Directory tree
 
-```
+```txt
 src/api/
 ├── generated/                  # OUTPUT of the codegen. Committed, never edited
 ├── client.ts                   # configures the generated client + apiCall()
@@ -43,7 +43,7 @@ src/api/
 Those are the **only** filenames allowed under `src/api/domains/<domain>/`.
 
 | File | Required when |
-|---|---|
+| --- | --- |
 | `<domain>.ts`, `<domain>.test.ts`, `index.ts` | always |
 | `types.ts` | the domain has a payload |
 | `converters.ts`, `converters.test.ts` | `types.ts` exists |
@@ -268,7 +268,7 @@ Return SWR's result object untouched. Do not destructure and rewrap.
 ## Testing
 
 | File | Backed by | Asserts |
-|---|---|---|
+| --- | --- | --- |
 | `converters.test.ts` | nothing | the shaping decisions: units, unions, renames |
 | `<domain>.test.ts` | MSW | fetcher and converter together, plus the error mapping |
 | `useApiXxx.test.ts` | MSW + `SwrWrapper` | keying, skipping, and that mutations invalidate |
