@@ -1,9 +1,28 @@
 # TODO
 
+- [ ] Post Oxaria
+- [ ] Include Oxaria to the test scripts ?
+- [ ] Stop running EVERY test script oon git push
+
 ## Infra
 
+- [ ] Set-up and configure Grafana Alloy
+    - [X] Scrape system metrics
+    - [X] Scrape system logs
+    - [X] Scrape Docker metrics
+    - [X] Scrape Docker logs
+    - [ ] Scrape Kubernetes metrics
+    - [ ] Scrape Kubernetes logs
+    - [ ] Find other interresting metrics to be scrapped
+- [ ] Remove network connection for Homepage
 - [ ] Test out docker image builds, docker compose, kubernetes
 - [ ] Make Nix flake and NixOS image
+
+### Kubernetes
+
+- [ ] Use cluster DNS names for pods, use https instead of http
+- [ ] Better cleanup of migration pod
+- [ ] More realist expectation of memory requirements
 
 ## Other
 
@@ -77,6 +96,7 @@
 - [ ] Standardize API tests
 
 - [ ] Nix & k3s infra
+- [ ] oxaria integration
 
 - [ ] Cache uuid <-> username in Redis ?
 - [ ] use username as slug ?

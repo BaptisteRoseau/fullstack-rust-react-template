@@ -13,6 +13,9 @@ the trade-off per file rather than the crate deciding for everyone. `load` rever
 gzip step on its own: the backend stores the compression as the object's content-type and
 reads it back from there, so a caller never has to remember what it saved with.
 
+Whenever you need to store a blob, compress it unless it is performance-critical to
+respond quickly.
+
 ## Skills
 
 - [backend-feature-gating](../../.claude/skills/backend-feature-gating/SKILL.md)

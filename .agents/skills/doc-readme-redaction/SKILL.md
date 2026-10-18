@@ -1,5 +1,5 @@
 ---
-name: doc-readme
+name: doc-readme-redaction
 description: Use when writing a new README.md, or restructuring or reviewing an existing one, anywhere in the repository.
 ---
 
