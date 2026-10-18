@@ -2,7 +2,7 @@
 
 - [ ] Post Oxaria
 - [ ] Include Oxaria to the test scripts ?
-- [ ] Stop running EVERY test script oon git push
+- [ ] Stop running EVERY test script on git push
 
 ## Infra
 
@@ -31,10 +31,11 @@
 - [ ] Remove CLAUDE.md symlinks
 
 - [ ] Skills
-    - [ ] Write a skill
-    - [ ] Write a README
+    - [X] Write a skill
+    - [X] Write a README
     - [ ] Simplifyier
     - [ ] Adding a new tool -> look for linters, formatters, tests, config etc..
+    - [ ] Infra skilsl ?
 
 - [ ] Add cargo target env variable in the debug container
 - [ ] SQL-based backend for Database
@@ -55,9 +56,9 @@
 - [ ] See how to properly handle reactivity on the frontend (use container classes ? Add another optionnal .scss file and include it ? Use variables from the theme constants ?)
 
 - [ ] Markdownlint + Markdownlink script
-- [ ] Nix flake (for development)
-    - [ ] Rust
-    - [ ] Bun
+- [X] Nix flake (for development)
+    - [X] Rust
+    - [X] Bun
     - [ ] All linters
     - [ ] Docker
     - [ ] K3D
@@ -67,7 +68,7 @@
 - [ ] Apply scripts/ensure_created_at_and_updated_at.sql at the end of migrations
 - [ ] Make/verify DB migrations transactions (if one breaks, nothing is commited)
 
-- [ ] Standardize skills prefix (doc/git/backend/frontend/infra)
+- [X] Standardize skills prefix (doc/git/backend/frontend/infra)
 
 ## Error management
 
@@ -95,8 +96,8 @@
 - [ ] Add the file name to the upload/download endpoint using the file metadata (currently downloading a blob) (See how it's done in the file storage PoC)
 - [ ] Standardize API tests
 
-- [ ] Nix & k3s infra
-- [ ] oxaria integration
+- [X] Nix & k3s infra
+- [X] oxaria integration
 
 - [ ] Cache uuid <-> username in Redis ?
 - [ ] use username as slug ?
@@ -116,7 +117,7 @@
 6. [x] Create a Database trait
 7. [ ] Implement CRUD handler in Database trait
 8. [x] Make a script to generate SQLx static file for offline sqlx compilation
-9. [ ] Change license to non-commercial
+9. [X] Change license to non-commercial
 
 ### Database Layer
 
@@ -140,7 +141,6 @@
 
 - [x] Set a request ID for logging purposes
 - [ ] Use slugs instead of IDs whenever possible
-- [ ] Use a Protobuf schema to generate Rust models and Typescript structures ?
 - [ ] Implement an actual CORS middleware
 - [x] Add compression middleware
 - [x] Add tracing middleware (set sensitive headers before)
@@ -154,7 +154,7 @@
 - [ ] Convert `app_core` models to API models and vice-versa
 - [x] Add error handling middleware & global error conversion
 - [x] Trace errors & normalize error response
-- [ ] Support both REST & RCP from the same handler (based on the `Content-Type` header)
+- [ ] Support both JSON & Protobuf from the same handler (based on the `Accept` header)
 - [ ] Add an MCP crate (similar to the API crate), merge it in the router
 - [ ] Better health checks (see kube probes (startup/ready/alive))
 - [ ] Pagination standardization
@@ -233,8 +233,8 @@
 
 ### Documentation
 
-- [ ] README.md in every directory explaining best practices of said directory
-- [ ] Skills for everything that is satisfying enough long-term
+- [X] README.md in every directory explaining best practices of said directory
+- [X] Skills for everything that is satisfying enough long-term
     - [X] Endpoint writing
     - [X] Config entries
 - [ ] `doc/dev` for developer documentation (+ Redocly)
@@ -247,10 +247,11 @@
 
 - [ ] Add a management CLI binary -> bound to `api_core` handlers
 - [ ] Add a development management tool (to replace the different plain shell scripts)
-- [ ] Loki docker/k3s plugin to expose docker logs to Grafana
+- [ ] Grafana Alloy integration
 - [ ] Pre-built Grafana dashboards
-- [ ] Kubernetes manifests
-- [ ] Nix flake (Docker & Prometheus & Kubernetes)
+- [ ] Performance benchmarks
+- [X] Kubernetes manifests
+- [X] Nix flake (Docker & Prometheus & Kubernetes)
 - [ ] Agent integration (MCP Gateway ?) read-only for every service (Backend, Postgres)
     - [ ] Ask for write operations
 - [ ] Admin Dashboard ?
