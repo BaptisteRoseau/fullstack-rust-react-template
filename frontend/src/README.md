@@ -47,3 +47,4 @@ Each folder listed above with its own README describes it in more depth.
 ## Skills
 
 - [frontend-architecture](../../.claude/skills/frontend-architecture/SKILL.md)
+- [frontend-accessibility-checking](../../.claude/skills/frontend-accessibility-checking/SKILL.md)

@@ -49,7 +49,8 @@ The canonical reference is [`docs/architecture/`](docs/architecture/README.md). 
 
 Agents: the same material is packaged as skills — `frontend-architecture`, `frontend-api`,
 `frontend-design-system`, `frontend-component`, `frontend-page`, `frontend-form`, `frontend-state`,
-`frontend-i18n`, `frontend-mocks`, `frontend-testing`, `frontend-seo`, `frontend-api-sdk`.
+`frontend-i18n`, `frontend-mocks`, `frontend-testing`, `frontend-seo`, `frontend-api-sdk`,
+`frontend-accessibility-checking`.
 
 ### The API client is generated
 
