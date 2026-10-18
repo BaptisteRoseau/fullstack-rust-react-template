@@ -99,6 +99,10 @@ make this test tautological?"**.
 Integration suites are written once against the trait, then replayed against every backend using
 [test_trait](./test_trait) and `testcontainers`.
 
+Always prefer writing tests under `tests` instead of `src`, only using the public interface.
+If not feasable, fallback to a unit test implementation.
+Avoid mocking.
+
 ## Skills
 
 - [backend-add-api-endpoint](../.claude/skills/backend-add-api-endpoint/SKILL.md)
