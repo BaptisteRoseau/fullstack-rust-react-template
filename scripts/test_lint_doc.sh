@@ -15,4 +15,4 @@ markdownlint $MARKDOWN_FILES -c "$GIT_ROOT/.markdownlint.json"
 markdown-link-check --config "$GIT_ROOT/.markdown-link-check.json" $MARKDOWN_FILES
 
 # Not mandatory yet and too verbose
-# cspell lint "$GIT_ROOT" --gitignore -c "$GIT_ROOT/.cspell.json"
+# cspell lint "$GIT_ROOT" --gitignore -c "$GIT_ROOT/.cspell.yml"

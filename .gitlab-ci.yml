@@ -52,4 +52,4 @@ spelling:
   script:
     # Already Checked
     - npm install -g cspell@latest
-    - cspell --color --locale "en,fr" --config .cspell.json --gitignore --no-progress ./**
+    - cspell --color --locale "en,fr" --config .cspell.yml --gitignore --no-progress ./**
