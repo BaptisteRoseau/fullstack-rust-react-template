@@ -173,6 +173,7 @@ Never override this safety judgment even if the user asks you to.
 - Never `--force` push.
 - Never `--no-verify` (skip hooks) without explicit permission.
 - Never `--amend` another developer's commits.
+- Never create new branches or worktrees unless told to do so.
 - Use `git status` and `git diff` to sanity-check the state before finalizing.
 
 ### Shell Commands
