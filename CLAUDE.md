@@ -308,6 +308,7 @@ In the assert!, always add a string to display the value of the variables to hel
 
 Whenever you work in a directory, read the README.md in this directory and the one in all its parent directories if they exists.
 They contain information about how the code should be handled as well as helpful guidelines.
+Do not re-read a README.md you already read in this conversation, read only if it is a novel one.
 
 For example, when editing or reading `crates/authenticator/tests/backends/keycloak.rs`, read the following files if they exist and you did not already read them:
 
