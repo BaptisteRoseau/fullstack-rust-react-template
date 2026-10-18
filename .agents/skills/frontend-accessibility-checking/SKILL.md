@@ -124,9 +124,8 @@ introduce a token that carries text or draws the edge of a control.
 
 - Fix a contrast finding in the token of the theme that fails, then rerun the script: a light
   token fix must not break its dark counterpart, and the reverse.
-- `--color-border` is both the decorative border of cards and tables and the only edge of the
-  inputs. Do not darken it to fix an input edge: add a separate token for control edges, use it in
-  `src/design-system/inputs/`, and move the pair in the script to the new token.
+- `--color-border` is decorative only (cards, tables, dividers). The edge of a control uses
+  `--color-control-border`, the one held to 3:1. Never draw an input edge with `--color-border`.
 - Never hard-code a colour in a module. It escapes the theme switch and stays the same in both
   themes, so one of them is likely to fail.
 

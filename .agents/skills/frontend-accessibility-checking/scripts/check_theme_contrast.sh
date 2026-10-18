@@ -37,11 +37,12 @@ TEXT_PAIRS = [
     ("on-danger", "danger-hover"),
 ]
 
-# --color-border is the only edge of the inputs and of the switch track.
+# --color-control-border is the only edge of the inputs and of the switch track.
 # --color-primary is the focus-ring outline of every focusable element.
 NON_TEXT_PAIRS = [
-    ("border", "surface"),
-    ("border", "background"),
+    ("control-border", "surface"),
+    ("control-border", "surface-raised"),
+    ("control-border", "background"),
     ("primary", "surface"),
     ("primary", "background"),
 ]
