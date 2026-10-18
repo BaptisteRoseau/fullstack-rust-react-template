@@ -1,0 +1,154 @@
+discovery.kubernetes "pods" {
+	role              = "pod"
+	api_server        = sys.env("KUBERNETES_API_URL")
+	bearer_token_file = "/var/lib/secrets/alloy-token"
+
+	tls_config {
+		ca_file = "/var/lib/rancher/k3s/agent/server-ca.crt"
+	}
+
+	selectors {
+		role  = "pod"
+		field = "spec.nodeName=" + sys.env("NODE_NAME")
+	}
+}
+
+discovery.relabel "pod_logs" {
+	targets = discovery.kubernetes.pods.targets
+
+	rule {
+		source_labels = ["__meta_kubernetes_namespace"]
+		target_label  = "namespace"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_name"]
+		target_label  = "pod"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_container_name"]
+		target_label  = "container"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+		target_label  = "app"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+		separator     = "/"
+		target_label  = "__path__"
+		replacement   = "/var/log/pods/*$1/*.log"
+	}
+}
+
+loki.source.file "pods" {
+	targets    = discovery.relabel.pod_logs.output
+	forward_to = [loki.process.pods.receiver]
+
+	file_match {
+		enabled = true
+	}
+}
+
+loki.process "pods" {
+	forward_to = [loki.write.default.receiver]
+
+	stage.cri { }
+}
+
+discovery.relabel "pod_metrics" {
+	targets = discovery.kubernetes.pods.targets
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_scrape"]
+		regex         = "true"
+		action        = "keep"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_port"]
+		regex         = ".+"
+		action        = "keep"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_phase"]
+		regex         = "Running"
+		action        = "keep"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_ip", "__meta_kubernetes_pod_annotation_prometheus_io_port"]
+		separator     = ":"
+		target_label  = "__address__"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_path"]
+		regex         = "(.+)"
+		target_label  = "__metrics_path__"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_namespace"]
+		target_label  = "namespace"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_name"]
+		target_label  = "pod"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+		target_label  = "app"
+	}
+}
+
+prometheus.scrape "pods" {
+	targets         = discovery.relabel.pod_metrics.output
+	forward_to      = [prometheus.remote_write.default.receiver]
+	scrape_interval = "30s"
+}
+
+// k3s runs every Kubernetes component in one process sharing one registry,
+// so the kubelet endpoint also serves the API server, scheduler, controller
+// manager and kube-proxy metrics on server nodes.
+prometheus.scrape "kubelet" {
+	targets = [
+		{"__address__" = "127.0.0.1:10250", "__metrics_path__" = "/metrics", "job" = "kubelet"},
+		{"__address__" = "127.0.0.1:10250", "__metrics_path__" = "/metrics/cadvisor", "job" = "cadvisor"},
+		{"__address__" = "127.0.0.1:10250", "__metrics_path__" = "/metrics/probes", "job" = "kubelet-probes"},
+	]
+	forward_to        = [prometheus.remote_write.default.receiver]
+	scheme            = "https"
+	bearer_token_file = "/var/lib/secrets/alloy-token"
+	scrape_interval   = "30s"
+
+	tls_config {
+		ca_file     = "/var/lib/rancher/k3s/agent/server-ca.crt"
+		server_name = sys.env("NODE_NAME")
+	}
+}
+
+// Every node runs this, clustering makes a single one of them collect.
+loki.source.kubernetes_events "cluster" {
+	forward_to = [loki.write.default.receiver]
+	job_name   = "kubernetes-events"
+
+	client {
+		api_server        = sys.env("KUBERNETES_API_URL")
+		bearer_token_file = "/var/lib/secrets/alloy-token"
+
+		tls_config {
+			ca_file = "/var/lib/rancher/k3s/agent/server-ca.crt"
+		}
+	}
+
+	clustering {
+		enabled = true
+	}
+}

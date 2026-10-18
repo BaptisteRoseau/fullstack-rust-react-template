@@ -1,0 +1,79 @@
+loki.relabel "journal" {
+	forward_to = []
+
+	// Kept: sshd, fail2ban and k3s, every sudo line, systemd and kernel
+	// warnings, and errors from anything else.
+	rule {
+		source_labels = [
+			"__journal__systemd_unit",
+			"__journal_syslog_identifier",
+			"__journal__transport",
+			"__journal_priority",
+		]
+		separator = ";"
+		regex     = "(sshd|fail2ban|k3s)\\.service;.*|.*;sudo;.*;.*|.*;systemd;.*;[0-4]|.*;.*;kernel;[0-4]|.*;.*;.*;[0-3]"
+		action    = "keep"
+	}
+
+	rule {
+		source_labels = ["__journal__systemd_unit"]
+		target_label  = "unit"
+	}
+
+	rule {
+		source_labels = ["__journal_syslog_identifier"]
+		target_label  = "identifier"
+	}
+
+	rule {
+		source_labels = ["__journal_priority_keyword"]
+		target_label  = "level"
+	}
+}
+
+loki.source.journal "system" {
+	forward_to    = [loki.process.journal.receiver]
+	relabel_rules = loki.relabel.journal.rules
+	max_age       = "12h"
+}
+
+loki.process "journal" {
+	forward_to = [loki.write.default.receiver]
+
+	// k3s logs everything at the info priority, its own level is in the line.
+	stage.match {
+		selector            = "{unit=\"k3s.service\"} |~ \"^I[0-9]{4} |level=info\""
+		action              = "drop"
+		drop_counter_reason = "k3s_info"
+	}
+
+	stage.match {
+		selector      = "{unit=\"fail2ban.service\"}"
+		pipeline_name = "fail2ban"
+
+		stage.regex {
+			expression = "\\[(?P<jail>[^\\]]+)\\] (?P<action>Found|Ban|Unban|Restore Ban) "
+		}
+
+		stage.labels {
+			values = {
+				jail   = "",
+				action = "",
+			}
+		}
+
+		stage.metrics {
+			metric.counter {
+				name        = "fail2ban_events_total"
+				prefix      = ""
+				description = "fail2ban log events, by jail and action."
+				source      = "action"
+				action      = "inc"
+			}
+		}
+
+		stage.label_drop {
+			values = ["action"]
+		}
+	}
+}

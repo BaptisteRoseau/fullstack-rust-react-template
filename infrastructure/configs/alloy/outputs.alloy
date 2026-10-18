@@ -1,0 +1,19 @@
+loki.write "default" {
+	endpoint {
+		url = sys.env("LOKI_URL")
+	}
+
+	external_labels = {
+		node = sys.env("NODE_NAME"),
+	}
+}
+
+prometheus.remote_write "default" {
+	endpoint {
+		url = sys.env("PROMETHEUS_URL")
+	}
+
+	external_labels = {
+		node = sys.env("NODE_NAME"),
+	}
+}

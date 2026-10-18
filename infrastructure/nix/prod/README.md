@@ -17,7 +17,8 @@ prod/
 ├── modules/                        # Reusable, parameterized, no machine-specific value
 │   ├── base.nix                    # Users, SSH, Nix settings, bootloader, locale
 │   ├── hardening.nix               # fail2ban, sysctl, firewall defaults
-│   ├── monitoring.nix              # Node Exporter
+│   ├── monitoring.nix              # Grafana Alloy
+│   ├── alloy-rbac.nix              # Kubernetes access for Alloy, deployed by servers
 │   ├── k3s.nix                     # Settings shared by both cluster roles
 │   ├── k3s-server.nix              # Control plane
 │   └── k3s-agent.nix               # Worker
@@ -86,7 +87,7 @@ nodes are opened **on that interface only**, so nothing internal is reachable fr
 | 2379, 2380 | private | server | etcd |
 | 10250 | private | both | Kubelet |
 | 8472/udp | private | both | Flannel VXLAN |
-| 9100 | private | both | Node Exporter, scraped by Prometheus |
+| 12345 | private | both | Grafana Alloy, UI and cluster gossip |
 
 Leaving `app.node.privateInterface` unset opens none of the internal ports: a single-node cluster
 works, a multi-node one does not. This is deliberate — the alternative default would expose etcd
@@ -97,6 +98,39 @@ has to wait for a timeout on every port instead of getting an immediate refusal.
 
 Traefik is disabled because the Kubernetes overlays use the nginx ingress controller and
 cert-manager, see [../../kubernetes](../../kubernetes).
+
+## Monitoring
+
+Every node runs [Grafana Alloy](https://grafana.com/docs/alloy/latest/), configured by the
+`*.alloy` files in [../../configs/alloy](../../configs/alloy). It pushes logs to Loki and metrics
+to Prometheus, both running as pods, and adds a `node` label holding the hostname to everything
+it sends:
+
+| File | Collects |
+| --- | --- |
+| `host.alloy` | CPU, memory, disks, network, systemd units, and Alloy's own metrics |
+| `journal.alloy` | sshd, sudo, fail2ban and k3s logs, kernel and systemd warnings, any error; `fail2ban_events_total` by jail and action |
+| `kubernetes.alloy` | Logs and annotated metrics of the pods on this node, kubelet and cAdvisor metrics, cluster events |
+| `outputs.alloy` | Nothing: the Loki and Prometheus endpoints the others send to |
+
+The `.alloy` files read node facts from environment variables: `NODE_NAME` and
+`KUBERNETES_API_URL` are set by [modules/monitoring.nix](./modules/monitoring.nix), `LOKI_URL`
+and `PROMETHEUS_URL` come from the node's environment file, see [Secrets](#secrets). Prometheus
+must run with `--web.enable-remote-write-receiver` to accept the push.
+
+The nodes form one Alloy cluster. Each node joins through the host of `services.k3s.serverAddr`,
+so the first server is the seed and nothing is set per host. The cluster makes a single node
+collect the Kubernetes events instead of all of them.
+
+Things that fail quietly:
+
+- **No `/var/lib/secrets/alloy-token`**: the host and journal pipelines work, every Kubernetes
+  component fails to authenticate and collects nothing.
+- **No `/var/lib/secrets/alloy.env`**, or a variable missing from it: Alloy does not start at
+  all, so the node sends nothing.
+- **k3s puts every component in one process**, so the kubelet `/metrics` endpoint also serves
+  the API server, scheduler and controller manager metrics on servers. Do not add a separate
+  API server scrape: it would duplicate every series.
 
 ## Secrets
 
@@ -110,6 +144,22 @@ install -Dm400 -o root -g root /dev/stdin /var/lib/secrets/k3s-token <<< "$TOKEN
 
 `/var/lib/secrets/k3s-token` holds the cluster join token, the same value on every node. Generate
 it once with `openssl rand -hex 32`.
+
+`/var/lib/secrets/alloy.env` holds the Loki and Prometheus endpoints, the same on every node. It
+is not a secret, but the addresses belong to the cluster, not to the repository:
+
+```sh
+LOKI_URL=http://<loki address>:3100/loki/api/v1/push
+PROMETHEUS_URL=http://<prometheus address>:9090/api/v1/write
+```
+
+`/var/lib/secrets/alloy-token` holds the token of the `alloy` ServiceAccount. Server nodes create
+it from [modules/alloy-rbac.nix](./modules/alloy-rbac.nix) through `services.k3s.manifests`, read
+it once the cluster is up:
+
+```sh
+kubectl -n kube-system get secret alloy-token -o jsonpath='{.data.token}' | base64 -d
+```
 
 Once there is more than one secret, use [sops-nix](https://github.com/Mic92/sops-nix) or
 [agenix](https://github.com/ryantm/agenix): encrypted files committed to the repository, decrypted

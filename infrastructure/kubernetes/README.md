@@ -106,7 +106,7 @@ kubernetes/
 - **Every workload declares probes, resource requests and a restrictive `securityContext`**
   (`runAsNonRoot`, `allowPrivilegeEscalation: false`, all capabilities dropped, and a read-only
   root filesystem wherever the image tolerates one).
-- **Services present once on every node belong to the node**, like Node Exporter, do
+- **Services present once on every node belong to the node**, like Grafana Alloy, do
   not add them as kubernetes containers but add them in the [NixOS](../nix) image.
 
 ## Environments
@@ -187,4 +187,4 @@ kustomize build --load-restrictor LoadRestrictionsNone \
 - Volumes are considered either empty or filled with a config map. Never bind code or config or relative path.
 - Always pin exact versions to container images, never `latest`. Images this repository builds are
   pinned by the overlay's `images:`, upstream images by the base.
-- Prometheus and the other per-node services are not deployed here, see [../nix](../nix).
+- Grafana Alloy and the other per-node services are not deployed here, see [../nix](../nix).

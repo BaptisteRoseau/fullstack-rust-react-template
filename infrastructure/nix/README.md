@@ -8,7 +8,7 @@ Nix manifests, split by what they are used for:
 
 ## Conventions
 
-If a service should be present once on every node (ex. Node Exporter, Kubernetes), include it into the NixOS image.
+If a service should be present once on every node (ex. Grafana Alloy, Kubernetes), include it into the NixOS image.
 
 Otherwise, the service belongs to [Kubernetes manifests](../kubernetes).
 
@@ -18,7 +18,7 @@ Each node includes at least the following services:
 
 - fail2ban
 - Kubernetes
-- Node Exporter (hardware prometheus metrics)
+- Grafana Alloy (system, journal and Kubernetes logs and metrics, see [prod](./prod/README.md#monitoring))
 
 ### Network Management
 

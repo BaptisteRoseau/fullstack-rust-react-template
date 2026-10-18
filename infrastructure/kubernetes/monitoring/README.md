@@ -19,8 +19,8 @@ that node's targets. A cluster-wide view needs a single store in front of the no
 Thanos, Mimir or VictoriaMetrics — reached by patching `PROMETHEUS_URL` in an overlay's
 `grafana/deployment.yaml`.
 
-The node Prometheus discovers its targets from pod annotations, so a component becomes a scrape
-target by carrying them on its pod template — no change to the Prometheus configuration is needed:
+Grafana Alloy, running on every node, discovers the pods of its node from their annotations and
+pushes their metrics to Prometheus, so a component becomes a scrape target by carrying them on its pod template — no change to the Prometheus configuration is needed:
 
 ```yaml
 annotations:
@@ -29,6 +29,6 @@ annotations:
   prometheus.io/path: /metrics
 ```
 
-That discovery needs a `ClusterRole` and `ClusterRoleBinding` granting the node's Prometheus read
-access to the API server. They are cluster-scoped and provisioned with the node, not from this
-directory.
+That discovery needs a `ClusterRole` and `ClusterRoleBinding` granting Alloy read access to the API
+server. They are cluster-scoped and provisioned with the node, not from this directory, see
+[../../nix/prod](../../nix/prod/README.md#monitoring).

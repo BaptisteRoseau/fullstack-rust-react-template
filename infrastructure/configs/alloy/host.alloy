@@ -1,0 +1,24 @@
+prometheus.exporter.unix "host" {
+	enable_collectors = ["systemd"]
+
+	filesystem {
+		mount_points_exclude = "^/(dev|proc|run|sys|var/lib/kubelet/.+|var/lib/rancher/k3s/agent/containerd/.+)($|/)"
+	}
+
+	systemd {
+		enable_restarts = true
+	}
+}
+
+prometheus.scrape "host" {
+	targets         = prometheus.exporter.unix.host.targets
+	forward_to      = [prometheus.remote_write.default.receiver]
+	scrape_interval = "30s"
+}
+
+prometheus.exporter.self "alloy" { }
+
+prometheus.scrape "alloy" {
+	targets    = prometheus.exporter.self.alloy.targets
+	forward_to = [prometheus.remote_write.default.receiver]
+}
