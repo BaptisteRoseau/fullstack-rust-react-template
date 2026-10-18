@@ -279,7 +279,7 @@ msgstr "Enregistrer"
 msgid "Ship a fullstack app, not a toolchain"
 msgstr "Livrez une application fullstack, pas une chaîne d'outils"
 
-#: src/layouts/AppLayout/AppLayout.tsx
+#: src/components/layout/SkipLink/SkipLink.tsx
 msgid "Skip to main content"
 msgstr "Aller au contenu principal"
 

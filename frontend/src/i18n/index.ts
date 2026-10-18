@@ -15,6 +15,7 @@ export async function loadLocale(locale: Locale): Promise<void> {
     const { messages } = await import(`./locales/${locale}/messages.po`)
     i18n.load(locale, messages)
     i18n.activate(locale)
+    document.documentElement.lang = locale
 }
 
 export { i18n }

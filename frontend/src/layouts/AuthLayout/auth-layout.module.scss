@@ -17,3 +17,13 @@
     width: min(26rem, 100%);
     text-align: center;
 }
+
+.content {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+
+    &:focus {
+        outline: none;
+    }
+}

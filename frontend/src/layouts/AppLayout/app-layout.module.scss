@@ -1,29 +1,7 @@
-@use 'variables' as *;
-@use 'mixins' as *;
-
 .layout {
     display: flex;
     flex-direction: column;
     min-height: 100%;
-}
-
-.skipLink {
-    @include focus-ring;
-
-    &:not(:focus) {
-        @include visually-hidden;
-    }
-
-    &:focus {
-        position: fixed;
-        top: $space-2;
-        left: $space-2;
-        z-index: 20;
-        padding: $space-2 $space-4;
-        border-radius: $radius-md;
-        color: var(--color-text);
-        background-color: var(--color-surface);
-    }
 }
 
 .content {
