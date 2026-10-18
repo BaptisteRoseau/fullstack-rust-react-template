@@ -279,6 +279,10 @@ msgstr "Save changes"
 msgid "Ship a fullstack app, not a toolchain"
 msgstr "Ship a fullstack app, not a toolchain"
 
+#: src/layouts/AppLayout/AppLayout.tsx
+msgid "Skip to main content"
+msgstr "Skip to main content"
+
 #: src/api/errors.ts
 msgid "Something went wrong. Please try again."
 msgstr "Something went wrong. Please try again."
