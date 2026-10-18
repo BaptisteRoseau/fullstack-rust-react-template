@@ -4,7 +4,7 @@ set -e
 GIT_ROOT=$(git rev-parse --show-toplevel)
 cd "$GIT_ROOT"
 
-# Verifies the text and background colour tokens keep WCAG contrast in the light and dark themes.
+# Verifies the colour tokens keep WCAG contrast in the light and dark themes.
 # Usage: .claude/skills/frontend-accessibility-checking/scripts/check_theme_contrast.sh
 # oxaria only renders the light theme, so this is the check that covers the dark one.
 
@@ -16,8 +16,10 @@ import sys
 
 # WCAG 1.4.3: 4.5:1 for normal-size text. Every pair below can carry normal-size text.
 MIN_TEXT_CONTRAST = 4.5
+# WCAG 1.4.11: 3:1 for the edge of a control and for a focus indicator.
+MIN_NON_TEXT_CONTRAST = 3.0
 
-PAIRS = [
+TEXT_PAIRS = [
     ("text", "surface"),
     ("text", "surface-raised"),
     ("text", "background"),
@@ -33,6 +35,15 @@ PAIRS = [
     ("on-primary", "primary-hover"),
     ("on-danger", "danger"),
     ("on-danger", "danger-hover"),
+]
+
+# --color-border is the only edge of the inputs and of the switch track.
+# --color-primary is the focus-ring outline of every focusable element.
+NON_TEXT_PAIRS = [
+    ("border", "surface"),
+    ("border", "background"),
+    ("primary", "surface"),
+    ("primary", "background"),
 ]
 
 source = open(sys.argv[1]).read()
@@ -61,17 +72,19 @@ failures = 0
 for theme, block in blocks.items():
     colors = tokens(block)
     print(f"{theme}:")
-    for foreground, background in PAIRS:
+    checks = [(pair, MIN_TEXT_CONTRAST, "text") for pair in TEXT_PAIRS]
+    checks += [(pair, MIN_NON_TEXT_CONTRAST, "edge") for pair in NON_TEXT_PAIRS]
+    for (foreground, background), minimum, kind in checks:
         ratio = contrast(colors[foreground], colors[background])
-        label = f"--color-{foreground} on --color-{background}: {ratio:.2f}:1"
-        if ratio >= MIN_TEXT_CONTRAST:
+        label = f"{kind} --color-{foreground} on --color-{background}: {ratio:.2f}:1"
+        if ratio >= minimum:
             print(f"  ✓ {label}")
         else:
-            print(f"  ✗ {label}, below {MIN_TEXT_CONTRAST}:1; change the {theme} token in {sys.argv[1]}")
+            print(f"  ✗ {label}, below {minimum}:1; change the {theme} token in {sys.argv[1]}")
             failures += 1
 
 if failures:
-    print(f"{failures} pair(s) below {MIN_TEXT_CONTRAST}:1.")
+    print(f"{failures} pair(s) below their minimum contrast.")
     sys.exit(1)
-print("Both themes keep the text contrast.")
+print("Both themes keep the text and edge contrast.")
 PYTHON
