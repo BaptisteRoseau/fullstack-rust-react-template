@@ -38,9 +38,10 @@ pub trait Cache: Send + Sync {
     /// Removes every key of `keys` from the cache.
     async fn delete_many(&self, keys: &[&str]) -> Result<(), CacheError>;
 
-    /** ==========================================================
+    /* ==========================================================
      * NO FAIL variants
      * =========================================================== */
+
     /// Like [`Cache::set`], but ignores errors.
     async fn set_nofail(&self, key: &str, value: &Value, timeout_s: Option<u32>) {
         let _ = self.set(key, value, timeout_s).await;
