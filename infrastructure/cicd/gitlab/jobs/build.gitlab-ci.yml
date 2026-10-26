@@ -1,0 +1,93 @@
+# The application images wait for the cheap lints of their code, so a lint
+# failure does not pay for a release build.
+app-backend-image:
+  extends: .docker-image
+  needs:
+    - job: rust-format
+      optional: true
+      artifacts: false
+    - job: rust-clippy
+      optional: true
+      artifacts: false
+  variables:
+    IMAGE_NAME: app_backend
+    DOCKERFILE: infrastructure/docker/app_backend/Dockerfile.release
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.tmp-health-checker-image-changed, rules]
+    - !reference [.crates-changed, rules]
+    - !reference [.rust-dependencies-changed, rules]
+    - changes:
+        paths:
+          - infrastructure/docker/app_backend/**/*
+          - tools/**/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+
+app-frontend-image:
+  extends: .docker-image
+  needs:
+    - job: frontend-lint
+      optional: true
+      artifacts: false
+    - job: frontend-types
+      optional: true
+      artifacts: false
+  variables:
+    IMAGE_NAME: app_frontend
+    DOCKERFILE: infrastructure/docker/app_frontend/Dockerfile.release
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.tmp-health-checker-image-changed, rules]
+    - !reference [.frontend-changed, rules]
+    - changes:
+        paths:
+          - infrastructure/docker/app_frontend/**/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+
+app-migration-image:
+  extends: .docker-image
+  variables:
+    IMAGE_NAME: app_migration
+    DOCKERFILE: infrastructure/docker/app_migration/Dockerfile
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.database-migrations-changed, rules]
+    - changes:
+        paths:
+          - infrastructure/docker/app_migration/**/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+
+app-postgres-image:
+  extends: .docker-image
+  variables:
+    IMAGE_NAME: app_postgres
+    DOCKERFILE: infrastructure/docker/app_postgres/Dockerfile
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.postgres-image-changed, rules]
+
+app-keycloak-image:
+  extends: .docker-image
+  variables:
+    IMAGE_NAME: app_keycloak
+    DOCKERFILE: infrastructure/docker/app_keycloak/Dockerfile
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.tmp-health-checker-image-changed, rules]
+    - changes:
+        paths:
+          - infrastructure/docker/app_keycloak/**/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+
+app-homepage-image:
+  extends: .docker-image
+  variables:
+    IMAGE_NAME: app_homepage
+    DOCKERFILE: infrastructure/docker/app_homepage/Dockerfile
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.tmp-health-checker-image-changed, rules]
+    - changes:
+        paths:
+          - infrastructure/docker/app_homepage/**/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH

@@ -1,0 +1,10 @@
+.check-all-files:
+  rules:
+    - if: $CHECK_ALL_FILES == "true"
+
+.any-file-changed:
+  rules:
+    - changes:
+        paths:
+          - "**/*"
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH

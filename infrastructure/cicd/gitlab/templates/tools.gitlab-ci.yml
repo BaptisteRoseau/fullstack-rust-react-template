@@ -1,0 +1,9 @@
+.node:
+  image: node:24-bookworm
+  stage: static_analysis
+  needs: []
+
+.python:
+  image: python:3.14-bookworm
+  stage: static_analysis
+  needs: []

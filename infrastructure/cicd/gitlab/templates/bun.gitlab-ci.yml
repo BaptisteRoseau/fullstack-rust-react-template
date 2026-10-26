@@ -1,0 +1,21 @@
+.bun:
+  image: oven/bun:1.4.4
+  stage: static_analysis
+  needs: []
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.frontend-changed, rules]
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends git ca-certificates >/dev/null
+    - cd frontend
+    - bun install --frozen-lockfile
+
+# The Playwright image ships the browsers and their system libraries, not bun.
+.bun-playwright:
+  extends: .bun
+  image: mcr.microsoft.com/playwright:v1.62.1-noble
+  stage: test
+  before_script:
+    - npm install --global --silent bun@1.4.4
+    - cd frontend
+    - bun install --frozen-lockfile

@@ -31,6 +31,19 @@ Every `test_*.sh` script is used in the `pre-push` hook or can be used as a stan
 - Linter results
 - Infrastructure manifests
 
+### Arguments
+
+With no argument, a script checks everything, which is what the `pre-push` hook runs. The CI
+splits that work across jobs with different triggers, so some scripts take a narrower scope:
+
+- A section: `test_lint.sh`, `test_cve.sh` and `test_licenses.sh` take `backend` or `frontend`,
+  and `test_lint_infra.sh` takes `docker`, `compose` or `kubernetes`.
+- A list of files: `test_lint_doc.sh` and `test_lint_cicd.sh` check only the files they are given.
+
+[`list_changed_files.sh`](./list_changed_files.sh) prints the files a branch changed since it left
+the default branch, filtered by git pathspecs. It is the one script that does not move to the git
+root: its pathspecs and output are relative to the current directory.
+
 ### Dependency advisories
 
 [`test_cve.sh`](./test_cve.sh) reports, it does not gate: it prints every advisory `cargo audit`

@@ -1,0 +1,46 @@
+include:
+  - local: infrastructure/cicd/gitlab/templates/inputs/lint_changed_files.gitlab-ci.yml
+    inputs:
+      job: markdown
+      pathspecs: "*.md :!.agents/skills/api-*"
+      all_on_delete: true
+      command: ./scripts/test_lint_doc.sh
+  - local: infrastructure/cicd/gitlab/templates/inputs/lint_changed_files.gitlab-ci.yml
+    inputs:
+      job: typos
+      command: typos --force-exclude
+  - local: infrastructure/cicd/gitlab/templates/inputs/lint_changed_files.gitlab-ci.yml
+    inputs:
+      job: cspell
+      command: cspell --no-progress --no-must-find-files --config .cspell.yml
+
+markdown:
+  extends:
+    - .node
+    - .markdown-changed-files
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.any-file-changed, rules]
+  before_script:
+    - npm install --global --silent markdownlint-cli@0.50.0 markdown-link-check@3.15.0
+
+typos:
+  extends:
+    - .python
+    - .typos-changed-files
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.any-file-changed, rules]
+  before_script:
+    - pip install --quiet typos==1.51.1
+
+cspell:
+  extends:
+    - .node
+    - .cspell-changed-files
+  allow_failure: true
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.any-file-changed, rules]
+  before_script:
+    - npm install --global --silent cspell@10.4.0

@@ -1,0 +1,36 @@
+spec:
+  inputs:
+    job:
+      description: Name of the job that extends the generated hidden job .<job>-changed-files.
+      regex: ^[a-z0-9-]+$
+    pathspecs:
+      description: Git pathspecs of the files to lint, separated by spaces. Empty matches every file.
+      default: ""
+    all_on_delete:
+      description: Lint every matching file when the branch deleted or renamed a file.
+      type: boolean
+      default: false
+    command:
+      description: The command that receives the files to lint as arguments.
+---
+# Runs the command on the matching files the branch changed, see
+# scripts/list_changed_files.sh, and passes when no file matches.
+# set -f keeps the pathspecs from being expanded by the shell.
+".$[[ inputs.job ]]-changed-files":
+  stage: static_analysis
+  needs: []
+  variables:
+    GIT_DEPTH: "0"
+  script:
+    - set -f
+    - LIST_ARGS="$[[ inputs.pathspecs ]]"
+    - if $[[ inputs.all_on_delete ]]; then LIST_ARGS="--all-on-delete $LIST_ARGS"; fi
+    - $CI_PROJECT_DIR/scripts/list_changed_files.sh $LIST_ARGS > $CI_PROJECT_DIR/changed_files.txt
+    - set +f
+    - |
+      if [ ! -s "$CI_PROJECT_DIR/changed_files.txt" ]; then
+        echo "No changed file matches '$[[ inputs.pathspecs ]]', nothing to check"
+        exit 0
+      fi
+    - cat $CI_PROJECT_DIR/changed_files.txt
+    - $[[ inputs.command ]] $(cat $CI_PROJECT_DIR/changed_files.txt)

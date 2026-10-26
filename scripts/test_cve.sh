@@ -8,13 +8,18 @@ cd "$GIT_ROOT"
 # transitive dependency, so the fix is an upstream release rather than a commit
 # here, and an advisory published overnight should not stop a push. Read the
 # output, upgrade what has a fix, and leave the rest until upstream moves.
+#
+# Usage: test_cve.sh [backend|frontend], both when omitted.
+SECTION=${1:-all}
 FOUND=false
 
-# Backend
-cargo audit || FOUND=true
+if [ "$SECTION" != frontend ]; then
+    cargo audit || FOUND=true
+fi
 
-# Frontend
-(cd frontend && bun x bun-audit) || FOUND=true
+if [ "$SECTION" != backend ]; then
+    (cd frontend && bun x bun-audit) || FOUND=true
+fi
 
 if [ "$FOUND" = true ]; then
     echo

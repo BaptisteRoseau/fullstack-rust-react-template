@@ -1,0 +1,21 @@
+.rust-dependencies-changed:
+  rules:
+    - changes:
+        paths:
+          - "**/Cargo.toml"
+          - Cargo.lock
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+
+.database-migrations-changed:
+  rules:
+    - changes:
+        paths:
+          - crates/database/migrations/**/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+
+.crates-changed:
+  rules:
+    - changes:
+        paths:
+          - crates/**/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH

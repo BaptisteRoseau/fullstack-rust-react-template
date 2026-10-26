@@ -1,0 +1,148 @@
+include:
+  - local: infrastructure/cicd/gitlab/templates/inputs/lint_changed_files.gitlab-ci.yml
+    inputs:
+      job: frontend-format
+      pathspecs: "*.scss *.css *.json :!package-lock.json"
+      command: bunx prettier --check
+
+frontend-lint:
+  extends: .bun
+  script:
+    - ../scripts/test_lint.sh frontend
+
+frontend-types:
+  extends: .bun
+  script:
+    - bun run check-types
+
+# ESLint already runs Prettier over the TypeScript files.
+frontend-format:
+  extends:
+    - .bun
+    - .frontend-format-changed-files
+  rules:
+    - !reference [.check-all-files, rules]
+    - changes:
+        paths:
+          - frontend/**/*.scss
+          - frontend/**/*.css
+          - frontend/**/*.json
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+
+# Also runs scripts/generate-seo-files.test.ts, the seo:check gate.
+frontend-unit-tests:
+  extends: .bun
+  stage: test
+  script:
+    - bun run test
+
+frontend-coverage:
+  extends: .bun
+  stage: test
+  allow_failure: true
+  script:
+    - bun run test --coverage --coverage.reporter=text-summary --coverage.reporter=cobertura
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: frontend/coverage/cobertura-coverage.xml
+
+# i18n:check rewrites the catalogs, so a stale catalog shows up as a diff.
+frontend-i18n:
+  extends: .bun
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.frontend-src-changed, rules]
+    - changes:
+        paths:
+          - frontend/lingui.config.ts
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+  script:
+    - bun run i18n:check
+    - git diff --exit-code -- src/i18n/locales
+
+frontend-build:
+  extends: .bun
+  stage: build
+  script:
+    - bun run build
+  artifacts:
+    paths:
+      - frontend/dist
+    expire_in: 1 week
+
+frontend-storybook:
+  extends: .bun
+  stage: build
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.frontend-dependencies-changed, rules]
+    - changes:
+        paths:
+          - frontend/**/*.stories.tsx
+          - frontend/.storybook/**/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+  script:
+    - bun run storybook:build
+
+# Waits for the cheap lints, so a lint failure does not pay for the browsers.
+frontend-e2e-tests:
+  extends: .bun-playwright
+  needs:
+    - job: frontend-lint
+      optional: true
+      artifacts: false
+    - job: frontend-types
+      optional: true
+      artifacts: false
+  script:
+    - bun run test:e2e
+  artifacts:
+    when: on_failure
+    paths:
+      - frontend/playwright-report
+    expire_in: 1 week
+
+# Same setup as the e2e tests: the dev server on the mock API, whose session
+# needs only the mock_session cookie.
+frontend-accessibility:
+  extends: .bun-playwright
+  stage: dynamic_analysis
+  allow_failure: true
+  variables:
+    OXARIA_VERSION: 0.1.1
+    VITE_APP_API_URL: http://localhost:8081
+    VITE_APP_URL: http://localhost:3000
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.frontend-src-changed, rules]
+  script:
+    - curl -sSfL "https://github.com/BaptisteRoseau/oxaria/releases/download/$OXARIA_VERSION/oxaria-linux-amd64.tar.gz" | tar -xz -C /usr/local/bin
+    - bun run run-mock-server > mock-server.log 2>&1 &
+    - bun run dev > dev-server.log 2>&1 &
+    - timeout 60 sh -c 'until curl -sf http://localhost:3000 >/dev/null && curl -s http://localhost:8081 >/dev/null; do sleep 1; done'
+    - >-
+      oxaria --full-site-scan --report-gitlab gl-code-quality-report.json
+      -H "Cookie: mock_session=active" http://localhost:3000/
+  artifacts:
+    when: always
+    reports:
+      codequality: frontend/gl-code-quality-report.json
+
+frontend-licenses:
+  extends: .bun
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.frontend-dependencies-changed, rules]
+  script:
+    - ../scripts/test_licenses.sh frontend
+
+frontend-advisories:
+  extends: .bun
+  allow_failure: true
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.frontend-dependencies-changed, rules]
+  script:
+    - ../scripts/test_cve.sh frontend

@@ -18,6 +18,8 @@ ensure_installed "cargo"
 
 source .env
 POSTGRES_PORT=5678
+# The host the published port is reachable on: "docker" under Docker-in-Docker.
+POSTGRES_HOST=${POSTGRES_HOST:-127.0.0.1}
 
 # Add a CLI argument to select the output file of this script
 # Prefix the generated file with a comment
@@ -58,7 +60,7 @@ if ! docker exec sqlx_query_temp pg_isready -q \
 fi
 
 echo "Starting SQLx migrations"
-DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@127.0.0.1:${POSTGRES_PORT}/${POSTGRES_DATABASE}?sslmode=disable"
+DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}?sslmode=disable"
 sqlx migrate run  --no-dotenv --database-url "$DATABASE_URL" --source "$GIT_ROOT/crates/database/migrations"
 
 DEST_FILE="./crates/database/src/generated_models.rs"

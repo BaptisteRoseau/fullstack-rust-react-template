@@ -1,0 +1,21 @@
+.tmp-health-checker-image-changed:
+  rules:
+    - changes:
+        paths:
+          - infrastructure/docker/tmp_health_checker/**/*
+          - tools/http_health_checker/**/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+
+.postgres-image-changed:
+  rules:
+    - changes:
+        paths:
+          - infrastructure/docker/app_postgres/**/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+
+.infrastructure-configs-changed:
+  rules:
+    - changes:
+        paths:
+          - infrastructure/configs/**/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH

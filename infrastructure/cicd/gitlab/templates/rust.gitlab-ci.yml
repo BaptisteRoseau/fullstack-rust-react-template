@@ -1,0 +1,26 @@
+.rust:
+  image: rust:1.98.1-bookworm
+  stage: static_analysis
+  needs: []
+  variables:
+    CARGO_TERM_COLOR: always
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.rust-dependencies-changed, rules]
+    - !reference [.database-migrations-changed, rules]
+    - changes:
+        paths:
+          - "**/*.rs"
+          - rustfmt.toml
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+
+# Installs the cargo subcommands listed in RUST_TOOLS from their prebuilt
+# release binaries, falling back to a build only when none is published.
+.rust-tools:
+  extends: .rust
+  variables:
+    BINSTALL_VERSION: v1.26.1
+    RUST_TOOLS: ""
+  before_script:
+    - curl -L --proto '=https' --tlsv1.2 -sSf "https://raw.githubusercontent.com/cargo-bins/cargo-binstall/$BINSTALL_VERSION/install-from-binstall-release.sh" | bash
+    - cargo binstall --no-confirm --locked $RUST_TOOLS

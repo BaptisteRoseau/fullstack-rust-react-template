@@ -1,0 +1,21 @@
+.frontend-changed:
+  rules:
+    - changes:
+        paths:
+          - frontend/**/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+
+.frontend-src-changed:
+  rules:
+    - changes:
+        paths:
+          - frontend/src/**/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+
+.frontend-dependencies-changed:
+  rules:
+    - changes:
+        paths:
+          - frontend/package.json
+          - frontend/bun.lock
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH

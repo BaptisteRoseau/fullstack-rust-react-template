@@ -1,0 +1,122 @@
+rust-format:
+  extends: .rust
+  before_script:
+    - rustup component add rustfmt
+  script:
+    - cargo fmt --all --check
+
+rust-clippy:
+  extends: .rust
+  before_script:
+    - rustup component add clippy
+  script:
+    - ./scripts/test_lint.sh backend
+
+rust-no-default-features:
+  extends: .rust
+  script:
+    - ./scripts/test_lint_no_default_features.sh
+
+rust-doc:
+  extends: .rust
+  variables:
+    RUSTDOCFLAGS: "-D warnings"
+  script:
+    - cargo doc --workspace --all-features --no-deps
+
+rust-unit-tests:
+  extends: .rust
+  stage: test
+  script:
+    - cargo test --workspace --all-features --lib --bins
+    - cargo test --workspace --all-features --doc
+
+# The tests under tests/ start their backends with testcontainers.
+rust-integration-tests:
+  extends:
+    - .rust
+    - .docker-daemon
+  stage: test
+  variables:
+    TESTCONTAINERS_HOST_OVERRIDE: docker
+  script:
+    - cargo test --workspace --all-features --test '*'
+
+rust-coverage:
+  extends:
+    - .rust-tools
+    - .docker-daemon
+  stage: test
+  allow_failure: true
+  variables:
+    RUST_TOOLS: cargo-llvm-cov@0.9.1
+    TESTCONTAINERS_HOST_OVERRIDE: docker
+  script:
+    - rustup component add llvm-tools-preview
+    - cargo llvm-cov --workspace --all-features --ignore-filename-regex='crates/(models/|logging)' --cobertura --output-path rust-coverage.xml
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: rust-coverage.xml
+
+rust-licenses:
+  extends: .rust-tools
+  variables:
+    RUST_TOOLS: cargo-deny@0.20.2
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.rust-dependencies-changed, rules]
+    - changes:
+        paths:
+          - deny.toml
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+  script:
+    - ./scripts/test_licenses.sh backend
+
+rust-advisories:
+  extends: .rust-tools
+  allow_failure: true
+  variables:
+    RUST_TOOLS: cargo-audit@0.22.2
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.rust-dependencies-changed, rules]
+  script:
+    - ./scripts/test_cve.sh backend
+
+rust-unused-dependencies:
+  extends: .rust-tools
+  allow_failure: true
+  variables:
+    RUST_TOOLS: cargo-machete@0.9.2
+  script:
+    - cargo machete
+
+# Regenerates the models from a blank database and fails when the committed
+# file differs. The database container publishes its port on the dind service.
+rust-generated-models:
+  extends:
+    - .rust-tools
+    - .docker-daemon
+  stage: test
+  variables:
+    RUST_TOOLS: sqlx-cli@0.9.0 sql-gen@0.2.3
+    DOCKER_CLI_VERSION: 29.9.2
+    POSTGRES_HOST: docker
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.database-migrations-changed, rules]
+    - !reference [.postgres-image-changed, rules]
+    - changes:
+        paths:
+          - crates/database/src/generated_models.rs
+          - scripts/build_database_rust_models.sh
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+  script:
+    - curl -sSfL "https://download.docker.com/linux/static/stable/x86_64/docker-$DOCKER_CLI_VERSION.tgz" | tar -xz --strip-components=1 -C /usr/local/bin docker/docker
+    - rustup component add rustfmt
+    - docker build --file infrastructure/docker/app_postgres/Dockerfile --tag app_postgres:latest .
+    - ln -sf .env.dev .env
+    - ./scripts/build_database_rust_models.sh
+    - git diff --exit-code -- crates/database/src/generated_models.rs

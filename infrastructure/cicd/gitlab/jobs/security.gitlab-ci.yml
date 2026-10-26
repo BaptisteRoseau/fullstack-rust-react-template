@@ -1,0 +1,49 @@
+include:
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+  - template: Jobs/SAST.gitlab-ci.yml
+  - template: Jobs/Container-Scanning.gitlab-ci.yml
+
+# Scans the images the build stage pushed, so only where it pushes them.
+container_scanning:
+  stage: dynamic_analysis
+  variables:
+    CS_IMAGE: $CI_REGISTRY_IMAGE/app_backend:$CI_COMMIT_SHORT_SHA
+  needs:
+    - app-backend-image
+  rules:
+    - if: $CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+container_scanning_frontend:
+  extends: container_scanning
+  variables:
+    CS_IMAGE: $CI_REGISTRY_IMAGE/app_frontend:$CI_COMMIT_SHORT_SHA
+  needs:
+    - app-frontend-image
+
+container_scanning_migration:
+  extends: container_scanning
+  variables:
+    CS_IMAGE: $CI_REGISTRY_IMAGE/app_migration:$CI_COMMIT_SHORT_SHA
+  needs:
+    - app-migration-image
+
+container_scanning_postgres:
+  extends: container_scanning
+  variables:
+    CS_IMAGE: $CI_REGISTRY_IMAGE/app_postgres:$CI_COMMIT_SHORT_SHA
+  needs:
+    - app-postgres-image
+
+container_scanning_keycloak:
+  extends: container_scanning
+  variables:
+    CS_IMAGE: $CI_REGISTRY_IMAGE/app_keycloak:$CI_COMMIT_SHORT_SHA
+  needs:
+    - app-keycloak-image
+
+container_scanning_homepage:
+  extends: container_scanning
+  variables:
+    CS_IMAGE: $CI_REGISTRY_IMAGE/app_homepage:$CI_COMMIT_SHORT_SHA
+  needs:
+    - app-homepage-image

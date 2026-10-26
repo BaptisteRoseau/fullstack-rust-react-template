@@ -1,0 +1,145 @@
+include:
+  - local: infrastructure/cicd/gitlab/templates/inputs/lint_changed_files.gitlab-ci.yml
+    inputs:
+      job: hadolint
+      pathspecs: "*Dockerfile*"
+      command: hadolint
+  - local: infrastructure/cicd/gitlab/templates/inputs/lint_changed_files.gitlab-ci.yml
+    inputs:
+      job: shellcheck
+      pathspecs: "*.sh scripts/git_hooks/pre-push"
+      command: shellcheck
+  - local: infrastructure/cicd/gitlab/templates/inputs/lint_changed_files.gitlab-ci.yml
+    inputs:
+      job: yamllint
+      pathspecs: "*.yml *.yaml"
+      command: yamllint
+  - local: infrastructure/cicd/gitlab/templates/inputs/lint_changed_files.gitlab-ci.yml
+    inputs:
+      job: gitlab-ci
+      pathspecs: ".gitlab-ci.yml infrastructure/cicd/gitlab/gitlab-ci.yml infrastructure/cicd/gitlab/*.gitlab-ci.yml"
+      command: ./scripts/test_lint_cicd.sh
+
+dockerfiles:
+  extends: .docker
+  stage: static_analysis
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.tmp-health-checker-image-changed, rules]
+    - changes:
+        paths:
+          - infrastructure/docker/**/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+  script:
+    - ./scripts/test_lint_infra.sh docker
+
+hadolint:
+  extends: .hadolint-changed-files
+  image: hadolint/hadolint:v2.15.1-alpine
+  rules:
+    - !reference [.check-all-files, rules]
+    - changes:
+        paths:
+          - "**/Dockerfile*"
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+  before_script:
+    - apk add --no-cache bash git
+
+# docker compose config reads the manifests only, no daemon is needed.
+docker-compose:
+  image: docker:29.9.2
+  stage: static_analysis
+  needs: []
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.infrastructure-configs-changed, rules]
+    - changes:
+        paths:
+          - docker-compose.yml
+          - infrastructure/docker-compose/**/*
+          - .env.dev
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+  before_script:
+    - apk add --no-cache bash
+  script:
+    - ./scripts/test_lint_infra.sh compose
+
+kubernetes:
+  image: alpine:3.24
+  stage: static_analysis
+  needs: []
+  variables:
+    KUSTOMIZE_VERSION: v5.8.3
+    KUBECONFORM_VERSION: v0.8.0
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.infrastructure-configs-changed, rules]
+    - changes:
+        paths:
+          - infrastructure/kubernetes/**/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+  before_script:
+    - apk add --no-cache bash git curl
+    - curl -sSfL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F$KUSTOMIZE_VERSION/kustomize_${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" | tar -xz -C /usr/local/bin
+    - curl -sSfL "https://github.com/yannh/kubeconform/releases/download/$KUBECONFORM_VERSION/kubeconform-linux-amd64.tar.gz" | tar -xz -C /usr/local/bin
+  script:
+    - ./scripts/test_lint_infra.sh kubernetes
+
+nix:
+  image: nixos/nix:2.35.4
+  stage: static_analysis
+  needs: []
+  variables:
+    NIX_CONFIG: "experimental-features = nix-command flakes"
+  rules:
+    - !reference [.check-all-files, rules]
+    - changes:
+        paths:
+          - "**/*.nix"
+          - flake.lock
+          - infrastructure/nix/**/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+  script:
+    - nix develop --command ./scripts/test_lint_nix.sh
+
+shellcheck:
+  extends: .shellcheck-changed-files
+  image: koalaman/shellcheck-alpine:v0.11.0
+  rules:
+    - !reference [.check-all-files, rules]
+    - changes:
+        paths:
+          - "**/*.sh"
+          - scripts/git_hooks/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+  before_script:
+    - apk add --no-cache bash git
+
+yamllint:
+  extends:
+    - .python
+    - .yamllint-changed-files
+  allow_failure: true
+  rules:
+    - !reference [.check-all-files, rules]
+    - changes:
+        paths:
+          - "**/*.yml"
+          - "**/*.yaml"
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+  before_script:
+    - pip install --quiet yamllint==1.38.0
+
+gitlab-ci:
+  extends:
+    - .python
+    - .gitlab-ci-changed-files
+  rules:
+    - !reference [.check-all-files, rules]
+    - changes:
+        paths:
+          - .gitlab-ci.yml
+          - infrastructure/cicd/gitlab/**/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+  before_script:
+    - pip install --quiet check-jsonschema==0.38.2

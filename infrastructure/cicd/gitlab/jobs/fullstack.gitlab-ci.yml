@@ -1,0 +1,21 @@
+# Needs cargo for the OpenAPI document and bun for the SDK generated from it.
+openapi-sdk:
+  extends: .rust
+  variables:
+    BUN_VERSION: bun-v1.4.4
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.crates-changed, rules]
+    - !reference [.rust-dependencies-changed, rules]
+    - changes:
+        paths:
+          - tools/openapi_generator/**/*
+          - frontend/src/api/generated/**/*
+          - frontend/scripts/generateApiSdk.ts
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+  before_script:
+    - curl -fsSL https://bun.sh/install | bash -s "$BUN_VERSION"
+    - export PATH="$HOME/.bun/bin:$PATH"
+    - (cd frontend && bun install --frozen-lockfile)
+  script:
+    - ./scripts/test_openapi.sh
