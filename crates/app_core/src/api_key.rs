@@ -6,13 +6,13 @@ use uuid::Uuid;
 use crate::access::ensure_owner;
 use crate::error::CoreError;
 use crate::models::api_key_from_db;
+use authenticator::Caller;
 use database::Database;
-use rbac::UserPermissions;
 
 /// Lists the keys owned by the caller, newest first.
 pub async fn list_api_keys(
     db: &Arc<RwLock<dyn Database>>,
-    caller: &UserPermissions,
+    caller: &Caller,
 ) -> Result<Vec<models::ApiKey>, CoreError> {
     let db_keys = db.read().await.read_api_keys_by_owner(caller.id).await?;
     db_keys.into_iter().map(api_key_from_db).collect()
@@ -21,7 +21,7 @@ pub async fn list_api_keys(
 /// Creates a key owned by the caller. Returns the raw key, which is never stored.
 pub async fn create_api_key(
     db: &Arc<RwLock<dyn Database>>,
-    caller: &UserPermissions,
+    caller: &Caller,
     name: String,
     permissions: Vec<rbac::Permissions>,
 ) -> Result<(String, models::ApiKey), CoreError> {
@@ -48,7 +48,7 @@ pub async fn create_api_key(
 /// Reads one key. A key the caller does not own answers `NotFound`.
 pub async fn get_api_key(
     db: &Arc<RwLock<dyn Database>>,
-    caller: &UserPermissions,
+    caller: &Caller,
     id: Uuid,
 ) -> Result<models::ApiKey, CoreError> {
     let db_key = db
@@ -64,7 +64,7 @@ pub async fn get_api_key(
 /// Deletes one key. A key the caller does not own answers `NotFound`.
 pub async fn delete_api_key(
     db: &Arc<RwLock<dyn Database>>,
-    caller: &UserPermissions,
+    caller: &Caller,
     id: Uuid,
 ) -> Result<(), CoreError> {
     let db_key = db

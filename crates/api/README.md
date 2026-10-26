@@ -67,7 +67,7 @@ what the client receives.
 ## Rules
 
 - Never check access in a handler. Every access check (ownership, [rbac](../rbac)) runs in
-  [app_core](../app_core): the handler passes the caller, `user.caller()` from `UserToken`,
+  [app_core](../app_core): the handler passes the `Caller`, `user.caller()` from `UserToken`,
   and `app_core` refuses. A check written in a handler is a check the MCP tools and every
   future entry point forget.
 - Never read a row in a handler to decide whether the caller may touch it. Add or extend an

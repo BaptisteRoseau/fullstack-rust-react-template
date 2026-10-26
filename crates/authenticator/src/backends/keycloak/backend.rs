@@ -8,7 +8,7 @@ use tokio::sync::RwLock;
 
 use crate::authenticator::Authenticator;
 use crate::error::AuthenticatorError;
-use crate::models::{AuthSession, AuthTokens, LoginScreen, UserInfo, UserToken};
+use crate::models::{AuthSession, AuthTokens, Caller, LoginScreen, UserInfo};
 
 use super::api_key::ApiKeyValidator;
 use super::endpoints::Endpoints;
@@ -45,7 +45,7 @@ impl Keycloak {
 
 #[async_trait]
 impl Authenticator for Keycloak {
-    async fn validate(&self, token: &str) -> Result<UserToken, Box<AuthenticatorError>> {
+    async fn validate(&self, token: &str) -> Result<Caller, Box<AuthenticatorError>> {
         // Only a JWT contains dots; anything else is an API key.
         if token.contains('.') {
             self.jwt.validate(token).await

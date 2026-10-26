@@ -2,16 +2,27 @@
 //! backends: the resolved caller identity, the OAuth flow's inputs and outputs,
 //! and the identity claims returned by the provider's userinfo endpoint.
 
+use std::collections::HashSet;
 use std::time::Duration;
 
+use rbac::UserPermissions;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 /// The caller resolved from a credential (a provider JWT or an API key).
+///
+/// The one identity type every entry point hands to `app_core`.
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct UserToken {
+pub struct Caller {
     pub id: Uuid,
     pub realm: String,
+}
+
+impl Caller {
+    /// What the caller may access. No credential carries groups or permissions yet.
+    pub fn permissions(&self) -> UserPermissions {
+        UserPermissions::new(self.id, HashSet::new(), HashSet::new())
+    }
 }
 
 /// Which provider page the browser should land on.

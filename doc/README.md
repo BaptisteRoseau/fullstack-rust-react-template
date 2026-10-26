@@ -76,7 +76,7 @@ What happens, in order, and where the code is.
    typed API under `/api` and merges the Swagger UI.
 5. **Extractors resolve the caller.** [`extractors/user.rs`](../crates/api/src/extractors/user.rs)
    reads the credential from an `Authorization` header or the `access_token` cookie, and asks the
-   `Authenticator` to turn it into a `UserToken`.
+   `Authenticator` to turn it into a `Caller`.
 6. **The endpoint runs.** Handlers live in `crates/api/src/endpoints/<name>/`. A handler reads input,
    calls `app_core`, and returns a typed response. It contains no business logic. See
    [endpoints/README.md](../crates/api/src/endpoints/README.md).

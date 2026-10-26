@@ -151,6 +151,7 @@ name = "app_core"
 version = "0.1.0"
 dependencies = [
  "async-trait",
+ "authenticator",
  "config",
  "database",
  "logging",
@@ -284,6 +285,7 @@ dependencies = [
  "database",
  "jsonwebtoken",
  "oauth2",
+ "rbac",
  "reqwest",
  "serde",
  "serde_json",
@@ -2666,12 +2668,12 @@ name = "mcp"
 version = "0.1.0"
 dependencies = [
  "app_core",
+ "authenticator",
  "axum",
  "chrono",
  "config",
  "database",
  "http-body-util",
- "rbac",
  "rmcp",
  "schemars 1.2.2",
  "serde",

@@ -1,10 +1,9 @@
-use std::collections::HashSet;
 use std::sync::Arc;
 
 use app_core::error::CoreError;
+use authenticator::Caller;
 use database::Database;
 use database::testing::MockDatabase;
-use rbac::UserPermissions;
 use tokio::sync::RwLock;
 use uuid::Uuid;
 
@@ -15,8 +14,11 @@ fn databases() -> (Arc<RwLock<MockDatabase>>, Arc<RwLock<dyn Database>>) {
     (mock, db)
 }
 
-fn caller(id: Uuid) -> UserPermissions {
-    UserPermissions::new(id, HashSet::new(), HashSet::new())
+fn caller(id: Uuid) -> Caller {
+    Caller {
+        id,
+        realm: "test".to_string(),
+    }
 }
 
 async fn registered_user(db: &Arc<RwLock<dyn Database>>) -> Uuid {

@@ -11,6 +11,8 @@ is always [`ApiError`](../error/error.rs).
   no `UserToken`). The type implements `OptionalFromRequestParts` (the real extraction
   logic) and `FromRequestParts` (a thin wrapper turning `None` into a rejection), giving
   handlers both `Option<UserToken>` and `UserToken`. See [`user.rs`](user.rs).
+  `UserToken` only wraps an `authenticator::Caller`, the identity shared with `mcp`; read it
+  with `user.caller()`.
 - **Required only** — extraction without a value makes no sense (e.g. `AppState`, always
   present). The type implements only `FromRequestParts`. See [`app_state.rs`](app_state.rs).
 

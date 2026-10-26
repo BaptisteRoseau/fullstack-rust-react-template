@@ -25,7 +25,7 @@ use crate::{
     app_state::AppState,
     error::{ApiError, ApiErrorResponse},
     extractors::error::ExtractorError,
-    models::caller_from_id,
+    models::UserToken,
 };
 
 crate::endpoints::macros::declare_tag!(
@@ -184,14 +184,14 @@ pub(crate) async fn logout(
     ),
 )]
 pub(crate) async fn me(
+    user: UserToken,
     State(authenticator): State<Arc<RwLock<dyn Authenticator>>>,
     State(database): State<Arc<RwLock<dyn database::Database>>>,
     jar: CookieJar,
 ) -> Result<Json<GetMeResponse>, ApiError> {
     let info = caller_userinfo(&authenticator, &jar).await?;
     let profile =
-        app_core::user::read_profile(&database, &caller_from_id(info.sub), info.sub)
-            .await?;
+        app_core::user::read_profile(&database, user.caller(), info.sub).await?;
 
     let response = GetMeResponse::from_userinfo(&info);
     Ok(Json(match profile {
@@ -215,6 +215,7 @@ pub(crate) async fn me(
     ),
 )]
 pub(crate) async fn update_me(
+    user: UserToken,
     State(authenticator): State<Arc<RwLock<dyn Authenticator>>>,
     State(database): State<Arc<RwLock<dyn database::Database>>>,
     jar: CookieJar,
@@ -223,7 +224,7 @@ pub(crate) async fn update_me(
     let info = caller_userinfo(&authenticator, &jar).await?;
     let user = app_core::user::update_profile(
         &database,
-        &caller_from_id(info.sub),
+        user.caller(),
         info.sub,
         body.first_name,
         body.last_name,

@@ -108,7 +108,7 @@ fn with_mcp(
 
 /// Refuses anonymous requests and stores the caller for the MCP tools.
 async fn insert_caller(user: UserToken, mut request: Request, next: Next) -> Response {
-    request.extensions_mut().insert(user.caller());
+    request.extensions_mut().insert(user.into_caller());
     next.run(request).await
 }
 

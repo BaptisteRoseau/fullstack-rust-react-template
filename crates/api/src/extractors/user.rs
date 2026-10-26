@@ -114,7 +114,7 @@ where
                 .map_err(credential_error)?;
         }
         let user: UserToken = user.into();
-        Span::current().record("user_id", tracing::field::display(user.id));
+        Span::current().record("user_id", tracing::field::display(user.caller().id));
         Ok(Some(user))
     }
 }

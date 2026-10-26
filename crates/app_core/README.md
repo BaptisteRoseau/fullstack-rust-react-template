@@ -28,7 +28,7 @@ One module per domain concept, each a set of free functions rather than a struct
 ## Access checks
 
 Every function reading or changing stored data on behalf of someone takes the caller as
-`&rbac::UserPermissions` and checks access itself, through
+`&authenticator::Caller` and checks access itself, through
 [`AccessControl::has_access`](../rbac/src/access_control.rs). The protocol crates, [api](../api)
 and [mcp](../mcp), only pass the caller along, so a new entry point cannot forget a check.
 

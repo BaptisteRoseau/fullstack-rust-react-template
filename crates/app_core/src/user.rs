@@ -1,4 +1,4 @@
-use rbac::UserPermissions;
+use authenticator::Caller;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use uuid::Uuid;
@@ -38,7 +38,7 @@ pub async fn register(
 /// A caller may only read their own profile; any other answers `NotFound`.
 pub async fn read_profile(
     db: &Arc<RwLock<dyn Database>>,
-    caller: &UserPermissions,
+    caller: &Caller,
     id: Uuid,
 ) -> Result<Option<User>, CoreError> {
     ensure_owner(caller, id, id)?;
@@ -55,7 +55,7 @@ pub async fn read_profile(
 /// A caller may only change their own profile; any other answers `NotFound`.
 pub async fn update_profile(
     db: &Arc<RwLock<dyn Database>>,
-    caller: &UserPermissions,
+    caller: &Caller,
     id: Uuid,
     first_name: String,
     last_name: String,

@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 
 use crate::error::AuthenticatorError;
-use crate::models::{AuthSession, AuthTokens, LoginScreen, UserInfo, UserToken};
+use crate::models::{AuthSession, AuthTokens, Caller, LoginScreen, UserInfo};
 
 /// Everything the application needs from an identity provider: validating the
 /// credentials callers present, and driving the browser login flow on their behalf.
@@ -9,7 +9,7 @@ use crate::models::{AuthSession, AuthTokens, LoginScreen, UserInfo, UserToken};
 pub trait Authenticator: Send + Sync {
     /// Resolves a caller-supplied credential — a provider JWT or an API key —
     /// into the user it identifies.
-    async fn validate(&self, token: &str) -> Result<UserToken, Box<AuthenticatorError>>;
+    async fn validate(&self, token: &str) -> Result<Caller, Box<AuthenticatorError>>;
 
     /// Builds the provider URL the browser must be sent to, persisting the PKCE
     /// verifier and the post-login `redirect` under a freshly generated CSRF state.

@@ -48,7 +48,7 @@ async fn set_cache_then_try_get_cache_round_trips() {
     let validator = make_validator(cache, database);
 
     let hashed = hex_sha256("my-secret-token");
-    let token = UserToken {
+    let token = Caller {
         id: Uuid::new_v4(),
         realm: "api_key".to_string(),
     };
@@ -105,19 +105,19 @@ async fn validate_api_key_reads_from_database_and_caches() {
     }));
     let validator = make_validator(cache, database);
 
-    let user_token = validator
+    let caller = validator
         .validate(token)
         .await
         .expect("valid api key should resolve to a user token");
     assert_eq!(
-        user_token.id, owner,
+        caller.id, owner,
         "user id should be the api key owner: got={}, want={owner}",
-        user_token.id
+        caller.id
     );
     assert_eq!(
-        user_token.realm, "api_key",
+        caller.realm, "api_key",
         "api key realm should be \"api_key\", got={}",
-        user_token.realm
+        caller.realm
     );
 
     let cached = validator
@@ -145,7 +145,7 @@ async fn validate_api_key_uses_cache_before_database() {
 
     validator
         .set_cache(
-            &UserToken {
+            &Caller {
                 id: owner,
                 realm: "api_key".to_string(),
             },
@@ -153,14 +153,14 @@ async fn validate_api_key_uses_cache_before_database() {
         )
         .await;
 
-    let user_token = validator
+    let caller = validator
         .validate(token)
         .await
         .expect("cached api key should resolve without database");
     assert_eq!(
-        user_token.id, owner,
+        caller.id, owner,
         "cached user id mismatch: got={}, want={owner}",
-        user_token.id
+        caller.id
     );
 }
 

@@ -5,4 +5,4 @@ pub mod backends;
 pub mod error;
 
 pub use authenticator::Authenticator;
-pub use models::{AuthSession, AuthTokens, LoginScreen, UserInfo, UserToken};
+pub use models::{AuthSession, AuthTokens, Caller, LoginScreen, UserInfo};

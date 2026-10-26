@@ -74,7 +74,7 @@ same-origin paths (starting with `/`) to avoid open redirects.
 ## Reading the token — extractor
 
 [`crates/api/src/extractors/user.rs`](../../crates/api/src/extractors/user.rs) resolves the
-`UserToken` from either:
+`Caller` from either:
 
 1. the `Authorization: Bearer <token>` header (API keys / machine clients), or
 2. the `access_token` cookie (the SPA, via the BFF).

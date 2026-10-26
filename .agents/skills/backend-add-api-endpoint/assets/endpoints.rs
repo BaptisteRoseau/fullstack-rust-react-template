@@ -39,7 +39,7 @@ pub(crate) async fn get_widget(
 ) -> Result<Json<GetWidgetResponse>, ApiError> {
     // `app_core` locks the database and runs the access check. It answers `NotFound` on
     // refusal, which `?` turns into a 404.
-    let widget = app_core::widget::get_widget(&db, &user.caller(), id).await?;
+    let widget = app_core::widget::get_widget(&db, user.caller(), id).await?;
 
     Ok(Json(GetWidgetResponse::from(widget)))
 }
@@ -60,7 +60,7 @@ pub(crate) async fn create_widget(
     State(db): State<Arc<RwLock<dyn database::Database>>>,
     Json(body): Json<PostWidgetRequest>,
 ) -> Result<(StatusCode, Json<GetWidgetResponse>), ApiError> {
-    let widget = app_core::widget::create_widget(&db, &user.caller(), body.name)
+    let widget = app_core::widget::create_widget(&db, user.caller(), body.name)
         .await
         .map_err(|error| ApiError::Unexpected(anyhow::anyhow!("{error}")))?;
 

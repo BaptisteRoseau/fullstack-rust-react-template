@@ -18,15 +18,20 @@ so they live behind one trait:
 
 | Method | Responsibility |
 | --- | --- |
-| `validate` | Resolve a caller's credential into a `UserToken`. |
+| `validate` | Resolve a caller's credential into a `Caller`. |
 | `authorize_url` | Build the provider URL to send the browser to, persisting the PKCE verifier and the post-login redirect under a fresh CSRF state. |
 | `exchange_code` | Trade an authorization code for an `AuthSession`, validating and consuming the CSRF state. |
 | `refresh_tokens` | Trade a refresh token for a fresh pair. |
 | `userinfo` | Fetch the identity claims backing the current-user endpoint. |
 | `logout` | Revoke the provider-side session. |
 
-Shared types live in `models.rs`: `UserToken`, `LoginScreen`, `AuthTokens`, `AuthSession`
+Shared types live in `models.rs`: `Caller`, `LoginScreen`, `AuthTokens`, `AuthSession`
 and `UserInfo`. Errors are `AuthenticatorError` in `error.rs`.
+
+`Caller` is the one identity type of the backend: `api` and `mcp` both hand it to `app_core`,
+which checks access with `Caller::permissions()`. It lives here, not in `api`, so `mcp` can use
+it without depending on `api`. It is also what the API key cache stores, so renaming or
+retyping a field silently invalidates every cached key for 300s.
 
 ## The Keycloak backend
 

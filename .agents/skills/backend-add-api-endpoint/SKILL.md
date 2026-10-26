@@ -78,10 +78,10 @@ The template shows a read and a write handler. Keep to its shape:
 - Return `Result<Json<T>, ApiError>`, or `Result<(StatusCode, Json<T>), ApiError>` when the status
   varies, such as `201 Created`.
 - Take `UserToken` when authentication is required, `Option<UserToken>` when it is optional.
-- **Pass the caller to `app_core` and let it refuse**: `app_core::widget::get_widget(&*db,
-  &user.caller(), id)`. Never compare `owner` to `user.id`, nor read a row to decide access, in
-  a handler: the MCP tools call the same `app_core` function and would skip that check. If the
-  `app_core` function takes no caller yet, add one first. See the rules in
+- **Pass the caller to `app_core` and let it refuse**: `app_core::widget::get_widget(&db,
+  user.caller(), id)`. Never compare `owner` to `user.caller().id`, nor read a row to decide
+  access, in a handler: the MCP tools call the same `app_core` function and would skip that
+  check. If the `app_core` function takes no caller yet, add one first. See the rules in
   [crates/api/README.md](../../../crates/api/README.md#rules).
 - Let `?` convert a `CoreError`: a refusal is `CoreError::NotFound`, which answers 404. Do not
   `map_err` it into another variant.
@@ -133,7 +133,7 @@ pub(crate) async fn get_widget(
     State(db): State<Arc<RwLock<dyn database::Database>>>,
     Path(id): Path<Uuid>,
 ) -> Result<Json<GetWidgetResponse>, ApiError> {
-    let widget = app_core::widget::get_widget(&db, &user.caller(), id).await?;
+    let widget = app_core::widget::get_widget(&db, user.caller(), id).await?;
     Ok(Json(GetWidgetResponse::from(widget)))
 }
 
@@ -153,7 +153,7 @@ pub(crate) async fn create_widget(
     State(db): State<Arc<RwLock<dyn database::Database>>>,
     Json(body): Json<PostWidgetRequest>,
 ) -> Result<(StatusCode, Json<GetWidgetResponse>), ApiError> {
-    let widget = app_core::widget::create_widget(&db, &user.caller(), body.name)
+    let widget = app_core::widget::create_widget(&db, user.caller(), body.name)
         .await
         .map_err(|e| ApiError::Unexpected(anyhow::anyhow!("{e}")))?;
     Ok((StatusCode::CREATED, Json(GetWidgetResponse::from(widget))))

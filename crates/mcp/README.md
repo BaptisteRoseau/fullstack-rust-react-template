@@ -74,7 +74,7 @@ clients.
 endpoints ([routes/router.rs](../api/src/routes/router.rs)). An anonymous caller is refused
 before any tool runs.
 
-`api` then stores the caller, a `rbac::UserPermissions`, in the HTTP request extensions. `rmcp`
+`api` then stores the caller, an `authenticator::Caller`, in the HTTP request extensions. `rmcp`
 hands those to a tool as `Extension<Parts>`, and [`caller`](src/caller.rs) reads it back. A tool
 passes it to `app_core`, which runs the access checks; a tool never checks access itself.
 

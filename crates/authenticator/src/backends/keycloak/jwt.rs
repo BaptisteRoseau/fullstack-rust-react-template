@@ -8,7 +8,7 @@ use tracing::warn;
 use uuid::Uuid;
 
 use crate::error::{AuthenticatorError, error_chain};
-use crate::models::UserToken;
+use crate::models::Caller;
 
 #[derive(Debug, Deserialize)]
 struct Claims {
@@ -78,7 +78,7 @@ impl JwtValidator {
     pub(super) async fn validate(
         &self,
         token: &str,
-    ) -> Result<UserToken, Box<AuthenticatorError>> {
+    ) -> Result<Caller, Box<AuthenticatorError>> {
         let header = decode_header(token)?;
         let kid = header.kid.ok_or("No 'kid' in token header")?;
         let decoding_key = self.decoding_key(&kid).await?;
@@ -92,7 +92,7 @@ impl JwtValidator {
         let realm = realm_from_iss(&claims.iss)
             .ok_or(AuthenticatorError::InvalidRealm(claims.iss))?;
 
-        Ok(UserToken { id, realm })
+        Ok(Caller { id, realm })
     }
 }
 

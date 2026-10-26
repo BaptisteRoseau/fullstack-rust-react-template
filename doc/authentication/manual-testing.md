@@ -220,7 +220,7 @@ TOKEN_RESPONSE=$(curl -s -X POST \
 ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r .access_token)
 ```
 
-Inspect the payload (`sub` is the user UUID surfaced as `UserToken.id`, and `aud` must contain
+Inspect the payload (`sub` is the user UUID surfaced as `Caller.id`, and `aud` must contain
 `backend` for the API's audience check to pass):
 
 ```bash

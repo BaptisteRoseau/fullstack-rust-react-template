@@ -49,8 +49,8 @@ token with `curl`.
 
 From the validated access token:
 
-- `sub` — the user's UUID, surfaced as `UserToken.id`.
-- `iss` — the issuer. Its last path segment becomes `UserToken.realm`.
+- `sub` — the user's UUID, surfaced as `Caller.id`.
+- `iss` — the issuer. Its last path segment becomes `Caller.realm`.
 
 `/auth/me` additionally calls Keycloak's `userinfo` endpoint for the display name and email.
 

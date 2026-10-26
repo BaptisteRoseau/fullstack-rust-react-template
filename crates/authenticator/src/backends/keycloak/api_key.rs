@@ -9,7 +9,7 @@ use sha2::{Digest, Sha256};
 use tokio::sync::RwLock;
 
 use crate::error::AuthenticatorError;
-use crate::models::UserToken;
+use crate::models::Caller;
 
 pub(super) struct ApiKeyValidator {
     cache: Arc<RwLock<dyn Cache>>,
@@ -27,11 +27,11 @@ impl ApiKeyValidator {
     pub(super) async fn validate(
         &self,
         token: &str,
-    ) -> Result<UserToken, Box<AuthenticatorError>> {
+    ) -> Result<Caller, Box<AuthenticatorError>> {
         let hashed = hex_sha256(token);
 
-        if let Some(user_token) = self.try_get_cache(&hashed).await {
-            return Ok(user_token);
+        if let Some(caller) = self.try_get_cache(&hashed).await {
+            return Ok(caller);
         }
 
         let api_key = self
@@ -42,29 +42,29 @@ impl ApiKeyValidator {
             .await
             .map_err(|_| AuthenticatorError::AuthenticationFailure)?;
 
-        let user_token = UserToken {
+        let caller = Caller {
             id: api_key.owner,
             realm: "api_key".to_string(),
         };
 
-        self.set_cache(&user_token, hashed.as_str()).await;
+        self.set_cache(&caller, hashed.as_str()).await;
 
-        Ok(user_token)
+        Ok(caller)
     }
 
     /// Gets the token from local cache
-    async fn try_get_cache(&self, hashed: &str) -> Option<UserToken> {
+    async fn try_get_cache(&self, hashed: &str) -> Option<Caller> {
         if let Some(value) = self.cache.read().await.get_nofail(hashed).await
-            && let Ok(user_token) = serde_json::from_value::<UserToken>(value)
+            && let Ok(caller) = serde_json::from_value::<Caller>(value)
         {
-            return Some(user_token);
+            return Some(caller);
         }
         None
     }
 
     /// Sets the token into local cache
-    async fn set_cache(&self, user_token: &UserToken, hashed: &str) {
-        if let Ok(value) = serde_json::to_value(user_token) {
+    async fn set_cache(&self, caller: &Caller, hashed: &str) {
+        if let Ok(value) = serde_json::to_value(caller) {
             self.cache
                 .read()
                 .await
