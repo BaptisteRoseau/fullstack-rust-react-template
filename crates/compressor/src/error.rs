@@ -6,6 +6,10 @@ pub enum CompressorError {
     ImageHandlingError(#[from] caesium::error::CaesiumError),
     #[error(transparent)]
     IoError(#[from] std::io::Error),
+    #[error(transparent)]
+    ImageCodingError(#[from] image::ImageError),
+    #[error(transparent)]
+    PngOptimizationError(#[from] oxipng::PngError),
 }
 
 impl From<caesium::error::CaesiumError> for Box<CompressorError> {
@@ -17,5 +21,17 @@ impl From<caesium::error::CaesiumError> for Box<CompressorError> {
 impl From<std::io::Error> for Box<CompressorError> {
     fn from(e: std::io::Error) -> Self {
         Box::new(CompressorError::IoError(e))
+    }
+}
+
+impl From<image::ImageError> for Box<CompressorError> {
+    fn from(e: image::ImageError) -> Self {
+        Box::new(CompressorError::ImageCodingError(e))
+    }
+}
+
+impl From<oxipng::PngError> for Box<CompressorError> {
+    fn from(e: oxipng::PngError) -> Self {
+        Box::new(CompressorError::PngOptimizationError(e))
     }
 }

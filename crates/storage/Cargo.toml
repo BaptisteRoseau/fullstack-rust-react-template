@@ -12,7 +12,7 @@ config = { path = "../config" }
 compressor = { path = "../compressor" }
 flate2 = "1"
 async-trait = "0"
-libcaesium = { version = "0", features = ["gif", "jpg", "png", "tiff", "webp"] }
+libcaesium = { version = "0", default-features = false, features = ["jpg", "parallel", "tiff", "webp"] }
 s3 = { version = "0", features = ["checksums", "metrics"] }
 # reqx 0.1.29 added a `message` field to Error::Transport that breaks s3 0.1.22
 reqx = ">=0.1.27, <0.1.29"

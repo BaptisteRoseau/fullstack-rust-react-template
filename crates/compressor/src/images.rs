@@ -2,6 +2,7 @@ use crate::error::CompressorError;
 use crate::parameters::{
     ImageCompression, ImageConversion, ImageParameters, ImageResize,
 };
+use crate::png::{compress_to_png, is_png};
 use caesium::compress_in_memory;
 use caesium::parameters::{
     ChromaSubsampling, GifParameters, JpegParameters, PngParameters, TiffDeflateLevel,
@@ -17,8 +18,11 @@ pub fn compress_image(
     update_dimensions(&parameters.resize, &mut compression_parameters);
 
     let format = match parameters.conversion {
+        ImageConversion::Png if is_png(image) => {
+            return handle_compression_only(image, parameters, &compression_parameters);
+        }
+        ImageConversion::Png => return compress_to_png(image, &parameters.resize),
         ImageConversion::Jpeg => SupportedFileTypes::Jpeg,
-        ImageConversion::Png => SupportedFileTypes::Png,
         ImageConversion::Tiff => SupportedFileTypes::Tiff,
         ImageConversion::Webp => SupportedFileTypes::WebP,
         ImageConversion::NoConversion => {
@@ -65,6 +69,8 @@ fn handle_compression_only(
         && parameters.resize.width.is_none()
     {
         Ok(image.into())
+    } else if is_png(image) {
+        compress_to_png(image, &parameters.resize)
     } else {
         Ok(compress_in_memory(image.into(), compression_parameters)?)
     }

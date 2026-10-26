@@ -18,6 +18,9 @@ only one implementation and no backend to swap.
   `compress_bytes` / `decompress_bytes`.
 - [`images`](src/images.rs) — `compress_image`, used when the blob is an image. Wraps the
   `libcaesium` crate to additionally resize and convert format (JPEG, PNG, TIFF, WebP).
+  PNG goes through [`png`](src/png.rs) instead, with `image` and `oxipng`, because
+  libcaesium's PNG and GIF support pulls GPL and AGPL crates. PNG compression is
+  lossless only, and GIF is not supported.
 - [`error::CompressorError`](src/error.rs) — wraps `caesium::error::CaesiumError` and
   `std::io::Error`.
 
@@ -28,6 +31,7 @@ compressor/
 ├── src/
 │   ├── compressor.rs   # generic byte (de)compression, gzip today
 │   ├── images.rs       # image-specific compression, resize and format conversion
+│   ├── png.rs          # PNG resize, conversion and lossless compression
 │   ├── parameters.rs   # CompressionParameters and its presets
 │   └── error.rs
 └── tests/

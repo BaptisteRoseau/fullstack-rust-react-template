@@ -8,8 +8,10 @@ test_utils = { path = "../test_utils" }
 config = { path = "../config" }
 flate2 = "1"
 async-trait = "0"
-libcaesium = { version = "0", features = ["gif", "jpg", "png", "tiff", "webp"] }
+libcaesium = { version = "0", default-features = false, features = ["jpg", "parallel", "tiff", "webp"] }
 thiserror = "2"
+image = { version = "0.25", default-features = false, features = ["png"] }
+oxipng = { version = "10", default-features = false, features = ["parallel"] }
 
 [dev-dependencies]
 uuid = { version = "1", features = ["v4"] }

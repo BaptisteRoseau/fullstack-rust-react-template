@@ -104,11 +104,6 @@ allow = [
     "Unicode-3.0",
     "Unicode-DFS-2016",
     "Zlib",
-    # NEW
-    # gifski, reached through libcaesium's `gif` feature
-    "AGPL-3.0-or-later",
-    # imagequant, reached through libcaesium's `png` feature
-    "GPL-3.0-or-later",
 ]
 # The confidence threshold for detecting a license from license text.
 # The higher the value, the more closely the license text must be to the
@@ -203,6 +198,8 @@ deny = [
     # Wrapper crates can optionally be specified to allow the crate when it
     # is a direct dependency of the otherwise banned crate
     #{ crate = "ansi_term@0.11.0", wrappers = ["this-crate-directly-depends-on-ansi_term"] },
+    { crate = "gifski", reason = "AGPL-3.0-or-later, reached through libcaesium's `gif` feature" },
+    { crate = "imagequant", reason = "GPL-3.0-or-later, reached through libcaesium's `png` and `gif` features" },
 ]
 
 # List of features to allow/deny
