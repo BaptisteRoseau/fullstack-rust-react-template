@@ -104,6 +104,7 @@ and what it is for:
 
 Use a table instead when every item has the same columns (a trait's methods and their
 responsibility, a module and its contents).
+
 ### Directory tree
 
 A fenced `txt` block, drawn with box characters, the root written as `<dir>/`, a `#` comment
