@@ -19,7 +19,7 @@ use crate::error::CoreError;
 /// The display name is only taken from the provider on creation; afterwards it
 /// belongs to the user and is changed through [`update_profile`].
 pub async fn register(
-    db: &mut dyn Database,
+    db: &Arc<RwLock<dyn Database>>,
     id: Uuid,
     username: String,
     first_name: String,
@@ -27,6 +27,8 @@ pub async fn register(
     email: String,
 ) -> Result<User, CoreError> {
     Ok(db
+        .write()
+        .await
         .register(id, username, first_name, last_name, email)
         .await?)
 }
@@ -35,12 +37,13 @@ pub async fn register(
 ///
 /// A caller may only read their own profile; any other answers `NotFound`.
 pub async fn read_profile(
-    db: &dyn Database,
+    db: &Arc<RwLock<dyn Database>>,
     caller: &UserPermissions,
     id: Uuid,
 ) -> Result<Option<User>, CoreError> {
     ensure_owner(caller, id, id)?;
-    match db.read_user(id).await {
+    let user = db.read().await.read_user(id).await;
+    match user {
         Ok(user) => Ok(Some(user)),
         Err(e) if matches!(*e, DatabaseError::NotFound(_)) => Ok(None),
         Err(e) => Err(CoreError::DatabaseError(e)),
@@ -51,7 +54,7 @@ pub async fn read_profile(
 ///
 /// A caller may only change their own profile; any other answers `NotFound`.
 pub async fn update_profile(
-    db: &mut dyn Database,
+    db: &Arc<RwLock<dyn Database>>,
     caller: &UserPermissions,
     id: Uuid,
     first_name: String,
@@ -62,7 +65,9 @@ pub async fn update_profile(
         .set_first_name(first_name)
         .set_last_name(last_name);
 
-    db.update_user(patch)
+    db.write()
+        .await
+        .update_user(patch)
         .await
         .map_err(|error| CoreError::from_database(*error))
 }

@@ -39,15 +39,10 @@ pub(crate) async fn create_api_key(
     Json(body): Json<CreateApiKeyRequest>,
 ) -> Result<(StatusCode, Json<CreateApiKeyResponse>), ApiError> {
     let permissions = parse_permissions(&body.permissions);
-    let mut db = db.write().await;
-    let (raw_key, api_key) = app_core::api_key::create_api_key(
-        &mut *db,
-        &user.caller(),
-        body.name,
-        permissions,
-    )
-    .await
-    .map_err(|e| ApiError::Unexpected(anyhow::anyhow!("{e}")))?;
+    let (raw_key, api_key) =
+        app_core::api_key::create_api_key(&db, &user.caller(), body.name, permissions)
+            .await
+            .map_err(|e| ApiError::Unexpected(anyhow::anyhow!("{e}")))?;
 
     Ok((
         StatusCode::CREATED,
@@ -69,10 +64,7 @@ pub(crate) async fn list_api_keys(
     user: UserToken,
     State(db): State<Arc<RwLock<dyn database::Database>>>,
 ) -> Result<Json<Vec<GetApiKeyResponse>>, ApiError> {
-    let api_keys = {
-        let db = db.read().await;
-        app_core::api_key::list_api_keys(&*db, &user.caller()).await?
-    };
+    let api_keys = app_core::api_key::list_api_keys(&db, &user.caller()).await?;
 
     Ok(Json(
         api_keys.into_iter().map(GetApiKeyResponse::from).collect(),
@@ -96,10 +88,7 @@ pub(crate) async fn get_api_key(
     State(db): State<Arc<RwLock<dyn database::Database>>>,
     Path(id): Path<Uuid>,
 ) -> Result<Json<GetApiKeyResponse>, ApiError> {
-    let api_key = {
-        let db = db.read().await;
-        app_core::api_key::get_api_key(&*db, &user.caller(), id).await?
-    };
+    let api_key = app_core::api_key::get_api_key(&db, &user.caller(), id).await?;
 
     Ok(Json(GetApiKeyResponse::from(api_key)))
 }
@@ -121,10 +110,7 @@ pub(crate) async fn delete_api_key(
     State(db): State<Arc<RwLock<dyn database::Database>>>,
     Path(id): Path<Uuid>,
 ) -> Result<StatusCode, ApiError> {
-    {
-        let mut db = db.write().await;
-        app_core::api_key::delete_api_key(&mut *db, &user.caller(), id).await?;
-    }
+    app_core::api_key::delete_api_key(&db, &user.caller(), id).await?;
 
     Ok(StatusCode::NO_CONTENT)
 }

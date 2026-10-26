@@ -35,10 +35,8 @@ any other UUID fails as not found."
         user_id: Uuid,
     ) -> Result<CallToolResult, McpError> {
         let caller = caller(parts)?;
-        let profile = {
-            let database = self.state.database.read().await;
-            app_core::user::read_profile(&*database, caller, user_id).await?
-        };
+        let profile =
+            app_core::user::read_profile(&self.state.database, caller, user_id).await?;
 
         let profile = profile.ok_or_else(|| McpError::NotFound(user_id.to_string()))?;
         structured(GetUserResult::from(profile))

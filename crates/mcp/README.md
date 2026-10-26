@@ -131,6 +131,8 @@ claude mcp add --transport http backend http://localhost:8080/mcp \
 - Only `McpState` and `mcp_routes` are public; every other item stays crate-private.
 - No business logic in a tool: it calls `app_core` and serialises the result.
 - Never check access in a tool. Pass the caller to `app_core`, which refuses.
+- Never lock a service in a tool. Pass the `Arc<RwLock<dyn Trait>>` to `app_core`, which
+  locks only around each call to the service.
 - Every tool group must be added to the `#[tool_handler]` sum in `server.rs`.
 - No stdio transport.
 - Keep sessions off, so responses stay plain JSON and survive the API's `TimeoutLayer`.

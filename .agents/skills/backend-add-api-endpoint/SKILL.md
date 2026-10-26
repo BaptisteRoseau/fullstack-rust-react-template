@@ -85,15 +85,16 @@ The template shows a read and a write handler. Keep to its shape:
   [crates/api/README.md](../../../crates/api/README.md#rules).
 - Let `?` convert a `CoreError`: a refusal is `CoreError::NotFound`, which answers 404. Do not
   `map_err` it into another variant.
-- Take a read lock for reads and a write lock for writes, and **keep the lock window minimal** —
-  release it before doing anything else.
+- Never lock a service in a handler. Pass the `Arc<RwLock<dyn Trait>>` from the state to
+  `app_core` as `&db`; `app_core` locks only around each call to the service, so no lock is
+  held for the whole request.
 - Map domain errors onto `ApiError` variants. Never leak an internal error to the caller.
 - Document every response status you can return, including the failures.
 - Always annotate with `#[axum_macros::debug_handler(state = AppState)]`.
 - Always annotate with `#[utoipa::path(...)]` — this generates the OpenAPI spec.
 - Write a doc comment above the handler; consider it as the user-facing documentation so be concise but exhaustive.
 - Return `Result<Json<ResponseType>, ApiError>` for standard JSON, or `Result<(StatusCode, Json<ResponseType>), ApiError>` when the status code varies (e.g. 201 Created).
-- Use `State(db): State<Arc<RwLock<dyn database::Database>>>` to access the database. Take a read lock for reads, a write lock for writes. Keep the lock window minimal.
+- Use `State(db): State<Arc<RwLock<dyn database::Database>>>` to access the database.
 - Map domain errors to `ApiError` variants — do not expose internal error details.
 - Call `app_core::*` for all business logic. The handler itself should contain no domain logic.
 
@@ -132,10 +133,7 @@ pub(crate) async fn get_widget(
     State(db): State<Arc<RwLock<dyn database::Database>>>,
     Path(id): Path<Uuid>,
 ) -> Result<Json<GetWidgetResponse>, ApiError> {
-    let widget = {
-        let db = db.read().await;
-        app_core::widget::get_widget(&*db, &user.caller(), id).await?
-    };
+    let widget = app_core::widget::get_widget(&db, &user.caller(), id).await?;
     Ok(Json(GetWidgetResponse::from(widget)))
 }
 
@@ -155,8 +153,7 @@ pub(crate) async fn create_widget(
     State(db): State<Arc<RwLock<dyn database::Database>>>,
     Json(body): Json<PostWidgetRequest>,
 ) -> Result<(StatusCode, Json<GetWidgetResponse>), ApiError> {
-    let mut db = db.write().await;
-    let widget = app_core::widget::create_widget(&mut *db, &user.caller(), body.name)
+    let widget = app_core::widget::create_widget(&db, &user.caller(), body.name)
         .await
         .map_err(|e| ApiError::Unexpected(anyhow::anyhow!("{e}")))?;
     Ok((StatusCode::CREATED, Json(GetWidgetResponse::from(widget))))

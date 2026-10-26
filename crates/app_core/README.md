@@ -4,8 +4,12 @@ The business logic layer. This is the only crate allowed to hold domain rules: g
 data, what is the right thing to do.
 
 See [crates/README.md](../README.md) for the layer rule: `app_core` may use `database`,
-but never `api`. Its functions take `&dyn Database` / `&mut dyn Database`, never a
-concrete backend, so `api` handlers can call them without knowing which backend is live.
+but never `api`. Its functions take `&Arc<RwLock<dyn Database>>`, never a concrete backend,
+so `api` handlers can call them without knowing which backend is live.
+
+A function locks a service itself, only around each call to it, and releases the lock before
+doing anything else. A handler or a tool never locks: holding a lock for a whole request
+blocks every other request on the same service, a write lock most of all.
 
 ## Public surface
 

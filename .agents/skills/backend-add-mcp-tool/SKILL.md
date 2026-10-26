@@ -89,8 +89,8 @@ The template shows one tool. Keep to its shape:
   `Result<CallToolResult, McpError>`, so the body can use `?`.
 - Build the answer with `structured(...)`, which fills both `structuredContent` and its text
   rendering.
-- Take a read lock for reads and a write lock for writes, and **keep the lock window
-  minimal** — release it before doing anything else.
+- Never lock a service in a tool. Pass `&self.state.database` to `app_core`, which locks
+  only around each call to the service.
 - Call `app_core::*` for all business logic.
 
 ```rust
@@ -127,10 +127,8 @@ no widget has that id or the caller may not see it.")]
         widget_id: Uuid,
     ) -> Result<CallToolResult, McpError> {
         let caller = caller(parts)?;
-        let widget = {
-            let database = self.state.database.read().await;
-            app_core::widget::get_widget(&*database, caller, widget_id).await?
-        };
+        let widget =
+            app_core::widget::get_widget(&self.state.database, caller, widget_id).await?;
         structured(GetWidgetResult::from(widget))
     }
 }

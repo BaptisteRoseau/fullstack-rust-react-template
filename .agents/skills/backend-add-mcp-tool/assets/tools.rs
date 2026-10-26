@@ -36,18 +36,16 @@ no widget has that id or the caller may not see it.")]
     /// Body of [`Self::get_widget`], split out so it can use `?` over [`McpError`].
     ///
     /// Takes the arguments, calls `app_core` with the caller, serialises the result. No
-    /// domain logic and no access check: `app_core` refuses. The lock window stays as
-    /// narrow as the call that needs it.
+    /// domain logic, no access check and no lock: `app_core` locks the database only
+    /// around each call to it.
     async fn read_widget(
         &self,
         parts: &Parts,
         widget_id: Uuid,
     ) -> Result<CallToolResult, McpError> {
         let caller = caller(parts)?;
-        let widget = {
-            let database = self.state.database.read().await;
-            app_core::widget::get_widget(&*database, caller, widget_id).await?
-        };
+        let widget =
+            app_core::widget::get_widget(&self.state.database, caller, widget_id).await?;
 
         structured(GetWidgetResult::from(widget))
     }

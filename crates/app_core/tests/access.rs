@@ -1,15 +1,25 @@
 use std::collections::HashSet;
+use std::sync::Arc;
 
 use app_core::error::CoreError;
+use database::Database;
 use database::testing::MockDatabase;
 use rbac::UserPermissions;
+use tokio::sync::RwLock;
 use uuid::Uuid;
+
+/// The mock, to inspect afterwards, and the same database as `app_core` takes it.
+fn databases() -> (Arc<RwLock<MockDatabase>>, Arc<RwLock<dyn Database>>) {
+    let mock = Arc::new(RwLock::new(MockDatabase::default()));
+    let db: Arc<RwLock<dyn Database>> = mock.clone();
+    (mock, db)
+}
 
 fn caller(id: Uuid) -> UserPermissions {
     UserPermissions::new(id, HashSet::new(), HashSet::new())
 }
 
-async fn registered_user(db: &mut MockDatabase) -> Uuid {
+async fn registered_user(db: &Arc<RwLock<dyn Database>>) -> Uuid {
     let id = Uuid::new_v4();
     app_core::user::register(
         db,
@@ -26,8 +36,8 @@ async fn registered_user(db: &mut MockDatabase) -> Uuid {
 
 #[tokio::test]
 async fn test_read_profile_allows_the_owner() {
-    let mut db = MockDatabase::default();
-    let owner = registered_user(&mut db).await;
+    let (_, db) = databases();
+    let owner = registered_user(&db).await;
 
     let profile = app_core::user::read_profile(&db, &caller(owner), owner).await;
 
@@ -39,8 +49,8 @@ async fn test_read_profile_allows_the_owner() {
 
 #[tokio::test]
 async fn test_read_profile_hides_other_users() {
-    let mut db = MockDatabase::default();
-    let owner = registered_user(&mut db).await;
+    let (_, db) = databases();
+    let owner = registered_user(&db).await;
     let stranger = Uuid::new_v4();
 
     let profile = app_core::user::read_profile(&db, &caller(stranger), owner).await;
@@ -53,12 +63,12 @@ async fn test_read_profile_hides_other_users() {
 
 #[tokio::test]
 async fn test_update_profile_refuses_other_users() {
-    let mut db = MockDatabase::default();
-    let owner = registered_user(&mut db).await;
+    let (mock, db) = databases();
+    let owner = registered_user(&db).await;
     let stranger = Uuid::new_v4();
 
     let result = app_core::user::update_profile(
-        &mut db,
+        &db,
         &caller(stranger),
         owner,
         "Mallory".to_string(),
@@ -70,16 +80,16 @@ async fn test_update_profile_refuses_other_users() {
         matches!(result, Err(CoreError::NotFound(_))),
         "another user's profile must not be changed, got {result:?}"
     );
-    let first_name = &db.users[&owner].first_name;
+    let first_name = &mock.read().await.users[&owner].first_name;
     assert_eq!(first_name, "John", "the profile changed to {first_name}");
 }
 
 #[tokio::test]
 async fn test_get_api_key_allows_the_owner() {
-    let mut db = MockDatabase::default();
+    let (_, db) = databases();
     let owner = caller(Uuid::new_v4());
     let (_, created) =
-        app_core::api_key::create_api_key(&mut db, &owner, "key".to_string(), vec![])
+        app_core::api_key::create_api_key(&db, &owner, "key".to_string(), vec![])
             .await
             .expect("creating a key");
 
@@ -93,11 +103,11 @@ async fn test_get_api_key_allows_the_owner() {
 
 #[tokio::test]
 async fn test_get_api_key_hides_other_users_keys() {
-    let mut db = MockDatabase::default();
+    let (_, db) = databases();
     let owner = caller(Uuid::new_v4());
     let stranger = caller(Uuid::new_v4());
     let (_, created) =
-        app_core::api_key::create_api_key(&mut db, &owner, "key".to_string(), vec![])
+        app_core::api_key::create_api_key(&db, &owner, "key".to_string(), vec![])
             .await
             .expect("creating a key");
 
@@ -111,7 +121,7 @@ async fn test_get_api_key_hides_other_users_keys() {
 
 #[tokio::test]
 async fn test_get_api_key_unknown_id_is_not_found() {
-    let db = MockDatabase::default();
+    let (_, db) = databases();
     let unknown = Uuid::new_v4();
 
     let read =
@@ -125,22 +135,22 @@ async fn test_get_api_key_unknown_id_is_not_found() {
 
 #[tokio::test]
 async fn test_delete_api_key_refuses_other_users() {
-    let mut db = MockDatabase::default();
+    let (mock, db) = databases();
     let owner = caller(Uuid::new_v4());
     let stranger = caller(Uuid::new_v4());
     let (_, created) =
-        app_core::api_key::create_api_key(&mut db, &owner, "key".to_string(), vec![])
+        app_core::api_key::create_api_key(&db, &owner, "key".to_string(), vec![])
             .await
             .expect("creating a key");
 
-    let result = app_core::api_key::delete_api_key(&mut db, &stranger, created.id).await;
+    let result = app_core::api_key::delete_api_key(&db, &stranger, created.id).await;
 
     assert!(
         matches!(result, Err(CoreError::NotFound(_))),
         "another user's key must not be deleted, got {result:?}"
     );
     assert!(
-        db.api_keys_by_id.contains_key(&created.id),
+        mock.read().await.api_keys_by_id.contains_key(&created.id),
         "the key {} was deleted by a stranger",
         created.id
     );
@@ -148,21 +158,21 @@ async fn test_delete_api_key_refuses_other_users() {
 
 #[tokio::test]
 async fn test_delete_api_key_allows_the_owner() {
-    let mut db = MockDatabase::default();
+    let (mock, db) = databases();
     let owner = caller(Uuid::new_v4());
     let (_, created) =
-        app_core::api_key::create_api_key(&mut db, &owner, "key".to_string(), vec![])
+        app_core::api_key::create_api_key(&db, &owner, "key".to_string(), vec![])
             .await
             .expect("creating a key");
 
-    let result = app_core::api_key::delete_api_key(&mut db, &owner, created.id).await;
+    let result = app_core::api_key::delete_api_key(&db, &owner, created.id).await;
 
     assert!(
         result.is_ok(),
         "the owner must delete their own key, got {result:?}"
     );
     assert!(
-        !db.api_keys_by_id.contains_key(&created.id),
+        !mock.read().await.api_keys_by_id.contains_key(&created.id),
         "the key {} is still stored",
         created.id
     );
@@ -170,10 +180,10 @@ async fn test_delete_api_key_allows_the_owner() {
 
 #[tokio::test]
 async fn test_list_api_keys_only_lists_the_callers_keys() {
-    let mut db = MockDatabase::default();
+    let (_, db) = databases();
     let owner = caller(Uuid::new_v4());
     let stranger = caller(Uuid::new_v4());
-    app_core::api_key::create_api_key(&mut db, &owner, "key".to_string(), vec![])
+    app_core::api_key::create_api_key(&db, &owner, "key".to_string(), vec![])
         .await
         .expect("creating a key");
 

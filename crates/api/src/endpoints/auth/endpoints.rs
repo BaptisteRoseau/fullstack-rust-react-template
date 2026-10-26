@@ -189,10 +189,9 @@ pub(crate) async fn me(
     jar: CookieJar,
 ) -> Result<Json<GetMeResponse>, ApiError> {
     let info = caller_userinfo(&authenticator, &jar).await?;
-    let profile = {
-        let db = database.read().await;
-        app_core::user::read_profile(&*db, &caller_from_id(info.sub), info.sub).await?
-    };
+    let profile =
+        app_core::user::read_profile(&database, &caller_from_id(info.sub), info.sub)
+            .await?;
 
     let response = GetMeResponse::from_userinfo(&info);
     Ok(Json(match profile {
@@ -222,17 +221,14 @@ pub(crate) async fn update_me(
     Json(body): Json<PatchMeRequest>,
 ) -> Result<Json<GetMeResponse>, ApiError> {
     let info = caller_userinfo(&authenticator, &jar).await?;
-    let user = {
-        let mut db = database.write().await;
-        app_core::user::update_profile(
-            &mut *db,
-            &caller_from_id(info.sub),
-            info.sub,
-            body.first_name,
-            body.last_name,
-        )
-        .await?
-    };
+    let user = app_core::user::update_profile(
+        &database,
+        &caller_from_id(info.sub),
+        info.sub,
+        body.first_name,
+        body.last_name,
+    )
+    .await?;
 
     Ok(Json(
         GetMeResponse::from_userinfo(&info).with_profile(&user),
@@ -261,9 +257,8 @@ async fn register_user(
     info: &UserInfo,
     database: &Arc<RwLock<dyn database::Database>>,
 ) -> Result<(), ApiError> {
-    let mut db = database.write().await;
     app_core::user::register(
-        &mut *db,
+        database,
         info.sub,
         info.preferred_username.clone(),
         info.given_name.clone(),

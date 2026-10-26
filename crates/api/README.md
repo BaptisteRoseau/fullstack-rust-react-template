@@ -72,6 +72,8 @@ what the client receives.
   future entry point forget.
 - Never read a row in a handler to decide whether the caller may touch it. Add or extend an
   `app_core` function that takes the caller instead.
+- Never lock a service in a handler. Pass the `Arc<RwLock<dyn Trait>>` to `app_core`, which
+  locks only around each call to the service.
 
 ## Skills
 
