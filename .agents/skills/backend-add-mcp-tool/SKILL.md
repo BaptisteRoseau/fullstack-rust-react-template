@@ -80,6 +80,11 @@ The template shows one tool. Keep to its shape:
   are what an assistant reads before choosing the tool: say what it returns and when it
   fails.
 - Take arguments as `Parameters<T>`, destructured in the signature.
+- Take `Extension(parts): Extension<Parts>` and read the caller with `caller(&parts)?`, then
+  **pass it to `app_core` and let it refuse**. Never compare ids or read a row to decide access
+  in a tool: put the check in the `app_core` function, so `api` gets it too. If that function
+  takes no caller yet, add one first.
+- A refusal is `CoreError::NotFound`, which `into_tool_result` already reports as not found.
 - Return `Result<CallToolResult, ErrorData>` and delegate to a private method returning
   `Result<CallToolResult, McpError>`, so the body can use `?`.
 - Build the answer with `structured(...)`, which fills both `structuredContent` and its text
@@ -89,13 +94,16 @@ The template shows one tool. Keep to its shape:
 - Call `app_core::*` for all business logic.
 
 ```rust
+use axum::http::request::Parts;
 use rmcp::ErrorData;
+use rmcp::handler::server::tool::Extension;
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::CallToolResult;
 use rmcp::{tool, tool_router};
 use uuid::Uuid;
 
 use super::models::{GetWidgetParams, GetWidgetResult};
+use crate::caller::caller;
 use crate::error::{McpError, into_tool_result, structured};
 use crate::server::McpServer;
 
@@ -104,18 +112,24 @@ use crate::server::McpServer;
 impl McpServer {
     /// Read one widget.
     #[tool(description = "Read one widget by its UUID. Returns its name, and fails when \
-no widget has that id.")]
+no widget has that id or the caller may not see it.")]
     async fn get_widget(
         &self,
+        Extension(parts): Extension<Parts>,
         Parameters(GetWidgetParams { widget_id }): Parameters<GetWidgetParams>,
     ) -> Result<CallToolResult, ErrorData> {
-        into_tool_result(self.read_widget(widget_id).await)
+        into_tool_result(self.read_widget(&parts, widget_id).await)
     }
 
-    async fn read_widget(&self, widget_id: Uuid) -> Result<CallToolResult, McpError> {
+    async fn read_widget(
+        &self,
+        parts: &Parts,
+        widget_id: Uuid,
+    ) -> Result<CallToolResult, McpError> {
+        let caller = caller(parts)?;
         let widget = {
             let database = self.state.database.read().await;
-            app_core::widget::get_widget(&*database, widget_id).await?
+            app_core::widget::get_widget(&*database, caller, widget_id).await?
         };
         structured(GetWidgetResult::from(widget))
     }
@@ -197,6 +211,7 @@ curl -sS http://localhost:8080/mcp \
 ```
 
 - [ ] The tool calls `app_core` and holds no domain logic.
+- [ ] The tool passes the caller to `app_core` and checks no access itself.
 - [ ] Its description and every field's doc comment are written for the model that will
       read them.
 - [ ] The result carries nothing the caller did not ask for.

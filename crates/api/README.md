@@ -23,9 +23,9 @@ directly by handlers.
 
 `public_routes` also mounts the MCP endpoint of the [mcp](../mcp) crate, when
 `config.mcp` is set. `api` sees exactly two things from that crate — `McpState` and
-`mcp_routes` — and is where the endpoint's authentication is applied, so the tools
-themselves hold no notion of identity. See `with_mcp` in
-[routes/router.rs](src/routes/router.rs).
+`mcp_routes` — and is where the endpoint's authentication is applied: it refuses anonymous
+requests and stores the caller in the request extensions for the tools to read. See
+`with_mcp` in [routes/router.rs](src/routes/router.rs).
 
 ## Directory
 
@@ -63,6 +63,15 @@ produce and converts `From` the lower layers' error types. `error/response.rs` m
 variant to the `ApiErrorResponse` JSON body and HTTP status actually sent to the caller —
 the two are kept separate so the trace logged server-side can stay more detailed than
 what the client receives.
+
+## Rules
+
+- Never check access in a handler. Every access check (ownership, [rbac](../rbac)) runs in
+  [app_core](../app_core): the handler passes the caller, `user.caller()` from `UserToken`,
+  and `app_core` refuses. A check written in a handler is a check the MCP tools and every
+  future entry point forget.
+- Never read a row in a handler to decide whether the caller may touch it. Add or extend an
+  `app_core` function that takes the caller instead.
 
 ## Skills
 

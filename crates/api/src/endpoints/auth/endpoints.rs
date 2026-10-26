@@ -25,6 +25,7 @@ use crate::{
     app_state::AppState,
     error::{ApiError, ApiErrorResponse},
     extractors::error::ExtractorError,
+    models::caller_from_id,
 };
 
 crate::endpoints::macros::declare_tag!(
@@ -190,7 +191,7 @@ pub(crate) async fn me(
     let info = caller_userinfo(&authenticator, &jar).await?;
     let profile = {
         let db = database.read().await;
-        app_core::user::read_profile(&*db, info.sub).await?
+        app_core::user::read_profile(&*db, &caller_from_id(info.sub), info.sub).await?
     };
 
     let response = GetMeResponse::from_userinfo(&info);
@@ -225,6 +226,7 @@ pub(crate) async fn update_me(
         let mut db = database.write().await;
         app_core::user::update_profile(
             &mut *db,
+            &caller_from_id(info.sub),
             info.sub,
             body.first_name,
             body.last_name,

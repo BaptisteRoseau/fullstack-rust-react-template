@@ -1,3 +1,4 @@
+use rbac::UserPermissions;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use uuid::Uuid;
@@ -8,6 +9,7 @@ use database::{
     models::{User, UserPatch},
 };
 
+use crate::access::ensure_owner;
 use crate::error::CoreError;
 
 /// Registers a user from OIDC identity claims (`sub`, `preferred_username`,
@@ -30,10 +32,14 @@ pub async fn register(
 }
 
 /// Reads the locally stored profile, or `None` when the user never logged in.
+///
+/// A caller may only read their own profile; any other answers `NotFound`.
 pub async fn read_profile(
     db: &dyn Database,
+    caller: &UserPermissions,
     id: Uuid,
 ) -> Result<Option<User>, CoreError> {
+    ensure_owner(caller, id, id)?;
     match db.read_user(id).await {
         Ok(user) => Ok(Some(user)),
         Err(e) if matches!(*e, DatabaseError::NotFound(_)) => Ok(None),
@@ -42,20 +48,23 @@ pub async fn read_profile(
 }
 
 /// Changes the display name the user owns, leaving the provider's claims alone.
+///
+/// A caller may only change their own profile; any other answers `NotFound`.
 pub async fn update_profile(
     db: &mut dyn Database,
+    caller: &UserPermissions,
     id: Uuid,
     first_name: String,
     last_name: String,
 ) -> Result<User, CoreError> {
+    ensure_owner(caller, id, id)?;
     let patch = User::build_patch(id)
         .set_first_name(first_name)
         .set_last_name(last_name);
 
-    db.update_user(patch).await.map_err(|e| match *e {
-        DatabaseError::NotFound(missing) => CoreError::NotFound(missing),
-        other => CoreError::DatabaseError(Box::new(other)),
-    })
+    db.update_user(patch)
+        .await
+        .map_err(|error| CoreError::from_database(*error))
 }
 
 pub async fn create_user<U: Into<UserPatch>>(

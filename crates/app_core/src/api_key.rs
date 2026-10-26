@@ -1,25 +1,28 @@
 use sha2::{Digest, Sha256};
 use uuid::Uuid;
 
+use crate::access::ensure_owner;
 use crate::error::CoreError;
 use crate::models::api_key_from_db;
 use database::Database;
+use rbac::UserPermissions;
 
-/// Lists the keys owned by `owner`, newest first.
+/// Lists the keys owned by the caller, newest first.
 pub async fn list_api_keys(
     db: &dyn Database,
-    owner: Uuid,
+    caller: &UserPermissions,
 ) -> Result<Vec<models::ApiKey>, CoreError> {
-    db.read_api_keys_by_owner(owner)
+    db.read_api_keys_by_owner(caller.id)
         .await?
         .into_iter()
         .map(api_key_from_db)
         .collect()
 }
 
+/// Creates a key owned by the caller. Returns the raw key, which is never stored.
 pub async fn create_api_key(
     db: &mut dyn Database,
-    owner: Uuid,
+    caller: &UserPermissions,
     name: String,
     permissions: Vec<rbac::Permissions>,
 ) -> Result<(String, models::ApiKey), CoreError> {
@@ -28,7 +31,7 @@ pub async fn create_api_key(
         let raw_key = generate_random_key();
         let hash = hex_sha256(&raw_key);
         match db
-            .create_api_key(owner, name.clone(), hash, permissions_json.clone())
+            .create_api_key(caller.id, name.clone(), hash, permissions_json.clone())
             .await
         {
             Ok(db_key) => {
@@ -39,6 +42,35 @@ pub async fn create_api_key(
             Err(e) => return Err(CoreError::DatabaseError(e)),
         }
     }
+}
+
+/// Reads one key. A key the caller does not own answers `NotFound`.
+pub async fn get_api_key(
+    db: &dyn Database,
+    caller: &UserPermissions,
+    id: Uuid,
+) -> Result<models::ApiKey, CoreError> {
+    let db_key = db
+        .read_api_key_by_id(id)
+        .await
+        .map_err(|error| CoreError::from_database(*error))?;
+    ensure_owner(caller, db_key.owner, id)?;
+    api_key_from_db(db_key)
+}
+
+/// Deletes one key. A key the caller does not own answers `NotFound`.
+pub async fn delete_api_key(
+    db: &mut dyn Database,
+    caller: &UserPermissions,
+    id: Uuid,
+) -> Result<(), CoreError> {
+    let db_key = db
+        .read_api_key_by_id(id)
+        .await
+        .map_err(|error| CoreError::from_database(*error))?;
+    ensure_owner(caller, db_key.owner, id)?;
+    db.delete_api_key(id).await?;
+    Ok(())
 }
 
 fn generate_random_key() -> String {

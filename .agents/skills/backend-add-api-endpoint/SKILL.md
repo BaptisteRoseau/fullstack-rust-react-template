@@ -78,6 +78,13 @@ The template shows a read and a write handler. Keep to its shape:
 - Return `Result<Json<T>, ApiError>`, or `Result<(StatusCode, Json<T>), ApiError>` when the status
   varies, such as `201 Created`.
 - Take `UserToken` when authentication is required, `Option<UserToken>` when it is optional.
+- **Pass the caller to `app_core` and let it refuse**: `app_core::widget::get_widget(&*db,
+  &user.caller(), id)`. Never compare `owner` to `user.id`, nor read a row to decide access, in
+  a handler: the MCP tools call the same `app_core` function and would skip that check. If the
+  `app_core` function takes no caller yet, add one first. See the rules in
+  [crates/api/README.md](../../../crates/api/README.md#rules).
+- Let `?` convert a `CoreError`: a refusal is `CoreError::NotFound`, which answers 404. Do not
+  `map_err` it into another variant.
 - Take a read lock for reads and a write lock for writes, and **keep the lock window minimal** —
   release it before doing anything else.
 - Map domain errors onto `ApiError` variants. Never leak an internal error to the caller.
@@ -87,7 +94,6 @@ The template shows a read and a write handler. Keep to its shape:
 - Write a doc comment above the handler; consider it as the user-facing documentation so be concise but exhaustive.
 - Return `Result<Json<ResponseType>, ApiError>` for standard JSON, or `Result<(StatusCode, Json<ResponseType>), ApiError>` when the status code varies (e.g. 201 Created).
 - Use `State(db): State<Arc<RwLock<dyn database::Database>>>` to access the database. Take a read lock for reads, a write lock for writes. Keep the lock window minimal.
-- Use the `UserToken` extractor when authentication is mandatory; `Option<UserToken>` when optional.
 - Map domain errors to `ApiError` variants — do not expose internal error details.
 - Call `app_core::*` for all business logic. The handler itself should contain no domain logic.
 
@@ -122,14 +128,14 @@ use crate::{
     ),
 )]
 pub(crate) async fn get_widget(
-    _user: UserToken,
+    user: UserToken,
     State(db): State<Arc<RwLock<dyn database::Database>>>,
     Path(id): Path<Uuid>,
 ) -> Result<Json<GetWidgetResponse>, ApiError> {
-    let db = db.read().await;
-    let widget = app_core::widget::get_widget(&*db, id)
-        .await
-        .map_err(|_| ApiError::NotFound(id.to_string()))?;
+    let widget = {
+        let db = db.read().await;
+        app_core::widget::get_widget(&*db, &user.caller(), id).await?
+    };
     Ok(Json(GetWidgetResponse::from(widget)))
 }
 
@@ -145,12 +151,12 @@ pub(crate) async fn get_widget(
     ),
 )]
 pub(crate) async fn create_widget(
-    _user: UserToken,
+    user: UserToken,
     State(db): State<Arc<RwLock<dyn database::Database>>>,
     Json(body): Json<PostWidgetRequest>,
 ) -> Result<(StatusCode, Json<GetWidgetResponse>), ApiError> {
     let mut db = db.write().await;
-    let widget = app_core::widget::create_widget(&mut *db, body.name)
+    let widget = app_core::widget::create_widget(&mut *db, &user.caller(), body.name)
         .await
         .map_err(|e| ApiError::Unexpected(anyhow::anyhow!("{e}")))?;
     Ok((StatusCode::CREATED, Json(GetWidgetResponse::from(widget))))
@@ -205,5 +211,6 @@ See Skill(commit-messages).
 ```
 
 - [ ] The handler calls `app_core` and holds no domain logic.
+- [ ] The handler passes `user.caller()` to `app_core` and checks no access itself.
 - [ ] Every response status the handler can return is documented in `utoipa::path`.
 - [ ] The endpoint appears in Swagger UI at the configured path.

@@ -9,6 +9,8 @@ use app_core::error::CoreError;
 pub(crate) enum McpError {
     #[error("Not found: {0}")]
     NotFound(String),
+    #[error("No caller was attached to the request")]
+    MissingCaller,
     #[error(transparent)]
     CoreError(#[from] CoreError),
     #[error("Could not serialize the tool result: {0}")]

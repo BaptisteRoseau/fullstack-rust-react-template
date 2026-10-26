@@ -40,10 +40,14 @@ pub(crate) async fn create_api_key(
 ) -> Result<(StatusCode, Json<CreateApiKeyResponse>), ApiError> {
     let permissions = parse_permissions(&body.permissions);
     let mut db = db.write().await;
-    let (raw_key, api_key) =
-        app_core::api_key::create_api_key(&mut *db, user.id, body.name, permissions)
-            .await
-            .map_err(|e| ApiError::Unexpected(anyhow::anyhow!("{e}")))?;
+    let (raw_key, api_key) = app_core::api_key::create_api_key(
+        &mut *db,
+        &user.caller(),
+        body.name,
+        permissions,
+    )
+    .await
+    .map_err(|e| ApiError::Unexpected(anyhow::anyhow!("{e}")))?;
 
     Ok((
         StatusCode::CREATED,
@@ -67,7 +71,7 @@ pub(crate) async fn list_api_keys(
 ) -> Result<Json<Vec<GetApiKeyResponse>>, ApiError> {
     let api_keys = {
         let db = db.read().await;
-        app_core::api_key::list_api_keys(&*db, user.id).await?
+        app_core::api_key::list_api_keys(&*db, &user.caller()).await?
     };
 
     Ok(Json(
@@ -92,19 +96,10 @@ pub(crate) async fn get_api_key(
     State(db): State<Arc<RwLock<dyn database::Database>>>,
     Path(id): Path<Uuid>,
 ) -> Result<Json<GetApiKeyResponse>, ApiError> {
-    let db = db.read().await;
-    let db_key = db
-        .read_api_key_by_id(id)
-        .await
-        .map_err(|_| ApiError::NotFound(id.to_string()))?;
-
-    if db_key.owner != user.id {
-        return Err(ApiError::NotFound(id.to_string()));
-    }
-
-    let api_key = app_core::models::api_key_from_db(db_key).map_err(|e| {
-        ApiError::Unexpected(anyhow::anyhow!("failed to deserialize permissions: {e}"))
-    })?;
+    let api_key = {
+        let db = db.read().await;
+        app_core::api_key::get_api_key(&*db, &user.caller(), id).await?
+    };
 
     Ok(Json(GetApiKeyResponse::from(api_key)))
 }
@@ -126,23 +121,10 @@ pub(crate) async fn delete_api_key(
     State(db): State<Arc<RwLock<dyn database::Database>>>,
     Path(id): Path<Uuid>,
 ) -> Result<StatusCode, ApiError> {
-    let db_key = {
-        let db_read = db.read().await;
-        db_read
-            .read_api_key_by_id(id)
-            .await
-            .map_err(|_| ApiError::NotFound(id.to_string()))?
-    };
-
-    if db_key.owner != user.id {
-        return Err(ApiError::NotFound(id.to_string()));
+    {
+        let mut db = db.write().await;
+        app_core::api_key::delete_api_key(&mut *db, &user.caller(), id).await?;
     }
-
-    db.write()
-        .await
-        .delete_api_key(id)
-        .await
-        .map_err(|e| ApiError::Unexpected(anyhow::anyhow!("{e}")))?;
 
     Ok(StatusCode::NO_CONTENT)
 }

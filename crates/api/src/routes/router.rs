@@ -22,7 +22,13 @@ use crate::{
     },
     models::UserToken,
 };
-use axum::{Router, middleware::from_extractor_with_state, routing::get};
+use axum::{
+    Router,
+    extract::Request,
+    middleware::{Next, from_fn_with_state},
+    response::Response,
+    routing::get,
+};
 use axum_prometheus::metrics_exporter_prometheus::PrometheusHandle;
 use config::Config;
 use mcp::{McpState, mcp_routes};
@@ -82,8 +88,8 @@ pub fn public_routes(config: &Config, state: AppState) -> Router {
 ///
 /// Authentication is applied here rather than inside the tools: the endpoint is wrapped
 /// in the same [`UserToken`] check the authenticated API endpoints use, so an anonymous
-/// caller is turned away before any tool runs. That is what lets `mcp` hold no notion of
-/// identity, and it means a tool never has to re-check one.
+/// caller is turned away before any tool runs. The caller is then stored in the request
+/// extensions, where a tool reads it to hand to `app_core`, which runs the access checks.
 fn with_mcp(
     routes: Router<AppState>,
     config: &Config,
@@ -96,10 +102,14 @@ fn with_mcp(
     let mcp_state = McpState::new(Arc::clone(&state.database));
     routes.merge(
         mcp_routes(mcp_config, mcp_state)
-            .layer(from_extractor_with_state::<UserToken, AppState>(
-                state.clone(),
-            )),
+            .layer(from_fn_with_state(state.clone(), insert_caller)),
     )
+}
+
+/// Refuses anonymous requests and stores the caller for the MCP tools.
+async fn insert_caller(user: UserToken, mut request: Request, next: Next) -> Response {
+    request.extensions_mut().insert(user.caller());
+    next.run(request).await
 }
 
 /// Swagger UI and OpenAPI routes layer.

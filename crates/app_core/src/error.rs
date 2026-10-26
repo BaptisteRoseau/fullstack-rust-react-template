@@ -8,6 +8,16 @@ pub enum CoreError {
     Serialization(#[from] serde_json::Error),
 }
 
+impl CoreError {
+    /// Keeps a missing row a `NotFound`, any other database failure stays a `DatabaseError`.
+    pub(crate) fn from_database(error: database::error::DatabaseError) -> Self {
+        match error {
+            database::error::DatabaseError::NotFound(missing) => Self::NotFound(missing),
+            other => Self::DatabaseError(Box::new(other)),
+        }
+    }
+}
+
 impl From<Box<database::error::DatabaseError>> for Box<CoreError> {
     fn from(value: Box<database::error::DatabaseError>) -> Self {
         Box::new(CoreError::DatabaseError(value))

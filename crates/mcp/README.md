@@ -35,6 +35,7 @@ mcp/
 │   ├── state.rs     # McpState: what the tools may reach
 │   ├── server.rs    # McpServer, the handshake info, and the list of tool routers
 │   ├── routes.rs    # mcp_routes: the one public entry point
+│   ├── caller.rs    # reads the caller api stored in the request
 │   ├── tools/       # the tools, one directory per group — see tools/README.md
 │   └── error/       # McpError and its conversion to a tool result
 └── Cargo.toml
@@ -65,19 +66,23 @@ clients.
 | Tool | What it does |
 | --- | --- |
 | `ping` | Answers `pong`. The counterpart of `GET /api/ping`. |
-| `get_user` | Reads one user's profile by UUID, through `app_core::user::read_profile`. |
+| `get_user` | Reads the caller's own profile by UUID, through `app_core::user::read_profile`. |
 
 ## Authentication
 
-The tools know nothing about identity. `api` wraps the whole endpoint in the same `UserToken`
-check as its other authenticated endpoints ([routes/router.rs](../api/src/routes/router.rs)).
-An anonymous caller is refused before any tool runs.
+`api` wraps the whole endpoint in the same `UserToken` check as its other authenticated
+endpoints ([routes/router.rs](../api/src/routes/router.rs)). An anonymous caller is refused
+before any tool runs.
+
+`api` then stores the caller, a `rbac::UserPermissions`, in the HTTP request extensions. `rmcp`
+hands those to a tool as `Extension<Parts>`, and [`caller`](src/caller.rs) reads it back. A tool
+passes it to `app_core`, which runs the access checks; a tool never checks access itself.
 
 A client logs in like any other API caller: an API key in the `Authorization` header, or the
 `access_token` cookie set by the auth BFF.
 
-**Not yet done:** every logged-in caller can use every tool. Per-tool permission checks would go
-through [rbac](../rbac), which is not wired in yet.
+**Not yet done:** every logged-in caller can list and call every tool; only the data a tool
+reaches is checked.
 
 `--mcp-allowed-hosts` is the `Host` header allow list. The MCP specification requires it on HTTP
 transports to block DNS-rebinding attacks.
@@ -125,6 +130,7 @@ claude mcp add --transport http backend http://localhost:8080/mcp \
 - Never import `api` from this crate.
 - Only `McpState` and `mcp_routes` are public; every other item stays crate-private.
 - No business logic in a tool: it calls `app_core` and serialises the result.
+- Never check access in a tool. Pass the caller to `app_core`, which refuses.
 - Every tool group must be added to the `#[tool_handler]` sum in `server.rs`.
 - No stdio transport.
 - Keep sessions off, so responses stay plain JSON and survive the API's `TimeoutLayer`.

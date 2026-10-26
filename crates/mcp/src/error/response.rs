@@ -1,3 +1,4 @@
+use app_core::error::CoreError;
 use rmcp::ErrorData;
 use rmcp::model::{CallToolResult, ContentBlock};
 use serde::Serialize;
@@ -34,15 +35,23 @@ pub(crate) fn into_tool_result(
 
     let trace = format!("{error:?}");
     let message = match &error {
-        McpError::NotFound(what) => format!("Not found: {what}"),
-        McpError::CoreError(_) | McpError::SerializationError(_) => {
+        McpError::NotFound(what) | McpError::CoreError(CoreError::NotFound(what)) => {
+            format!("Not found: {what}")
+        }
+        McpError::MissingCaller
+        | McpError::CoreError(_)
+        | McpError::SerializationError(_) => {
             "The backend could not serve this call.".to_string()
         }
     };
 
     match error {
-        McpError::NotFound(_) => warn!(error = %trace, "MCP tool error"),
-        McpError::CoreError(_) | McpError::SerializationError(_) => {
+        McpError::NotFound(_) | McpError::CoreError(CoreError::NotFound(_)) => {
+            warn!(error = %trace, "MCP tool error")
+        }
+        McpError::MissingCaller
+        | McpError::CoreError(_)
+        | McpError::SerializationError(_) => {
             error!(error = %trace, "MCP tool error")
         }
     }

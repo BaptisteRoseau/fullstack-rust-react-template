@@ -2671,6 +2671,7 @@ dependencies = [
  "config",
  "database",
  "http-body-util",
+ "rbac",
  "rmcp",
  "schemars 1.2.2",
  "serde",

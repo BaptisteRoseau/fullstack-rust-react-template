@@ -1,7 +1,7 @@
 //! Handlers for this endpoint group.
 //!
 //! A handler extracts input, calls `app_core`, and serialises the result.
-//! It contains no business logic.
+//! It contains no business logic and no access check: it passes the caller to `app_core`.
 
 use std::sync::Arc;
 
@@ -33,16 +33,16 @@ use crate::{
     ),
 )]
 pub(crate) async fn get_widget(
-    _user: UserToken,
+    user: UserToken,
     State(db): State<Arc<RwLock<dyn database::Database>>>,
     Path(id): Path<Uuid>,
 ) -> Result<Json<GetWidgetResponse>, ApiError> {
-    // Keep the lock window as small as possible.
+    // Keep the lock window as small as possible. `app_core` runs the access check and
+    // answers `NotFound` on refusal, which `?` turns into a 404.
     let widget = {
         let db = db.read().await;
-        app_core::widget::get_widget(&*db, id).await
-    }
-    .map_err(|_| ApiError::NotFound(id.to_string()))?;
+        app_core::widget::get_widget(&*db, &user.caller(), id).await?
+    };
 
     Ok(Json(GetWidgetResponse::from(widget)))
 }
@@ -59,13 +59,13 @@ pub(crate) async fn get_widget(
     ),
 )]
 pub(crate) async fn create_widget(
-    _user: UserToken,
+    user: UserToken,
     State(db): State<Arc<RwLock<dyn database::Database>>>,
     Json(body): Json<PostWidgetRequest>,
 ) -> Result<(StatusCode, Json<GetWidgetResponse>), ApiError> {
     let widget = {
         let mut db = db.write().await;
-        app_core::widget::create_widget(&mut *db, body.name).await
+        app_core::widget::create_widget(&mut *db, &user.caller(), body.name).await
     }
     .map_err(|error| ApiError::Unexpected(anyhow::anyhow!("{error}")))?;
 

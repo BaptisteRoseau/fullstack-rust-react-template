@@ -52,3 +52,19 @@ fn test_structured_fills_both_representations() {
         response.content
     );
 }
+
+#[test]
+fn test_core_not_found_is_reported_as_not_found() {
+    let uuid = "0198f0b4-0000-7000-8000-000000000000";
+
+    let response = into_tool_result(Err(McpError::CoreError(CoreError::NotFound(
+        uuid.to_string(),
+    ))))
+    .expect("a tool-level failure stays a tool result");
+
+    let rendered = format!("{:?}", response.content);
+    assert!(
+        rendered.contains(uuid),
+        "a refused or missing object should read as not found, got {rendered}"
+    );
+}

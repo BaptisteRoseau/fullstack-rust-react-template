@@ -4,6 +4,7 @@ use std::collections::HashSet;
 use uuid::Uuid;
 
 /// Defines the scope of what a user has access to.
+#[derive(Debug, Clone)]
 pub struct UserPermissions {
     pub id: Uuid,
     pub group_ids: HashSet<Uuid>,
