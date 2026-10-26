@@ -57,8 +57,8 @@ glance. The list is not closed: add a prefix when a new area appears, and use it
 After the prefix, name the task, not the tool: `backend-database-migration`, not `backend-sqlx`.
 Avoid vague words (`helper`, `utils`, `misc`) and the reserved words `anthropic` and `claude`.
 
-`api-*` skills other than `api-skill-generator` are generated: never edit them by hand, regenerate
-them with Skill(api-skill-generator).
+`api-*` skills are generated: never edit them by hand, regenerate them with
+Skill(ai-api-skill-generator).
 
 ## 3. Frontmatter
 
@@ -70,7 +70,7 @@ description: Use when adding, renaming or removing a configuration setting of th
 ```
 
 Only `name` and `description` are expected. Add `allowed-tools` only when the skill must run with a
-restricted tool set (as `api-skill-generator` does), and `compatibility` only for a hard
+restricted tool set (as `ai-api-skill-generator` does), and `compatibility` only for a hard
 environment requirement.
 
 ### Description
@@ -129,7 +129,7 @@ Model it on the existing skills:
 | Changes several files in a fixed order | [backend-config-entry](../backend-config-entry/SKILL.md) |
 | Scaffolds with a generator, then checks with a script | [frontend-page](../frontend-page/SKILL.md) |
 | Ships copyable boilerplate in `assets/` | [backend-add-api-endpoint](../backend-add-api-endpoint/SKILL.md) |
-| Wraps an external CLI with a prerequisite | [api-skill-generator](../api-skill-generator/SKILL.md) |
+| Wraps an external CLI with a prerequisite | [ai-api-skill-generator](../ai-api-skill-generator/SKILL.md) |
 
 ### Title and opening
 

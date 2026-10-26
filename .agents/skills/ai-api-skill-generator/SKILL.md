@@ -1,5 +1,5 @@
 ---
-name: api-skill-generator
+name: ai-api-skill-generator
 description: Use when a product exposes a REST API and no skill for it exists yet, or when navigating an OpenAPI manifest.
 allowed-tools:
     - Read
