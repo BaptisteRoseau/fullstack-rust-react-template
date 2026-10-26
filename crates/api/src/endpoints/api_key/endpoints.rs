@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use authenticator::Authenticator;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -108,9 +109,10 @@ pub(crate) async fn get_api_key(
 pub(crate) async fn delete_api_key(
     user: UserToken,
     State(db): State<Arc<RwLock<dyn database::Database>>>,
+    State(authenticator): State<Arc<RwLock<dyn Authenticator>>>,
     Path(id): Path<Uuid>,
 ) -> Result<StatusCode, ApiError> {
-    app_core::api_key::delete_api_key(&db, user.caller(), id).await?;
+    app_core::api_key::delete_api_key(&db, &authenticator, user.caller(), id).await?;
 
     Ok(StatusCode::NO_CONTENT)
 }

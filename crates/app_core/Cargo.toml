@@ -21,3 +21,6 @@ authenticator = { version = "0.1.0", path = "../authenticator" }
 [dev-dependencies]
 database = { path = "../database", features = ["test-utils"] }
 async-trait = "0"
+authenticator = { path = "../authenticator", features = ["keycloak"] }
+cache = { path = "../cache", features = ["hash_map"] }
+config = { path = "../config", features = ["test-utils"] }

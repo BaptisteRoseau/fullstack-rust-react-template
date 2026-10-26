@@ -152,6 +152,7 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "authenticator",
+ "cache",
  "config",
  "database",
  "logging",

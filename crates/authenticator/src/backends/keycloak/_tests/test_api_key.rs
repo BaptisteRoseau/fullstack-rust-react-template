@@ -181,3 +181,33 @@ async fn validate_api_key_fails_when_unknown() {
         "unknown api key should fail authentication, got={result:?}"
     );
 }
+
+#[tokio::test]
+async fn forget_drops_only_the_given_entry() {
+    let cache: Arc<RwLock<dyn Cache>> = Arc::new(RwLock::new(HashMapCache::default()));
+    let database: Arc<RwLock<dyn Database>> =
+        Arc::new(RwLock::new(MockDatabase::default()));
+    let validator = make_validator(cache, database);
+    let forgotten = hex_sha256("forgotten-key");
+    let kept = hex_sha256("kept-key");
+    let caller = Caller {
+        id: Uuid::new_v4(),
+        realm: "api_key".to_string(),
+    };
+    validator.set_cache(&caller, &forgotten).await;
+    validator.set_cache(&caller, &kept).await;
+
+    validator
+        .forget(&forgotten)
+        .await
+        .expect("forgetting a cached key should succeed");
+
+    assert!(
+        validator.try_get_cache(&forgotten).await.is_none(),
+        "the forgotten key {forgotten} is still cached"
+    );
+    assert!(
+        validator.try_get_cache(&kept).await.is_some(),
+        "forgetting {forgotten} also dropped the unrelated key {kept}"
+    );
+}

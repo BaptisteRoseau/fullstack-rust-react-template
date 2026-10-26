@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
 use app_core::error::CoreError;
-use authenticator::Caller;
+use authenticator::backends::Keycloak;
+use authenticator::{Authenticator, Caller};
+use cache::Cache;
+use cache::backends::hash_map::HashMapCache;
 use database::Database;
 use database::testing::MockDatabase;
 use tokio::sync::RwLock;
@@ -13,6 +16,22 @@ fn databases() -> (Arc<RwLock<MockDatabase>>, Arc<RwLock<dyn Database>>) {
     let db: Arc<RwLock<dyn Database>> = mock.clone();
     (mock, db)
 }
+
+/// The real Keycloak backend over the same database, built offline: only API keys are used.
+async fn authenticator(
+    db: &Arc<RwLock<dyn Database>>,
+) -> (Arc<RwLock<dyn Cache>>, Arc<RwLock<dyn Authenticator>>) {
+    let cache: Arc<RwLock<dyn Cache>> = Arc::new(RwLock::new(HashMapCache::default()));
+    let mut config = config::testing::test_config();
+    config.authenticator.issuer_url = UNREACHABLE_ISSUER.to_string();
+    let keycloak = Keycloak::try_new(&config, Arc::clone(&cache), Arc::clone(db))
+        .await
+        .expect("building the keycloak authenticator");
+    (cache, Arc::new(RwLock::new(keycloak)))
+}
+
+/// Port 9 is the discard port: nothing listens there, so the JWKS fetch fails at once.
+const UNREACHABLE_ISSUER: &str = "http://127.0.0.1:9/realms/test";
 
 fn caller(id: Uuid) -> Caller {
     Caller {
@@ -145,7 +164,11 @@ async fn test_delete_api_key_refuses_other_users() {
             .await
             .expect("creating a key");
 
-    let result = app_core::api_key::delete_api_key(&db, &stranger, created.id).await;
+    let (_, authenticator) = authenticator(&db).await;
+
+    let result =
+        app_core::api_key::delete_api_key(&db, &authenticator, &stranger, created.id)
+            .await;
 
     assert!(
         matches!(result, Err(CoreError::NotFound(_))),
@@ -167,7 +190,10 @@ async fn test_delete_api_key_allows_the_owner() {
             .await
             .expect("creating a key");
 
-    let result = app_core::api_key::delete_api_key(&db, &owner, created.id).await;
+    let (_, authenticator) = authenticator(&db).await;
+
+    let result =
+        app_core::api_key::delete_api_key(&db, &authenticator, &owner, created.id).await;
 
     assert!(
         result.is_ok(),
@@ -177,6 +203,67 @@ async fn test_delete_api_key_allows_the_owner() {
         !mock.read().await.api_keys_by_id.contains_key(&created.id),
         "the key {} is still stored",
         created.id
+    );
+}
+
+#[tokio::test]
+async fn test_deleted_api_key_is_refused_at_once() {
+    let (_, db) = databases();
+    let (_, authenticator) = authenticator(&db).await;
+    let owner = caller(Uuid::new_v4());
+    let (raw_key, created) =
+        app_core::api_key::create_api_key(&db, &owner, "key".to_string(), vec![])
+            .await
+            .expect("creating a key");
+    authenticator
+        .read()
+        .await
+        .validate(&raw_key)
+        .await
+        .expect("a fresh key validates, and its validation is now cached");
+
+    app_core::api_key::delete_api_key(&db, &authenticator, &owner, created.id)
+        .await
+        .expect("the owner deletes their key");
+
+    let result = authenticator.read().await.validate(&raw_key).await;
+    assert!(
+        result.is_err(),
+        "a deleted key must be refused without waiting for the cache, got {result:?}"
+    );
+}
+
+#[tokio::test]
+async fn test_deleting_an_api_key_keeps_other_cache_entries() {
+    let (mock, db) = databases();
+    let (cache, authenticator) = authenticator(&db).await;
+    let owner = caller(Uuid::new_v4());
+    let (_, deleted) =
+        app_core::api_key::create_api_key(&db, &owner, "deleted".to_string(), vec![])
+            .await
+            .expect("creating a key");
+    let (kept_raw_key, kept) =
+        app_core::api_key::create_api_key(&db, &owner, "kept".to_string(), vec![])
+            .await
+            .expect("creating a key");
+    authenticator
+        .read()
+        .await
+        .validate(&kept_raw_key)
+        .await
+        .expect("a fresh key validates, and its validation is now cached");
+    let kept_hash = mock.read().await.api_keys_by_id[&kept.id].hash.clone();
+
+    app_core::api_key::delete_api_key(&db, &authenticator, &owner, deleted.id)
+        .await
+        .expect("the owner deletes their key");
+
+    let cached = cache.read().await.get(&kept_hash).await;
+    assert!(
+        matches!(cached, Ok(Some(_))),
+        "deleting {} dropped the cache entry of {}, got {cached:?}",
+        deleted.id,
+        kept.id
     );
 }
 

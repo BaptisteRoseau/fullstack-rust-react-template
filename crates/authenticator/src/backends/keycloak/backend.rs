@@ -87,4 +87,8 @@ impl Authenticator for Keycloak {
     async fn logout(&self, refresh_token: &str) -> Result<(), Box<AuthenticatorError>> {
         self.oidc.logout(refresh_token).await
     }
+
+    async fn forget_api_key(&self, hash: &str) -> Result<(), Box<AuthenticatorError>> {
+        self.api_keys.forget(hash).await
+    }
 }

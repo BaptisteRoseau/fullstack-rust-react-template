@@ -25,6 +25,7 @@ as `Arc<RwLock<dyn Authenticator>>`, like every other service the API depends on
 | `refresh_tokens(refresh_token)` | Exchange a refresh token for a fresh token set. |
 | `userinfo(access_token)` | Fetch the OIDC userinfo claims for `/auth/me`, typed as `UserInfo`. |
 | `logout(refresh_token)` | Revoke the session at Keycloak's end-session endpoint. |
+| `forget_api_key(hash)` | Delete the cache entry of one API key, keyed by its stored sha256 hash. `app_core::api_key::delete_api_key` calls it after deleting the row, so a deleted key stops validating at once instead of after the 300s cache lifetime. |
 
 Notes:
 

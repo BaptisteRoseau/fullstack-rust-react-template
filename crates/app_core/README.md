@@ -20,6 +20,9 @@ One module per domain concept, each a set of free functions rather than a struct
 - [`api_key`](src/api_key.rs) — `list_api_keys`, `create_api_key`, `get_api_key`,
   `delete_api_key`. A raw key is generated, hashed with SHA-256, and only the hash reaches
   [database](../database); `create_api_key` retries key generation on a hash collision.
+  `delete_api_key` also asks the `Authenticator` to forget the key's cached validation,
+  after the row is gone. A validation that read the row just before the delete can still
+  cache it afterwards, for at most 300s.
 - [`error::CoreError`](src/error.rs) — the crate-wide error enum. See the error convention
   in [crates/README.md](../README.md).
 - [`models`](src/models.rs) — conversions from [database](../database) row structs to the

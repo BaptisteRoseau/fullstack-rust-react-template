@@ -24,6 +24,7 @@ so they live behind one trait:
 | `refresh_tokens` | Trade a refresh token for a fresh pair. |
 | `userinfo` | Fetch the identity claims backing the current-user endpoint. |
 | `logout` | Revoke the provider-side session. |
+| `forget_api_key` | Drop the cached validation of one API key, given its stored hash. |
 
 Shared types live in `models.rs`: `Caller`, `LoginScreen`, `AuthTokens`, `AuthSession`
 and `UserInfo`. Errors are `AuthenticatorError` in `error.rs`.
@@ -43,7 +44,7 @@ as one file:
 | `backend.rs` | The `Keycloak` struct, its constructor, and the trait impl delegating to the three modules below. |
 | `endpoints.rs` | `Endpoints::from_issuer` — the single place Keycloak's URL shape is encoded. |
 | `jwt.rs` | RS256 validation against the realm's JWKS, plus the `iss` → realm extraction. |
-| `api_key.rs` | The sha256 digest lookup, memoised in the shared cache for 300s. |
+| `api_key.rs` | The sha256 digest lookup, memoised in the shared cache for 300s. `forget` deletes that one entry, so a deleted key is refused at once. |
 | `oidc.rs` | The Authorization Code + PKCE flow, on top of the `oauth2` crate. |
 
 Notes worth knowing before changing anything here:

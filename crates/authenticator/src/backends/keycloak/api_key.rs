@@ -52,6 +52,19 @@ impl ApiKeyValidator {
         Ok(caller)
     }
 
+    /// Removes the cache entry of one key, leaving every other entry in place.
+    pub(super) async fn forget(
+        &self,
+        hashed: &str,
+    ) -> Result<(), Box<AuthenticatorError>> {
+        self.cache
+            .read()
+            .await
+            .delete(hashed)
+            .await
+            .map_err(|error| Box::new(AuthenticatorError::from(error)))
+    }
+
     /// Gets the token from local cache
     async fn try_get_cache(&self, hashed: &str) -> Option<Caller> {
         if let Some(value) = self.cache.read().await.get_nofail(hashed).await

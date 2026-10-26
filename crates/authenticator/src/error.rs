@@ -18,6 +18,8 @@ pub enum AuthenticatorError {
     OidcRejected,
     #[error("Invalid or expired login state")]
     InvalidState,
+    #[error("Cache error: {0}")]
+    CacheError(#[from] cache::error::CacheError),
     #[error("{0}")]
     Message(String),
 }

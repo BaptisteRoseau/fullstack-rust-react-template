@@ -41,4 +41,8 @@ pub trait Authenticator: Send + Sync {
 
     /// Revokes the provider-side session.
     async fn logout(&self, refresh_token: &str) -> Result<(), Box<AuthenticatorError>>;
+
+    /// Drops the cached validation of one API key, given its stored hash, so a deleted
+    /// key is refused at once instead of when the cache entry expires.
+    async fn forget_api_key(&self, hash: &str) -> Result<(), Box<AuthenticatorError>>;
 }

@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::access::ensure_owner;
 use crate::error::CoreError;
 use crate::models::api_key_from_db;
-use authenticator::Caller;
+use authenticator::{Authenticator, Caller};
 use database::Database;
 
 /// Lists the keys owned by the caller, newest first.
@@ -61,9 +61,11 @@ pub async fn get_api_key(
     api_key_from_db(db_key)
 }
 
-/// Deletes one key. A key the caller does not own answers `NotFound`.
+/// Deletes one key and drops its cached validation, so it is refused at once.
+/// A key the caller does not own answers `NotFound`.
 pub async fn delete_api_key(
     db: &Arc<RwLock<dyn Database>>,
+    authenticator: &Arc<RwLock<dyn Authenticator>>,
     caller: &Caller,
     id: Uuid,
 ) -> Result<(), CoreError> {
@@ -75,6 +77,11 @@ pub async fn delete_api_key(
         .map_err(|error| CoreError::from_database(*error))?;
     ensure_owner(caller, db_key.owner, id)?;
     db.write().await.delete_api_key(id).await?;
+    authenticator
+        .read()
+        .await
+        .forget_api_key(&db_key.hash)
+        .await?;
     Ok(())
 }
 

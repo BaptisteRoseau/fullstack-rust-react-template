@@ -69,6 +69,17 @@ pub mod suite {
     }
 
     #[test_trait]
+    async fn forgets_an_uncached_api_key(authenticator: &impl Authenticator) {
+        let hash = Uuid::new_v4().simple().to_string();
+
+        let result = authenticator.forget_api_key(&hash).await;
+        assert!(
+            result.is_ok(),
+            "forgetting a key that was never cached should succeed, hash={hash} got={result:?}"
+        );
+    }
+
+    #[test_trait]
     async fn rejects_unknown_api_key(authenticator: &impl Authenticator) {
         // No dots => treated as an API key; the empty database reports it missing.
         let result = authenticator.validate("plain-api-key-without-dots").await;

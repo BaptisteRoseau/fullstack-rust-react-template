@@ -6,6 +6,8 @@ pub enum CoreError {
     NotFound(String),
     #[error("Serialization error: {0}")]
     Serialization(#[from] serde_json::Error),
+    #[error(transparent)]
+    AuthenticatorError(#[from] Box<authenticator::error::AuthenticatorError>),
 }
 
 impl CoreError {
