@@ -1,11 +1,20 @@
 # GitLab CI/CD improvement plan
 
 Step 3 of the GitLab CI/CD work: fixes and optimizations of the pipeline in
-[infrastructure/cicd/gitlab](../infrastructure/cicd/gitlab/README.md). Steps 1 (list the checks)
-and 2 (write the manifests) are done. Items marked **Done** are implemented; nothing else is.
+[infrastructure/cicd/gitlab](../infrastructure/cicd/gitlab/README.md). Every item below is still
+to do; an item is removed from this file once it is implemented.
 
 Items are in the order they should be done: later ones build on earlier ones. Each one says what
 changes, why, and how to know it is done.
+
+## Current state
+
+- **Written, never run.** The pipeline is committed and its README describes how it works. It
+  passes the schema check of `scripts/test_lint_cicd.sh` and resolves with `gitlab-ci-local`,
+  but has not run on a GitLab instance yet.
+- **Known red jobs.** Item 0 lists the jobs expected to fail on the first run.
+- **Next.** Item 3, caching. Item 0 needs a GitLab runner to confirm, and item 1 can follow
+  item 3, since caching does not depend on the CI images.
 
 ## 0. Make the existing jobs pass
 
@@ -78,21 +87,7 @@ Docker-in-Docker starts empty, so every image build starts without a layer cache
 
 Done when rebuilding an unchanged image takes under a minute.
 
-## 5. Cancel outdated pipelines and stop early
-
-**Done.**
-
-- Keep `interruptible: true` on every job through `default:`. GitLab's default
-  `auto_cancel:on_new_commit: conservative` then cancels a branch's older pipelines whole. A
-  single started job with `interruptible: false`, a job's own default, would stop that.
-- Make the expensive jobs wait on the cheap lints of their own code with `needs`:
-  `frontend-e2e-tests` and `app-frontend-image` on `frontend-lint` and `frontend-types`,
-  `app-backend-image` on `rust-format` and `rust-clippy`. A failed cheap lint then no longer
-  pays for them. Keep `needs: []` everywhere else, so feedback stays fast.
-
-Done when pushing twice in a row cancels the first pipeline.
-
-## 6. Show results in GitLab
+## 5. Show results in GitLab
 
 - **Tests.** Switch Rust tests to `cargo nextest` and publish its JUnit output as
   `artifacts: reports: junit`. Keep `cargo test --doc`, because nextest does not run doctests.
@@ -105,7 +100,7 @@ Done when pushing twice in a row cancels the first pipeline.
 
 Done when a failing test shows in the pipeline's Tests tab.
 
-## 7. Reliability
+## 6. Reliability
 
 - **Retry infrastructure failures only.** In `default:`, set `retry: max: 2` with
   `when: [runner_system_failure, stuck_or_timeout_failure, scheduler_failure, api_failure]`.
@@ -115,7 +110,7 @@ Done when a failing test shows in the pipeline's Tests tab.
 - **Timeouts.** Give each job a `timeout`, so a hung e2e test does not hold a runner for the
   default hour.
 
-## 8. Supply chain
+## 7. Supply chain
 
 - **Renovate.** The manifests pin about 30 versions. Run Renovate on the GitLab instance, with
   custom regex managers for the `*_VERSION` variables and the image tags, so they are bumped
@@ -123,15 +118,11 @@ Done when a failing test shows in the pipeline's Tests tab.
 - **Digests.** Pin images by digest as well as by tag.
 - **No `curl | bash`.** Item 1 removes the cargo-binstall and Bun installers from the jobs.
 
-## 9. Structure
+## 8. Structure
 
-- **Inputs instead of variables. Done.** `.lint-changed-files` read `LIST_CHANGED_FILES_ARGS`
-  and `LINT_COMMAND`, and a misspelled variable failed silently. It is now
-  `templates/inputs/lint_changed_files.gitlab-ci.yml`, which takes `spec:inputs` (GitLab 17+,
-  free tier included) and rejects a missing input.
 - **No parent-child pipelines.** At about 50 jobs they add more complexity than they save.
 
-## 10. Later: release and deploy
+## 9. Later: release and deploy
 
 On tags: images tagged with the version, an SBOM from `syft`, and a release created with the
 `release:` keyword. A deploy job then uses `environment:` and `resource_group:`, so two deploys

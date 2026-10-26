@@ -7,6 +7,8 @@
 - [ ] Better way to store documentation & plans
 - [ ] Reviewer / Implementer agents
 
+- [ ] Make openapi2skill write markdownlint-passing files
+
 ## Infra
 
 - [ ] Set-up and configure Grafana Alloy
