@@ -4,13 +4,16 @@
 - [ ] Include Oxaria to the test scripts ?
 - [ ] Stop running EVERY test script on git push
 
+- [ ] Better way to store documentation & plans
+- [ ] Reviewer / Implementer agents
+
 ## Infra
 
 - [ ] Set-up and configure Grafana Alloy
-    - [X] Scrape system metrics
-    - [X] Scrape system logs
-    - [X] Scrape Docker metrics
-    - [X] Scrape Docker logs
+    - [x] Scrape system metrics
+    - [x] Scrape system logs
+    - [x] Scrape Docker metrics
+    - [x] Scrape Docker logs
     - [ ] Scrape Kubernetes metrics
     - [ ] Scrape Kubernetes logs
     - [ ] Find other interresting metrics to be scrapped
@@ -31,8 +34,8 @@
 - [ ] Remove CLAUDE.md symlinks
 
 - [ ] Skills
-    - [X] Write a skill
-    - [X] Write a README
+    - [x] Write a skill
+    - [x] Write a README
     - [ ] Simplifyier
     - [ ] Adding a new tool -> look for linters, formatters, tests, config etc..
     - [ ] Infra skilsl ?
@@ -56,9 +59,9 @@
 - [ ] See how to properly handle reactivity on the frontend (use container classes ? Add another optionnal .scss file and include it ? Use variables from the theme constants ?)
 
 - [ ] Markdownlint + Markdownlink script
-- [X] Nix flake (for development)
-    - [X] Rust
-    - [X] Bun
+- [x] Nix flake (for development)
+    - [x] Rust
+    - [x] Bun
     - [ ] All linters
     - [ ] Docker
     - [ ] K3D
@@ -68,7 +71,7 @@
 - [ ] Apply scripts/ensure_created_at_and_updated_at.sql at the end of migrations
 - [ ] Make/verify DB migrations transactions (if one breaks, nothing is commited)
 
-- [X] Standardize skills prefix (doc/git/backend/frontend/infra)
+- [x] Standardize skills prefix (doc/git/backend/frontend/infra)
 
 ## Error management
 
@@ -96,8 +99,8 @@
 - [ ] Add the file name to the upload/download endpoint using the file metadata (currently downloading a blob) (See how it's done in the file storage PoC)
 - [ ] Standardize API tests
 
-- [X] Nix & k3s infra
-- [X] oxaria integration
+- [x] Nix & k3s infra
+- [x] oxaria integration
 
 - [ ] Cache uuid <-> username in Redis ?
 - [ ] use username as slug ?
@@ -117,7 +120,7 @@
 6. [x] Create a Database trait
 7. [ ] Implement CRUD handler in Database trait
 8. [x] Make a script to generate SQLx static file for offline sqlx compilation
-9. [X] Change license to non-commercial
+9. [x] Change license to non-commercial
 
 ### Database Layer
 
@@ -130,11 +133,11 @@
 - [x] Set up a database with two users: read_write and read_only
 - [x] Create the first sqlx migration with a table containing the users
     - [x] Move the created_at/updated_at function to the first migration
-- [X] Generate backend Rust database models for the User
-- [X] CRUD macro (see something like <https://docs.rs/sqlx-crud/latest/sqlx_crud/traits/trait.Schema.html>)
-- [X] Use a script to generate the database models: <https://github.com/jayy-lmao/sql-gen?tab=readme-ov-file>
+- [x] Generate backend Rust database models for the User
+- [x] CRUD macro (see something like <https://docs.rs/sqlx-crud/latest/sqlx_crud/traits/trait.Schema.html>)
+- [x] Use a script to generate the database models: <https://github.com/jayy-lmao/sql-gen?tab=readme-ov-file>
 - The two previous milestones should allow you to make the database crate basic CRUD functionalities across all tables trivial, so that you can focus on the more interesting ones :D
-- [X] Split database into multiple traits then use T1 + T2 + T3 .. to avoid having a giant one.
+- [x] Split database into multiple traits then use T1 + T2 + T3 .. to avoid having a giant one.
 - [ ] Atomic transactions support (transactions)
 
 ### API Layer
@@ -146,11 +149,11 @@
 - [x] Add tracing middleware (set sensitive headers before)
 - [x] Add timeout middleware
 - [x] Add Swagger UI & openapi.json
-    - [X] Add categories in the Swagger UI (Auth, Storage...)
-    - [X] Add auth support and auth documentation in the swagger UI
+    - [x] Add categories in the Swagger UI (Auth, Storage...)
+    - [x] Add auth support and auth documentation in the swagger UI
     - [ ] Fix the OIDC documentation (currently not usable)
-- [X] Add rate limiter middleware
-- [X] Aggregate middlewares cleanly
+- [x] Add rate limiter middleware
+- [x] Aggregate middlewares cleanly
 - [ ] Convert `app_core` models to API models and vice-versa
 - [x] Add error handling middleware & global error conversion
 - [x] Trace errors & normalize error response
@@ -158,12 +161,12 @@
 - [ ] Add an MCP crate (similar to the API crate), merge it in the router
 - [ ] Better health checks (see kube probes (startup/ready/alive))
 - [ ] Pagination standardization
-- [ ] API routes standards (GET is always for multiple objects with pagination, POST/PUT/DELETE are for 1 item only with IDs or slugs, when to use ID vs when to use slug,  etc..)
+- [ ] API routes standards (GET is always for multiple objects with pagination, POST/PUT/DELETE are for 1 item only with IDs or slugs, when to use ID vs when to use slug, etc..)
 
 ### Testing, CI/CD, Docker and scripts
 
 - [ ] Fix all docker images creation
-- [X] Fix all docker-compose files, services & interaction
+- [x] Fix all docker-compose files, services & interaction
 - [ ] Fix scripts for test execution, audit & licenses
 - [ ] Add formatting checker script
 - [x] Add sqlx JSON schema generation from migration scripts and blank container
@@ -190,17 +193,17 @@
 
 ### Frontend
 
-- [X] Build React mainstream architecture (component/pages/controllers)
+- [x] Build React mainstream architecture (component/pages/controllers)
 
 ### Core and authentication - API
 
 - [x] Select authentication service (Keycloak)
-- [X] Use JWT & auto-rotate
+- [x] Use JWT & auto-rotate
 
 ### User Management & Information Update (back & front)
 
-- [X] User Dashboard
-- [X] API to update user information (/me, not /user/id)
+- [x] User Dashboard
+- [x] API to update user information (/me, not /user/id)
 
 ### Storage layer
 
@@ -233,13 +236,13 @@
 
 ### Documentation
 
-- [X] README.md in every directory explaining best practices of said directory
-- [X] Skills for everything that is satisfying enough long-term
-    - [X] Endpoint writing
-    - [X] Config entries
+- [x] README.md in every directory explaining best practices of said directory
+- [x] Skills for everything that is satisfying enough long-term
+    - [x] Endpoint writing
+    - [x] Config entries
 - [ ] `doc/dev` for developer documentation (+ Redocly)
 - [ ] `doc/userguide` for end-user
-- [X] CLAUDE.md and other LLM templates
+- [x] CLAUDE.md and other LLM templates
 - [ ] Redaction simplifier
 - [ ] Git workflow
 
@@ -250,8 +253,15 @@
 - [ ] Grafana Alloy integration
 - [ ] Pre-built Grafana dashboards
 - [ ] Performance benchmarks
-- [X] Kubernetes manifests
-- [X] Nix flake (Docker & Prometheus & Kubernetes)
+- [x] Kubernetes manifests
+- [x] Nix flake (Docker & Prometheus & Kubernetes)
 - [ ] Agent integration (MCP Gateway ?) read-only for every service (Backend, Postgres)
     - [ ] Ask for write operations
 - [ ] Admin Dashboard ?
+
+## Pricing & Licensing
+
+- [ ] Remove from GitHub:
+    - [ ] Put it on your own website: it should be navigable like gitlab/github
+    - [ ] To be able to clone it: user has to be logged-in
+    - [ ] Insert a UUID per clone (save IP, user agent, location, and everything)
