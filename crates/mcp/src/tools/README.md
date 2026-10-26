@@ -36,7 +36,7 @@ read by the model** that decides how to call the tool. Write them for that reade
 Conversions from `app_core` and `database` models are implemented here as `From<T>`, so
 tools stay free of mapping code.
 
-## Tools
+## MCP Tools
 
 Each group is an inherent `impl McpServer` block carrying
 `#[tool_router(router = <name>_tool_router, vis = "pub(crate)")]`. Rust allows an inherent
