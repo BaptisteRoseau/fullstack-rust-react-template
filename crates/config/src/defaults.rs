@@ -50,3 +50,6 @@ pub(crate) const DEFAULT_MCP_PATH: &str = "/mcp";
 // browser page on another origin from driving this endpoint through DNS rebinding.
 // A deployment answering on a real domain must list it here.
 pub(crate) const DEFAULT_MCP_ALLOWED_HOSTS: &str = "localhost,127.0.0.1,::1";
+pub(crate) const DEFAULT_MCP_SERVER_NAME: &str = "backend";
+pub(crate) const DEFAULT_MCP_SERVER_INSTRUCTIONS: &str = "Tools exposed by the backend of this application. \
+Every tool answers from the application's own data; none of them reach the public internet.";

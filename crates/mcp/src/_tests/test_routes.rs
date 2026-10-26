@@ -17,6 +17,8 @@ fn test_mcp_config(path: &str) -> McpConfig {
         path: path.to_string(),
         allowed_hosts: vec!["localhost".to_string()],
         json_response: true,
+        server_name: "backend".to_string(),
+        server_instructions: "Test instructions.".to_string(),
     }
 }
 

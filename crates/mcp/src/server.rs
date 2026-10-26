@@ -1,15 +1,11 @@
+use std::sync::Arc;
+
+use config::McpConfig;
 use rmcp::ServerHandler;
-use rmcp::model::{Implementation, ServerCapabilities, ServerInfo};
+use rmcp::model::{Implementation, ServerCapabilities, ServerConfig};
 use rmcp::tool_handler;
 
 use crate::state::McpState;
-
-/// The server name advertised to MCP clients, shown next to its tools.
-const SERVER_NAME: &str = "backend";
-
-/// What the model is told the server is for, before it sees any tool.
-const SERVER_INSTRUCTIONS: &str = "Tools exposed by the backend of this application. \
-Every tool answers from the application's own data; none of them reach the public internet.";
 
 /// The MCP server: one struct holding the state, with the tools attached to it.
 ///
@@ -23,11 +19,12 @@ Every tool answers from the application's own data; none of them reach the publi
 #[derive(Clone)]
 pub(crate) struct McpServer {
     pub(crate) state: McpState,
+    config: Arc<McpConfig>,
 }
 
 impl McpServer {
-    pub(crate) fn new(state: McpState) -> Self {
-        Self { state }
+    pub(crate) fn new(state: McpState, config: Arc<McpConfig>) -> Self {
+        Self { state, config }
     }
 }
 
@@ -37,11 +34,14 @@ impl McpServer {
 impl ServerHandler for McpServer {
     /// Metadata sent back to the client during the MCP handshake.
     ///
-    /// Written out rather than left to the macro so the name and the instructions stay
-    /// next to each other as named constants, the way `api`'s `api_info` does.
-    fn get_info(&self) -> ServerInfo {
-        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
-            .with_server_info(Implementation::new(SERVER_NAME, env!("CARGO_PKG_VERSION")))
-            .with_instructions(SERVER_INSTRUCTIONS.to_string())
+    /// Written out rather than left to the macro so the name and the instructions come
+    /// from [`McpConfig`].
+    fn get_info(&self) -> ServerConfig {
+        ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
+            .with_server_info(Implementation::new(
+                self.config.server_name.clone(),
+                env!("CARGO_PKG_VERSION"),
+            ))
+            .with_instructions(self.config.server_instructions.clone())
     }
 }

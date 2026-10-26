@@ -29,8 +29,9 @@ where
     // captured state rather than moving it. Sessions are off: the tools hold no
     // per-connection state, and a stateless endpoint answers a plain JSON body instead
     // of an event stream, which survives the API's request timeout unchanged.
+    let server_config = Arc::new(config.clone());
     let service = StreamableHttpService::new(
-        move || Ok(McpServer::new(state.clone())),
+        move || Ok(McpServer::new(state.clone(), Arc::clone(&server_config))),
         Arc::new(LocalSessionManager::default()),
         StreamableHttpServerConfig::default()
             .with_legacy_session_mode(false)

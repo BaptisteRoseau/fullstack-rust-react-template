@@ -90,6 +90,10 @@ pub struct McpConfig {
     /// stream. The server still falls back to `text/event-stream` when a tool emits a
     /// notification before its result.
     pub json_response: bool,
+    /// Server name advertised to clients during the handshake, shown next to its tools.
+    pub server_name: String,
+    /// What the model is told the server is for, before it sees any tool.
+    pub server_instructions: String,
 }
 
 /// The main configuration.
@@ -153,6 +157,8 @@ impl TryFrom<CliConfig> for Config {
                 path: value.mcp_path,
                 allowed_hosts: split_list(&value.mcp_allowed_hosts),
                 json_response: !value.no_mcp_json_response,
+                server_name: value.mcp_server_name,
+                server_instructions: value.mcp_server_instructions,
             })
         };
 

@@ -183,6 +183,14 @@ pub(crate) struct CliConfig {
     #[arg(long, env, default_value_t = DEFAULT_MCP_ALLOWED_HOSTS.to_string())]
     pub(crate) mcp_allowed_hosts: String,
 
+    /// The server name advertised to MCP clients, shown next to its tools
+    #[arg(long, env, default_value_t = DEFAULT_MCP_SERVER_NAME.to_string())]
+    pub(crate) mcp_server_name: String,
+
+    /// What the assistant is told the MCP server is for, before it sees any tool
+    #[arg(long, env, default_value_t = DEFAULT_MCP_SERVER_INSTRUCTIONS.to_string())]
+    pub(crate) mcp_server_instructions: String,
+
     /// Stream MCP tool results as an event stream instead of a single JSON body
     #[arg(long, env, default_value_t = false)]
     pub(crate) no_mcp_json_response: bool,

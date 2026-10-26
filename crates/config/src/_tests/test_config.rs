@@ -40,6 +40,8 @@ impl Default for CliConfig {
             cookie_secure: DEFAULT_COOKIE_SECURE,
             mcp_path: DEFAULT_MCP_PATH.to_string(),
             mcp_allowed_hosts: DEFAULT_MCP_ALLOWED_HOSTS.to_string(),
+            mcp_server_name: DEFAULT_MCP_SERVER_NAME.to_string(),
+            mcp_server_instructions: DEFAULT_MCP_SERVER_INSTRUCTIONS.to_string(),
             no_mcp_json_response: false,
             no_mcp: false,
         }
