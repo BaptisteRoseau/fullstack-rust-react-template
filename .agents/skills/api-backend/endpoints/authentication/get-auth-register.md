@@ -1,7 +1,7 @@
 # GET /auth/register
 
 | | |
-|--|--|
+| -- | -- |
 | **Method** | `GET` |
 | **URL** | `/auth/register` |
 | **Full URL** | `/api/auth/register` |
@@ -18,4 +18,3 @@
 ## Response 303
 
 Redirect to the login or registration page.
-

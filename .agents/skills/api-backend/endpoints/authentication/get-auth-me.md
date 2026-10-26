@@ -1,7 +1,7 @@
 # GET /auth/me
 
 | | |
-|--|--|
+| -- | -- |
 | **Method** | `GET` |
 | **URL** | `/auth/me` |
 | **Full URL** | `/api/auth/me` |
@@ -33,4 +33,3 @@ The authenticated user's profile.
 Not authenticated.
 
 See [ApiErrorResponse](../../schemas/api-error-response.md)
-

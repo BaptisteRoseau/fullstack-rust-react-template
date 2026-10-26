@@ -13,7 +13,8 @@ allowed-tools:
 **Version:** 39c057d
 
 **Servers:**
-- http://localhost:8080/api
+
+- <http://localhost:8080/api>
 
 ## Navigation
 

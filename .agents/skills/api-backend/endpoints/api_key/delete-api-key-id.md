@@ -1,7 +1,7 @@
 # DELETE /api-key/{id}
 
 | | |
-|--|--|
+| -- | -- |
 | **Method** | `DELETE` |
 | **URL** | `/api-key/{id}` |
 | **Full URL** | `/api/api-key/{id}` |
@@ -30,4 +30,3 @@ See [ApiErrorResponse](../../schemas/api-error-response.md)
 ## Response 404
 
 Not found or not owned by caller.
-

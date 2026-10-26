@@ -1,7 +1,7 @@
 # DELETE /storage/delete/{file}
 
 | | |
-|--|--|
+| -- | -- |
 | **Method** | `DELETE` |
 | **URL** | `/storage/delete/{file}` |
 | **Full URL** | `/api/storage/delete/{file}` |
@@ -26,4 +26,3 @@ File successfully deleted.
 Storage error.
 
 See [ApiErrorResponse](../../schemas/api-error-response.md)
-

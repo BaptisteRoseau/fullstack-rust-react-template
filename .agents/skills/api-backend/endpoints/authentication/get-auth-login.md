@@ -1,7 +1,7 @@
 # GET /auth/login
 
 | | |
-|--|--|
+| -- | -- |
 | **Method** | `GET` |
 | **URL** | `/auth/login` |
 | **Full URL** | `/api/auth/login` |
@@ -18,4 +18,3 @@
 ## Response 303
 
 Redirect to the login page.
-

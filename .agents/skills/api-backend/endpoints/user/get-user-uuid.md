@@ -1,7 +1,7 @@
 # GET /user/{uuid}
 
 | | |
-|--|--|
+| -- | -- |
 | **Method** | `GET` |
 | **URL** | `/user/{uuid}` |
 | **Full URL** | `/api/user/{uuid}` |
@@ -34,4 +34,3 @@ The user information.
 The user does not exist.
 
 See [ApiErrorResponse](../../schemas/api-error-response.md)
-

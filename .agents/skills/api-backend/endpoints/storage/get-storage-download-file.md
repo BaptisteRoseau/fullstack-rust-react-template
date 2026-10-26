@@ -1,7 +1,7 @@
 # GET /storage/download/{file}
 
 | | |
-|--|--|
+| -- | -- |
 | **Method** | `GET` |
 | **URL** | `/storage/download/{file}` |
 | **Full URL** | `/api/storage/download/{file}` |
@@ -28,4 +28,3 @@ File successfully downloaded.
 Storage error.
 
 See [ApiErrorResponse](../../schemas/api-error-response.md)
-

@@ -1,7 +1,7 @@
 # PUT /storage/upload/{file}
 
 | | |
-|--|--|
+| -- | -- |
 | **Method** | `PUT` |
 | **URL** | `/storage/upload/{file}` |
 | **Full URL** | `/api/storage/upload/{file}` |
@@ -19,7 +19,7 @@
 ### Query Parameters
 
 | Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
+| ----------- | ------ | ---------- | ------------- |
 | `compression` | array[boolean, null] | No | Enable gzip compression. Defaults to true. |
 | `imageCompression` | array[string, null] | No | Image compression mode: "none", "lossless", "lossy", "auto". Defaults to "lossy". |
 | `imageConversion` | array[string, null] | No | Image conversion format: "none", "webp", "jpeg", "png", "tiff". Defaults to no conversion. |
@@ -51,4 +51,3 @@ File has been successfully uploaded.
 Storage error.
 
 See [ApiErrorResponse](../../schemas/api-error-response.md)
-

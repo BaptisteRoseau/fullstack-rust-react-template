@@ -1,7 +1,7 @@
 # GET /ping
 
 | | |
-|--|--|
+| -- | -- |
 | **Method** | `GET` |
 | **URL** | `/ping` |
 | **Full URL** | `/api/ping` |
@@ -10,4 +10,3 @@
 ## Response 200
 
 The API is up and running.
-

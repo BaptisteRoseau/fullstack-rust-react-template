@@ -1,7 +1,7 @@
 # POST /api-key
 
 | | |
-|--|--|
+| -- | -- |
 | **Method** | `POST` |
 | **URL** | `/api-key` |
 | **Full URL** | `/api/api-key` |
@@ -46,4 +46,3 @@ API key created.
 Not authenticated.
 
 See [ApiErrorResponse](../../schemas/api-error-response.md)
-

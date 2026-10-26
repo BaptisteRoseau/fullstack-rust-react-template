@@ -1,7 +1,7 @@
 # GET /auth/callback
 
 | | |
-|--|--|
+| -- | -- |
 | **Method** | `GET` |
 | **URL** | `/auth/callback` |
 | **Full URL** | `/api/auth/callback` |
@@ -19,4 +19,3 @@
 ## Response 303
 
 Tokens stored in httpOnly cookies; redirect to the frontend.
-

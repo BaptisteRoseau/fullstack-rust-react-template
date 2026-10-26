@@ -1,7 +1,7 @@
 # POST /auth/logout
 
 | | |
-|--|--|
+| -- | -- |
 | **Method** | `POST` |
 | **URL** | `/auth/logout` |
 | **Full URL** | `/api/auth/logout` |
@@ -10,4 +10,3 @@
 ## Response 204
 
 Session revoked and cookies cleared.
-
