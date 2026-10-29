@@ -1,5 +1,7 @@
 # Base of the Rust jobs, with the cargo registry cached.
 # CARGO_HOME moves into the project directory, the only place GitLab caches.
+# The cache key changes with Cargo.lock, so crates the lock file dropped leave
+# the cache with it instead of piling up.
 # The cargo binaries stay on the PATH of the image, under /usr/local/cargo/bin.
 # The CI never rebuilds the same tree twice, so incremental compilation would
 # only fill target/, and line tables are enough for a backtrace.
@@ -15,7 +17,10 @@
     CARGO_INCREMENTAL: "0"
     CARGO_PROFILE_DEV_DEBUG: line-tables-only
   cache:
-    key: cargo
+    key:
+      prefix: cargo
+      files:
+        - Cargo.lock
     paths:
       - .cache/cargo/registry/index
       - .cache/cargo/registry/cache
@@ -42,7 +47,10 @@
     SCCACHE_DIR: $CI_PROJECT_DIR/.cache/sccache
     SCCACHE_CACHE_SIZE: 2G
   cache:
-    - key: cargo
+    - key:
+        prefix: cargo
+        files:
+          - Cargo.lock
       paths:
         - .cache/cargo/registry/index
         - .cache/cargo/registry/cache

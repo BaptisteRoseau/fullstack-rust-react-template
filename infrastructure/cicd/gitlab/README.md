@@ -133,7 +133,10 @@ on every full run.
 ## Caches
 
 - **Dependencies.** `CARGO_HOME` and Bun's install cache move into `.cache/` in the project
-  directory, the only place GitLab caches. Jobs share the `cargo` and `bun` cache keys.
+  directory, the only place GitLab caches. Jobs share the `cargo-*` and `bun-*` cache keys,
+  computed from `Cargo.lock` and `frontend/bun.lock`. A new lock file starts a new cache, so
+  dependencies it dropped do not pile up. A branch that changes a lock file has no cache for it
+  and downloads its dependencies until it is merged.
 - **Compiled Rust.** Jobs extending `.rust-sccache` compile through sccache. It uses the S3 bucket
   from the `SCCACHE_BUCKET`, `SCCACHE_ENDPOINT`, `SCCACHE_REGION` and `AWS_*` project variables,
   such as one on the stack's SeaweedFS. With no bucket set, it falls back to `.cache/sccache`,

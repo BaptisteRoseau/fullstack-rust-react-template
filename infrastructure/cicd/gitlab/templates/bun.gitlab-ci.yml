@@ -1,6 +1,7 @@
 # Base of the frontend jobs: runs in frontend/ with the dependencies installed.
 # Bun keeps the packages it downloads in its install cache, which the GitLab
-# cache restores, so bun install only links them into node_modules.
+# cache restores, so bun install only links them into node_modules. The cache
+# key changes with bun.lock, so dropped packages leave the cache with it.
 .bun:
   image: $BUN_CI_IMAGE
   stage: static_analysis
@@ -10,7 +11,10 @@
   variables:
     BUN_INSTALL_CACHE_DIR: $CI_PROJECT_DIR/.cache/bun
   cache:
-    key: bun
+    key:
+      prefix: bun
+      files:
+        - frontend/bun.lock
     paths:
       - .cache/bun
     policy: $CACHE_POLICY
