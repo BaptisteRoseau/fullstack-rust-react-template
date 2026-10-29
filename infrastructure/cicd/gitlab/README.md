@@ -127,6 +127,10 @@ on every full run.
 - **Bump the tag whenever the image directory changes.** The build job also pushes a tag holding
   the hash of the directory. When the image is already pushed but that hash tag is missing, the
   job fails and asks for a bump, so a changed Dockerfile never hides behind an old tag.
+- **A tag belongs to the first branch that pushes it.** Branches push their CI images too, so
+  two branches bumping `ci_rust:1` to `ci_rust:2` with different Dockerfiles collide: the
+  second one fails and must take `ci_rust:3`. A tag pushed by a branch that was never merged
+  stays taken, and the next bump skips it.
 - **The CI images run as root**, unlike the release images: the job writes into the clone the
   runner made as root.
 

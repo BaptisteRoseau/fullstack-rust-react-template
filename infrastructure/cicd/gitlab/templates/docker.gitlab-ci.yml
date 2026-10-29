@@ -118,7 +118,8 @@
           echo "$IMAGE is up to date with $IMAGE_DIRECTORY"
           exit 0
         fi
-        echo "$IMAGE_DIRECTORY changed but $IMAGE already exists: bump its tag in gitlab-ci.yml" >&2
+        echo "$IMAGE_DIRECTORY changed but $IMAGE already exists: bump its tag in gitlab-ci.yml." >&2
+        echo "Another branch may have pushed this tag first: take the next free one." >&2
         exit 1
       fi
     - docker build --file "$IMAGE_DIRECTORY/Dockerfile" --tag "$IMAGE" --tag "$IMAGE-$HASH" "$IMAGE_DIRECTORY"
