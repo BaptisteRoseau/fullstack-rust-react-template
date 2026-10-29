@@ -90,10 +90,11 @@ frontend-storybook:
   script:
     - bun run storybook:build
 
-# The Playwright suite.
+# The Playwright suite, split by spec file across the parallel jobs.
 # Waits for the cheap lints, so a lint failure does not pay for the browsers.
 frontend-e2e-tests:
   extends: .bun-playwright
+  parallel: 2
   needs:
     - job: ci-playwright-image
       optional: true
@@ -104,7 +105,7 @@ frontend-e2e-tests:
       optional: true
       artifacts: false
   script:
-    - bun run test:e2e
+    - bun run test:e2e --shard="$CI_NODE_INDEX/$CI_NODE_TOTAL"
   artifacts:
     when: on_failure
     paths:
@@ -112,8 +113,9 @@ frontend-e2e-tests:
     expire_in: 1 week
 
 # oxaria scans every page and reports to GitLab's code quality widget.
-# Same setup as the e2e tests: the dev server on the mock API, whose session
-# needs only the mock_session cookie.
+# It scans the production build served by vite preview, on the mock API whose
+# session needs only the mock_session cookie. The build takes the API URL at
+# build time, so it cannot reuse the dist of frontend-build.
 frontend-accessibility:
   extends: .bun-playwright
   stage: dynamic_analysis
@@ -125,8 +127,9 @@ frontend-accessibility:
     - !reference [.check-all-files, rules]
     - !reference [.frontend-src-changed, rules]
   script:
+    - bun run build
     - bun run run-mock-server > mock-server.log 2>&1 &
-    - bun run dev > dev-server.log 2>&1 &
+    - bun run preview > preview-server.log 2>&1 &
     - timeout 60 sh -c 'until curl -sf http://localhost:3000 >/dev/null && curl -s http://localhost:8081 >/dev/null; do sleep 1; done'
     - >-
       oxaria --full-site-scan --report-gitlab gl-code-quality-report.json
