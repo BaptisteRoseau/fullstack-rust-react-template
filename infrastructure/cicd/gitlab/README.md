@@ -146,8 +146,8 @@ on every full run.
   such as one on the stack's SeaweedFS. With no bucket set, it falls back to `.cache/sccache`,
   cached per job.
 - **Docker layers.** Image builds read and write a registry cache, `$BUILD_CACHE:<image>`. They
-  also build `tmp_health_checker` from that cache, which `.build-health-checker` shares with the
-  `dockerfiles` job. `rust-generated-models` builds the database image from the cache of
+  also build `tmp_health_checker` from that cache, which the `dockerfiles` job shares through
+  `.build-health-checker`. `rust-generated-models` builds the database image from the cache of
   `app-postgres-image`.
 - **Only the default branch writes.** The workflow sets `CACHE_POLICY` to `pull-push` there and
   `pull` everywhere else, and every cache and `--cache-to` follows it. A branch with new
@@ -161,6 +161,28 @@ Two instance settings make the caches reach every job:
 - **Shared caches across branches.** Branches only read the default branch's cache when the
   project setting "Use separate caches for protected branches" is disabled. Otherwise every
   branch pipeline starts empty, without any error.
+
+## Runners
+
+Jobs start containers or build images in two ways, and each needs its own runner setting:
+
+| Template | Jobs | Runs | Runner |
+| --- | --- | --- | --- |
+| `.buildkit` | `ci-<name>-image`, `app-<service>-image` | a rootless BuildKit service | any |
+| `.docker-daemon` | `rust-tests`, `rust-generated-models`, `dockerfiles` | a `docker:dind` service | tagged `privileged` |
+
+- **Image builds need no privileged runner.** Rootless BuildKit only needs the seccomp and
+  AppArmor profiles of its service to be unconfined, so it can create a user namespace:
+
+  ```toml
+  [runners.docker]
+    services_security_opt = ["seccomp:unconfined", "apparmor:unconfined"]
+  ```
+
+- **Containers need a privileged runner.** The integration tests and the generated models start
+  containers, and `docker build --check` needs `tmp_health_checker` loaded in a daemon. Only a
+  runner with `privileged = true` and the `privileged` tag picks those jobs up. Without one, they
+  stay pending.
 
 ## Cancelled and waiting jobs
 
@@ -205,8 +227,11 @@ Traps when adding a job:
   `frontend/`, so its jobs get paths relative to it, ready for `prettier` or `eslint`.
 - **A command containing a colon followed by a space must be a block scalar** (`- >-`).
   Otherwise YAML reads it as a map and the job is invalid.
-- **Docker jobs need a privileged runner** for the `docker:dind` service. A container they start
-  listens on the `docker` host, not on `127.0.0.1`.
+- **A container started by a `.docker-daemon` job listens on the `docker` host**, not on
+  `127.0.0.1`.
+- **BuildKit has no image store.** An image a `.buildkit` job builds cannot be referenced by a
+  later build in the same job. Pass it as a `--build-context`, as `.docker-image` does with
+  `tmp_health_checker`.
 - **A template's `needs` is replaced, not merged.** A job that sets its own `needs`, such as
   `app-backend-image`, must list its image's build job again, or it can start before its image
   is pushed. The changed-files template sets no `needs` for that reason.

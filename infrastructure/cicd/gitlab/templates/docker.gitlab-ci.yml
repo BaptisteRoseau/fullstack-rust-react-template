@@ -1,6 +1,9 @@
-# Adds a Docker daemon, for jobs that build images or start containers.
-# Needs a runner allowed to start privileged containers.
+# Adds a Docker daemon, for jobs that start containers: the integration tests,
+# the generated models and the Dockerfile check.
+# Needs a runner allowed to start privileged containers, tagged privileged.
 .docker-daemon:
+  tags:
+    - privileged
   services:
     - docker:29.9.2-dind
   variables:
@@ -17,9 +20,26 @@
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login --username "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
 
+# Adds a rootless BuildKit daemon, for jobs that only build and push images.
+# It runs unprivileged, but the runner must start services with unconfined
+# seccomp and AppArmor profiles, see the README. buildx sends it the build
+# context and the registry credentials of docker login.
+.buildkit:
+  image: $DOCKER_CI_IMAGE
+  needs:
+    - job: ci-docker-image
+      optional: true
+  services:
+    - name: moby/buildkit:v0.34.1-rootless
+      alias: buildkitd
+      command: ["--addr", "tcp://0.0.0.0:1234", "--oci-worker-no-process-sandbox"]
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login --username "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - docker buildx create --name buildkitd --driver remote --use tcp://buildkitd:1234
+    - timeout 60 sh -c 'until docker buildx inspect --bootstrap >/dev/null 2>&1; do sleep 1; done'
+
 # Script that builds localhost/tmp_health_checker, the image release Dockerfiles
-# copy the health checker binary from. It does nothing when DOCKERFILE is set
-# and does not copy from it.
+# copy the health checker binary from, into the daemon of .docker.
 # Docker-in-Docker starts with no layer, so builds take their layers from the
 # BUILD_CACHE repository of the registry. Only the default branch writes it.
 # The daemon uses the containerd image store, the default since Docker 29,
@@ -27,28 +47,27 @@
 .build-health-checker:
   script:
     - |
-      if [ -z "${DOCKERFILE:-}" ] || grep -q "localhost/tmp_health_checker" "$DOCKERFILE"; then
-        CACHE_TO=""
-        if [ "$CACHE_POLICY" = pull-push ]; then
-          CACHE_TO="--cache-to type=registry,ref=$BUILD_CACHE:tmp_health_checker,mode=max"
-        fi
-        docker buildx build --load \
-          --cache-from "type=registry,ref=$BUILD_CACHE:tmp_health_checker" $CACHE_TO \
-          --file infrastructure/docker/tmp_health_checker/Dockerfile \
-          --tag localhost/tmp_health_checker:latest .
+      CACHE_TO=""
+      if [ "$CACHE_POLICY" = pull-push ]; then
+        CACHE_TO="--cache-to type=registry,ref=$BUILD_CACHE:tmp_health_checker,mode=max"
       fi
+      docker buildx build --load \
+        --cache-from "type=registry,ref=$BUILD_CACHE:tmp_health_checker" $CACHE_TO \
+        --file infrastructure/docker/tmp_health_checker/Dockerfile \
+        --tag localhost/tmp_health_checker:latest .
 
 # Base of the app-<service>-image jobs.
 # Builds IMAGE_NAME from DOCKERFILE with the repository root as context, and
 # pushes it to the project registry from the default branch and from tags only.
-# A Dockerfile that copies from localhost/tmp_health_checker gets that image
-# built first in the same daemon, mostly from the registry cache.
+# BuildKit has no image store, so a Dockerfile that copies from
+# localhost/tmp_health_checker gets that image exported to a directory first,
+# mostly from the registry cache, then passed as a build context of that name.
 # When the directory PREBUILT_DIRECTORY exists, it replaces the stage
 # PREBUILT_STAGE, which is then not built.
 # A tag on a commit the default branch already pushed retags that image instead
 # of building it again, so the release is the image that was tested.
 .docker-image:
-  extends: .docker
+  extends: .buildkit
   stage: build
   variables:
     IMAGE_NAME: ""
@@ -63,7 +82,18 @@
         docker buildx imagetools create --tag "$IMAGE:$CI_COMMIT_TAG" "$IMAGE:$CI_COMMIT_SHORT_SHA"
         exit 0
       fi
-    - !reference [.build-health-checker, script]
+    - |
+      HEALTH_CHECKER_CONTEXT=""
+      if grep -q "localhost/tmp_health_checker" "$DOCKERFILE"; then
+        CACHE_TO=""
+        if [ "$CACHE_POLICY" = pull-push ]; then
+          CACHE_TO="--cache-to type=registry,ref=$BUILD_CACHE:tmp_health_checker,mode=max"
+        fi
+        docker buildx build --output type=local,dest=/tmp/tmp_health_checker \
+          --cache-from "type=registry,ref=$BUILD_CACHE:tmp_health_checker" $CACHE_TO \
+          --file infrastructure/docker/tmp_health_checker/Dockerfile .
+        HEALTH_CHECKER_CONTEXT="--build-context localhost/tmp_health_checker:latest=/tmp/tmp_health_checker"
+      fi
     - |
       CACHE_TO=""
       if [ "$CACHE_POLICY" = pull-push ]; then
@@ -74,23 +104,20 @@
         echo "Using $PREBUILT_DIRECTORY instead of building the $PREBUILT_STAGE stage"
         BUILD_CONTEXT="--build-context $PREBUILT_STAGE=$PREBUILT_DIRECTORY"
       fi
-      docker buildx build --load \
-        --cache-from "type=registry,ref=$BUILD_CACHE:$IMAGE_NAME" $CACHE_TO $BUILD_CONTEXT \
-        --file "$DOCKERFILE" --tag "$IMAGE:$CI_COMMIT_SHORT_SHA" .
-    - |
-      if [ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ] && [ -z "$CI_COMMIT_TAG" ]; then
-        echo "Not on $CI_DEFAULT_BRANCH nor on a tag, the image is not pushed"
-        exit 0
-      fi
-    - docker push "$IMAGE:$CI_COMMIT_SHORT_SHA"
-    - |
+      TAGS="--tag $IMAGE:$CI_COMMIT_SHORT_SHA"
+      OUTPUT="--push"
       if [ -n "$CI_COMMIT_TAG" ]; then
-        docker tag "$IMAGE:$CI_COMMIT_SHORT_SHA" "$IMAGE:$CI_COMMIT_TAG"
-        docker push "$IMAGE:$CI_COMMIT_TAG"
+        TAGS="$TAGS --tag $IMAGE:$CI_COMMIT_TAG"
+      elif [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
+        TAGS="$TAGS --tag $IMAGE:latest"
       else
-        docker tag "$IMAGE:$CI_COMMIT_SHORT_SHA" "$IMAGE:latest"
-        docker push "$IMAGE:latest"
+        echo "Not on $CI_DEFAULT_BRANCH nor on a tag, the image is not pushed"
+        OUTPUT="--output type=cacheonly"
       fi
+      docker buildx build $OUTPUT $TAGS \
+        --cache-from "type=registry,ref=$BUILD_CACHE:$IMAGE_NAME" $CACHE_TO \
+        $HEALTH_CHECKER_CONTEXT $BUILD_CONTEXT \
+        --file "$DOCKERFILE" .
 
 # Base of the ci-<name>-image jobs.
 # Builds the image of IMAGE_DIRECTORY as IMAGE, the reference the jobs use, and
@@ -99,7 +126,7 @@
 # when it does not: the directory changed without its tag being bumped.
 # It runs before the CI images exist, so it uses the upstream Docker image.
 .ci-image:
-  extends: .docker-daemon
+  extends: .buildkit
   image: docker:29.9.2
   stage: ci_images
   needs: []
@@ -111,7 +138,6 @@
     - !reference [.ci-images-changed, rules]
   script:
     - HASH=$(find "$IMAGE_DIRECTORY" -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -c1-12)
-    - echo "$CI_REGISTRY_PASSWORD" | docker login --username "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
     - |
       if docker buildx imagetools inspect "$IMAGE" >/dev/null 2>&1; then
         if docker buildx imagetools inspect "$IMAGE-$HASH" >/dev/null 2>&1; then
@@ -122,6 +148,4 @@
         echo "Another branch may have pushed this tag first: take the next free one." >&2
         exit 1
       fi
-    - docker build --file "$IMAGE_DIRECTORY/Dockerfile" --tag "$IMAGE" --tag "$IMAGE-$HASH" "$IMAGE_DIRECTORY"
-    - docker push "$IMAGE"
-    - docker push "$IMAGE-$HASH"
+    - docker buildx build --push --file "$IMAGE_DIRECTORY/Dockerfile" --tag "$IMAGE" --tag "$IMAGE-$HASH" "$IMAGE_DIRECTORY"
