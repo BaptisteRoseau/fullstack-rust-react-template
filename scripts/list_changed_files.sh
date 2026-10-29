@@ -5,8 +5,9 @@ set -e
 #
 # Prints the tracked files matching the pathspecs that changed since the branch
 # left the default branch. Prints every matching file instead when
-# CHECK_ALL_FILES is "true", or, with --all-on-delete, when a file was deleted or
-# renamed: that can break a file which did not change, such as a markdown link.
+# SHOULD_RUN_ALL_JOBS is "true", or, with --all-on-delete, when a file was
+# deleted or renamed: that can break a file which did not change, such as a
+# markdown link.
 #
 # Unlike the other scripts, this one does not move to the git root: pathspecs and
 # printed paths are relative to the current directory, so a job running in
@@ -18,7 +19,7 @@ if [ "${1:-}" = "--all-on-delete" ]; then
     shift
 fi
 
-if [ "${CHECK_ALL_FILES:-false}" = true ]; then
+if [ "${SHOULD_RUN_ALL_JOBS:-false}" = true ]; then
     git ls-files -- "$@"
     exit 0
 fi

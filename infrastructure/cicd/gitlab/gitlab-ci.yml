@@ -19,7 +19,7 @@ variables:
 
 # One pipeline per pushed commit. Merge request pipelines would run the same
 # commit a second time, so they are never created.
-# CHECK_ALL_FILES makes every job run on every file instead of on what the
+# SHOULD_RUN_ALL_JOBS makes every job run on every file instead of on what the
 # branch changed since it left the default branch.
 workflow:
   rules:
@@ -27,18 +27,18 @@ workflow:
       when: never
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       variables:
-        CHECK_ALL_FILES: "true"
+        SHOULD_RUN_ALL_JOBS: "true"
         CACHE_POLICY: pull-push
     - if: $CI_COMMIT_TAG || $CI_PIPELINE_SOURCE == "schedule"
       variables:
-        CHECK_ALL_FILES: "true"
+        SHOULD_RUN_ALL_JOBS: "true"
     - changes:
         paths:
           - .gitlab-ci.yml
           - infrastructure/cicd/gitlab/**/*
         compare_to: refs/heads/$CI_DEFAULT_BRANCH
       variables:
-        CHECK_ALL_FILES: "true"
+        SHOULD_RUN_ALL_JOBS: "true"
     - when: always
 
 # A new commit on a branch cancels its older pipelines, but only those where no

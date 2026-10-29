@@ -17,7 +17,7 @@ app-backend-image:
     IMAGE_NAME: app_backend
     DOCKERFILE: infrastructure/docker/app_backend/Dockerfile.release
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - !reference [.tmp-health-checker-image-changed, rules]
     - !reference [.crates-changed, rules]
     - !reference [.rust-dependencies-changed, rules]
@@ -47,7 +47,7 @@ app-frontend-image:
     PREBUILT_STAGE: site
     PREBUILT_DIRECTORY: frontend/dist
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - !reference [.tmp-health-checker-image-changed, rules]
     - !reference [.frontend-changed, rules]
     - changes:
@@ -62,7 +62,7 @@ app-migration-image:
     IMAGE_NAME: app_migration
     DOCKERFILE: infrastructure/docker/app_migration/Dockerfile
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - !reference [.database-migrations-changed, rules]
     - changes:
         paths:
@@ -76,7 +76,7 @@ app-postgres-image:
     IMAGE_NAME: app_postgres
     DOCKERFILE: infrastructure/docker/app_postgres/Dockerfile
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - !reference [.postgres-image-changed, rules]
 
 # The identity provider image.
@@ -86,7 +86,7 @@ app-keycloak-image:
     IMAGE_NAME: app_keycloak
     DOCKERFILE: infrastructure/docker/app_keycloak/Dockerfile
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - !reference [.tmp-health-checker-image-changed, rules]
     - changes:
         paths:
@@ -100,7 +100,7 @@ app-homepage-image:
     IMAGE_NAME: app_homepage
     DOCKERFILE: infrastructure/docker/app_homepage/Dockerfile
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - !reference [.tmp-health-checker-image-changed, rules]
     - changes:
         paths:

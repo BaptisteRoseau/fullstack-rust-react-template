@@ -21,7 +21,7 @@ markdown:
     - .tools
     - .markdown-changed-files
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - !reference [.any-file-changed, rules]
 
 # Spelling mistakes in every changed file, code included.
@@ -30,7 +30,7 @@ typos:
     - .tools
     - .typos-changed-files
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - !reference [.any-file-changed, rules]
 
 # Unknown words in every changed file, against .cspell.yml. Reports only.
@@ -40,5 +40,5 @@ cspell:
     - .cspell-changed-files
   allow_failure: true
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - !reference [.any-file-changed, rules]

@@ -48,7 +48,7 @@ next to the paths only it needs:
 app-keycloak-image:
   extends: .docker-image
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - !reference [.tmp-health-checker-image-changed, rules]
     - changes:
         paths:
@@ -61,9 +61,9 @@ not change when it runs.
 
 ## Changed files
 
-The workflow in [gitlab-ci.yml](./gitlab-ci.yml) sets `CHECK_ALL_FILES` to `true` wherever every
-check must run on every file. `.check-all-files` comes first in every job, so it then matches
-before any `changes` rule.
+The workflow in [gitlab-ci.yml](./gitlab-ci.yml) sets `SHOULD_RUN_ALL_JOBS` to `true` wherever
+every check must run on every file. `.should-run-all-jobs` comes first in every job, so it then
+matches before any `changes` rule.
 
 `changes` rules compare to the default branch (`compare_to: refs/heads/$CI_DEFAULT_BRANCH`).
 Variables in `compare_to` need GitLab 17.2 or later. On an older instance they are not expanded,

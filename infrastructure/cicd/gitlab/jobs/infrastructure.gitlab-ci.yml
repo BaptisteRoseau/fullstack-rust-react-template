@@ -25,7 +25,7 @@ dockerfiles:
   extends: .docker
   stage: static_analysis
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - !reference [.tmp-health-checker-image-changed, rules]
     - changes:
         paths:
@@ -41,7 +41,7 @@ hadolint:
     - .tools
     - .hadolint-changed-files
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - changes:
         paths:
           - "**/Dockerfile*"
@@ -56,7 +56,7 @@ docker-compose:
     - job: ci-docker-image
       optional: true
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - !reference [.infrastructure-configs-changed, rules]
     - changes:
         paths:
@@ -71,7 +71,7 @@ docker-compose:
 kubernetes:
   extends: .tools
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - !reference [.infrastructure-configs-changed, rules]
     - changes:
         paths:
@@ -88,7 +88,7 @@ nix:
   variables:
     NIX_CONFIG: "experimental-features = nix-command flakes"
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - changes:
         paths:
           - "**/*.nix"
@@ -104,7 +104,7 @@ shellcheck:
     - .tools
     - .shellcheck-changed-files
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - changes:
         paths:
           - "**/*.sh"
@@ -118,7 +118,7 @@ yamllint:
     - .yamllint-changed-files
   allow_failure: true
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - changes:
         paths:
           - "**/*.yml"
@@ -131,7 +131,7 @@ gitlab-ci:
     - .tools
     - .gitlab-ci-changed-files
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - changes:
         paths:
           - .gitlab-ci.yml

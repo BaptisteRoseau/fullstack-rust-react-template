@@ -1,8 +1,8 @@
 # Matches every job on a full run: default branch, tags, schedules, CI changes.
 # Listed first in every job, so it wins over the changes rules after it.
-.check-all-files:
+.should-run-all-jobs:
   rules:
-    - if: $CHECK_ALL_FILES == "true"
+    - if: $SHOULD_RUN_ALL_JOBS == "true"
 
 # For checks that read every file type, such as typos and markdown links.
 .any-file-changed:

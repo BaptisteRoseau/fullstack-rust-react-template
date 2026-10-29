@@ -134,7 +134,7 @@
     IMAGE_DIRECTORY: ""
     IMAGE: ""
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - !reference [.ci-images-changed, rules]
   script:
     - HASH=$(find "$IMAGE_DIRECTORY" -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -c1-12)

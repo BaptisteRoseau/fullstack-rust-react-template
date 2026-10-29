@@ -24,7 +24,7 @@ frontend-format:
     - .bun
     - .frontend-format-changed-files
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - changes:
         paths:
           - frontend/**/*.scss
@@ -51,7 +51,7 @@ frontend-unit-tests:
 frontend-i18n:
   extends: .bun
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - !reference [.frontend-src-changed, rules]
     - changes:
         paths:
@@ -80,7 +80,7 @@ frontend-storybook:
   extends: .bun
   stage: build
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - !reference [.frontend-dependencies-changed, rules]
     - changes:
         paths:
@@ -124,7 +124,7 @@ frontend-accessibility:
     VITE_APP_API_URL: http://localhost:8081
     VITE_APP_URL: http://localhost:3000
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - !reference [.frontend-src-changed, rules]
   script:
     - bun run build
@@ -143,7 +143,7 @@ frontend-accessibility:
 frontend-licenses:
   extends: .bun
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - !reference [.frontend-dependencies-changed, rules]
   script:
     - ../scripts/test_licenses.sh frontend
@@ -153,7 +153,7 @@ frontend-advisories:
   extends: .bun
   allow_failure: true
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - !reference [.frontend-dependencies-changed, rules]
   script:
     - ../scripts/test_cve.sh frontend

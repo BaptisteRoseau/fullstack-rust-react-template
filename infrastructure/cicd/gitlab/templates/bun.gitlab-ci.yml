@@ -19,7 +19,7 @@
       - .cache/bun
     policy: $CACHE_POLICY
   rules:
-    - !reference [.check-all-files, rules]
+    - !reference [.should-run-all-jobs, rules]
     - !reference [.frontend-changed, rules]
   before_script:
     - cd frontend
