@@ -55,5 +55,6 @@ kompose
 # Docker compose override
 docker-compose.override.yml
 
-# Agent scheduler state
+# AI Agent
 .agents/scheduled_tasks.lock
+.agents/settings.json
