@@ -110,7 +110,7 @@
     - !reference [.check-all-files, rules]
     - !reference [.ci-images-changed, rules]
   script:
-    - HASH=$(find "$IMAGE_DIRECTORY" -type f | sort | xargs sha256sum | sha256sum | cut -c1-12)
+    - HASH=$(find "$IMAGE_DIRECTORY" -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -c1-12)
     - echo "$CI_REGISTRY_PASSWORD" | docker login --username "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
     - |
       if docker buildx imagetools inspect "$IMAGE" >/dev/null 2>&1; then
