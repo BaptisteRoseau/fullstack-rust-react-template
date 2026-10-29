@@ -6,32 +6,32 @@ import {
     type DefaultValues,
     type UseFormReturn,
 } from 'react-hook-form'
-import type { z, ZodType } from 'zod'
+import type { ZodType } from 'zod'
 
-type FormSchema = ZodType<FieldValues, FieldValues>
+type FormMethods<
+    TInput extends FieldValues,
+    TOutput extends FieldValues,
+> = UseFormReturn<TInput, unknown, TOutput>
 
-type FormMethods<TSchema extends FormSchema> = UseFormReturn<
-    z.input<TSchema>,
-    unknown,
-    z.output<TSchema>
->
-
-export type FormProps<TSchema extends FormSchema> = {
-    schema: TSchema
-    onSubmit: (values: z.output<TSchema>) => void | Promise<void>
-    defaultValues?: DefaultValues<z.input<TSchema>>
+export type FormProps<
+    TInput extends FieldValues,
+    TOutput extends FieldValues,
+> = {
+    schema: ZodType<TOutput, TInput>
+    onSubmit: (values: TOutput) => void | Promise<void>
+    defaultValues?: DefaultValues<TInput>
     className?: string
-    children: (methods: FormMethods<TSchema>) => React.ReactNode
+    children: (methods: FormMethods<TInput, TOutput>) => React.ReactNode
 }
 
-export function Form<TSchema extends FormSchema>({
+export function Form<TInput extends FieldValues, TOutput extends FieldValues>({
     schema,
     onSubmit,
     defaultValues,
     className,
     children,
-}: FormProps<TSchema>) {
-    const methods = useForm<z.input<TSchema>, unknown, z.output<TSchema>>({
+}: FormProps<TInput, TOutput>) {
+    const methods = useForm<TInput, unknown, TOutput>({
         resolver: zodResolver(schema),
         defaultValues,
     })
