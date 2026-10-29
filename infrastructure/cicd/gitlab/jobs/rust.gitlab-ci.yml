@@ -85,6 +85,7 @@ rust-unused-dependencies:
 # Fails when crates/database/src/generated_models.rs is out of date.
 # Regenerates the models from a blank database and fails when the committed
 # file differs. The database container publishes its port on the dind service.
+# The database image builds from the layers app-postgres-image cached.
 rust-generated-models:
   extends:
     - .rust
@@ -102,7 +103,11 @@ rust-generated-models:
           - scripts/build_database_rust_models.sh
         compare_to: refs/heads/$CI_DEFAULT_BRANCH
   script:
-    - docker build --file infrastructure/docker/app_postgres/Dockerfile --tag app_postgres:latest .
+    - echo "$CI_REGISTRY_PASSWORD" | docker login --username "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - >-
+      docker buildx build --load
+      --cache-from "type=registry,ref=$BUILD_CACHE:app_postgres"
+      --file infrastructure/docker/app_postgres/Dockerfile --tag app_postgres:latest .
     - ln -sf .env.dev .env
     - ./scripts/build_database_rust_models.sh
     - git diff --exit-code -- crates/database/src/generated_models.rs

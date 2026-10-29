@@ -110,7 +110,7 @@ job installs a tool at run time:
 
 | Image | Template | Holds |
 | --- | --- | --- |
-| `ci_rust` | `.rust` | rustfmt, clippy, llvm-tools, cargo subcommands, sccache, Docker CLI |
+| `ci_rust` | `.rust` | rustfmt, clippy, llvm-tools, cargo subcommands, sccache, Docker CLI, buildx |
 | `ci_bun` | `.bun` | Bun, git |
 | `ci_playwright` | `.bun-playwright` | Playwright browsers, Bun, oxaria |
 | `ci_tools` | `.tools` | the docs, shell, YAML, Dockerfile, Kubernetes and CI manifest linters |
@@ -143,7 +143,8 @@ on every full run.
   cached per job.
 - **Docker layers.** Image builds read and write a registry cache, `$BUILD_CACHE:<image>`. They
   also build `tmp_health_checker` from that cache, which `.build-health-checker` shares with the
-  `dockerfiles` job.
+  `dockerfiles` job. `rust-generated-models` builds the database image from the cache of
+  `app-postgres-image`.
 - **Only the default branch writes.** The workflow sets `CACHE_POLICY` to `pull-push` there and
   `pull` everywhere else, and every cache and `--cache-to` follows it. A branch with new
   dependencies downloads them, and they are cached once the branch is merged.

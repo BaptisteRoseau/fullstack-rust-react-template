@@ -9,7 +9,7 @@ stages:
 # tag whenever its directory changes: the ci-images jobs fail until it is.
 # CACHE_POLICY lets only the default branch write the caches, see the workflow.
 variables:
-  RUST_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_rust:1
+  RUST_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_rust:2
   BUN_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_bun:1
   PLAYWRIGHT_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_playwright:1
   TOOLS_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_tools:1
