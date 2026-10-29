@@ -2,23 +2,26 @@
 [workspace]
 resolver = "1"
 members = [
-  "crates/api",
-  "crates/cache",
-  "crates/authenticator",
-  "crates/binaries/backend",
-  "crates/app_core",
-  "crates/mailer",
-  "crates/config",
-  "crates/database",
-  "crates/database_crud_derive",
-  "crates/logging",
-  "crates/mcp",
-  "crates/storage",
-  "crates/test_trait",
-  "crates/test_trait_derive",
-  "crates/test_utils",
-  "tools/http_health_checker", "crates/rbac", "crates/models",
-  "tools/openapi_generator"
+    "crates/api",
+    "crates/app_core",
+    "crates/authenticator",
+    "crates/binaries/backend",
+    "crates/cache",
+    "crates/config",
+    "crates/database",
+    "crates/database_crud_derive",
+    "crates/logging",
+    "crates/mailer",
+    "crates/mcp",
+    "crates/models",
+    "crates/payment",
+    "crates/rbac",
+    "crates/storage",
+    "crates/test_trait",
+    "crates/test_trait_derive",
+    "crates/test_utils",
+    "tools/http_health_checker",
+    "tools/openapi_generator",
 ]
 
 [profile.release]
