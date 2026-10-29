@@ -1,8 +1,6 @@
 # TODO
 
-- [ ] Post Oxaria
-- [ ] Include Oxaria to the test scripts ?
-- [ ] Stop running EVERY test script on git push
+- [ ] Make CI images run as a user
 
 - [ ] CICD improvements
     - [ ] Rules/Templates -> Move to jobs directly if used 1 time

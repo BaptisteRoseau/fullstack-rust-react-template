@@ -62,7 +62,8 @@ The frontend's `.env.example` points `VITE_APP_API_URL` at the backend **origin*
 Before pushing, run the same checks the hooks run:
 
 ```bash
-./scripts/test_lint.sh    # clippy + eslint
+./scripts/test_lint_backend.sh    # clippy
+./scripts/test_lint_frontend.sh   # eslint
 ./scripts/test_units.sh   # cargo test --workspace --all-features + bun test
 ./scripts/test_openapi.sh # the committed frontend SDK still matches the api crate
 ./scripts/git_hooks/setup.sh   # install the pre-push hook once

@@ -195,7 +195,7 @@ footer listing each one, prefixed `MCP:`. See Skill(commit-messages).
 
 ```bash
 ./scripts/test_units.sh   # the crate's tests, including the endpoint handshake
-./scripts/test_lint.sh
+./scripts/test_lint_backend.sh
 ```
 
 ```bash

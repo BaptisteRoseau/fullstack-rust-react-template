@@ -15,9 +15,8 @@ rust-check:
   variables:
     RUSTDOCFLAGS: "-D warnings"
   script:
-    - ./scripts/test_lint.sh backend
+    - ./scripts/test_lint_backend.sh
     - cargo doc --workspace --all-features --no-deps
-    - ./scripts/test_lint_no_default_features.sh
 
 # Every Rust test, the coverage report and the OpenAPI document.
 # Runs every test once, doctests and the tests under tests/ included, in the

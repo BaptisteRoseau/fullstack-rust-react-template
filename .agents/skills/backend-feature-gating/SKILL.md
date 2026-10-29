@@ -10,7 +10,7 @@ default**. A crate that only needs the trait must not pull in a Redis client, sq
 
 See [crates/README.md](../../../crates/README.md) for the service-crate layout.
 
-A wrong gate does not fail CI. `test_lint.sh` and `test_units.sh` both pass `--all-features`, so the
+A wrong gate does not fail CI. `test_lint_backend.sh` and `test_units.sh` both pass `--all-features`, so the
 build that breaks is the one nobody runs.
 
 ## 1. Declare the feature

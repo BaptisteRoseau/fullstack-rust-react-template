@@ -59,4 +59,4 @@ Do not "fix" these by undoing them.
 
 `bun run api:sdk [spec]` and `bun run api:check [spec]` run the node half alone, defaulting to
 `frontend/openapi.json`. They are only useful when that document already exists — a fresh clone has
-none, which is why the gate is `test_openapi.sh` and not a line in `test_lint.sh`.
+none, which is why the gate is `test_openapi.sh` and not a line in `test_lint_frontend.sh`.

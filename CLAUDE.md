@@ -300,7 +300,7 @@ Every `## Rules` section of a README.md is absolute and should be followed in it
 
 #### Testing
 
-Always run the unit tests and linters. Use the `test_lint.sh` and `test_units.sh` files to run the tests. Focus on fixing the issues before going any further.
+Always run the unit tests and linters. Use the `test_lint_backend.sh`, `test_lint_frontend.sh` and `test_units.sh` files to run the tests. Focus on fixing the issues before going any further.
 
 Be critical on the issues: is the problem from the test or the codebase ? If in doubt, consider it is from the codebase and do not update the test, otherwise carefully update the test.
 

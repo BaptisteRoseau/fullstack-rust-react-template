@@ -36,7 +36,7 @@ Every `test_*.sh` script is used in the `pre-push` hook or can be used as a stan
 With no argument, a script checks everything, which is what the `pre-push` hook runs. The CI
 splits that work across jobs with different triggers, so some scripts take a narrower scope:
 
-- A section: `test_lint.sh`, `test_cve.sh` and `test_licenses.sh` take `backend` or `frontend`,
+- A section: `test_lint_backend.sh`, `test_lint_frontend.sh`, `test_cve.sh` and `test_licenses.sh` take `backend` or `frontend`,
   and `test_lint_infra.sh` takes `docker`, `compose` or `kubernetes`.
 - A list of files: `test_lint_doc.sh` and `test_lint_cicd.sh` check only the files they are given.
 
@@ -108,7 +108,7 @@ commit the generated folder — `frontend/openapi.json` is a build artifact and 
 
 [`test_openapi.sh`](./test_openapi.sh) is the matching gate: it fails when the committed SDK no
 longer matches the router. Both need cargo *and* bun, which is why the check is not part of
-`test_lint.sh`'s frontend section. Pass `--from <document>` to either one to skip cargo and use a
+`test_lint_frontend.sh`. Pass `--from <document>` to either one to skip cargo and use a
 document [`build_openapi.sh`](./build_openapi.sh) wrote earlier, as the CI does.
 
 `build_openapi.sh` runs the generator in a scrubbed environment: the backend reads generic

@@ -69,7 +69,6 @@ Changing the codegen configuration, or debugging the pipeline itself, is rare â€
 
 - Edit anything under `src/api/generated/`.
 - Commit `frontend/openapi.json`, or remove it from `.gitignore`.
-- Add `bun run api:check` to `scripts/test_lint.sh`: a fresh clone has no document for it to read.
 - Import `@/api/generated` outside `src/api/**` (or `src/test-utils/**`, whose MSW handlers must
   type their responses with the wire shapes).
 - Tighten `operation_id` in the utoipa annotations to prettify generated names. Nothing outside

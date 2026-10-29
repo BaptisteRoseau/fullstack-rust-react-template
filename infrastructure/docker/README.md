@@ -37,8 +37,7 @@ For docker images where the image build differs between release and debug, use t
     └── <other assets embeded in the images>
 ```
 
-Images used exclusively for CI are prefixed `ci_*`. They hold the tools of the CI jobs, run as
-root, and are tagged by hand, see [gitlab/README.md](../cicd/gitlab/README.md#ci-images).
+Images used exclusively for CI are prefixed `ci_*`.
 
 The CI caches the layers of every image it builds in the `buildcache` repository of the project
 registry, one tag per image. Release Dockerfiles copy the dependency manifests before the

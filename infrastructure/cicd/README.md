@@ -20,8 +20,7 @@ cicd/
 
 - **A job calls a script.** Linters, tests and builds live in [scripts](../../scripts/README.md)
   so they run the same on a developer's machine. A job only sets up the environment, then calls
-  the script. A script that several jobs need with different triggers takes a section argument,
-  such as `test_lint.sh backend`.
+  the script.
 - **Pin every image and tool version.** A `latest` tag changes under a pipeline that did not,
   and the failure then has no matching commit.
 - **Both providers run the same checks with the same triggers**, listed below, so a project
