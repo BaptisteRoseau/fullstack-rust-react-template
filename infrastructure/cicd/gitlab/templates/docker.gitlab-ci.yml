@@ -45,6 +45,8 @@
 # built first in the same daemon, mostly from the registry cache.
 # When the directory PREBUILT_DIRECTORY exists, it replaces the stage
 # PREBUILT_STAGE, which is then not built.
+# A tag on a commit the default branch already pushed retags that image instead
+# of building it again, so the release is the image that was tested.
 .docker-image:
   extends: .docker
   stage: build
@@ -55,6 +57,12 @@
     PREBUILT_DIRECTORY: ""
   script:
     - IMAGE="$CI_REGISTRY_IMAGE/$IMAGE_NAME"
+    - |
+      if [ -n "$CI_COMMIT_TAG" ] && docker buildx imagetools inspect "$IMAGE:$CI_COMMIT_SHORT_SHA" >/dev/null 2>&1; then
+        echo "$IMAGE:$CI_COMMIT_SHORT_SHA is already pushed, tagging it $CI_COMMIT_TAG"
+        docker buildx imagetools create --tag "$IMAGE:$CI_COMMIT_TAG" "$IMAGE:$CI_COMMIT_SHORT_SHA"
+        exit 0
+      fi
     - !reference [.build-health-checker, script]
     - |
       CACHE_TO=""

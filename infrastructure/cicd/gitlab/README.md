@@ -210,6 +210,10 @@ Traps when adding a job:
   built from the sources instead.
 - **Images are pushed only from the default branch and tags.** On other branches they are built,
   then dropped. Container scanning runs only where images are pushed.
+- **A tag retags the image of its commit.** When the default branch already pushed
+  `<image>:<short sha>`, the tag pipeline adds the tag to it without building. A tag pushed
+  before that pipeline finished, or on a commit that never was on the default branch, builds the
+  image instead.
 
 ## Verification
 
