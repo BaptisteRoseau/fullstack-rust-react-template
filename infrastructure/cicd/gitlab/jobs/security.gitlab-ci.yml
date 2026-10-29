@@ -3,6 +3,8 @@ include:
   - template: Jobs/SAST.gitlab-ci.yml
   - template: Jobs/Container-Scanning.gitlab-ci.yml
 
+# GitLab's scanners: secrets and SAST over the sources, CVEs in the images.
+# Their jobs come from the templates included above.
 # Scans the images the build stage pushed, so only where it pushes them.
 container_scanning:
   stage: dynamic_analysis

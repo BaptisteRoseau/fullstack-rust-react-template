@@ -13,8 +13,10 @@ changes, why, and how to know it is done.
   passes the schema check of `scripts/test_lint_cicd.sh` and resolves with `gitlab-ci-local`,
   but has not run on a GitLab instance yet.
 - **Known red jobs.** Item 0 lists the jobs expected to fail on the first run.
-- **Next.** Item 3, caching. Item 0 needs a GitLab runner to confirm, and item 1 can follow
-  item 3, since caching does not depend on the CI images.
+- **Done.** The CI images, the cargo, Bun, sccache and Docker layer caches, and fewer Rust
+  compilations. How they work is in the [gitlab README](../infrastructure/cicd/gitlab/README.md).
+- **Next.** Item 0, which needs a GitLab runner to confirm. That first run also confirms the
+  caches: a second pipeline on the same lock files should download no dependency.
 
 ## 0. Make the existing jobs pass
 
@@ -26,66 +28,13 @@ The pipeline has never run on a GitLab instance. These failures are known before
   Use the host testcontainers reports (`container.get_host()`) instead.
 - **New gating linters fail on the current code**: `typos` reports 5 issues, `hadolint` 5 and
   `shellcheck` 37. Fix the code, or justify each exception in the linter's config.
-- **Never run locally**: `rust-doc` with `-D warnings`, `rust-generated-models` and `nix`. Run
-  them once and fix what they report.
+- **Never run locally**: `rust-check`'s rustdoc with `-D warnings`, `rust-generated-models` and
+  `nix`. Run them once and fix what they report.
+- **First run of the CI images.** Set the project's "Use separate caches for protected branches"
+  setting to disabled and the runner's distributed cache, then check that the `ci-*-image` jobs
+  push their images.
 
 Done when a pipeline on the default branch, where every job runs, is green.
-
-## 1. Build the CI images once
-
-Almost every job installs its tools before it starts: `apt-get install git` in `.bun`,
-`npm install --global`, `pip install`, cargo-binstall, `curl | bash` for Bun, and
-`rustup component add`. That costs time on every job, depends on the network, and spreads the
-tool versions across many files.
-
-- Add `infrastructure/docker/ci_<name>/Dockerfile` images, such as `ci_rust` (toolchain
-  components, cargo subcommands, Docker CLI, Bun), `ci_bun` (git) and `ci_tools` (markdownlint,
-  markdown-link-check, cspell, typos, yamllint, check-jsonschema, shellcheck, hadolint). The
-  `ci_*` prefix is already reserved by [docker/README.md](../infrastructure/docker/README.md).
-- Build them in a first job, tagged with a hash of their Dockerfile, and push them to the project
-  registry. Rebuild only when that hash is not in the registry yet.
-- Point the templates at `$CI_REGISTRY_IMAGE/ci_<name>:<hash>` and drop the install steps.
-
-This is the approach of freedesktop's ci-templates, used by Mesa and GNOME.
-
-Done when no job installs a tool at run time.
-
-## 2. Compile the Rust workspace fewer times
-
-`rust-clippy`, `rust-no-default-features`, `rust-doc`, `rust-unit-tests`,
-`rust-integration-tests` and `rust-coverage` each build the whole workspace from scratch.
-
-- Make `rust-coverage` the integration test job: it runs every test once, produces the report,
-  and becomes gating. Remove `rust-integration-tests`.
-- Run `rust-clippy` and `rust-doc` in one job, so they share `target/`.
-
-Done when a full pipeline compiles the workspace at most four times.
-
-## 3. Cache dependencies and builds
-
-- **Cargo registry.** Move `CARGO_HOME` into the project directory, because GitLab only caches
-  paths inside it. Cache `registry/` and `git/`, keyed on `Cargo.lock`.
-- **Cache policy.** `policy: pull` on branches, `pull-push` on the default branch, with
-  `fallback_keys` pointing at the default branch's cache.
-- **Compiled output.** Prefer sccache with an S3 backend over caching `target/`. GNOME's librsvg
-  measured about 400 MB of `target/` cache for little gain. The stack already runs SeaweedFS,
-  which speaks S3.
-- **Bun.** Cache the package store (`BUN_INSTALL_CACHE_DIR` inside the project), not
-  `node_modules`, keyed on `frontend/bun.lock`.
-
-Done when a second pipeline on the same `Cargo.lock` and `bun.lock` downloads no dependency.
-
-## 4. Cache Docker layers and build the health checker once
-
-Docker-in-Docker starts empty, so every image build starts without a layer cache.
-
-- Build with `docker buildx build --cache-from type=registry --cache-to type=registry`.
-- Build `tmp_health_checker` once, push it, and hand it to the other builds with
-  `--build-context localhost/tmp_health_checker=docker-image://<pushed image>`. Today the backend,
-  frontend, keycloak and homepage jobs each rebuild it.
-- Consider rootless BuildKit (`moby/buildkit:rootless`), which needs no privileged runner.
-
-Done when rebuilding an unchanged image takes under a minute.
 
 ## 5. Show results in GitLab
 
@@ -95,8 +44,8 @@ Done when rebuilding an unchanged image takes under a minute.
   as junit tests".
 - **Lint findings.** Publish clippy and ESLint findings as `reports: codequality`, as
   `frontend-accessibility` already does with oxaria.
-- **Coverage.** Add a `coverage:` regex to both coverage jobs, so the percentage shows on the
-  pipeline.
+- **Coverage.** Add a `coverage:` regex to `rust-tests` and `frontend-unit-tests`, so the
+  percentage shows on the pipeline.
 
 Done when a failing test shows in the pipeline's Tests tab.
 
@@ -116,7 +65,8 @@ Done when a failing test shows in the pipeline's Tests tab.
   custom regex managers for the `*_VERSION` variables and the image tags, so they are bumped
   through merge requests instead of going stale.
 - **Digests.** Pin images by digest as well as by tag.
-- **No `curl | bash`.** Item 1 removes the cargo-binstall and Bun installers from the jobs.
+- **No `curl | bash`.** The `ci_rust` image still installs cargo-binstall that way, once per
+  image build. Download and verify its release archive instead.
 
 ## 8. Structure
 

@@ -1,9 +1,27 @@
+# Base of the Rust jobs, with the cargo registry cached.
+# CARGO_HOME moves into the project directory, the only place GitLab caches.
+# The cargo binaries stay on the PATH of the image, under /usr/local/cargo/bin.
+# The CI never rebuilds the same tree twice, so incremental compilation would
+# only fill target/, and line tables are enough for a backtrace.
 .rust:
-  image: rust:1.98.1-bookworm
+  image: $RUST_CI_IMAGE
   stage: static_analysis
-  needs: []
+  needs:
+    - job: ci-rust-image
+      optional: true
   variables:
     CARGO_TERM_COLOR: always
+    CARGO_HOME: $CI_PROJECT_DIR/.cache/cargo
+    CARGO_INCREMENTAL: "0"
+    CARGO_PROFILE_DEV_DEBUG: line-tables-only
+  cache:
+    key: cargo
+    paths:
+      - .cache/cargo/registry/index
+      - .cache/cargo/registry/cache
+      - .cache/cargo/git/db
+      - .cache/cargo/advisory-db
+    policy: $CACHE_POLICY
   rules:
     - !reference [.check-all-files, rules]
     - !reference [.rust-dependencies-changed, rules]
@@ -14,13 +32,25 @@
           - rustfmt.toml
         compare_to: refs/heads/$CI_DEFAULT_BRANCH
 
-# Installs the cargo subcommands listed in RUST_TOOLS from their prebuilt
-# release binaries, falling back to a build only when none is published.
-.rust-tools:
-  extends: .rust
+# Mixin for the jobs that compile the workspace.
+# For the jobs that compile the workspace. sccache stores what it compiles in
+# the S3 bucket set by the SCCACHE_BUCKET, SCCACHE_ENDPOINT and AWS_* project
+# variables, or in SCCACHE_DIR, cached per job, when no bucket is set.
+.rust-sccache:
   variables:
-    BINSTALL_VERSION: v1.26.1
-    RUST_TOOLS: ""
-  before_script:
-    - curl -L --proto '=https' --tlsv1.2 -sSf "https://raw.githubusercontent.com/cargo-bins/cargo-binstall/$BINSTALL_VERSION/install-from-binstall-release.sh" | bash
-    - cargo binstall --no-confirm --locked $RUST_TOOLS
+    RUSTC_WRAPPER: sccache
+    SCCACHE_DIR: $CI_PROJECT_DIR/.cache/sccache
+    SCCACHE_CACHE_SIZE: 2G
+  cache:
+    - key: cargo
+      paths:
+        - .cache/cargo/registry/index
+        - .cache/cargo/registry/cache
+        - .cache/cargo/git/db
+      policy: $CACHE_POLICY
+    - key: sccache-$CI_JOB_NAME
+      paths:
+        - .cache/sccache
+      policy: $CACHE_POLICY
+  after_script:
+    - sccache --show-stats

@@ -1,9 +1,8 @@
-.node:
-  image: node:24-bookworm
+# Base of the linters that are not tied to Rust or Bun: docs, shell, YAML,
+# Dockerfiles, Kubernetes and CI manifests.
+.tools:
+  image: $TOOLS_CI_IMAGE
   stage: static_analysis
-  needs: []
-
-.python:
-  image: python:3.14-bookworm
-  stage: static_analysis
-  needs: []
+  needs:
+    - job: ci-tools-image
+      optional: true

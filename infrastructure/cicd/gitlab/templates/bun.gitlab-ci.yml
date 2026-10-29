@@ -1,21 +1,32 @@
+# Base of the frontend jobs: runs in frontend/ with the dependencies installed.
+# Bun keeps the packages it downloads in its install cache, which the GitLab
+# cache restores, so bun install only links them into node_modules.
 .bun:
-  image: oven/bun:1.4.4
+  image: $BUN_CI_IMAGE
   stage: static_analysis
-  needs: []
+  needs:
+    - job: ci-bun-image
+      optional: true
+  variables:
+    BUN_INSTALL_CACHE_DIR: $CI_PROJECT_DIR/.cache/bun
+  cache:
+    key: bun
+    paths:
+      - .cache/bun
+    policy: $CACHE_POLICY
   rules:
     - !reference [.check-all-files, rules]
     - !reference [.frontend-changed, rules]
   before_script:
-    - apt-get update -qq && apt-get install -y -qq --no-install-recommends git ca-certificates >/dev/null
     - cd frontend
     - bun install --frozen-lockfile
 
-# The Playwright image ships the browsers and their system libraries, not bun.
+# Base of the jobs that drive a browser: e2e tests and accessibility.
+# The Playwright image ships the browsers and their system libraries.
 .bun-playwright:
   extends: .bun
-  image: mcr.microsoft.com/playwright:v1.62.1-noble
+  image: $PLAYWRIGHT_CI_IMAGE
   stage: test
-  before_script:
-    - npm install --global --silent bun@1.4.4
-    - cd frontend
-    - bun install --frozen-lockfile
+  needs:
+    - job: ci-playwright-image
+      optional: true

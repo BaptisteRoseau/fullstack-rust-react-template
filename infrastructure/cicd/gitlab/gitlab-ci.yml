@@ -1,8 +1,21 @@
 stages:
+  - ci_images
   - static_analysis
   - test
   - build
   - dynamic_analysis
+
+# The images the jobs run in, built from infrastructure/docker/ci_<name>. Bump a
+# tag whenever its directory changes: the ci-images jobs fail until it is.
+# CACHE_POLICY lets only the default branch write the caches, see the workflow.
+variables:
+  RUST_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_rust:1
+  BUN_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_bun:1
+  PLAYWRIGHT_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_playwright:1
+  TOOLS_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_tools:1
+  DOCKER_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_docker:1
+  BUILD_CACHE: $CI_REGISTRY_IMAGE/buildcache
+  CACHE_POLICY: pull
 
 # One pipeline per pushed commit. Merge request pipelines would run the same
 # commit a second time, so they are never created.
@@ -12,7 +25,11 @@ workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never
-    - if: $CI_COMMIT_TAG || $CI_PIPELINE_SOURCE == "schedule" || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        CHECK_ALL_FILES: "true"
+        CACHE_POLICY: pull-push
+    - if: $CI_COMMIT_TAG || $CI_PIPELINE_SOURCE == "schedule"
       variables:
         CHECK_ALL_FILES: "true"
     - changes:

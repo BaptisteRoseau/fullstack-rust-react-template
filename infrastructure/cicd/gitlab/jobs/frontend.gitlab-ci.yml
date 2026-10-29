@@ -5,16 +5,19 @@ include:
       pathspecs: "*.scss *.css *.json :!package-lock.json"
       command: bunx prettier --check
 
+# ESLint over src and e2e.
 frontend-lint:
   extends: .bun
   script:
     - ../scripts/test_lint.sh frontend
 
+# The TypeScript type check.
 frontend-types:
   extends: .bun
   script:
     - bun run check-types
 
+# Prettier over the changed style and JSON files.
 # ESLint already runs Prettier over the TypeScript files.
 frontend-format:
   extends:
@@ -29,17 +32,12 @@ frontend-format:
           - frontend/**/*.json
         compare_to: refs/heads/$CI_DEFAULT_BRANCH
 
-# Also runs scripts/generate-seo-files.test.ts, the seo:check gate.
+# The Vitest suite and its coverage report.
+# Also runs scripts/generate-seo-files.test.ts, the seo:check gate. The
+# coverage report comes from the same run.
 frontend-unit-tests:
   extends: .bun
   stage: test
-  script:
-    - bun run test
-
-frontend-coverage:
-  extends: .bun
-  stage: test
-  allow_failure: true
   script:
     - bun run test --coverage --coverage.reporter=text-summary --coverage.reporter=cobertura
   artifacts:
@@ -48,6 +46,7 @@ frontend-coverage:
         coverage_format: cobertura
         path: frontend/coverage/cobertura-coverage.xml
 
+# Fails when the translation catalogs do not match the sources.
 # i18n:check rewrites the catalogs, so a stale catalog shows up as a diff.
 frontend-i18n:
   extends: .bun
@@ -62,16 +61,21 @@ frontend-i18n:
     - bun run i18n:check
     - git diff --exit-code -- src/i18n/locales
 
+# The production build of the site.
+# Compressed as app_frontend/Dockerfile.release does, so app-frontend-image
+# can take this dist instead of building its own.
 frontend-build:
   extends: .bun
   stage: build
   script:
     - bun run build
+    - bun scripts/compress-dist.ts dist
   artifacts:
     paths:
       - frontend/dist
     expire_in: 1 week
 
+# Builds Storybook, so a broken story fails before anyone opens it.
 frontend-storybook:
   extends: .bun
   stage: build
@@ -86,10 +90,13 @@ frontend-storybook:
   script:
     - bun run storybook:build
 
+# The Playwright suite.
 # Waits for the cheap lints, so a lint failure does not pay for the browsers.
 frontend-e2e-tests:
   extends: .bun-playwright
   needs:
+    - job: ci-playwright-image
+      optional: true
     - job: frontend-lint
       optional: true
       artifacts: false
@@ -104,6 +111,7 @@ frontend-e2e-tests:
       - frontend/playwright-report
     expire_in: 1 week
 
+# oxaria scans every page and reports to GitLab's code quality widget.
 # Same setup as the e2e tests: the dev server on the mock API, whose session
 # needs only the mock_session cookie.
 frontend-accessibility:
@@ -111,14 +119,12 @@ frontend-accessibility:
   stage: dynamic_analysis
   allow_failure: true
   variables:
-    OXARIA_VERSION: 0.1.1
     VITE_APP_API_URL: http://localhost:8081
     VITE_APP_URL: http://localhost:3000
   rules:
     - !reference [.check-all-files, rules]
     - !reference [.frontend-src-changed, rules]
   script:
-    - curl -sSfL "https://github.com/BaptisteRoseau/oxaria/releases/download/$OXARIA_VERSION/oxaria-linux-amd64.tar.gz" | tar -xz -C /usr/local/bin
     - bun run run-mock-server > mock-server.log 2>&1 &
     - bun run dev > dev-server.log 2>&1 &
     - timeout 60 sh -c 'until curl -sf http://localhost:3000 >/dev/null && curl -s http://localhost:8081 >/dev/null; do sleep 1; done'
@@ -130,6 +136,7 @@ frontend-accessibility:
     reports:
       codequality: frontend/gl-code-quality-report.json
 
+# Fails on a dependency whose license is not allowed.
 frontend-licenses:
   extends: .bun
   rules:
@@ -138,6 +145,7 @@ frontend-licenses:
   script:
     - ../scripts/test_licenses.sh frontend
 
+# Reports the known vulnerabilities of the dependencies, without failing.
 frontend-advisories:
   extends: .bun
   allow_failure: true

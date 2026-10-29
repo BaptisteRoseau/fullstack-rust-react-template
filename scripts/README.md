@@ -98,4 +98,10 @@ commit the generated folder — `frontend/openapi.json` is a build artifact and 
 
 [`test_openapi.sh`](./test_openapi.sh) is the matching gate: it fails when the committed SDK no
 longer matches the router. Both need cargo *and* bun, which is why the check is not part of
-`test_lint.sh`'s frontend section.
+`test_lint.sh`'s frontend section. Pass `--from <document>` to either one to skip cargo and use a
+document [`build_openapi.sh`](./build_openapi.sh) wrote earlier, as the CI does.
+
+`build_openapi.sh` runs the generator in a scrubbed environment: the backend reads generic
+variables such as `PORT` or `DEBUG`, and their values reach the document. Only the toolchain
+variables survive (`CARGO_*`, `RUSTC_*`, `RUSTFLAGS`, `SCCACHE_*`, cargo-llvm-cov's), so a build
+under coverage or sccache still reuses what they compiled.

@@ -16,9 +16,9 @@ spec:
 # Runs the command on the matching files the branch changed, see
 # scripts/list_changed_files.sh, and passes when no file matches.
 # set -f keeps the pathspecs from being expanded by the shell.
+# It sets no needs, so the needs of the image template it is combined with stay.
 ".$[[ inputs.job ]]-changed-files":
   stage: static_analysis
-  needs: []
   variables:
     GIT_DEPTH: "0"
   script:

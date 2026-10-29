@@ -1,3 +1,4 @@
+# The health checker every release image copies, so every image job runs on it.
 .tmp-health-checker-image-changed:
   rules:
     - changes:
@@ -6,6 +7,8 @@
           - tools/http_health_checker/**/*
         compare_to: refs/heads/$CI_DEFAULT_BRANCH
 
+# The database image, used by its image job and by rust-generated-models,
+# which generates the models against it.
 .postgres-image-changed:
   rules:
     - changes:
@@ -13,9 +16,18 @@
           - infrastructure/docker/app_postgres/**/*
         compare_to: refs/heads/$CI_DEFAULT_BRANCH
 
+# Runtime configs that Compose and Kustomize mount, for their manifest checks.
 .infrastructure-configs-changed:
   rules:
     - changes:
         paths:
           - infrastructure/configs/**/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+
+# Any CI image definition, for the ci-<name>-image jobs.
+.ci-images-changed:
+  rules:
+    - changes:
+        paths:
+          - infrastructure/docker/ci_*/**/*
         compare_to: refs/heads/$CI_DEFAULT_BRANCH

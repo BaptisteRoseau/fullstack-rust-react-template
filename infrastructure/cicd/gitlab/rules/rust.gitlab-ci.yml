@@ -1,3 +1,5 @@
+# Crate manifests and the lock file: every Rust job, plus license and advisory
+# checks, which look at nothing else.
 .rust-dependencies-changed:
   rules:
     - changes:
@@ -6,6 +8,7 @@
           - Cargo.lock
         compare_to: refs/heads/$CI_DEFAULT_BRANCH
 
+# SQL migrations, which the tests run and the generated models come from.
 .database-migrations-changed:
   rules:
     - changes:
@@ -13,6 +16,7 @@
           - crates/database/migrations/**/*
         compare_to: refs/heads/$CI_DEFAULT_BRANCH
 
+# Any file of the backend crates, Rust or not, for the backend image.
 .crates-changed:
   rules:
     - changes:

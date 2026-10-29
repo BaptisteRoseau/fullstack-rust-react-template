@@ -50,11 +50,11 @@ A non-gating check reports but never fails the pipeline.
 | docs | markdownlint, markdown links including external URLs, typos | yes |
 | docs | cspell | no |
 | rust | rustfmt, clippy, build without default features, rustdoc, licenses | yes |
-| rust | unit tests, integration tests, generated database models | yes |
-| rust | coverage, advisories, unused dependencies | no |
+| rust | unit tests, integration tests, coverage report, generated database models | yes |
+| rust | advisories, unused dependencies | no |
 | frontend | lint, types, prettier, i18n catalogs, licenses | yes |
-| frontend | unit tests, e2e tests, production build, Storybook build | yes |
-| frontend | coverage, advisories, accessibility | no |
+| frontend | unit tests, coverage report, e2e tests, production build, Storybook build | yes |
+| frontend | advisories, accessibility | no |
 | fullstack | committed API SDK matches the router | yes |
 | infrastructure | Dockerfiles, hadolint, Compose, Kubernetes, Nix, shellcheck, CI manifests | yes |
 | infrastructure | yamllint | no |

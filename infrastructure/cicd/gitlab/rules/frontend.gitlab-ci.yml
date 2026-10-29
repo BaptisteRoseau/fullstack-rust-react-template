@@ -1,3 +1,4 @@
+# Anything under frontend/: sources, config, lock file. Default of .bun jobs.
 .frontend-changed:
   rules:
     - changes:
@@ -5,6 +6,8 @@
           - frontend/**/*
         compare_to: refs/heads/$CI_DEFAULT_BRANCH
 
+# Application sources only, for checks that ignore the tooling config:
+# i18n catalogs and accessibility.
 .frontend-src-changed:
   rules:
     - changes:
@@ -12,10 +15,21 @@
           - frontend/src/**/*
         compare_to: refs/heads/$CI_DEFAULT_BRANCH
 
+# The npm dependencies, for license and advisory checks and the Storybook build.
 .frontend-dependencies-changed:
   rules:
     - changes:
         paths:
           - frontend/package.json
           - frontend/bun.lock
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+
+# The generated SDK and its generator. rust-tests and openapi-sdk run on it, so
+# an SDK edited by hand is checked against the router.
+.api-sdk-changed:
+  rules:
+    - changes:
+        paths:
+          - frontend/src/api/generated/**/*
+          - frontend/scripts/generateApiSdk.ts
         compare_to: refs/heads/$CI_DEFAULT_BRANCH

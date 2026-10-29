@@ -12,21 +12,32 @@ cd "$GIT_ROOT"
 # frontend/src/api/generated is. Pass --check to regenerate the document and
 # verify that the committed SDK still matches it, writing nothing; that is what
 # scripts/test_openapi.sh runs. Pass a path to put the document elsewhere.
+# Pass --from <document> to skip the cargo half and use a document built
+# earlier, as the CI does with the one its Rust tests job built.
 #
 # The generator cannot take an output path of its own: `Config::parse()` runs
 # clap over the whole of `std::env::args()`, and `CliConfig` has a positional
 # argument, so the path is swallowed by the config parser. It always writes
 # ./openapi.json, which this script then moves into place.
-#
-# The cargo half runs with a scrubbed environment. Config values reach the
-# document -- `servers`, and `openIdConnectUrl` under `securitySchemes` -- so a
-# developer with those variables exported would otherwise generate an SDK that
-# nobody else reproduces.
 
 CHECK=false
 if [ "${1:-}" = "--check" ]; then
     CHECK=true
     shift
+fi
+
+function generate_sdk() {
+    cd "$GIT_ROOT/frontend"
+    if [ "$CHECK" = true ]; then
+        bun run api:check "$1"
+    else
+        bun run api:sdk "$1"
+    fi
+}
+
+if [ "${1:-}" = "--from" ]; then
+    generate_sdk "$(realpath "$2")"
+    exit 0
 fi
 
 OPENAPI_OUTPUT=$(realpath -m "${1:-frontend/openapi.json}")
@@ -44,25 +55,11 @@ if [ "$GENERATED_DOCUMENT" != "$OPENAPI_OUTPUT" ]; then
     trap 'rm -f "$GENERATED_DOCUMENT"' EXIT
 fi
 
-# What the scrub keeps out is the application's own configuration, not the
-# toolchain's: inside `nix develop` cargo finds openssl and its own dependencies
-# through these, and dropping them fails the build instead of the document.
-scrubbed_env=(env -i PATH="$PATH" HOME="$HOME")
-for variable in CARGO_TARGET_DIR CARGO_HOME RUSTUP_HOME PKG_CONFIG_PATH LD_LIBRARY_PATH; do
-    if [ -n "${!variable:-}" ]; then
-        scrubbed_env+=("$variable=${!variable}")
-    fi
-done
-"${scrubbed_env[@]}" ./scripts/build_openapi.sh
+./scripts/build_openapi.sh
 
 if [ "$GENERATED_DOCUMENT" != "$OPENAPI_OUTPUT" ]; then
     mv "$GENERATED_DOCUMENT" "$OPENAPI_OUTPUT"
 fi
 echo "Wrote the OpenAPI document to $OPENAPI_OUTPUT"
 
-cd frontend
-if [ "$CHECK" = true ]; then
-    bun run api:check "$OPENAPI_OUTPUT"
-else
-    bun run api:sdk "$OPENAPI_OUTPUT"
-fi
+generate_sdk "$OPENAPI_OUTPUT"

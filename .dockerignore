@@ -13,3 +13,6 @@ dist/
 
 # Node modules
 node_modules/
+
+# CI caches
+.cache/

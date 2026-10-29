@@ -1,3 +1,4 @@
+# Adds a Docker daemon, for jobs that build images or start containers.
 # Needs a runner allowed to start privileged containers.
 .docker-daemon:
   services:
@@ -6,36 +7,73 @@
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
 
+# Base of the jobs that talk to the daemon, logged in to the project registry.
 .docker:
   extends: .docker-daemon
-  image: docker:29.9.2
-  needs: []
+  image: $DOCKER_CI_IMAGE
+  needs:
+    - job: ci-docker-image
+      optional: true
   before_script:
-    - apk add --no-cache bash
+    - echo "$CI_REGISTRY_PASSWORD" | docker login --username "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
 
+# Script that builds localhost/tmp_health_checker, the image release Dockerfiles
+# copy the health checker binary from. It does nothing when DOCKERFILE is set
+# and does not copy from it.
+# Docker-in-Docker starts with no layer, so builds take their layers from the
+# BUILD_CACHE repository of the registry. Only the default branch writes it.
+# The daemon uses the containerd image store, the default since Docker 29,
+# which lets the default builder export a registry cache.
+.build-health-checker:
+  script:
+    - |
+      if [ -z "${DOCKERFILE:-}" ] || grep -q "localhost/tmp_health_checker" "$DOCKERFILE"; then
+        CACHE_TO=""
+        if [ "$CACHE_POLICY" = pull-push ]; then
+          CACHE_TO="--cache-to type=registry,ref=$BUILD_CACHE:tmp_health_checker,mode=max"
+        fi
+        docker buildx build --load \
+          --cache-from "type=registry,ref=$BUILD_CACHE:tmp_health_checker" $CACHE_TO \
+          --file infrastructure/docker/tmp_health_checker/Dockerfile \
+          --tag localhost/tmp_health_checker:latest .
+      fi
+
+# Base of the app-<service>-image jobs.
 # Builds IMAGE_NAME from DOCKERFILE with the repository root as context, and
 # pushes it to the project registry from the default branch and from tags only.
-# A Dockerfile that copies from localhost/tmp_health_checker needs that image
-# built first in the same daemon.
+# A Dockerfile that copies from localhost/tmp_health_checker gets that image
+# built first in the same daemon, mostly from the registry cache.
+# When the directory PREBUILT_DIRECTORY exists, it replaces the stage
+# PREBUILT_STAGE, which is then not built.
 .docker-image:
   extends: .docker
   stage: build
   variables:
     IMAGE_NAME: ""
     DOCKERFILE: ""
+    PREBUILT_STAGE: ""
+    PREBUILT_DIRECTORY: ""
   script:
     - IMAGE="$CI_REGISTRY_IMAGE/$IMAGE_NAME"
+    - !reference [.build-health-checker, script]
     - |
-      if grep -q "localhost/tmp_health_checker" "$DOCKERFILE"; then
-        docker build --file infrastructure/docker/tmp_health_checker/Dockerfile --tag localhost/tmp_health_checker:latest .
+      CACHE_TO=""
+      if [ "$CACHE_POLICY" = pull-push ]; then
+        CACHE_TO="--cache-to type=registry,ref=$BUILD_CACHE:$IMAGE_NAME,mode=max"
       fi
-    - docker build --file "$DOCKERFILE" --tag "$IMAGE:$CI_COMMIT_SHORT_SHA" .
+      BUILD_CONTEXT=""
+      if [ -n "$PREBUILT_DIRECTORY" ] && [ -d "$PREBUILT_DIRECTORY" ]; then
+        echo "Using $PREBUILT_DIRECTORY instead of building the $PREBUILT_STAGE stage"
+        BUILD_CONTEXT="--build-context $PREBUILT_STAGE=$PREBUILT_DIRECTORY"
+      fi
+      docker buildx build --load \
+        --cache-from "type=registry,ref=$BUILD_CACHE:$IMAGE_NAME" $CACHE_TO $BUILD_CONTEXT \
+        --file "$DOCKERFILE" --tag "$IMAGE:$CI_COMMIT_SHORT_SHA" .
     - |
       if [ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ] && [ -z "$CI_COMMIT_TAG" ]; then
         echo "Not on $CI_DEFAULT_BRANCH nor on a tag, the image is not pushed"
         exit 0
       fi
-    - echo "$CI_REGISTRY_PASSWORD" | docker login --username "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
     - docker push "$IMAGE:$CI_COMMIT_SHORT_SHA"
     - |
       if [ -n "$CI_COMMIT_TAG" ]; then
@@ -45,3 +83,36 @@
         docker tag "$IMAGE:$CI_COMMIT_SHORT_SHA" "$IMAGE:latest"
         docker push "$IMAGE:latest"
       fi
+
+# Base of the ci-<name>-image jobs.
+# Builds the image of IMAGE_DIRECTORY as IMAGE, the reference the jobs use, and
+# pushes it with a second tag holding the hash of the directory. A pipeline
+# finding IMAGE already pushed builds nothing when that hash matches, and fails
+# when it does not: the directory changed without its tag being bumped.
+# It runs before the CI images exist, so it uses the upstream Docker image.
+.ci-image:
+  extends: .docker-daemon
+  image: docker:29.9.2
+  stage: ci_images
+  needs: []
+  variables:
+    IMAGE_DIRECTORY: ""
+    IMAGE: ""
+  rules:
+    - !reference [.check-all-files, rules]
+    - !reference [.ci-images-changed, rules]
+  script:
+    - HASH=$(find "$IMAGE_DIRECTORY" -type f | sort | xargs sha256sum | sha256sum | cut -c1-12)
+    - echo "$CI_REGISTRY_PASSWORD" | docker login --username "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - |
+      if docker buildx imagetools inspect "$IMAGE" >/dev/null 2>&1; then
+        if docker buildx imagetools inspect "$IMAGE-$HASH" >/dev/null 2>&1; then
+          echo "$IMAGE is up to date with $IMAGE_DIRECTORY"
+          exit 0
+        fi
+        echo "$IMAGE_DIRECTORY changed but $IMAGE already exists: bump its tag in gitlab-ci.yml" >&2
+        exit 1
+      fi
+    - docker build --file "$IMAGE_DIRECTORY/Dockerfile" --tag "$IMAGE" --tag "$IMAGE-$HASH" "$IMAGE_DIRECTORY"
+    - docker push "$IMAGE"
+    - docker push "$IMAGE-$HASH"

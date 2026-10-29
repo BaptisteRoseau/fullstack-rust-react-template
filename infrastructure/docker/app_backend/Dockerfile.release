@@ -1,8 +1,20 @@
-FROM rust:1.98.1 AS builder
+FROM lukemathwalker/cargo-chef:0.1.78-rust-1.98.1 AS chef
+
+WORKDIR /build
+
+# The recipe lists the dependencies only, so the layer that compiles them is
+# reused until Cargo.toml or Cargo.lock change, not on every source change.
+FROM chef AS planner
+
+COPY tools/ ./tools/
+COPY Cargo.toml Cargo.lock ./
+COPY crates/ ./crates/
+RUN cargo chef prepare --recipe-path recipe.json
+
+FROM chef AS builder
 
 ARG target=x86_64-unknown-linux-gnu
 
-WORKDIR /build
 RUN touch /opt/config.yml
 
 # OpenSSL's static libcrypto.a references zlib (compression BIOs), so a
@@ -11,16 +23,24 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends zlib1g-dev && \
     rm -rf /var/lib/apt/lists/*
 
-COPY tools/ ./tools/
-COPY Cargo.toml ./Cargo.toml
-COPY crates/ ./crates/
+# The dependencies and the backend must be compiled with the same flags, or
+# the backend build compiles the dependencies again.
+ENV RUSTFLAGS='-C target-feature=+crt-static -C link-arg=-l:libz.a'
 
-
-RUN RUSTFLAGS='-C target-feature=+crt-static' \
-    cargo fetch
-RUN RUSTFLAGS='-C target-feature=+crt-static -C link-arg=-l:libz.a' \
-    cargo build \
+COPY --from=planner /build/recipe.json recipe.json
+RUN cargo chef cook \
     --release \
+    --locked \
+    --target $target \
+    --bin backend \
+    --recipe-path recipe.json
+
+COPY tools/ ./tools/
+COPY Cargo.toml Cargo.lock ./
+COPY crates/ ./crates/
+RUN cargo build \
+    --release \
+    --locked \
     --target $target \
     --bin backend && \
     mv target/$target/release/backend /opt/backend && \

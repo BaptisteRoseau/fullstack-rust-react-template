@@ -1,21 +1,15 @@
-# Needs cargo for the OpenAPI document and bun for the SDK generated from it.
+# Checks the committed SDK against the OpenAPI document rust-tests built, so it
+# compiles nothing. The script runs from the repository root, hence the path.
+# Both jobs share their rules: rust-tests always exists here.
 openapi-sdk:
-  extends: .rust
-  variables:
-    BUN_VERSION: bun-v1.4.4
+  extends: .bun
+  stage: test
+  needs:
+    - job: ci-bun-image
+      optional: true
+    - job: rust-tests
+      artifacts: true
   rules:
-    - !reference [.check-all-files, rules]
-    - !reference [.crates-changed, rules]
-    - !reference [.rust-dependencies-changed, rules]
-    - changes:
-        paths:
-          - tools/openapi_generator/**/*
-          - frontend/src/api/generated/**/*
-          - frontend/scripts/generateApiSdk.ts
-        compare_to: refs/heads/$CI_DEFAULT_BRANCH
-  before_script:
-    - curl -fsSL https://bun.sh/install | bash -s "$BUN_VERSION"
-    - export PATH="$HOME/.bun/bin:$PATH"
-    - (cd frontend && bun install --frozen-lockfile)
+    - !reference [rust-tests, rules]
   script:
-    - ./scripts/test_openapi.sh
+    - ../scripts/test_openapi.sh --from frontend/openapi.json

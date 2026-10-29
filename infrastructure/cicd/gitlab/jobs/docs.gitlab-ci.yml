@@ -14,33 +14,31 @@ include:
       job: cspell
       command: cspell --no-progress --no-must-find-files --config .cspell.yml
 
+# markdownlint and the link check over the changed markdown files, or over all
+# of them when a file was deleted or renamed, since that can break a link.
 markdown:
   extends:
-    - .node
+    - .tools
     - .markdown-changed-files
   rules:
     - !reference [.check-all-files, rules]
     - !reference [.any-file-changed, rules]
-  before_script:
-    - npm install --global --silent markdownlint-cli@0.50.0 markdown-link-check@3.15.0
 
+# Spelling mistakes in every changed file, code included.
 typos:
   extends:
-    - .python
+    - .tools
     - .typos-changed-files
   rules:
     - !reference [.check-all-files, rules]
     - !reference [.any-file-changed, rules]
-  before_script:
-    - pip install --quiet typos==1.51.1
 
+# Unknown words in every changed file, against .cspell.yml. Reports only.
 cspell:
   extends:
-    - .node
+    - .tools
     - .cspell-changed-files
   allow_failure: true
   rules:
     - !reference [.check-all-files, rules]
     - !reference [.any-file-changed, rules]
-  before_script:
-    - npm install --global --silent cspell@10.4.0

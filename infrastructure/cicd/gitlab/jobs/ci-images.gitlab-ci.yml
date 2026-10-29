@@ -1,0 +1,30 @@
+# One job per CI image of infrastructure/docker/ci_<name>, see .ci-image.
+ci-rust-image:
+  extends: .ci-image
+  variables:
+    IMAGE_DIRECTORY: infrastructure/docker/ci_rust
+    IMAGE: $RUST_CI_IMAGE
+
+ci-bun-image:
+  extends: .ci-image
+  variables:
+    IMAGE_DIRECTORY: infrastructure/docker/ci_bun
+    IMAGE: $BUN_CI_IMAGE
+
+ci-playwright-image:
+  extends: .ci-image
+  variables:
+    IMAGE_DIRECTORY: infrastructure/docker/ci_playwright
+    IMAGE: $PLAYWRIGHT_CI_IMAGE
+
+ci-tools-image:
+  extends: .ci-image
+  variables:
+    IMAGE_DIRECTORY: infrastructure/docker/ci_tools
+    IMAGE: $TOOLS_CI_IMAGE
+
+ci-docker-image:
+  extends: .ci-image
+  variables:
+    IMAGE_DIRECTORY: infrastructure/docker/ci_docker
+    IMAGE: $DOCKER_CI_IMAGE
