@@ -2,27 +2,33 @@ include:
   - local: infrastructure/cicd/gitlab/templates/inputs/lint_changed_files.gitlab-ci.yml
     inputs:
       job: hadolint
-      pathspecs: "*Dockerfile*"
+      paths: "**/Dockerfile*"
       command: hadolint
   - local: infrastructure/cicd/gitlab/templates/inputs/lint_changed_files.gitlab-ci.yml
     inputs:
       job: shellcheck
-      pathspecs: "*.sh scripts/git_hooks/pre-push"
+      paths: "{**/*.sh,scripts/git_hooks/pre-push}"
       command: shellcheck
   - local: infrastructure/cicd/gitlab/templates/inputs/lint_changed_files.gitlab-ci.yml
     inputs:
       job: yamllint
-      pathspecs: "*.yml *.yaml"
+      paths: "**/*.{yml,yaml}"
       command: yamllint
   - local: infrastructure/cicd/gitlab/templates/inputs/lint_changed_files.gitlab-ci.yml
     inputs:
       job: gitlab-ci
-      pathspecs: ".gitlab-ci.yml infrastructure/cicd/gitlab/gitlab-ci.yml infrastructure/cicd/gitlab/*.gitlab-ci.yml"
+      paths: "{.gitlab-ci.yml,infrastructure/cicd/gitlab/**/*.yml}"
       command: ./scripts/test_lint_cicd.sh
 
 # docker build --check over every Dockerfile.
+# The release Dockerfiles copy from localhost/tmp_health_checker, so that image
+# is loaded in the daemon first, mostly from the registry cache. The daemon
+# uses the containerd image store, the default since Docker 29, which lets the
+# default builder export a registry cache.
 dockerfiles:
-  extends: .docker
+  extends:
+    - .docker-cli
+    - .docker-daemon
   stage: static_analysis
   rules:
     - !reference [.should-run-all-jobs, rules]
@@ -32,7 +38,16 @@ dockerfiles:
           - infrastructure/docker/**/*
         compare_to: refs/heads/$CI_DEFAULT_BRANCH
   script:
-    - !reference [.build-health-checker, script]
+    - !reference [.registry-login, script]
+    - |
+      CACHE_TO=""
+      if [ "$CACHE_POLICY" = pull-push ]; then
+        CACHE_TO="--cache-to type=registry,ref=$BUILD_CACHE:tmp_health_checker,mode=max"
+      fi
+      docker buildx build --load \
+        --cache-from "type=registry,ref=$BUILD_CACHE:tmp_health_checker" $CACHE_TO \
+        --file infrastructure/docker/tmp_health_checker/Dockerfile \
+        --tag localhost/tmp_health_checker:latest .
     - ./scripts/test_lint_infra.sh docker
 
 # hadolint over the changed Dockerfiles.
@@ -40,21 +55,12 @@ hadolint:
   extends:
     - .tools
     - .hadolint-changed-files
-  rules:
-    - !reference [.should-run-all-jobs, rules]
-    - changes:
-        paths:
-          - "**/Dockerfile*"
-        compare_to: refs/heads/$CI_DEFAULT_BRANCH
 
 # Merges the Compose manifests with every profile.
 # docker compose config reads the manifests only, no daemon is needed.
 docker-compose:
-  image: $DOCKER_CI_IMAGE
+  extends: .docker-cli
   stage: static_analysis
-  needs:
-    - job: ci-docker-image
-      optional: true
   rules:
     - !reference [.should-run-all-jobs, rules]
     - !reference [.infrastructure-configs-changed, rules]
@@ -103,13 +109,6 @@ shellcheck:
   extends:
     - .tools
     - .shellcheck-changed-files
-  rules:
-    - !reference [.should-run-all-jobs, rules]
-    - changes:
-        paths:
-          - "**/*.sh"
-          - scripts/git_hooks/*
-        compare_to: refs/heads/$CI_DEFAULT_BRANCH
 
 # yamllint over the changed YAML files. Reports only.
 yamllint:
@@ -117,23 +116,10 @@ yamllint:
     - .tools
     - .yamllint-changed-files
   allow_failure: true
-  rules:
-    - !reference [.should-run-all-jobs, rules]
-    - changes:
-        paths:
-          - "**/*.yml"
-          - "**/*.yaml"
-        compare_to: refs/heads/$CI_DEFAULT_BRANCH
 
-# The changed CI manifests against GitLab's CI schema.
+# The changed CI manifests against GitLab's CI schema, and the CI image tags
+# against their directories.
 gitlab-ci:
   extends:
     - .tools
     - .gitlab-ci-changed-files
-  rules:
-    - !reference [.should-run-all-jobs, rules]
-    - changes:
-        paths:
-          - .gitlab-ci.yml
-          - infrastructure/cicd/gitlab/**/*
-        compare_to: refs/heads/$CI_DEFAULT_BRANCH

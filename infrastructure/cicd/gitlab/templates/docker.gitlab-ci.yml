@@ -1,3 +1,16 @@
+# Base of the jobs that run the Docker CLI: image builds and Compose checks.
+.docker-cli:
+  image: $DOCKER_CI_IMAGE
+  needs:
+    - job: ci-docker-image
+      optional: true
+
+# Script that logs in to the project registry, for the jobs reading or writing
+# its images and build cache.
+.registry-login:
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login --username "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+
 # Adds a Docker daemon, for jobs that start containers: the integration tests,
 # the generated models and the Dockerfile check.
 # Needs a runner allowed to start privileged containers, tagged privileged.
@@ -5,129 +18,37 @@
   tags:
     - privileged
   services:
-    - docker:29.9.2-dind
+    - docker:${DOCKER_VERSION}-dind
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
-
-# Base of the jobs that talk to the daemon, logged in to the project registry.
-.docker:
-  extends: .docker-daemon
-  image: $DOCKER_CI_IMAGE
-  needs:
-    - job: ci-docker-image
-      optional: true
-  before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login --username "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
 
 # Adds a rootless BuildKit daemon, for jobs that only build and push images.
 # It runs unprivileged, but the runner must start services with unconfined
 # seccomp and AppArmor profiles, see the README. buildx sends it the build
 # context and the registry credentials of docker login.
 .buildkit:
-  image: $DOCKER_CI_IMAGE
-  needs:
-    - job: ci-docker-image
-      optional: true
+  extends: .docker-cli
   services:
     - name: moby/buildkit:v0.34.1-rootless
       alias: buildkitd
       command: ["--addr", "tcp://0.0.0.0:1234", "--oci-worker-no-process-sandbox"]
   before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login --username "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - !reference [.registry-login, script]
     - docker buildx create --name buildkitd --driver remote --use tcp://buildkitd:1234
     - timeout 60 sh -c 'until docker buildx inspect --bootstrap >/dev/null 2>&1; do sleep 1; done'
 
-# Script that builds localhost/tmp_health_checker, the image release Dockerfiles
-# copy the health checker binary from, into the daemon of .docker.
-# Docker-in-Docker starts with no layer, so builds take their layers from the
-# BUILD_CACHE repository of the registry. Only the default branch writes it.
-# The daemon uses the containerd image store, the default since Docker 29,
-# which lets the default builder export a registry cache.
-.build-health-checker:
-  script:
-    - |
-      CACHE_TO=""
-      if [ "$CACHE_POLICY" = pull-push ]; then
-        CACHE_TO="--cache-to type=registry,ref=$BUILD_CACHE:tmp_health_checker,mode=max"
-      fi
-      docker buildx build --load \
-        --cache-from "type=registry,ref=$BUILD_CACHE:tmp_health_checker" $CACHE_TO \
-        --file infrastructure/docker/tmp_health_checker/Dockerfile \
-        --tag localhost/tmp_health_checker:latest .
-
-# Base of the app-<service>-image jobs.
-# Builds IMAGE_NAME from DOCKERFILE with the repository root as context, and
-# pushes it to the project registry from the default branch and from tags only.
-# BuildKit has no image store, so a Dockerfile that copies from
-# localhost/tmp_health_checker gets that image exported to a directory first,
-# mostly from the registry cache, then passed as a build context of that name.
-# When the directory PREBUILT_DIRECTORY exists, it replaces the stage
-# PREBUILT_STAGE, which is then not built.
-# A tag on a commit the default branch already pushed retags that image instead
-# of building it again, so the release is the image that was tested.
-.docker-image:
-  extends: .buildkit
-  stage: build
-  variables:
-    IMAGE_NAME: ""
-    DOCKERFILE: ""
-    PREBUILT_STAGE: ""
-    PREBUILT_DIRECTORY: ""
-  script:
-    - IMAGE="$CI_REGISTRY_IMAGE/$IMAGE_NAME"
-    - |
-      if [ -n "$CI_COMMIT_TAG" ] && docker buildx imagetools inspect "$IMAGE:$CI_COMMIT_SHORT_SHA" >/dev/null 2>&1; then
-        echo "$IMAGE:$CI_COMMIT_SHORT_SHA is already pushed, tagging it $CI_COMMIT_TAG"
-        docker buildx imagetools create --tag "$IMAGE:$CI_COMMIT_TAG" "$IMAGE:$CI_COMMIT_SHORT_SHA"
-        exit 0
-      fi
-    - |
-      HEALTH_CHECKER_CONTEXT=""
-      if grep -q "localhost/tmp_health_checker" "$DOCKERFILE"; then
-        CACHE_TO=""
-        if [ "$CACHE_POLICY" = pull-push ]; then
-          CACHE_TO="--cache-to type=registry,ref=$BUILD_CACHE:tmp_health_checker,mode=max"
-        fi
-        docker buildx build --output type=local,dest=/tmp/tmp_health_checker \
-          --cache-from "type=registry,ref=$BUILD_CACHE:tmp_health_checker" $CACHE_TO \
-          --file infrastructure/docker/tmp_health_checker/Dockerfile .
-        HEALTH_CHECKER_CONTEXT="--build-context localhost/tmp_health_checker:latest=/tmp/tmp_health_checker"
-      fi
-    - |
-      CACHE_TO=""
-      if [ "$CACHE_POLICY" = pull-push ]; then
-        CACHE_TO="--cache-to type=registry,ref=$BUILD_CACHE:$IMAGE_NAME,mode=max"
-      fi
-      BUILD_CONTEXT=""
-      if [ -n "$PREBUILT_DIRECTORY" ] && [ -d "$PREBUILT_DIRECTORY" ]; then
-        echo "Using $PREBUILT_DIRECTORY instead of building the $PREBUILT_STAGE stage"
-        BUILD_CONTEXT="--build-context $PREBUILT_STAGE=$PREBUILT_DIRECTORY"
-      fi
-      TAGS="--tag $IMAGE:$CI_COMMIT_SHORT_SHA"
-      OUTPUT="--push"
-      if [ -n "$CI_COMMIT_TAG" ]; then
-        TAGS="$TAGS --tag $IMAGE:$CI_COMMIT_TAG"
-      elif [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
-        TAGS="$TAGS --tag $IMAGE:latest"
-      else
-        echo "Not on $CI_DEFAULT_BRANCH nor on a tag, the image is not pushed"
-        OUTPUT="--output type=cacheonly"
-      fi
-      docker buildx build $OUTPUT $TAGS \
-        --cache-from "type=registry,ref=$BUILD_CACHE:$IMAGE_NAME" $CACHE_TO \
-        $HEALTH_CHECKER_CONTEXT $BUILD_CONTEXT \
-        --file "$DOCKERFILE" .
-
 # Base of the ci-<name>-image jobs.
-# Builds the image of IMAGE_DIRECTORY as IMAGE, the reference the jobs use, and
-# pushes it with a second tag holding the hash of the directory. A pipeline
-# finding IMAGE already pushed builds nothing when that hash matches, and fails
-# when it does not: the directory changed without its tag being bumped.
-# It runs before the CI images exist, so it uses the upstream Docker image.
+# IMAGE is tagged with the hash of IMAGE_DIRECTORY by
+# scripts/update_ci_image_tags.sh, which hashes the files the same way. The job
+# fails when the tag no longer matches the files, builds nothing when the tag
+# is already pushed, and builds and pushes it otherwise. Equal files give equal
+# tags, so two branches never push different images under one tag.
+# It runs before the CI images exist, so it uses the upstream Docker image,
+# whose shell is sh.
 .ci-image:
   extends: .buildkit
-  image: docker:29.9.2
+  image: docker:$DOCKER_VERSION
   stage: ci_images
   needs: []
   variables:
@@ -135,17 +56,20 @@
     IMAGE: ""
   rules:
     - !reference [.should-run-all-jobs, rules]
-    - !reference [.ci-images-changed, rules]
+    - changes:
+        paths:
+          - infrastructure/docker/ci_*/**/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
   script:
-    - HASH=$(find "$IMAGE_DIRECTORY" -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -c1-12)
+    - HASH=$(find "$IMAGE_DIRECTORY" -type f -print0 | LC_ALL=C sort -z | xargs -0 sha256sum | sha256sum | cut -c1-12)
     - |
-      if docker buildx imagetools inspect "$IMAGE" >/dev/null 2>&1; then
-        if docker buildx imagetools inspect "$IMAGE-$HASH" >/dev/null 2>&1; then
-          echo "$IMAGE is up to date with $IMAGE_DIRECTORY"
-          exit 0
-        fi
-        echo "$IMAGE_DIRECTORY changed but $IMAGE already exists: bump its tag in gitlab-ci.yml." >&2
-        echo "Another branch may have pushed this tag first: take the next free one." >&2
+      if [ "${IMAGE##*:}" != "$HASH" ]; then
+        echo "$IMAGE_DIRECTORY hashes to $HASH, but $IMAGE is tagged ${IMAGE##*:}." >&2
+        echo "Run ./scripts/update_ci_image_tags.sh and commit gitlab-ci.yml." >&2
         exit 1
       fi
-    - docker buildx build --push --file "$IMAGE_DIRECTORY/Dockerfile" --tag "$IMAGE" --tag "$IMAGE-$HASH" "$IMAGE_DIRECTORY"
+      if docker buildx imagetools inspect "$IMAGE" >/dev/null 2>&1; then
+        echo "$IMAGE is already pushed"
+        exit 0
+      fi
+    - docker buildx build --push --file "$IMAGE_DIRECTORY/Dockerfile" --tag "$IMAGE" "$IMAGE_DIRECTORY"

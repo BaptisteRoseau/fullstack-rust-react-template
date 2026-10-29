@@ -1,33 +1,20 @@
-# The health checker every release image copies, so every image job runs on it.
-.tmp-health-checker-image-changed:
-  rules:
-    - changes:
-        paths:
-          - infrastructure/docker/tmp_health_checker/**/*
-          - tools/http_health_checker/**/*
-        compare_to: refs/heads/$CI_DEFAULT_BRANCH
-
-# The database image, used by its image job and by rust-generated-models,
-# which generates the models against it.
-.postgres-image-changed:
-  rules:
-    - changes:
-        paths:
-          - infrastructure/docker/app_postgres/**/*
-        compare_to: refs/heads/$CI_DEFAULT_BRANCH
-
-# Runtime configs that Compose and Kustomize mount, for their manifest checks.
-.infrastructure-configs-changed:
-  rules:
-    - changes:
-        paths:
-          - infrastructure/configs/**/*
-        compare_to: refs/heads/$CI_DEFAULT_BRANCH
-
-# Any CI image definition, for the ci-<name>-image jobs.
-.ci-images-changed:
-  rules:
-    - changes:
-        paths:
-          - infrastructure/docker/ci_*/**/*
-        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+# The changes rules shared by several infrastructure jobs, see changes_rule.gitlab-ci.yml.
+include:
+  # .tmp-health-checker-image-changed: the health checker every release image
+  # copies, so every image job and the Dockerfile check run on it.
+  - local: infrastructure/cicd/gitlab/templates/inputs/changes_rule.gitlab-ci.yml
+    inputs:
+      name: tmp-health-checker-image
+      paths: ["infrastructure/docker/tmp_health_checker/**/*", "tools/http_health_checker/**/*"]
+  # .postgres-image-changed: the database image, used by its image job and by
+  # rust-generated-models, which generates the models against it.
+  - local: infrastructure/cicd/gitlab/templates/inputs/changes_rule.gitlab-ci.yml
+    inputs:
+      name: postgres-image
+      paths: ["infrastructure/docker/app_postgres/**/*"]
+  # .infrastructure-configs-changed: the runtime configs that Compose and
+  # Kustomize mount, for their manifest checks.
+  - local: infrastructure/cicd/gitlab/templates/inputs/changes_rule.gitlab-ci.yml
+    inputs:
+      name: infrastructure-configs
+      paths: ["infrastructure/configs/**/*"]

@@ -24,7 +24,8 @@ rust-check:
 # build cargo-llvm-cov instruments for the coverage report. The tests under
 # tests/ start their backends with testcontainers.
 # The OpenAPI document reuses that build, and openapi-sdk checks it, so this
-# job also runs when only the generated SDK changed.
+# job also runs when only the generated SDK or its generator changed: an SDK
+# edited by hand is then checked against the router.
 rust-tests:
   extends:
     - .rust
@@ -35,7 +36,11 @@ rust-tests:
     TESTCONTAINERS_HOST_OVERRIDE: docker
   rules:
     - !reference [.rust, rules]
-    - !reference [.api-sdk-changed, rules]
+    - changes:
+        paths:
+          - frontend/src/api/generated/**/*
+          - frontend/scripts/generateApiSdk.ts
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
   script:
     - source <(cargo llvm-cov show-env --sh)
     - cargo llvm-cov clean --workspace
@@ -103,7 +108,7 @@ rust-generated-models:
           - scripts/build_database_rust_models.sh
         compare_to: refs/heads/$CI_DEFAULT_BRANCH
   script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login --username "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - !reference [.registry-login, script]
     - >-
       docker buildx build --load
       --cache-from "type=registry,ref=$BUILD_CACHE:app_postgres"

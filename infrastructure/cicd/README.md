@@ -56,7 +56,8 @@ A non-gating check reports but never fails the pipeline.
 | frontend | unit tests, coverage report, e2e tests, production build, Storybook build | yes |
 | frontend | advisories, accessibility | no |
 | fullstack | committed API SDK matches the router | yes |
+| fullstack | newer versions of the crates, npm packages and Docker images | no |
 | infrastructure | Dockerfiles, hadolint, Compose, Kubernetes, Nix, shellcheck, CI manifests | yes |
 | infrastructure | yamllint | no |
-| security | secret detection, SAST, container scanning | no |
+| security | secret detection, SAST, IaC scanning, dependency scanning, container scanning | no |
 | build | one release image per service in [docker](../docker/README.md) | yes |

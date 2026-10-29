@@ -1,51 +1,75 @@
-# The backend release image.
+# One release image per service of infrastructure/docker, each scanned for CVEs
+# where it is pushed, see docker_image.gitlab-ci.yml.
 # The application images wait for the cheap lints of their code, so a lint
 # failure does not pay for a release build. The frontend image takes the dist
 # of frontend-build when that job ran.
+include:
+  - local: infrastructure/cicd/gitlab/templates/inputs/docker_image.gitlab-ci.yml
+    inputs:
+      job: app-backend-image
+      image: app_backend
+      dockerfile: infrastructure/docker/app_backend/Dockerfile.release
+      needs:
+        - job: rust-format
+          optional: true
+          artifacts: false
+        - job: rust-check
+          optional: true
+          artifacts: false
+  - local: infrastructure/cicd/gitlab/templates/inputs/docker_image.gitlab-ci.yml
+    inputs:
+      job: app-frontend-image
+      image: app_frontend
+      dockerfile: infrastructure/docker/app_frontend/Dockerfile.release
+      prebuilt_stage: site
+      prebuilt_directory: frontend/dist
+      needs:
+        - job: frontend-lint
+          optional: true
+          artifacts: false
+        - job: frontend-types
+          optional: true
+          artifacts: false
+        - job: frontend-build
+          optional: true
+  - local: infrastructure/cicd/gitlab/templates/inputs/docker_image.gitlab-ci.yml
+    inputs:
+      job: app-migration-image
+      image: app_migration
+      dockerfile: infrastructure/docker/app_migration/Dockerfile
+  - local: infrastructure/cicd/gitlab/templates/inputs/docker_image.gitlab-ci.yml
+    inputs:
+      job: app-postgres-image
+      image: app_postgres
+      dockerfile: infrastructure/docker/app_postgres/Dockerfile
+  - local: infrastructure/cicd/gitlab/templates/inputs/docker_image.gitlab-ci.yml
+    inputs:
+      job: app-keycloak-image
+      image: app_keycloak
+      dockerfile: infrastructure/docker/app_keycloak/Dockerfile
+  - local: infrastructure/cicd/gitlab/templates/inputs/docker_image.gitlab-ci.yml
+    inputs:
+      job: app-homepage-image
+      image: app_homepage
+      dockerfile: infrastructure/docker/app_homepage/Dockerfile
+
+# The backend release image.
 app-backend-image:
-  extends: .docker-image
-  needs:
-    - job: ci-docker-image
-      optional: true
-    - job: rust-format
-      optional: true
-      artifacts: false
-    - job: rust-check
-      optional: true
-      artifacts: false
-  variables:
-    IMAGE_NAME: app_backend
-    DOCKERFILE: infrastructure/docker/app_backend/Dockerfile.release
+  extends: .app-backend-image
   rules:
     - !reference [.should-run-all-jobs, rules]
     - !reference [.tmp-health-checker-image-changed, rules]
-    - !reference [.crates-changed, rules]
     - !reference [.rust-dependencies-changed, rules]
     - changes:
         paths:
+          - crates/**/*
           - infrastructure/docker/app_backend/**/*
           - tools/**/*
         compare_to: refs/heads/$CI_DEFAULT_BRANCH
 
 # The frontend release image: the static site and static-web-server.
 app-frontend-image:
-  extends: .docker-image
-  needs:
-    - job: ci-docker-image
-      optional: true
-    - job: frontend-lint
-      optional: true
-      artifacts: false
-    - job: frontend-types
-      optional: true
-      artifacts: false
-    - job: frontend-build
-      optional: true
-  variables:
-    IMAGE_NAME: app_frontend
-    DOCKERFILE: infrastructure/docker/app_frontend/Dockerfile.release
-    PREBUILT_STAGE: site
-    PREBUILT_DIRECTORY: frontend/dist
+  extends: .app-frontend-image
   rules:
     - !reference [.should-run-all-jobs, rules]
     - !reference [.tmp-health-checker-image-changed, rules]
@@ -57,10 +81,7 @@ app-frontend-image:
 
 # The one-shot image that applies the database migrations.
 app-migration-image:
-  extends: .docker-image
-  variables:
-    IMAGE_NAME: app_migration
-    DOCKERFILE: infrastructure/docker/app_migration/Dockerfile
+  extends: .app-migration-image
   rules:
     - !reference [.should-run-all-jobs, rules]
     - !reference [.database-migrations-changed, rules]
@@ -71,20 +92,14 @@ app-migration-image:
 
 # The database image, with its initialization scripts.
 app-postgres-image:
-  extends: .docker-image
-  variables:
-    IMAGE_NAME: app_postgres
-    DOCKERFILE: infrastructure/docker/app_postgres/Dockerfile
+  extends: .app-postgres-image
   rules:
     - !reference [.should-run-all-jobs, rules]
     - !reference [.postgres-image-changed, rules]
 
 # The identity provider image.
 app-keycloak-image:
-  extends: .docker-image
-  variables:
-    IMAGE_NAME: app_keycloak
-    DOCKERFILE: infrastructure/docker/app_keycloak/Dockerfile
+  extends: .app-keycloak-image
   rules:
     - !reference [.should-run-all-jobs, rules]
     - !reference [.tmp-health-checker-image-changed, rules]
@@ -95,10 +110,7 @@ app-keycloak-image:
 
 # The dashboard image linking every service.
 app-homepage-image:
-  extends: .docker-image
-  variables:
-    IMAGE_NAME: app_homepage
-    DOCKERFILE: infrastructure/docker/app_homepage/Dockerfile
+  extends: .app-homepage-image
   rules:
     - !reference [.should-run-all-jobs, rules]
     - !reference [.tmp-health-checker-image-changed, rules]

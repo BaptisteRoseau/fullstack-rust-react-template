@@ -12,9 +12,9 @@ The checks it runs and when they run are shared with every provider, see
 gitlab/
 ├── gitlab-ci.yml                 # stages, CI image tags, workflow rules, and the includes below
 ├── rules/
-│   └── <category>.gitlab-ci.yml  # hidden rules shared by several jobs: .frontend-changed
+│   └── <category>.gitlab-ci.yml  # changes rules shared by several jobs: .frontend-changed
 ├── templates/
-│   ├── <tool>.gitlab-ci.yml      # hidden jobs, such as .rust or .docker-image
+│   ├── <tool>.gitlab-ci.yml      # hidden jobs shared by several jobs, such as .rust or .buildkit
 │   └── inputs/
 │       └── <name>.gitlab-ci.yml  # templates with spec:inputs, included by the jobs using them
 └── jobs/
@@ -26,14 +26,14 @@ that suffix, so a manifest named `<name>.yml` is silently left out of the pipeli
 lint.
 
 - **`templates/`** holds hidden jobs, whose names start with a dot. Each one implements how a
-  kind of job runs, for example how to build and push a Docker image.
+  kind of job runs, for example how to start a BuildKit daemon.
 - **`templates/inputs/`** holds templates that take [`spec:inputs`](#templates-with-inputs). The
   entry point's `templates/*.gitlab-ci.yml` wildcard does not reach this folder, on purpose: a
   wildcard include passes no inputs, so the pipeline would fail on the missing ones.
 - **`jobs/`** holds the jobs that actually run. Each one extends a template and names what it
   applies to, for example `app-backend-image`.
-- **`rules/`** holds a rule only once two jobs or templates need it. A rule used by a single job
-  stays in that job.
+- **`rules/` and `templates/` hold only what two jobs or more share.** A rule or a template used
+  by a single job lives in that job, where its reader looks for it.
 
 ## Rules
 
@@ -41,12 +41,14 @@ Templates and jobs can both define `rules`. A template sets the default trigger 
 job. A job that needs another trigger replaces it, because `extends` **replaces** `rules`
 instead of merging them.
 
-A shared rule is a hidden key named after what changed, holding a `rules` list. A job lists it
-next to the paths only it needs:
+A shared rule is a hidden key named after what changed, `.<name>-changed`, holding a `rules`
+list. [changes_rule.gitlab-ci.yml](./templates/inputs/changes_rule.gitlab-ci.yml) generates it
+from a `name` and a `paths` list, so `compare_to` is written once. A job lists shared rules next
+to the paths only it needs:
 
 ```yaml
 app-keycloak-image:
-  extends: .docker-image
+  extends: .app-keycloak-image
   rules:
     - !reference [.should-run-all-jobs, rules]
     - !reference [.tmp-health-checker-image-changed, rules]
@@ -71,7 +73,8 @@ and the jobs no longer start on a branch.
 
 A job that lints changed files only uses
 [lint_changed_files.gitlab-ci.yml](./templates/inputs/lint_changed_files.gitlab-ci.yml), see
-below.
+below. One glob both starts the job and lists its files, through
+[list_changed_files.sh](../../../scripts/list_changed_files.sh), which reads GitLab's glob syntax.
 
 ## Templates with inputs
 
@@ -87,21 +90,29 @@ include:
   - local: infrastructure/cicd/gitlab/templates/inputs/lint_changed_files.gitlab-ci.yml
     inputs:
       job: shellcheck
-      pathspecs: "*.sh scripts/git_hooks/pre-push"
+      paths: "{**/*.sh,scripts/git_hooks/pre-push}"
       command: shellcheck
 
 shellcheck:
-  extends: .shellcheck-changed-files
-  image: koalaman/shellcheck-alpine:v0.11.0
+  extends:
+    - .tools
+    - .shellcheck-changed-files
 ```
 
-The inputs of `lint_changed_files.gitlab-ci.yml`:
+| Template | Generates | Inputs |
+| --- | --- | --- |
+| [lint_changed_files](./templates/inputs/lint_changed_files.gitlab-ci.yml) | `.<job>-changed-files`, with its rules | `job`, `paths`, `exclude`, `all_on_delete`, `command` |
+| [docker_image](./templates/inputs/docker_image.gitlab-ci.yml) | `.<job>`, and the visible `<job>-scan` | `job`, `image`, `dockerfile`, `prebuilt_stage`, `prebuilt_directory`, `needs` |
+| [changes_rule](./templates/inputs/changes_rule.gitlab-ci.yml) | `.<name>-changed` | `name`, `paths` |
 
-- `job` — the name of the job, which extends `.<job>-changed-files`.
-- `pathspecs` — the git pathspecs of the files to lint. Empty matches every file.
-- `all_on_delete` — lint every matching file when the branch deleted or renamed a file, for a
-  check that file can break, such as a markdown link.
-- `command` — the command that receives the files.
+- **`paths` of `lint_changed_files` is one GitLab glob.** Braces list several:
+  `"**/*.{yml,yaml}"`. `exclude` leaves files out of the lint, but they still start the job,
+  since `rules:changes` cannot exclude. `all_on_delete` lints every matching file when the branch
+  deleted or renamed a file, for a check that such a file can break, such as a markdown link.
+- **`needs` of `docker_image` lists the jobs to wait for besides `ci-docker-image`.** The template
+  adds them to its own, since a job's `needs` would replace the template's instead of merging.
+- **An array input goes in as a JSON-like list**, such as `paths: ["frontend/**/*"]`. Never put a
+  `!reference` inside an input: GitLab does not resolve it there.
 
 ## CI images
 
@@ -114,23 +125,25 @@ job installs a tool at run time:
 | `ci_bun` | `.bun` | Bun, git |
 | `ci_playwright` | `.bun-playwright` | Playwright browsers, Bun, oxaria |
 | `ci_tools` | `.tools` | the docs, shell, YAML, Dockerfile, Kubernetes and CI manifest linters |
-| `ci_docker` | `.docker` | Docker CLI, bash, git |
+| `ci_docker` | `.docker-cli` | Docker CLI, bash, git |
 
 A tool version lives in its image's Dockerfile, not in the job.
 
 The `ci-<name>-image` jobs of the `ci_images` stage build them, and every job using an image
 `needs` its build job with `optional: true`. They run only when an image directory changed, and
-on every full run.
+on every full run. They stay five jobs rather than one `parallel:matrix` job, because GitLab
+refuses `optional` on a `needs` of a matrix job.
 
-- **The tag is set by hand** in [gitlab-ci.yml](./gitlab-ci.yml), such as `ci_rust:1`. A job
-  cannot pick its `image` from a value computed during the pipeline.
-- **Bump the tag whenever the image directory changes.** The build job also pushes a tag holding
-  the hash of the directory. When the image is already pushed but that hash tag is missing, the
-  job fails and asks for a bump, so a changed Dockerfile never hides behind an old tag.
-- **A tag belongs to the first branch that pushes it.** Branches push their CI images too, so
-  two branches bumping `ci_rust:1` to `ci_rust:2` with different Dockerfiles collide: the
-  second one fails and must take `ci_rust:3`. A tag pushed by a branch that was never merged
-  stays taken, and the next bump skips it.
+- **The tag is the hash of the image directory**, such as `ci_rust:7d30afb0266a`, written in
+  [gitlab-ci.yml](./gitlab-ci.yml). A job cannot pick its `image` from a value computed during
+  the pipeline, so the hash is committed.
+- **Run `./scripts/update_ci_image_tags.sh` after changing an image directory**, and commit the
+  entry point with it. The build job hashes the directory the same way and fails on a stale tag,
+  and so does `test_lint_cicd.sh`, which the `pre-push` hook runs.
+- **Equal files give equal tags.** Two branches changing an image differently push different
+  tags, so they never overwrite each other's image.
+- **The hash covers the files git tracks.** `git add` a new file of the image directory before
+  running the script, or the job, which hashes every file of its clone, disagrees with it.
 - **The CI images run as root**, unlike the release images: the job writes into the clone the
   runner made as root.
 
@@ -145,10 +158,14 @@ on every full run.
   from the `SCCACHE_BUCKET`, `SCCACHE_ENDPOINT`, `SCCACHE_REGION` and `AWS_*` project variables,
   such as one on the stack's SeaweedFS. With no bucket set, it falls back to `.cache/sccache`,
   cached per job.
-- **Docker layers.** Image builds read and write a registry cache, `$BUILD_CACHE:<image>`. They
-  also build `tmp_health_checker` from that cache, which the `dockerfiles` job shares through
-  `.build-health-checker`. `rust-generated-models` builds the database image from the cache of
+- **Docker layers.** Image builds, in
+  [build_release_image.sh](../../../scripts/build_release_image.sh), read and write a registry
+  cache, `$BUILD_CACHE:<image>`. They also build `tmp_health_checker` from that cache, which the
+  `dockerfiles` job shares. `rust-generated-models` builds the database image from the cache of
   `app-postgres-image`.
+- **One cache key, one set of paths.** `.rust` and `.rust-sccache` push the same `cargo-*` key,
+  so they share its entry through a YAML anchor. Two lists of paths under one key would let the
+  last job to upload drop the others' paths.
 - **Only the default branch writes.** The workflow sets `CACHE_POLICY` to `pull-push` there and
   `pull` everywhere else, and every cache and `--cache-to` follows it. A branch with new
   dependencies downloads them, and they are cached once the branch is merged.
@@ -186,11 +203,11 @@ Jobs start containers or build images in two ways, and each needs its own runner
 
 ## Cancelled and waiting jobs
 
-- **A new commit cancels the older pipelines of its branch**, whole. GitLab only does so while
-  no job with `interruptible: false` has started, and that is a job's default. `default:` sets
-  `interruptible: true` for every job: **never set it to `false`**, or the first such job that
-  starts keeps its whole pipeline running. The project setting "Auto-cancel redundant
-  pipelines" must stay enabled.
+- **A new commit cancels the interruptible jobs of its branch's older pipelines.** The workflow
+  sets `auto_cancel: on_new_commit: interruptible`, and `default:` makes every job
+  interruptible. A job set to `interruptible: false` keeps running and the rest are cancelled.
+  The project setting "Auto-cancel redundant pipelines" must stay enabled: the workflow only
+  tunes it.
 - **A cancelled image job can leave some of its tags pushed**, such as the commit's tag without
   `latest`. The next pipeline on that branch pushes them again.
 - **Expensive jobs wait on the cheap lints of their code.** `frontend-e2e-tests` and
@@ -216,13 +233,42 @@ A full pipeline compiles the workspace three times, once per mode:
 changed. Keep them that way: the needs of `openapi-sdk` on `rust-tests` is not optional, so a
 pipeline where only the first exists is invalid.
 
+## Security scans and dependency updates
+
+[security.gitlab-ci.yml](./jobs/security.gitlab-ci.yml) includes GitLab's scanners:
+
+| Template | Jobs | Scans |
+| --- | --- | --- |
+| `Secret-Detection` | `secret_detection` | secrets in the commits |
+| `SAST` | `semgrep-sast` and the other analyzers | the sources |
+| `SAST-IaC` | `kics-iac-sast` | Dockerfiles, Compose and Kubernetes manifests |
+| `Dependency-Scanning.v2` | `dependency-scanning` | `Cargo.lock` and `bun.lock` |
+| `Container-Scanning` | `<job>-scan`, one per release image | the pushed images |
+
+- **Dependency scanning needs GitLab 19.0 or later**, where its `v2` template is generally
+  available. On an older instance, the include fails and no pipeline is created.
+- **`AST_ENABLE_MR_PIPELINES` is `"false"`.** The templates otherwise leave a branch with an
+  open merge request to a merge request pipeline, which the workflow never creates, and the scans
+  would not run at all. Dependency scanning does so even when the variable is unset.
+- **The scanners start at once.** `needs: []` on their bases keeps a failing lint from leaving the
+  commit unscanned.
+
+`dependency-updates` in [fullstack.gitlab-ci.yml](./jobs/fullstack.gitlab-ci.yml) runs Renovate
+on the clone, as configured by
+[configs/renovate/config.json](../../configs/renovate/config.json). It looks up a
+newer version of every crate, npm package and Docker image, including the images of these
+manifests, and lists them in its log and in `renovate-report.json`. It opens no merge request and
+needs no token. A `GITHUB_COM_TOKEN` project variable lifts GitHub's rate limit on its lookups.
+
+- **An image given through a variable is invisible to Renovate**, such as `docker:$DOCKER_VERSION`.
+  The config reads `DOCKER_VERSION` with a custom manager: give any new version variable one.
+- **The config is passed as `RENOVATE_CONFIG_FILE`**, not found at the repository root. A
+  Renovate bot installed on the project would not read it.
+
 ## Traps
 
 Traps when adding a job:
 
-- **`changes` paths and `pathspecs` use different syntaxes.** The first is a
-  GitLab glob (`"**/*.md"`), the second a git pathspec (`*.md`). Update both together, or the
-  job starts and finds no file, or never starts.
 - **The file list is relative to the job's directory.** The `.bun` template moves to
   `frontend/`, so its jobs get paths relative to it, ready for `prettier` or `eslint`.
 - **A command containing a colon followed by a space must be a block scalar** (`- >-`).
@@ -230,11 +276,13 @@ Traps when adding a job:
 - **A container started by a `.docker-daemon` job listens on the `docker` host**, not on
   `127.0.0.1`.
 - **BuildKit has no image store.** An image a `.buildkit` job builds cannot be referenced by a
-  later build in the same job. Pass it as a `--build-context`, as `.docker-image` does with
-  `tmp_health_checker`.
-- **A template's `needs` is replaced, not merged.** A job that sets its own `needs`, such as
-  `app-backend-image`, must list its image's build job again, or it can start before its image
-  is pushed. The changed-files template sets no `needs` for that reason.
+  later build in the same job. Pass it as a `--build-context`, as `build_release_image.sh` does
+  with `tmp_health_checker`.
+- **A template's `needs`, `cache` and `rules` are replaced, not merged.** A job that sets its own
+  `needs` must list its image's build job again, or it can start before its image is pushed.
+  `!reference` cannot help: GitLab only combines lists of them in `rules`, `script` and `stages`.
+  Pass extra needs as an input instead, as `docker_image` does. The changed-files template sets
+  no `needs` for that reason.
 - **`frontend/dist` replaces a Dockerfile stage.** `app-frontend-image` passes the dist of
   `frontend-build` as the `site` stage of its Dockerfile. When that job did not run, the stage is
   built from the sources instead.
@@ -248,8 +296,8 @@ Traps when adding a job:
 ## Verification
 
 ```bash
-./scripts/test_lint_cicd.sh    # every manifest against GitLab's CI schema
-npx gitlab-ci-local --list     # the merged pipeline, includes and !reference resolved
+./scripts/test_lint_cicd.sh      # every manifest against GitLab's CI schema, and the CI image tags
+npx gitlab-ci-local --preview    # the merged pipeline, includes, inputs and !reference resolved
 ```
 
 The first needs `check-jsonschema` and validates each file alone; a file with a `spec:` header

@@ -2,7 +2,8 @@ include:
   - local: infrastructure/cicd/gitlab/templates/inputs/lint_changed_files.gitlab-ci.yml
     inputs:
       job: frontend-format
-      pathspecs: "*.scss *.css *.json :!package-lock.json"
+      paths: "frontend/**/*.{scss,css,json}"
+      exclude: frontend/package-lock.json
       command: bunx prettier --check
 
 # ESLint over src and e2e.
@@ -23,14 +24,6 @@ frontend-format:
   extends:
     - .bun
     - .frontend-format-changed-files
-  rules:
-    - !reference [.should-run-all-jobs, rules]
-    - changes:
-        paths:
-          - frontend/**/*.scss
-          - frontend/**/*.css
-          - frontend/**/*.json
-        compare_to: refs/heads/$CI_DEFAULT_BRANCH
 
 # The Vitest suite and its coverage report.
 # Also runs scripts/generate-seo-files.test.ts, the seo:check gate. The

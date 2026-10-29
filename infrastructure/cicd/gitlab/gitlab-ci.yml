@@ -5,15 +5,18 @@ stages:
   - build
   - dynamic_analysis
 
-# The images the jobs run in, built from infrastructure/docker/ci_<name>. Bump a
-# tag whenever its directory changes: the ci-images jobs fail until it is.
+# The images the jobs run in, built from infrastructure/docker/ci_<name> and
+# tagged with the hash of that directory. scripts/update_ci_image_tags.sh
+# writes the tags: the ci-images jobs fail when one is stale.
+# DOCKER_VERSION is the upstream Docker image of the daemon and CI image jobs.
 # CACHE_POLICY lets only the default branch write the caches, see the workflow.
 variables:
-  RUST_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_rust:2
-  BUN_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_bun:1
-  PLAYWRIGHT_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_playwright:1
-  TOOLS_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_tools:1
-  DOCKER_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_docker:1
+  RUST_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_rust:7d30afb0266a
+  BUN_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_bun:0dd3759cd823
+  PLAYWRIGHT_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_playwright:a59277879464
+  TOOLS_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_tools:c2d0a743a885
+  DOCKER_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_docker:97ae0354d4e1
+  DOCKER_VERSION: "29.9.2"
   BUILD_CACHE: $CI_REGISTRY_IMAGE/buildcache
   CACHE_POLICY: pull
 
@@ -21,7 +24,11 @@ variables:
 # commit a second time, so they are never created.
 # SHOULD_RUN_ALL_JOBS makes every job run on every file instead of on what the
 # branch changed since it left the default branch.
+# A new commit on a branch cancels the interruptible jobs of its older
+# pipelines, which default makes every job.
 workflow:
+  auto_cancel:
+    on_new_commit: interruptible
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never
@@ -41,8 +48,8 @@ workflow:
         SHOULD_RUN_ALL_JOBS: "true"
     - when: always
 
-# A new commit on a branch cancels its older pipelines, but only those where no
-# job with interruptible: false has started, which is the default of a job.
+# A job is not interruptible by default, and would keep running once its
+# pipeline is redundant.
 default:
   interruptible: true
 

@@ -1,35 +1,20 @@
-# Anything under frontend/: sources, config, lock file. Default of .bun jobs.
-.frontend-changed:
-  rules:
-    - changes:
-        paths:
-          - frontend/**/*
-        compare_to: refs/heads/$CI_DEFAULT_BRANCH
-
-# Application sources only, for checks that ignore the tooling config:
-# i18n catalogs and accessibility.
-.frontend-src-changed:
-  rules:
-    - changes:
-        paths:
-          - frontend/src/**/*
-        compare_to: refs/heads/$CI_DEFAULT_BRANCH
-
-# The npm dependencies, for license and advisory checks and the Storybook build.
-.frontend-dependencies-changed:
-  rules:
-    - changes:
-        paths:
-          - frontend/package.json
-          - frontend/bun.lock
-        compare_to: refs/heads/$CI_DEFAULT_BRANCH
-
-# The generated SDK and its generator. rust-tests and openapi-sdk run on it, so
-# an SDK edited by hand is checked against the router.
-.api-sdk-changed:
-  rules:
-    - changes:
-        paths:
-          - frontend/src/api/generated/**/*
-          - frontend/scripts/generateApiSdk.ts
-        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+# The changes rules shared by several frontend jobs, see changes_rule.gitlab-ci.yml.
+include:
+  # .frontend-changed: anything under frontend/, sources, config and lock file.
+  # Default of the .bun jobs, and the frontend image.
+  - local: infrastructure/cicd/gitlab/templates/inputs/changes_rule.gitlab-ci.yml
+    inputs:
+      name: frontend
+      paths: ["frontend/**/*"]
+  # .frontend-src-changed: the application sources only, for the checks that
+  # ignore the tooling config: i18n catalogs and accessibility.
+  - local: infrastructure/cicd/gitlab/templates/inputs/changes_rule.gitlab-ci.yml
+    inputs:
+      name: frontend-src
+      paths: ["frontend/src/**/*"]
+  # .frontend-dependencies-changed: the npm dependencies, for the license and
+  # advisory checks, the Storybook build and the dependency updates.
+  - local: infrastructure/cicd/gitlab/templates/inputs/changes_rule.gitlab-ci.yml
+    inputs:
+      name: frontend-dependencies
+      paths: ["frontend/package.json", "frontend/bun.lock"]

@@ -41,8 +41,18 @@ splits that work across jobs with different triggers, so some scripts take a nar
 - A list of files: `test_lint_doc.sh` and `test_lint_cicd.sh` check only the files they are given.
 
 [`list_changed_files.sh`](./list_changed_files.sh) prints the files a branch changed since it left
-the default branch, filtered by git pathspecs. It is the one script that does not move to the git
-root: its pathspecs and output are relative to the current directory.
+the default branch, filtered by globs in the syntax of GitLab's `rules:changes`, from the git
+root. It is the one script that does not move to the git root: its output is relative to the
+current directory.
+
+### CI images and release images
+
+- [`update_ci_image_tags.sh`](./update_ci_image_tags.sh) writes the tag of each
+  `infrastructure/docker/ci_<name>` image, the hash of its files, into the GitLab entry point.
+  Run it after changing a CI image directory. `--check` fails on a stale tag instead, and
+  `test_lint_cicd.sh` runs it.
+- [`build_release_image.sh`](./build_release_image.sh) builds and pushes a release image from
+  the CI. It reads the `CI_*` variables GitLab sets, so it is not meant to run on a laptop.
 
 ### Dependency advisories
 

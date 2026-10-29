@@ -13,3 +13,38 @@ openapi-sdk:
     - !reference [rust-tests, rules]
   script:
     - ../scripts/test_openapi.sh --from frontend/openapi.json
+
+# Lists the dependencies that have a newer version: crates, npm packages, and
+# the Docker images of the Dockerfiles, Compose files and CI manifests, as
+# infrastructure/configs/renovate/config.json configures. Renovate reads the
+# clone and changes nothing: no merge request, no token. Reports only, in the
+# log and in the JSON report.
+# A GITHUB_COM_TOKEN project variable lifts GitHub's rate limit on lookups.
+dependency-updates:
+  image: renovate/renovate:44.160.1
+  stage: static_analysis
+  needs: []
+  allow_failure: true
+  variables:
+    RENOVATE_CONFIG_FILE: infrastructure/configs/renovate/config.json
+    RENOVATE_PLATFORM: local
+    RENOVATE_DRY_RUN: lookup
+    RENOVATE_REPORT_TYPE: file
+    RENOVATE_REPORT_PATH: renovate-report.json
+    LOG_LEVEL: info
+  rules:
+    - !reference [.should-run-all-jobs, rules]
+    - !reference [.rust-dependencies-changed, rules]
+    - !reference [.frontend-dependencies-changed, rules]
+    - changes:
+        paths:
+          - "**/Dockerfile*"
+          - infrastructure/configs/renovate/**/*
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+  script:
+    - renovate
+  artifacts:
+    when: always
+    paths:
+      - renovate-report.json
+    expire_in: 1 week

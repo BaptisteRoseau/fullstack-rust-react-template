@@ -1,0 +1,22 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "onboarding": false,
+  "requireConfig": "optional",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "The upstream Docker image of the GitLab CI daemon and CI image jobs.",
+      "managerFilePatterns": [
+        "/^infrastructure/cicd/gitlab/gitlab-ci\\.yml$/"
+      ],
+      "matchStrings": [
+        "DOCKER_VERSION: \"(?<currentValue>[^\"]+)\""
+      ],
+      "depNameTemplate": "docker",
+      "datasourceTemplate": "docker"
+    }
+  ]
+}

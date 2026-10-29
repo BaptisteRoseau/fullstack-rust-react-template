@@ -3,11 +3,3 @@
 .should-run-all-jobs:
   rules:
     - if: $SHOULD_RUN_ALL_JOBS == "true"
-
-# For checks that read every file type, such as typos and markdown links.
-.any-file-changed:
-  rules:
-    - changes:
-        paths:
-          - "**/*"
-        compare_to: refs/heads/$CI_DEFAULT_BRANCH

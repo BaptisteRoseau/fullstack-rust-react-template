@@ -1,0 +1,47 @@
+spec:
+  inputs:
+    job:
+      description: Name of the job that extends the generated hidden job .<job>.
+      regex: ^[a-z0-9-]+$
+    image:
+      description: Name of the image in the project registry, such as app_backend.
+      regex: ^[a-z0-9_]+$
+    dockerfile:
+      description: Path of the Dockerfile from the repository root, which is the build context.
+    prebuilt_stage:
+      description: Stage of the Dockerfile that prebuilt_directory replaces when that directory exists.
+      default: ""
+    prebuilt_directory:
+      description: Directory an earlier job built, such as frontend/dist. Empty builds every stage.
+      default: ""
+    needs:
+      description: Jobs to wait for besides ci-docker-image, in the syntax of needs.
+      type: array
+      default: []
+---
+# Builds and pushes the image, see scripts/build_release_image.sh.
+# The needs of .buildkit are listed again with the extra ones, since needs
+# replace each other instead of merging.
+".$[[ inputs.job ]]":
+  extends: .buildkit
+  stage: build
+  needs:
+    - job: ci-docker-image
+      optional: true
+    - $[[ inputs.needs ]]
+  script:
+    - >-
+      ./scripts/build_release_image.sh "$[[ inputs.image ]]" "$[[ inputs.dockerfile ]]"
+      "$[[ inputs.prebuilt_stage ]]" "$[[ inputs.prebuilt_directory ]]"
+
+# Scans the image for CVEs, only where it is pushed: the default branch and tags.
+# container_scanning comes from GitLab's template, see security.gitlab-ci.yml.
+"$[[ inputs.job ]]-scan":
+  extends: container_scanning
+  stage: dynamic_analysis
+  variables:
+    CS_IMAGE: $CI_REGISTRY_IMAGE/$[[ inputs.image ]]:$CI_COMMIT_SHORT_SHA
+  needs:
+    - $[[ inputs.job ]]
+  rules:
+    - if: $CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

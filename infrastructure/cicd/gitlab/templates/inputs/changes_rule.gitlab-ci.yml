@@ -1,0 +1,17 @@
+spec:
+  inputs:
+    name:
+      description: Name of the generated hidden key, .<name>-changed.
+      regex: ^[a-z0-9-]+$
+    paths:
+      description: GitLab globs of the files, from the repository root.
+      type: array
+---
+# A rules list matching when the branch changed one of the paths since it left
+# the default branch. Every changes rule compares to the default branch, so the
+# shared ones are generated here instead of repeating compare_to.
+".$[[ inputs.name ]]-changed":
+  rules:
+    - changes:
+        paths: $[[ inputs.paths ]]
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH

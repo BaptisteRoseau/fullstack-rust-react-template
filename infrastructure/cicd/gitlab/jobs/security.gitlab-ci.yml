@@ -1,61 +1,37 @@
+# GitLab's scanners, from its templates: secrets, SAST, infrastructure as code
+# and dependencies over the sources, CVEs in the pushed images. Dependency
+# scanning reads Cargo.lock and bun.lock, and needs GitLab 19.0 or later.
 include:
   - template: Jobs/Secret-Detection.gitlab-ci.yml
   - template: Jobs/SAST.gitlab-ci.yml
+  - template: Jobs/SAST-IaC.gitlab-ci.yml
+  - template: Jobs/Dependency-Scanning.v2.gitlab-ci.yml
   - template: Jobs/Container-Scanning.gitlab-ci.yml
 
-# GitLab's scanners: secrets and SAST over the sources, CVEs in the images.
-# Their jobs come from the templates included above.
+# The templates leave a branch with an open merge request to its merge request
+# pipeline, which the workflow never creates. Dependency scanning does so even
+# when this variable is unset, so it is set to keep every scan in the branch
+# pipeline.
+variables:
+  AST_ENABLE_MR_PIPELINES: "false"
 
-# The bases of the SAST and secret detection jobs. Without needs, a job waits
-# for every earlier stage and is skipped when one fails, so a failing lint
-# would leave the commit unscanned. These keys merge into the templates' own.
+# The bases of the source scanners. Without needs, a job waits for every
+# earlier stage and is skipped when one fails, so a failing lint would leave
+# the commit unscanned. These keys merge into the templates' own.
 sast:
   needs: []
 
 .secret-analyzer:
   needs: []
 
-# Scans the images the build stage pushed, so only where it pushes them.
+iac-sast:
+  needs: []
+
+dependency-scanning:
+  needs: []
+
+# The base of the <job>-scan jobs that docker_image.gitlab-ci.yml generates,
+# one per release image. It has no image of its own to scan.
 container_scanning:
-  stage: dynamic_analysis
-  variables:
-    CS_IMAGE: $CI_REGISTRY_IMAGE/app_backend:$CI_COMMIT_SHORT_SHA
-  needs:
-    - app-backend-image
   rules:
-    - if: $CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-
-container_scanning_frontend:
-  extends: container_scanning
-  variables:
-    CS_IMAGE: $CI_REGISTRY_IMAGE/app_frontend:$CI_COMMIT_SHORT_SHA
-  needs:
-    - app-frontend-image
-
-container_scanning_migration:
-  extends: container_scanning
-  variables:
-    CS_IMAGE: $CI_REGISTRY_IMAGE/app_migration:$CI_COMMIT_SHORT_SHA
-  needs:
-    - app-migration-image
-
-container_scanning_postgres:
-  extends: container_scanning
-  variables:
-    CS_IMAGE: $CI_REGISTRY_IMAGE/app_postgres:$CI_COMMIT_SHORT_SHA
-  needs:
-    - app-postgres-image
-
-container_scanning_keycloak:
-  extends: container_scanning
-  variables:
-    CS_IMAGE: $CI_REGISTRY_IMAGE/app_keycloak:$CI_COMMIT_SHORT_SHA
-  needs:
-    - app-keycloak-image
-
-container_scanning_homepage:
-  extends: container_scanning
-  variables:
-    CS_IMAGE: $CI_REGISTRY_IMAGE/app_homepage:$CI_COMMIT_SHORT_SHA
-  needs:
-    - app-homepage-image
+    - when: never

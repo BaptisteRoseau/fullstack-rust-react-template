@@ -2,7 +2,8 @@ include:
   - local: infrastructure/cicd/gitlab/templates/inputs/lint_changed_files.gitlab-ci.yml
     inputs:
       job: markdown
-      pathspecs: "*.md :!.agents/skills/api-*"
+      paths: "**/*.md"
+      exclude: ".agents/skills/api-*/**"
       all_on_delete: true
       command: ./scripts/test_lint_doc.sh
   - local: infrastructure/cicd/gitlab/templates/inputs/lint_changed_files.gitlab-ci.yml
@@ -16,22 +17,23 @@ include:
 
 # markdownlint and the link check over the changed markdown files, or over all
 # of them when a file was deleted or renamed, since that can break a link.
+# Any changed file can be such a deletion, so any one starts the job.
 markdown:
   extends:
     - .tools
     - .markdown-changed-files
   rules:
     - !reference [.should-run-all-jobs, rules]
-    - !reference [.any-file-changed, rules]
+    - changes:
+        paths:
+          - "**/*"
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
 
 # Spelling mistakes in every changed file, code included.
 typos:
   extends:
     - .tools
     - .typos-changed-files
-  rules:
-    - !reference [.should-run-all-jobs, rules]
-    - !reference [.any-file-changed, rules]
 
 # Unknown words in every changed file, against .cspell.yml. Reports only.
 cspell:
@@ -39,6 +41,3 @@ cspell:
     - .tools
     - .cspell-changed-files
   allow_failure: true
-  rules:
-    - !reference [.should-run-all-jobs, rules]
-    - !reference [.any-file-changed, rules]

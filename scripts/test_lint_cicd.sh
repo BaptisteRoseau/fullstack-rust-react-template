@@ -9,6 +9,9 @@ cd "$GIT_ROOT"
 # Validates each file alone against the GitLab CI schema: it does not resolve
 # `include:`, so a job extending a template from another file is not checked
 # against it. `glab ci lint` does that, but needs a GitLab instance and a token.
+# It also fails when a CI image tag no longer matches its directory.
+./scripts/update_ci_image_tags.sh --check
+
 if ! command -v check-jsonschema >/dev/null; then
     echo "check-jsonschema is not installed, skipping the CI/CD manifests" >&2
     echo "Install it with 'pipx install check-jsonschema'" >&2
