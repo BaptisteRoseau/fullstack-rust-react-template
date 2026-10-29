@@ -4,10 +4,17 @@
 - [ ] Include Oxaria to the test scripts ?
 - [ ] Stop running EVERY test script on git push
 
+- [ ] CICD improvements
+    - [ ] Rules/Templates -> Move to jobs directly if used 1 time
+    - [ ] Find a good way to reorganize files
+    - [ ] Simplify README -> into a Skill for what needs to become skill documentation
+
 - [ ] Better way to store documentation & plans
 - [ ] Reviewer / Implementer agents
 
-- [ ] Make openapi2skill write markdownlint-passing files
+- [X] Make openapi2skill write markdownlint-passing files
+- [ ] Management commands binary
+- [ ] Payment trait
 
 ## Infra
 
@@ -100,6 +107,7 @@
     - [ ] Create endpoint-specific error response schemas
 - [ ] Add the file name to the upload/download endpoint using the file metadata (currently downloading a blob) (See how it's done in the file storage PoC)
 - [ ] Standardize API tests
+- [ ] Use transaction/rollback in setUp/tearDown for tests
 
 - [x] Nix & k3s infra
 - [x] oxaria integration
@@ -167,26 +175,22 @@
 
 ### Testing, CI/CD, Docker and scripts
 
-- [ ] Fix all docker images creation
+- [X] Fix all docker images creation
 - [x] Fix all docker-compose files, services & interaction
-- [ ] Fix scripts for test execution, audit & licenses
-- [ ] Add formatting checker script
+- [X] Fix scripts for test execution, audit & licenses
+- [X] Add formatting checker script
 - [x] Add sqlx JSON schema generation from migration scripts and blank container
-- [ ] Add sqlx JSON schema checker (current vs expected from migrations)
-- [ ] Add protobuf models generation (front & back)
 - [ ] Add generated models checker (expected vs actual)
-- [ ] Add database crate models generation from sqlx JSON schema
 - [ ] Add database crate models generation from sqlx JSON schema checker (expected vs actual)
 - [ ] Integrate everything into GitLab CI
 - [ ] Integrate everything into GitHub CI
-- [ ] Automatically build containers
-- [ ] Fuzz-testing from the OpenAPI spec
+- [X] Automatically build containers
+- [ ] Fuzz-testing from the OpenAPI spec (main)
 - [ ] Build documentation using redocly
-- [ ] Accessibility checks on the frontend
+- [X] Accessibility checks on the frontend
 - [x] Add Mailhog for local development
-- [ ] Add unit & integration tests using testcontainers when necessary
-- [ ] Use transaction/rollback in setUp/tearDown for tests
-- [ ] Use chef and proxies to avoid re-downloading/compiling everything on every CI run
+- [X] Add unit & integration tests using testcontainers when necessary
+- [X] Use chef and proxies to avoid re-downloading/compiling everything on every CI run
 
 ### Security
 
@@ -252,12 +256,12 @@
 
 - [ ] Add a management CLI binary -> bound to `api_core` handlers
 - [ ] Add a development management tool (to replace the different plain shell scripts)
-- [ ] Grafana Alloy integration
+- [X] Grafana Alloy integration
 - [ ] Pre-built Grafana dashboards
 - [ ] Performance benchmarks
 - [x] Kubernetes manifests
 - [x] Nix flake (Docker & Prometheus & Kubernetes)
-- [ ] Agent integration (MCP Gateway ?) read-only for every service (Backend, Postgres)
+- [ ] Infra agent integration (MCP Gateway ?) read-only for every service (Backend, Postgres)
     - [ ] Ask for write operations
 - [ ] Admin Dashboard ?
 
