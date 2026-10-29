@@ -12,7 +12,7 @@
 - [ ] Better way to store documentation & plans
 - [ ] Reviewer / Implementer agents
 
-- [X] Make openapi2skill write markdownlint-passing files
+- [x] Make openapi2skill write markdownlint-passing files
 - [ ] Management commands binary
 - [ ] Payment trait
 
@@ -175,22 +175,22 @@
 
 ### Testing, CI/CD, Docker and scripts
 
-- [X] Fix all docker images creation
+- [x] Fix all docker images creation
 - [x] Fix all docker-compose files, services & interaction
-- [X] Fix scripts for test execution, audit & licenses
-- [X] Add formatting checker script
+- [x] Fix scripts for test execution, audit & licenses
+- [x] Add formatting checker script
 - [x] Add sqlx JSON schema generation from migration scripts and blank container
 - [ ] Add generated models checker (expected vs actual)
 - [ ] Add database crate models generation from sqlx JSON schema checker (expected vs actual)
 - [ ] Integrate everything into GitLab CI
 - [ ] Integrate everything into GitHub CI
-- [X] Automatically build containers
+- [x] Automatically build containers
 - [ ] Fuzz-testing from the OpenAPI spec (main)
 - [ ] Build documentation using redocly
-- [X] Accessibility checks on the frontend
+- [x] Accessibility checks on the frontend
 - [x] Add Mailhog for local development
-- [X] Add unit & integration tests using testcontainers when necessary
-- [X] Use chef and proxies to avoid re-downloading/compiling everything on every CI run
+- [x] Add unit & integration tests using testcontainers when necessary
+- [x] Use chef and proxies to avoid re-downloading/compiling everything on every CI run
 
 ### Security
 
@@ -256,7 +256,7 @@
 
 - [ ] Add a management CLI binary -> bound to `api_core` handlers
 - [ ] Add a development management tool (to replace the different plain shell scripts)
-- [X] Grafana Alloy integration
+- [x] Grafana Alloy integration
 - [ ] Pre-built Grafana dashboards
 - [ ] Performance benchmarks
 - [x] Kubernetes manifests
