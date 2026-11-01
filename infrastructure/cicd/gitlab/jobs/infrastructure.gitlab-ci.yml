@@ -71,6 +71,7 @@ docker-compose:
           - .env.dev
         compare_to: refs/heads/$CI_DEFAULT_BRANCH
   script:
+    - ln -sf .env.dev .env
     - ./scripts/test_lint_infra.sh compose
 
 # Builds the Kustomize overlays and validates them with kubeconform.
