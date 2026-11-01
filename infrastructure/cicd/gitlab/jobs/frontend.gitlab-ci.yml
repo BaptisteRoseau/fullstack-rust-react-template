@@ -31,6 +31,8 @@ frontend-format:
 frontend-unit-tests:
   extends: .bun
   stage: test
+  variables:
+    VITE_APP_API_URL: http://localhost:8080
   script:
     - bun run test --coverage --coverage.reporter=text-summary --coverage.reporter=cobertura
   artifacts:
