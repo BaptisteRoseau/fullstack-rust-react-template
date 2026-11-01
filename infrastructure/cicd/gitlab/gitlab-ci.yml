@@ -12,7 +12,7 @@ stages:
 # CACHE_POLICY lets only the default branch write the caches, see the workflow.
 variables:
   RUST_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_rust:7d30afb0266a
-  BUN_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_bun:0dd3759cd823
+  BUN_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_bun:8172273233fb
   PLAYWRIGHT_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_playwright:a59277879464
   TOOLS_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_tools:c2d0a743a885
   DOCKER_CI_IMAGE: $CI_REGISTRY_IMAGE/ci_docker:97ae0354d4e1
