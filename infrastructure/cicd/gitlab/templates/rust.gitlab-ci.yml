@@ -43,6 +43,8 @@
 # AWS_* project variables, or in SCCACHE_DIR, cached per job, when no bucket is
 # set. A cache list replaces the one of .rust, so the cargo cache comes back
 # through its anchor: two jobs pushing one key must push the same paths.
+# The stats print from a trap: the Docker executor runs after_script in a fresh
+# container, where the sccache server of the job is gone and the stats are zero.
 .rust-sccache:
   variables:
     RUSTC_WRAPPER: sccache
@@ -54,5 +56,5 @@
       paths:
         - .cache/sccache
       policy: $CACHE_POLICY
-  after_script:
-    - sccache --show-stats
+  before_script:
+    - trap 'sccache --show-stats' EXIT
