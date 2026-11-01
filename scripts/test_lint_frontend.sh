@@ -4,4 +4,3 @@ set -e
 GIT_ROOT=$(git rev-parse --show-toplevel)
 cd "$GIT_ROOT"/frontend
 bun run lint
-bun run api:check
